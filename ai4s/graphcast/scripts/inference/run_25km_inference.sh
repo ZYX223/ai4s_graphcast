@@ -3,7 +3,7 @@
 
 set -euo pipefail
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 cd "${SCRIPT_DIR}"
 
 usage() {
@@ -16,9 +16,12 @@ Optional environment variables:
   CONDA_ENV=name_or_prefix              # optional conda environment
   PYTHON_BIN=python                     # python executable
   DEVICE=auto                           # auto, cuda, cuda:0, musa, musa:0, npu, npu:0, cpu
-  GRAPHCAST_BACKEND=auto                # native/flagos profiles for CUDA, Hygon, PTG, MUSA, MetaX, or Ascend
+  GRAPHCAST_BACKEND=auto                # physical platform: NVIDIA, Hygon, PTG, MUSA, MetaX, or Ascend
   GRAPHCAST_FLAGOS_MODE=off             # off, flaggems, flagtree
-  GRAPHCAST_FLAGGEMS_OPS=silu,add
+  GRAPHCAST_FLAGGEMS_CONFIG=configs/flaggems/graphcast_inference.yaml
+  GRAPHCAST_FLAGGEMS_OPS=               # optional comma-separated override
+  GRAPHCAST_FLAGGEMS_VARIANT=installed  # installed, official, or internal
+  FLAGGEMS_RUNTIME_DEST=third_party/flaggems-runtime
   GRAPHCAST_FLAGGEMS_SOURCE_ROOT=/path/to/FlagGems
   GRAPHCAST_STRICT_FLAGOS=0             # fail if requested FlagOS layer cannot start
   OUTPUT=outputs/predictions/pred.nc
@@ -59,7 +62,10 @@ PYTHON_BIN="${PYTHON_BIN:-python}"
 DEVICE="${DEVICE:-auto}"
 GRAPHCAST_BACKEND="${GRAPHCAST_BACKEND:-auto}"
 GRAPHCAST_FLAGOS_MODE="${GRAPHCAST_FLAGOS_MODE:-off}"
-GRAPHCAST_FLAGGEMS_OPS="${GRAPHCAST_FLAGGEMS_OPS:-silu,add}"
+GRAPHCAST_FLAGGEMS_CONFIG="${GRAPHCAST_FLAGGEMS_CONFIG:-${SCRIPT_DIR}/configs/flaggems/graphcast_inference.yaml}"
+GRAPHCAST_FLAGGEMS_OPS="${GRAPHCAST_FLAGGEMS_OPS:-}"
+GRAPHCAST_FLAGGEMS_VARIANT="${GRAPHCAST_FLAGGEMS_VARIANT:-installed}"
+FLAGGEMS_RUNTIME_DEST="${FLAGGEMS_RUNTIME_DEST:-${SCRIPT_DIR}/third_party/flaggems-runtime}"
 GRAPHCAST_FLAGGEMS_SOURCE_ROOT="${GRAPHCAST_FLAGGEMS_SOURCE_ROOT:-}"
 GRAPHCAST_STRICT_FLAGOS="${GRAPHCAST_STRICT_FLAGOS:-0}"
 if [[ -n "${GRAPHCAST_FLAGGEMS_SOURCE_ROOT}" ]]; then
@@ -69,7 +75,8 @@ if [[ -n "${GRAPHCAST_FLAGGEMS_SOURCE_ROOT}" ]]; then
   fi
   export PYTHONPATH="${GRAPHCAST_FLAGGEMS_SOURCE_ROOT}/src:${PYTHONPATH:-}"
 fi
-export GRAPHCAST_BACKEND GRAPHCAST_FLAGOS_MODE GRAPHCAST_FLAGGEMS_OPS
+export GRAPHCAST_BACKEND GRAPHCAST_FLAGOS_MODE GRAPHCAST_FLAGGEMS_CONFIG GRAPHCAST_FLAGGEMS_OPS
+export GRAPHCAST_FLAGGEMS_VARIANT FLAGGEMS_RUNTIME_DEST
 export GRAPHCAST_FLAGGEMS_SOURCE_ROOT GRAPHCAST_STRICT_FLAGOS
 CONFIG="${CONFIG:-configs/inference/google_graphcast_operational_25km.yaml}"
 WEIGHTS="${WEIGHTS:-data/checkpoints/google_graphcast_operational_25km_compat_state.pt}"
@@ -99,10 +106,12 @@ fi
 printf 'running:'
 printf ' %q' "${cmd[@]}"
 printf '\n'
-printf 'backend env: GRAPHCAST_BACKEND=%q GRAPHCAST_FLAGOS_MODE=%q GRAPHCAST_FLAGGEMS_OPS=%q GRAPHCAST_FLAGGEMS_SOURCE_ROOT=%q GRAPHCAST_STRICT_FLAGOS=%q\n' \
+printf 'backend env: GRAPHCAST_BACKEND=%q GRAPHCAST_FLAGOS_MODE=%q GRAPHCAST_FLAGGEMS_CONFIG=%q GRAPHCAST_FLAGGEMS_OPS=%q GRAPHCAST_FLAGGEMS_VARIANT=%q GRAPHCAST_FLAGGEMS_SOURCE_ROOT=%q GRAPHCAST_STRICT_FLAGOS=%q\n' \
   "${GRAPHCAST_BACKEND}" \
   "${GRAPHCAST_FLAGOS_MODE}" \
+  "${GRAPHCAST_FLAGGEMS_CONFIG}" \
   "${GRAPHCAST_FLAGGEMS_OPS}" \
+  "${GRAPHCAST_FLAGGEMS_VARIANT}" \
   "${GRAPHCAST_FLAGGEMS_SOURCE_ROOT}" \
   "${GRAPHCAST_STRICT_FLAGOS}"
 "${cmd[@]}"

@@ -23,6 +23,7 @@ checkpoints/
 *.onnx
 data/
 !**/data/.gitkeep
+ai4s/graphcast/third_party/
 
 # Logs & local env
 *.log

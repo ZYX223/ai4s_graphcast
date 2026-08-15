@@ -43,8 +43,11 @@ If Docker is available, quickstart auto-detects your GPU/NPU platform and starts
 | `--image IMAGE` | platform default | Custom Docker image |
 | `--devices a,b,c,d` | auto-detect | Comma-separated GPU/NPU IDs (e.g. `0,1,2,3`) |
 | `--steps N` | 3 | Training steps |
-| `--flagos-mode MODE` | off | `flaggems` to enable FlagGems |
-| `--flaggems-ops OPS` | all-6 | Comma-separated FlagGems ops |
+| `--flagos-mode MODE` | `off` | `flaggems` to enable FlagGems |
+| `--flaggems-ops OPS` | platform profile | Optional comma-separated override |
+| `--flaggems-config PATH` | inference/training profile | Operator profile override |
+| `--flaggems-variant NAME` | `installed` | `installed`, `official`, or `internal` |
+| `--flaggems-src PATH` | - | Explicit FlagGems source root override |
 | `--data-source PATH` | — | Path to graphcast-data dir (skip download) |
 
 ### Auto-Detection
@@ -75,27 +78,30 @@ The correct Docker image and flags are chosen automatically.
 # Training with specific GPUs
 ./quickstart train --devices 4,5,6,7 --steps 10
 
-# Hygon FlagGems training (4 ops)
-./quickstart train --flagos-mode flaggems \
-    --flaggems-ops "addmm,silu,layer_norm,index"
+# Enable the platform's validated FlagGems profile
+./quickstart train --flagos-mode flaggems
 
-# Ascend FlagGems training (6 ops)
-./quickstart train --flagos-mode flaggems \
-    --flaggems-ops "addmm,silu,layer_norm,cat,index,add"
+# Compare matched upstream and internal optimized runtimes
+bash tools/prepare_flaggems_runtime.sh
+./quickstart infer --flagos-mode flaggems --flaggems-variant official
+./quickstart infer --flagos-mode flaggems --flaggems-variant internal
 
-# PPU FlagGems training (5 ops)
-./quickstart train --flagos-mode flaggems \
-    --flaggems-ops "addmm,silu,layer_norm,index,add"
+# Explicit operators remain available as a debugging override
+./quickstart infer --flagos-mode flaggems --flaggems-ops "index,addmm"
 ```
 
 ## Supported Platforms
 
 | Platform | Device | Backend | FlagGems Ops | Status |
 |----------|--------|---------|-------------|--------|
-| NVIDIA H100 | `cuda` | native_cuda | — | ✓ |
-| Huawei Ascend 910C | `npu` | native_npu / flagos_ascend | addmm, silu, layer_norm, cat, index, add (6/7, excl index_add_) | ✓ |
-| Hygon BW1000 | `cuda` (HIP) | native_hygon / flagos_hygon | addmm, silu, layer_norm, index (4/7, excl cat, add, index_add_) | ✓ |
-| T-Head PPU-ZW810E | `cuda` (HGGC) | native_ptg / flagos_ptg | addmm, silu, layer_norm, index, add (5/7, excl cat, index_add_) | ✓ |
+| NVIDIA H100 | `cuda` | `nvidia` | installed profile defaults to silu, add | ✓ |
+| Huawei Ascend 910C | `npu` | `ascend` | addmm, silu, layer_norm, cat, index, add | ✓ |
+| Hygon BW1000 | `cuda` (HIP) | `hygon` | addmm, silu, layer_norm, index | ✓ |
+| T-Head PPU-ZW810E | `cuda` (HGGC) | `ptg` | addmm, silu, layer_norm, index, add | ✓ |
+
+`GRAPHCAST_BACKEND` identifies the physical platform only. Whether FlagGems is
+enabled is controlled separately by `GRAPHCAST_FLAGOS_MODE`. Legacy names such
+as `native_hygon` and `flagos_hygon` remain accepted as aliases.
 
 See `ai4s/docs/multi-platform-guide.md` for accelerator compliance requirements.
 
@@ -103,19 +109,20 @@ See `ai4s/docs/multi-platform-guide.md` for accelerator compliance requirements.
 
 ```
 ai4s/graphcast/
-├── quickstart.sh           # one-click data download + train/infer
+├── quickstart              # one-click data download + train/infer
 ├── README.md
 ├── requirements.txt
 ├── configs/
 │   ├── training/           # 25km and 100km training YAML
-│   └── inference/          # operational 25km inference YAML
+│   ├── inference/          # operational 25km inference YAML
+│   └── flaggems/           # separate inference/training operator profiles
 ├── src/graphcast_compat/   # model, backend, data loading, normalization
 ├── scripts/
 │   ├── train.sh            # training entry → training/train_mp.sh
 │   ├── infer.sh            # inference entry → inference/run_25km_inference.sh
 │   ├── training/           # model parallel, DDP, single-GPU
 │   └── inference/          # inference scripts
-├── tools/                  # FlagGems candidate staging
+├── tools/                  # official/internal FlagGems runtime preparation
 └── data/                   # cases, stats, checkpoints, wheelhouse (auto-downloaded)
 ```
 
@@ -125,18 +132,38 @@ ai4s/graphcast/
 # Native (baseline B)
 bash scripts/train.sh
 
-# FlagGems (baseline C)
-GRAPHCAST_BACKEND=flagos_ptg \
+# FlagGems (baseline C); operators come from the training profile
+GRAPHCAST_BACKEND=ptg \
 GRAPHCAST_FLAGOS_MODE=flaggems \
-GRAPHCAST_FLAGGEMS_OPS=addmm,silu,layer_norm,index,add \
   bash scripts/train.sh
 ```
 
 ## Manual Inference
 
 ```bash
+# Native PyTorch
 bash scripts/infer.sh
+
+# FlagGems with the inference profile
+GRAPHCAST_FLAGOS_MODE=flaggems bash scripts/infer.sh
 ```
+
+## FlagGems Profiles and Source Selection
+
+Inference and training use independent checked-in profiles:
+
+- `configs/flaggems/graphcast_inference.yaml` controls inference operators;
+- `configs/flaggems/graphcast_training.yaml` controls training-forward operators.
+
+The training profile does not claim backward coverage. Backward correctness and
+performance must be validated separately. A non-empty
+`GRAPHCAST_FLAGGEMS_OPS` overrides the selected YAML profile.
+
+By default FlagGems mode imports the package installed in the environment. Run
+`bash tools/prepare_flaggems_runtime.sh` to fetch the active internal manifest
+and prepare matched `official` and `internal` source trees. Select one with
+`GRAPHCAST_FLAGGEMS_VARIANT`; the resolved commits are recorded in
+`third_party/flaggems-runtime/PROVENANCE.env`.
 
 ## Data
 
@@ -163,4 +190,3 @@ data/
 ## License
 
 Apache 2.0. See repository root `LICENSE`.
-

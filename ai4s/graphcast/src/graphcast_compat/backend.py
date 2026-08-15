@@ -7,28 +7,24 @@ FlagOS operator layers.
 
 from __future__ import annotations
 
-from dataclasses import dataclass
 import importlib
 import importlib.metadata as metadata
 import importlib.util
 import logging
 import os
+import sys
+from collections.abc import Callable
+from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Callable
+from typing import Any
 
 import torch
+import yaml
 
-
-SAFE_FLAGGEMS_OPS = ("silu", "add")
-RISKY_FLAGGEMS_OPS = (
-    "cat",
-    "addmm",
-    "index",
-    "index_add_",
-    "layer_norm",
-    "scatter_add_",
-    "scatter_add",
+DEFAULT_FLAGGEMS_CONFIG = (
+    Path(__file__).resolve().parents[2] / "configs/flaggems/graphcast_inference.yaml"
 )
+DEFAULT_FLAGGEMS_RUNTIME_DEST = Path(__file__).resolve().parents[2] / "third_party/flaggems-runtime"
 
 
 @dataclass(frozen=True)
@@ -52,6 +48,7 @@ class FlagOSState:
     strict: bool
     requested_ops: tuple[str, ...]
     status: str
+    variant: str = "off"
     vendor: str | None = None
     record_path: str | None = None
     bishengir_opt_dir: str | None = None
@@ -79,7 +76,9 @@ class RuntimeBackend:
             "flagos_mode": self.flagos.mode,
             "flagos_status": self.flagos.status,
             "flagos_strict": self.flagos.strict,
+            "flaggems_variant": self.flagos.variant,
             "flaggems_ops": list(self.flagos.requested_ops),
+            "flaggems_ops_config": os.environ.get("GRAPHCAST_FLAGGEMS_CONFIG"),
             "flaggems_vendor": self.flagos.vendor,
             "flaggems_record_path": self.flagos.record_path,
             "flaggems_source_root": os.environ.get("GRAPHCAST_FLAGGEMS_SOURCE_ROOT"),
@@ -103,163 +102,106 @@ BACKEND_PROFILES: dict[str, BackendProfile] = {
         chip="host",
         notes="CPU smoke path only; not suitable for full 25km inference.",
     ),
-    "native_cuda": BackendProfile(
-        name="native_cuda",
+    "nvidia": BackendProfile(
+        name="nvidia",
         device_type="cuda",
         default_device="cuda",
         runtime_family="pytorch_cuda",
         chip="nvidia",
-        notes="NVIDIA H100 correctness/performance baseline on CUDA.",
+        supports_flaggems=True,
+        flaggems_vendor="nvidia",
+        notes="NVIDIA platform through CUDA.",
     ),
-    "native_hygon": BackendProfile(
-        name="native_hygon",
+    "hygon": BackendProfile(
+        name="hygon",
         device_type="cuda",
         default_device="cuda",
         runtime_family="pytorch_hip",
         chip="hygon",
-        notes=(
-            "Hygon/BW PyTorch eager baseline. The model uses the torch.cuda "
-            "compatibility API, while the runtime is HIP/DAS/DTK underneath."
-        ),
+        supports_flaggems=True,
+        flaggems_vendor="hygon",
+        notes=("Hygon/BW platform through the torch.cuda-compatible HIP/DAS/DTK runtime."),
     ),
-    "native_ptg": BackendProfile(
-        name="native_ptg",
+    "ptg": BackendProfile(
+        name="ptg",
         device_type="cuda",
         default_device="cuda",
         runtime_family="pytorch_ppu",
         chip="pingtouge_810e",
-        notes="PTG 810E PyTorch eager baseline through the torch.cuda-compatible PPU runtime.",
+        supports_flaggems=True,
+        flaggems_vendor="thead",
+        notes="PTG 810E platform through its torch.cuda-compatible PPU runtime.",
     ),
-    "native_mthreads": BackendProfile(
-        name="native_mthreads",
+    "mthreads": BackendProfile(
+        name="mthreads",
         device_type="musa",
         default_device="musa",
         runtime_family="pytorch_musa",
         chip="mthreads_s5000",
-        notes="Moore Threads S5000 PyTorch eager baseline through torch_musa.",
+        supports_flaggems=True,
+        flaggems_vendor="mthreads",
+        notes="Moore Threads S5000 platform through torch_musa.",
     ),
-    "native_metax": BackendProfile(
-        name="native_metax",
+    "metax": BackendProfile(
+        name="metax",
         device_type="cuda",
         default_device="cuda",
         runtime_family="pytorch_metax",
         chip="metax_c550",
-        notes="MetaX C550 PyTorch eager baseline through its torch.cuda-compatible runtime.",
+        supports_flaggems=True,
+        flaggems_vendor="metax",
+        notes="MetaX C550 platform through its torch.cuda-compatible runtime.",
     ),
-    "native_npu": BackendProfile(
-        name="native_npu",
+    "ascend": BackendProfile(
+        name="ascend",
         device_type="npu",
         default_device="npu",
         runtime_family="pytorch_npu",
         chip="huawei_ascend",
-        notes="Ascend 910C correctness baseline on torch_npu eager.",
-    ),
-    "flagos_hygon": BackendProfile(
-        name="flagos_hygon",
-        device_type="cuda",
-        default_device="cuda",
-        runtime_family="flagos",
-        chip="hygon",
         supports_flaggems=True,
-        supports_flagtree=False,
-        flaggems_vendor="hygon",
-        notes=(
-            "FlagOS profile for Hygon/BW. FlagGems is optional and uses the "
-            "torch.cuda-compatible HIP/DAS/DTK runtime underneath."
-        ),
-    ),
-    "flagos_ptg": BackendProfile(
-        name="flagos_ptg",
-        device_type="cuda",
-        default_device="cuda",
-        runtime_family="flagos",
-        chip="pingtouge_810e",
-        supports_flaggems=True,
-        supports_flagtree=False,
-        flaggems_vendor="thead",
-        notes="FlagOS profile for PTG 810E on the torch.cuda-compatible PPU runtime.",
-    ),
-    "flagos_mthreads": BackendProfile(
-        name="flagos_mthreads",
-        device_type="musa",
-        default_device="musa",
-        runtime_family="flagos",
-        chip="mthreads_s5000",
-        supports_flaggems=True,
-        supports_flagtree=False,
-        flaggems_vendor="mthreads",
-        notes="FlagOS profile for Moore Threads S5000 through torch_musa.",
-    ),
-    "flagos_metax": BackendProfile(
-        name="flagos_metax",
-        device_type="cuda",
-        default_device="cuda",
-        runtime_family="flagos",
-        chip="metax_c550",
-        supports_flaggems=True,
-        supports_flagtree=False,
-        flaggems_vendor="metax",
-        notes="FlagOS profile for MetaX C550 through its torch.cuda-compatible runtime.",
-    ),
-    "flagos_ascend": BackendProfile(
-        name="flagos_ascend",
-        device_type="npu",
-        default_device="npu",
-        runtime_family="flagos",
-        chip="huawei_ascend",
-        supports_flaggems=True,
-        supports_flagtree=False,
         flaggems_vendor="ascend",
-        notes="FlagOS profile for Ascend 910C; FlagGems is optional and off by default.",
-    ),
-    "flagos_nvidia": BackendProfile(
-        name="flagos_nvidia",
-        device_type="cuda",
-        default_device="cuda",
-        runtime_family="flagos",
-        chip="nvidia",
-        supports_flaggems=True,
-        supports_flagtree=False,
-        flaggems_vendor="nvidia",
-        notes="FlagOS profile for NVIDIA H100; FlagGems is optional and off by default.",
+        notes="Ascend 910C platform through torch_npu.",
     ),
 }
 
+# GRAPHCAST_FLAGOS_MODE selects the runtime layer. Legacy backend names remain
+# aliases so existing launch commands resolve to the same physical platform.
 BACKEND_ALIASES = {
     "auto": "auto",
-    "cuda": "native_cuda",
-    "nvidia": "native_cuda",
-    "hygon": "native_hygon",
-    "bw1000": "native_hygon",
-    "hip": "native_hygon",
-    "hygon_native": "native_hygon",
-    "hygon_flagos": "flagos_hygon",
-    "flagos_hygon": "flagos_hygon",
-    "ptg": "native_ptg",
-    "810e": "native_ptg",
-    "pingtouge": "native_ptg",
-    "ptg_native": "native_ptg",
-    "ptg_flagos": "flagos_ptg",
-    "flagos_ptg": "flagos_ptg",
-    "flagos_pingtouge": "flagos_ptg",
-    "musa": "native_mthreads",
-    "mthreads": "native_mthreads",
-    "s5000": "native_mthreads",
-    "mthreads_native": "native_mthreads",
-    "mthreads_flagos": "flagos_mthreads",
-    "flagos_mthreads": "flagos_mthreads",
-    "metax": "native_metax",
-    "c550": "native_metax",
-    "metax_native": "native_metax",
-    "metax_flagos": "flagos_metax",
-    "flagos_metax": "flagos_metax",
-    "npu": "native_npu",
-    "ascend_native": "native_npu",
-    "ascend": "flagos_ascend",
-    "flagos": "flagos_ascend",
-    "nvidia_flagos": "flagos_nvidia",
-    "flagos_cuda": "flagos_nvidia",
-    "flagos_nvidia": "flagos_nvidia",
+    "cuda": "nvidia",
+    "native_cuda": "nvidia",
+    "nvidia_flagos": "nvidia",
+    "flagos_cuda": "nvidia",
+    "flagos_nvidia": "nvidia",
+    "bw1000": "hygon",
+    "hip": "hygon",
+    "native_hygon": "hygon",
+    "hygon_native": "hygon",
+    "hygon_flagos": "hygon",
+    "flagos_hygon": "hygon",
+    "810e": "ptg",
+    "pingtouge": "ptg",
+    "native_ptg": "ptg",
+    "ptg_native": "ptg",
+    "ptg_flagos": "ptg",
+    "flagos_ptg": "ptg",
+    "flagos_pingtouge": "ptg",
+    "musa": "mthreads",
+    "s5000": "mthreads",
+    "native_mthreads": "mthreads",
+    "mthreads_native": "mthreads",
+    "mthreads_flagos": "mthreads",
+    "flagos_mthreads": "mthreads",
+    "c550": "metax",
+    "native_metax": "metax",
+    "metax_native": "metax",
+    "metax_flagos": "metax",
+    "flagos_metax": "metax",
+    "npu": "ascend",
+    "native_npu": "ascend",
+    "ascend_native": "ascend",
+    "flagos_ascend": "ascend",
+    "flagos": "ascend",
     "cpu": "cpu",
 }
 
@@ -269,28 +211,28 @@ def _truthy(value: str | None) -> bool:
 
 
 def _cuda_backend_profile() -> str:
-    """Distinguish NVIDIA CUDA from Hygon's torch.cuda-compatible HIP runtime."""
+    """Identify the platform behind a torch.cuda-compatible runtime."""
 
     torch_version = str(getattr(torch, "__version__", "")).lower()
     if "metax" in torch_version:
-        return "native_metax"
+        return "metax"
 
     hip_version = getattr(torch.version, "hip", None)
     if not hip_version:
-        return "native_cuda"
+        return "nvidia"
 
     try:
         if torch.cuda.is_available():
             for device_id in range(torch.cuda.device_count()):
                 device_name = torch.cuda.get_device_name(device_id).strip().lower()
                 if device_name.startswith("bw") or "hygon" in device_name:
-                    return "native_hygon"
+                    return "hygon"
     except Exception:
         pass
 
     if _truthy(os.environ.get("GRAPHCAST_ASSUME_HYGON")):
-        return "native_hygon"
-    return "native_cuda"
+        return "hygon"
+    return "nvidia"
 
 
 def _version(package_names: tuple[str, ...]) -> str:
@@ -344,19 +286,19 @@ def _musa_is_available() -> bool:
 
 def _infer_backend_from_device(requested_device: str) -> str:
     if requested_device.startswith("musa"):
-        return "native_mthreads"
+        return "mthreads"
     if requested_device.startswith("cuda"):
         return _cuda_backend_profile()
     if requested_device.startswith("npu"):
-        return "native_npu"
+        return "ascend"
     if requested_device == "cpu":
         return "cpu"
     if torch.cuda.is_available():
         return _cuda_backend_profile()
     if _musa_is_available():
-        return "native_mthreads"
+        return "mthreads"
     if _npu_is_available():
-        return "native_npu"
+        return "ascend"
     return "cpu"
 
 
@@ -395,8 +337,49 @@ def _resolve_device(profile: BackendProfile, requested_device: str) -> torch.dev
 
 
 def _parse_ops(value: str | None) -> tuple[str, ...]:
-    raw_ops = value if value is not None else ",".join(SAFE_FLAGGEMS_OPS)
-    return tuple(op.strip() for op in raw_ops.split(",") if op.strip())
+    if not value:
+        return ()
+    return tuple(dict.fromkeys(op.strip() for op in value.split(",") if op.strip()))
+
+
+def _load_flaggems_ops(config_path: Path, platform: str) -> tuple[str, ...]:
+    """Load the operator allowlist for one physical platform."""
+
+    try:
+        config = yaml.safe_load(config_path.read_text(encoding="utf-8"))
+    except FileNotFoundError as exc:
+        raise ValueError(f"FlagGems operator profile does not exist: {config_path}") from exc
+    except yaml.YAMLError as exc:
+        raise ValueError(f"invalid FlagGems operator profile: {config_path}: {exc}") from exc
+
+    if not isinstance(config, dict) or config.get("version") != 1:
+        raise ValueError(f"FlagGems operator profile must use version 1: {config_path}")
+
+    platform_ops = config.get("platform_ops", {})
+    if not isinstance(platform_ops, dict):
+        raise ValueError(f"FlagGems platform_ops must be a mapping: {config_path}")
+    ops = platform_ops.get(platform, config.get("default_ops"))
+    if not isinstance(ops, list) or not ops:
+        raise ValueError(
+            f"FlagGems operator profile has no non-empty list for {platform}: {config_path}"
+        )
+    if any(not isinstance(op, str) or not op.strip() for op in ops):
+        raise ValueError(
+            f"FlagGems operator profile entries must be non-empty strings: {config_path}"
+        )
+    return tuple(dict.fromkeys(op.strip() for op in ops))
+
+
+def _resolve_flaggems_ops(profile: BackendProfile) -> tuple[str, ...]:
+    explicit_ops = _parse_ops(os.environ.get("GRAPHCAST_FLAGGEMS_OPS"))
+    if explicit_ops:
+        return explicit_ops
+
+    config_path = Path(
+        os.environ.get("GRAPHCAST_FLAGGEMS_CONFIG", str(DEFAULT_FLAGGEMS_CONFIG))
+    ).expanduser()
+    os.environ["GRAPHCAST_FLAGGEMS_CONFIG"] = str(config_path)
+    return _load_flaggems_ops(config_path, profile.name)
 
 
 def _flagos_mode() -> str:
@@ -405,10 +388,73 @@ def _flagos_mode() -> str:
     mode = aliases.get(mode, mode)
     if mode not in ("off", "flaggems", "flagtree"):
         raise ValueError(
-            "GRAPHCAST_FLAGOS_MODE must be one of off, flaggems, flagtree; "
-            f"got {mode!r}"
+            f"GRAPHCAST_FLAGOS_MODE must be one of off, flaggems, flagtree; got {mode!r}"
         )
     return mode
+
+
+def _resolve_flaggems_variant(mode: str) -> str:
+    if mode != "flaggems":
+        os.environ["GRAPHCAST_FLAGGEMS_VARIANT_RESOLVED"] = "off"
+        return "off"
+
+    source_root = os.environ.get("GRAPHCAST_FLAGGEMS_SOURCE_ROOT", "").strip()
+    if source_root:
+        variant = "custom"
+    else:
+        variant = os.environ.get("GRAPHCAST_FLAGGEMS_VARIANT", "installed").strip().lower()
+        if variant not in ("installed", "official", "internal"):
+            raise ValueError(
+                "GRAPHCAST_FLAGGEMS_VARIANT must be installed, official, or internal; "
+                f"got {variant!r}"
+            )
+        if variant in ("official", "internal"):
+            runtime_root = Path(
+                os.environ.get("FLAGGEMS_RUNTIME_DEST", str(DEFAULT_FLAGGEMS_RUNTIME_DEST))
+            ).expanduser()
+            os.environ["GRAPHCAST_FLAGGEMS_SOURCE_ROOT"] = str(runtime_root / variant / "FlagGems")
+    os.environ["GRAPHCAST_FLAGGEMS_VARIANT_RESOLVED"] = variant
+    return variant
+
+
+def configure_flagos_environment(
+    *,
+    mode: str | None = None,
+    ops: str | None = None,
+    config: str | None = None,
+    source_root: str | None = None,
+    record_path: str | None = None,
+    strict: str | bool | None = None,
+    bishengir_opt_dir: str | None = None,
+    variant: str | None = None,
+    runtime_dest: str | None = None,
+) -> None:
+    """Apply CLI FlagOS options using the canonical runtime environment names."""
+
+    if mode is not None:
+        normalized_mode = mode.strip().lower()
+        aliases = {"native": "off", "none": "off", "0": "off", "false": "off"}
+        os.environ["GRAPHCAST_FLAGOS_MODE"] = aliases.get(normalized_mode, normalized_mode)
+
+    values = {
+        "GRAPHCAST_FLAGGEMS_CONFIG": config,
+        "GRAPHCAST_FLAGGEMS_SOURCE_ROOT": source_root,
+        "GRAPHCAST_FLAGGEMS_RECORD_PATH": record_path,
+        "GRAPHCAST_BISHENGIR_OPT_DIR": bishengir_opt_dir,
+        "GRAPHCAST_FLAGGEMS_VARIANT": variant,
+        "FLAGGEMS_RUNTIME_DEST": runtime_dest,
+    }
+    for name, value in values.items():
+        if value is not None and str(value).strip():
+            os.environ[name] = str(value)
+
+    if ops is not None:
+        if ops.strip():
+            os.environ["GRAPHCAST_FLAGGEMS_OPS"] = ops
+        else:
+            os.environ.pop("GRAPHCAST_FLAGGEMS_OPS", None)
+    if strict is not None:
+        os.environ["GRAPHCAST_STRICT_FLAGOS"] = str(strict)
 
 
 def _default_record_path() -> str:
@@ -437,33 +483,64 @@ def _configure_flagos_toolchain(strict: bool) -> tuple[str | None, tuple[str, ..
     return opt_dir, tuple(warnings)
 
 
-def _enable_flaggems(profile: BackendProfile, ops: tuple[str, ...], strict: bool) -> FlagOSState:
+def _activate_flaggems_source_root() -> Path | None:
+    source_root = os.environ.get("GRAPHCAST_FLAGGEMS_SOURCE_ROOT", "").strip()
+    if not source_root:
+        return None
+
+    root = Path(source_root).expanduser().resolve()
+    python_root = root / "src"
+    if not (python_root / "flag_gems/__init__.py").is_file():
+        raise RuntimeError(f"invalid GRAPHCAST_FLAGGEMS_SOURCE_ROOT: {root}")
+    if str(python_root) not in sys.path:
+        sys.path.insert(0, str(python_root))
+    return python_root
+
+
+def _enable_flaggems(
+    profile: BackendProfile,
+    ops: tuple[str, ...],
+    strict: bool,
+    variant: str,
+) -> FlagOSState:
     warnings: list[str] = []
     if not profile.supports_flaggems:
         message = f"backend {profile.name} does not declare FlagGems support"
         if strict:
             raise RuntimeError(message)
-        return FlagOSState("flaggems", strict, ops, "unsupported", warnings=(message,))
+        return FlagOSState(
+            "flaggems",
+            strict,
+            ops,
+            "unsupported",
+            variant=variant,
+            warnings=(message,),
+        )
 
     bishengir_opt_dir, toolchain_warnings = _configure_flagos_toolchain(strict)
     warnings.extend(toolchain_warnings)
 
-    risky = [op for op in ops if op in RISKY_FLAGGEMS_OPS]
-    if risky:
-        warnings.append(
-            "risky FlagGems ops requested for GraphCast 25km shapes: " + ",".join(risky)
-        )
-
-    vendor = os.environ.get("GEMS_VENDOR") or profile.flaggems_vendor
+    vendor = profile.flaggems_vendor
     if vendor:
-        os.environ.setdefault("GEMS_VENDOR", vendor)
+        os.environ["GEMS_VENDOR"] = vendor
 
     record_path = os.environ.get("GRAPHCAST_FLAGGEMS_RECORD_PATH")
     if not record_path and _truthy(os.environ.get("GRAPHCAST_FLAGGEMS_RECORD")):
         record_path = _default_record_path()
 
     try:
+        expected_python_root = _activate_flaggems_source_root()
         import flag_gems
+
+        if expected_python_root is not None:
+            module_origin = Path(_module_origin("flag_gems") or "").resolve()
+            try:
+                module_origin.relative_to(expected_python_root)
+            except ValueError as exc:
+                raise RuntimeError(
+                    "loaded flag_gems does not come from GRAPHCAST_FLAGGEMS_SOURCE_ROOT: "
+                    f"{module_origin}"
+                ) from exc
 
         _bind_ascend_record_loggers()
         patched_ops: list[str] = []
@@ -479,15 +556,10 @@ def _enable_flaggems(profile: BackendProfile, ops: tuple[str, ...], strict: bool
         if record_path:
             Path(record_path).parent.mkdir(parents=True, exist_ok=True)
             record_kwargs = {"record": True, "path": record_path}
-        if hasattr(flag_gems, "only_enable"):
-            flag_gems.only_enable(include=list(ops), **record_kwargs)
-            status = "enabled_only_enable"
-        elif hasattr(flag_gems, "use_gems"):
-            flag_gems.use_gems()
-            status = "enabled_use_gems"
-            warnings.append("flag_gems.only_enable is unavailable; enabled all FlagGems ops")
-        else:
-            raise RuntimeError("flag_gems has neither only_enable nor use_gems")
+        if not hasattr(flag_gems, "only_enable"):
+            raise RuntimeError("the selected FlagGems runtime does not provide only_enable")
+        flag_gems.only_enable(include=list(ops), **record_kwargs)
+        status = "enabled_only_enable"
 
         _bind_ascend_record_loggers()
         registered_ops = _safe_list(flag_gems, "all_registered_ops")
@@ -500,6 +572,7 @@ def _enable_flaggems(profile: BackendProfile, ops: tuple[str, ...], strict: bool
             strict,
             ops,
             "failed",
+            variant=variant,
             vendor=vendor,
             record_path=record_path,
             bishengir_opt_dir=bishengir_opt_dir,
@@ -512,6 +585,7 @@ def _enable_flaggems(profile: BackendProfile, ops: tuple[str, ...], strict: bool
         strict,
         ops,
         status,
+        variant=variant,
         vendor=vendor,
         record_path=record_path,
         bishengir_opt_dir=bishengir_opt_dir,
@@ -523,17 +597,27 @@ def _enable_flaggems(profile: BackendProfile, ops: tuple[str, ...], strict: bool
 
 def _configure_flagos(profile: BackendProfile) -> FlagOSState:
     mode = _flagos_mode()
+    variant = _resolve_flaggems_variant(mode)
     strict = _truthy(os.environ.get("GRAPHCAST_STRICT_FLAGOS"))
-    ops = _parse_ops(os.environ.get("GRAPHCAST_FLAGGEMS_OPS"))
     if mode == "off":
-        return FlagOSState(mode, strict, ops, "disabled")
+        ops = _parse_ops(os.environ.get("GRAPHCAST_FLAGGEMS_OPS"))
+        return FlagOSState(mode, strict, ops, "disabled", variant=variant)
     if mode == "flaggems":
-        return _enable_flaggems(profile, ops, strict)
+        ops = _resolve_flaggems_ops(profile)
+        return _enable_flaggems(profile, ops, strict, variant)
 
+    ops = _parse_ops(os.environ.get("GRAPHCAST_FLAGGEMS_OPS"))
     message = "FlagTree is planned but not wired into the 25km package yet"
     if strict:
         raise RuntimeError(message)
-    return FlagOSState(mode, strict, ops, "not_implemented", warnings=(message,))
+    return FlagOSState(
+        mode,
+        strict,
+        ops,
+        "not_implemented",
+        variant=variant,
+        warnings=(message,),
+    )
 
 
 def _runtime_versions() -> dict[str, str]:
@@ -614,7 +698,9 @@ def backend_report_lines(runtime: RuntimeBackend) -> list[str]:
         f"- chip: `{metadata_dict['chip']}`",
         f"- FlagOS mode: `{metadata_dict['flagos_mode']}`",
         f"- FlagOS status: `{metadata_dict['flagos_status']}`",
+        f"- FlagGems variant: `{metadata_dict['flaggems_variant']}`",
         f"- FlagGems ops: `{metadata_dict['flaggems_ops']}`",
+        f"- FlagGems ops config: `{metadata_dict['flaggems_ops_config']}`",
         f"- FlagGems vendor: `{metadata_dict['flaggems_vendor']}`",
         f"- FlagGems record path: `{metadata_dict['flaggems_record_path']}`",
         f"- FlagGems source root: `{metadata_dict['flaggems_source_root']}`",
@@ -666,9 +752,7 @@ def _bind_ascend_record_loggers() -> None:
 
 def _patch_ascend_index_for_graphcast(flag_gems: Any) -> bool:
     try:
-        index_module = importlib.import_module(
-            "flag_gems.runtime.backend._ascend.ops.index"
-        )
+        index_module = importlib.import_module("flag_gems.runtime.backend._ascend.ops.index")
     except Exception:
         try:
             index_module = importlib.import_module("flag_gems.runtime._ascend.ops.index")
@@ -681,7 +765,7 @@ def _patch_ascend_index_for_graphcast(flag_gems: Any) -> bool:
 
     original_index = getattr(index_module, "index", None)
     patched_index = _build_graphcast_ascend_index(original_index, index_wrapper)
-    setattr(index_module, "index", patched_index)
+    index_module.index = patched_index
     return _replace_flaggems_config_function(flag_gems, "index.Tensor", patched_index)
 
 
@@ -742,7 +826,7 @@ def _replace_flaggems_config_function(
                 items[index] = (item[0], replacement, *item[2:])
                 changed = True
         if changed:
-            setattr(flag_gems, "_FULL_CONFIG", tuple(items))
+            flag_gems._FULL_CONFIG = tuple(items)
     by_func = getattr(flag_gems, "FULL_CONFIG_BY_FUNC", None)
     if isinstance(by_func, dict):
         for key, values in list(by_func.items()):

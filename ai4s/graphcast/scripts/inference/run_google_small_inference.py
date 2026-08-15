@@ -14,15 +14,14 @@ self-check and still writes a prediction NetCDF plus a report.
 from __future__ import annotations
 
 import argparse
-from dataclasses import replace
-from pathlib import Path
 import sys
 import time
+from dataclasses import replace
+from pathlib import Path
 
 import numpy as np
 import torch
 import xarray as xr
-
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 SRC_ROOT = REPO_ROOT / "src"
@@ -46,19 +45,18 @@ from graphcast_compat import (  # noqa: E402
 )
 from graphcast_compat.graph import default_latitudes, default_longitudes  # noqa: E402
 
-
 DEFAULT_CONFIG = "configs/inference/google_graphcast_small.yaml"
 DEFAULT_WEIGHTS = "data/checkpoints/google_graphcast_small_compat_state.pt"
 DEFAULT_OUTPUT = "outputs/predictions/google_small_prediction.nc"
 DEFAULT_REPORT = "outputs/reports/google_small_inference_report.md"
 
 
-def load_or_build_datasets(args: argparse.Namespace) -> tuple[xr.Dataset, xr.Dataset, xr.Dataset, str]:
+def load_or_build_datasets(
+    args: argparse.Namespace,
+) -> tuple[xr.Dataset, xr.Dataset, xr.Dataset, str]:
     paths = [args.inputs, args.forcings, args.target_template]
     if any(paths) and not all(paths):
-        raise ValueError(
-            "--inputs, --forcings, and --target-template must be provided together"
-        )
+        raise ValueError("--inputs, --forcings, and --target-template must be provided together")
 
     if all(paths):
         return (
@@ -97,7 +95,9 @@ def choose_config(args: argparse.Namespace, data_mode: str) -> GoogleSmallConfig
 
 
 def finite_dataset(dataset: xr.Dataset) -> bool:
-    return all(bool(np.isfinite(data_array.values).all()) for data_array in dataset.data_vars.values())
+    return all(
+        bool(np.isfinite(data_array.values).all()) for data_array in dataset.data_vars.values()
+    )
 
 
 def dataset_mean_std(dataset: xr.Dataset) -> tuple[float, float]:
@@ -283,6 +283,7 @@ def main(argv: list[str] | None = None) -> int:
     print(f"backend: {runtime.profile.name}", flush=True)
     print(f"flagos_mode: {runtime.flagos.mode}", flush=True)
     print(f"flagos_status: {runtime.flagos.status}", flush=True)
+    print(f"flaggems_variant: {runtime.flagos.variant}", flush=True)
     print(f"flaggems_ops: {list(runtime.flagos.requested_ops)}", flush=True)
     print(f"runtime_versions: {runtime.versions}", flush=True)
     if runtime.flagos.warnings:

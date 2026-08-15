@@ -4,18 +4,17 @@
 from __future__ import annotations
 
 import argparse
-from contextlib import contextmanager
-from dataclasses import replace
 import json
 import os
 import platform
-from pathlib import Path
 import sys
 import time
+from contextlib import contextmanager
+from dataclasses import replace
+from pathlib import Path
 from typing import Any
 
 import torch
-
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 SRC_ROOT = REPO_ROOT / "src"
@@ -32,10 +31,17 @@ from graphcast_compat import (  # noqa: E402
 )
 from graphcast_compat.backend import (  # noqa: E402
     backend_report_lines,
+    configure_flagos_environment,
     graphcast_gather_mode,
-    memory_text as _memory_text,
-    reset_peak_memory as _reset_peak_memory,
     resolve_runtime_backend,
+)
+from graphcast_compat.backend import (  # noqa: E402
+    memory_text as _memory_text,
+)
+from graphcast_compat.backend import (  # noqa: E402
+    reset_peak_memory as _reset_peak_memory,
+)
+from graphcast_compat.backend import (  # noqa: E402
     synchronize as _synchronize,
 )
 from graphcast_compat.normalization import normalize_dataset  # noqa: E402
@@ -45,13 +51,19 @@ from train_ddp import (  # noqa: E402
     target_to_training_tensor,
 )
 
-
 DEFAULT_CASE_DIR = REPO_ROOT / "data" / "cases" / "operational_25km"
 DEFAULT_CONFIG = REPO_ROOT / "configs" / "inference" / "google_graphcast_operational_25km.yaml"
-DEFAULT_WEIGHTS = REPO_ROOT / "data" / "checkpoints" / "google_graphcast_operational_25km_compat_state.pt"
+DEFAULT_WEIGHTS = (
+    REPO_ROOT / "data" / "checkpoints" / "google_graphcast_operational_25km_compat_state.pt"
+)
 DEFAULT_STATS_DIR = REPO_ROOT / "data" / "stats"
-DEFAULT_REPORT = REPO_ROOT / "outputs" / "training" / "reports" / "model_parallel_25km_train_report.md"
-DEFAULT_CHECKPOINT = REPO_ROOT / "outputs" / "training" / "checkpoints" / "model_parallel_25km_train.pt"
+DEFAULT_REPORT = (
+    REPO_ROOT / "outputs" / "training" / "reports" / "model_parallel_25km_train_report.md"
+)
+DEFAULT_CHECKPOINT = (
+    REPO_ROOT / "outputs" / "training" / "checkpoints" / "model_parallel_25km_train.pt"
+)
+DEFAULT_FLAGGEMS_CONFIG = REPO_ROOT / "configs/flaggems/graphcast_training.yaml"
 ACCELERATOR_TYPES = {"npu", "cuda"}
 
 
@@ -95,7 +107,9 @@ def distribute_mesh_steps(
         if len(step_devices) != steps:
             raise ValueError("--mesh-step-devices length must equal gnn_msg_steps")
         return step_devices
-    return tuple(devices[min(step * len(devices) // steps, len(devices) - 1)] for step in range(steps))
+    return tuple(
+        devices[min(step * len(devices) // steps, len(devices) - 1)] for step in range(steps)
+    )
 
 
 def unique_devices(devices: tuple[torch.device, ...]) -> tuple[torch.device, ...]:
@@ -172,7 +186,7 @@ def flatten_tensor_summaries(value: Any, *, limit: int = 8) -> list[dict[str, An
                 visit(child)
                 if len(summaries) >= limit:
                     return
-        elif isinstance(item, (list, tuple)):
+        elif isinstance(item, list | tuple):
             for child in item:
                 visit(child)
                 if len(summaries) >= limit:
@@ -188,7 +202,7 @@ def has_accelerator_tensor(value: Any) -> bool:
         return str(summary["device"]).split(":", 1)[0] in ACCELERATOR_TYPES
     if isinstance(value, dict):
         return any(has_accelerator_tensor(item) for item in value.values())
-    if isinstance(value, (list, tuple)):
+    if isinstance(value, list | tuple):
         return any(has_accelerator_tensor(item) for item in value)
     return False
 
@@ -244,7 +258,11 @@ class OperatorTrace:
             self.current_phase = previous
 
     def record(self, func: Any, args: tuple[Any, ...], kwargs: dict[str, Any], result: Any) -> None:
-        if not (has_accelerator_tensor(args) or has_accelerator_tensor(kwargs) or has_accelerator_tensor(result)):
+        if not (
+            has_accelerator_tensor(args)
+            or has_accelerator_tensor(kwargs)
+            or has_accelerator_tensor(result)
+        ):
             return
         name = str(func)
         entry = self.ops.setdefault(
@@ -322,7 +340,9 @@ def write_operator_trace(
     data = trace.to_json()
     if json_path is not None:
         json_path.parent.mkdir(parents=True, exist_ok=True)
-        json_path.write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+        json_path.write_text(
+            json.dumps(data, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
+        )
     if markdown_path is None:
         return
     lines = [
@@ -335,16 +355,12 @@ def write_operator_trace(
         "| --- | ---: | --- | --- |",
     ]
     for item in data["ops"]:
-        phases = "<br>".join(
-            f"{phase}: {count}" for phase, count in sorted(item["phases"].items())
-        )
+        phases = "<br>".join(f"{phase}: {count}" for phase, count in sorted(item["phases"].items()))
         examples = item["examples"][:1]
         input_shapes = []
         if examples:
             for tensor in examples[0]["inputs"]:
-                input_shapes.append(
-                    f"{tensor['shape']} {tensor['dtype']} {tensor['device']}"
-                )
+                input_shapes.append(f"{tensor['shape']} {tensor['dtype']} {tensor['device']}")
         lines.append(
             f"| `{item['op']}` | {item['count']} | {phases} | {'<br>'.join(input_shapes)} |"
         )
@@ -391,7 +407,7 @@ def summarize_flaggems_record(path: str | None) -> dict[str, int | str]:
         "INDEX ADD_": "INDEX ADD_",
         "ADD": "GEMS ADD",
     }
-    counts = {name: 0 for name in patterns}
+    counts = dict.fromkeys(patterns, 0)
     line_count = 0
     try:
         with record_path.open("r", encoding="utf-8", errors="replace") as handle:
@@ -448,12 +464,16 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--save-checkpoint", default="0")
     parser.add_argument(
         "--flagos-mode",
-        default=os.environ.get("GRAPHCAST_FLAGOS_MODE", "none"),
-        help="FlagOS backend mode: off, none, flaggems",
+        default=os.environ.get("GRAPHCAST_FLAGOS_MODE", "off"),
+        help="FlagOS backend mode: off or flaggems",
     )
     parser.add_argument(
         "--flaggems-ops",
-        default=os.environ.get("GRAPHCAST_FLAGGEMS_OPS", "addmm,silu,layer_norm,cat,index,index_add_,add"),
+        default=os.environ.get("GRAPHCAST_FLAGGEMS_OPS", ""),
+    )
+    parser.add_argument(
+        "--flaggems-config",
+        default=os.environ.get("GRAPHCAST_FLAGGEMS_CONFIG", str(DEFAULT_FLAGGEMS_CONFIG)),
     )
     parser.add_argument(
         "--flaggems-record-path",
@@ -472,7 +492,19 @@ def main(argv: list[str] | None = None) -> int:
     )
     parser.add_argument(
         "--flaggems-src",
-        default=os.environ.get("GRAPHCAST_FLAGGEMS_SRC"),
+        default=os.environ.get(
+            "GRAPHCAST_FLAGGEMS_SOURCE_ROOT",
+            os.environ.get("GRAPHCAST_FLAGGEMS_SRC"),
+        ),
+    )
+    parser.add_argument(
+        "--flaggems-variant",
+        choices=("installed", "official", "internal"),
+        default=os.environ.get("GRAPHCAST_FLAGGEMS_VARIANT", "installed"),
+    )
+    parser.add_argument(
+        "--flaggems-runtime-dest",
+        default=os.environ.get("FLAGGEMS_RUNTIME_DEST"),
     )
     parser.add_argument(
         "--trace-operators",
@@ -494,17 +526,17 @@ def main(argv: list[str] | None = None) -> int:
 
     devices = parse_devices(args.devices)
 
-    # Apply CLI flagos arguments to environment so resolve_runtime_backend picks them up
-    if args.flagos_mode != "none":
-        os.environ.setdefault("GRAPHCAST_FLAGOS_MODE", args.flagos_mode)
-    if args.flaggems_ops:
-        os.environ.setdefault("GRAPHCAST_FLAGGEMS_OPS", args.flaggems_ops)
-    if args.flaggems_record_path:
-        os.environ.setdefault("GRAPHCAST_FLAGGEMS_RECORD_PATH", args.flaggems_record_path)
-    if args.flaggems_strict:
-        os.environ.setdefault("GRAPHCAST_STRICT_FLAGOS", args.flaggems_strict)
-    if args.bishengir_opt_dir:
-        os.environ.setdefault("GRAPHCAST_BISHENGIR_OPT_DIR", args.bishengir_opt_dir)
+    configure_flagos_environment(
+        mode=args.flagos_mode,
+        ops=args.flaggems_ops,
+        config=args.flaggems_config,
+        source_root=args.flaggems_src,
+        record_path=args.flaggems_record_path,
+        strict=args.flaggems_strict,
+        bishengir_opt_dir=args.bishengir_opt_dir,
+        variant=args.flaggems_variant,
+        runtime_dest=args.flaggems_runtime_dest,
+    )
 
     runtime = resolve_runtime_backend(devices[0].type)
     init_accelerators(runtime, devices)
@@ -628,9 +660,7 @@ def main(argv: list[str] | None = None) -> int:
                 if args.mesh2grid_grid_partitions == 1:
                     with operator_trace.phase(f"step_{step}:forward"):
                         prediction = model(grid_features).to(output_device)
-                        loss = torch.mean(
-                            (prediction.float() - target_tensor.float()) ** 2
-                        )
+                        loss = torch.mean((prediction.float() - target_tensor.float()) ** 2)
                     with operator_trace.phase(f"step_{step}:backward"):
                         loss.backward()
                     loss_value = float(loss.detach().cpu())
@@ -658,9 +688,7 @@ def main(argv: list[str] | None = None) -> int:
                             ).to(output_device)
                             target_part = target_tensor[:, start:end, :]
                             loss_part = (
-                                torch.sum(
-                                    (prediction_part.float() - target_part.float()) ** 2
-                                )
+                                torch.sum((prediction_part.float() - target_part.float()) ** 2)
                                 / total_elements
                             )
                         with operator_trace.phase(
@@ -737,7 +765,7 @@ def main(argv: list[str] | None = None) -> int:
     report_lines = [
         "# GraphCast 25km Model-Parallel Training Report",
         "",
-        f"- status: `OK`",
+        "- status: `OK`",
         f"- devices: `{[str(device) for device in devices]}`",
         f"- mesh step devices: `{[str(device) for device in mesh_step_devices]}`",
         f"- train scope: `{args.train_scope}`",

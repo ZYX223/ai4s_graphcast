@@ -1,0 +1,27 @@
+version: 1
+profile: graphcast_inference
+
+# Keep a conservative fallback for platforms without a validated model profile.
+default_ops:
+  - silu
+  - add
+
+platform_ops:
+  ascend:
+    - addmm
+    - silu
+    - layer_norm
+    - cat
+    - index
+    - add
+  hygon:
+    - addmm
+    - silu
+    - layer_norm
+    - index
+  ptg:
+    - addmm
+    - silu
+    - layer_norm
+    - index
+    - add

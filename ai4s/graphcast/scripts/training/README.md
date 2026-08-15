@@ -34,7 +34,12 @@ npu-smi info 2>&1 | grep -E "^\| [0-9]+\s+[0-9]+\s+"
 | `GRAPHCAST_BACKEND` | `auto` | 后端选择：`ascend`（Ascend）、`ptg`（PPU）、`auto`（自动检测） |
 | `DEVICE` | `auto` | 设备类型：`npu`、`cuda`、`cpu`、`auto` |
 | `GRAPHCAST_FLAGOS_MODE` | `off` | FlagOS 模式：`off` 或 `flaggems` |
-| `GRAPHCAST_FLAGGEMS_OPS` | 7 算子全集 | 逗号分隔的 FlagGems 算子列表 |
+| `GRAPHCAST_FLAGGEMS_CONFIG` | `configs/flaggems/graphcast_training.yaml` | 按平台选择已验证的训练前向算子 |
+| `GRAPHCAST_FLAGGEMS_OPS` | 空 | 可选覆盖项；非空时替代 YAML 算子列表 |
+| `GRAPHCAST_FLAGGEMS_VARIANT` | `installed` | `installed`、`official` 或 `internal` |
+
+训练 profile 只描述 forward 接管范围，不代表 backward 已验证。需要对比
+同基线 official/internal 时，先运行 `bash tools/prepare_flaggems_runtime.sh`。
 
 ### 3. Docker 运行
 

@@ -13,6 +13,7 @@ from __future__ import annotations
 
 import argparse
 import os
+import shlex
 import shutil
 import subprocess
 import sys
@@ -28,16 +29,21 @@ SCRIPT_DIR = Path(__file__).resolve().parent
 # ── platform detection ──────────────────────────────────────────────────────
 
 GPU_CHECK_CMDS = {
-    "nvidia": [["nvidia-smi", "--query-gpu=index,memory.used,memory.total", "--format=csv,noheader"]],
+    "nvidia": [
+        ["nvidia-smi", "--query-gpu=index,memory.used,memory.total", "--format=csv,noheader"]
+    ],
     "ascend": [["npu-smi", "info"]],
     "hygon": [
         ["rocm-smi", "--showmeminfo", "vram"],
         ["/opt/dtk/bin/rocm-smi", "--showmeminfo", "vram"],
     ],
-    "ppu": [[
-        "/usr/local/PPU_SDK/CUDA_SDK/bin/nvidia-smi",
-        "--query-gpu=index,memory.used,memory.total", "--format=csv,noheader",
-    ]],
+    "ppu": [
+        [
+            "/usr/local/PPU_SDK/CUDA_SDK/bin/nvidia-smi",
+            "--query-gpu=index,memory.used,memory.total",
+            "--format=csv,noheader",
+        ]
+    ],
 }
 
 PLATFORM_CONFIG = {
@@ -52,8 +58,12 @@ PLATFORM_CONFIG = {
         "device_type": "npu",
         "backend_suffix": "ascend",
         "docker_flags": [
-            "--runtime=ascend", "--privileged", "--security-opt", "label=disable",
-            "--entrypoint", "/bin/sh",
+            "--runtime=ascend",
+            "--privileged",
+            "--security-opt",
+            "label=disable",
+            "--entrypoint",
+            "/bin/sh",
         ],
         "extra_volumes": [
             "/usr/local/Ascend/driver:/usr/local/Ascend/driver:ro",
@@ -63,8 +73,10 @@ PLATFORM_CONFIG = {
             "/etc/ascend_install.info:/etc/ascend_install.info:ro",
             "/etc/hccn.conf:/etc/hccn.conf:ro",
         ],
-        "env_vars": {"ASCEND_RT_VISIBLE_DEVICES": "DEVICE_IDS",
-                     "PYTORCH_NPU_ALLOC_CONF": "max_split_size_mb:256"},
+        "env_vars": {
+            "ASCEND_RT_VISIBLE_DEVICES": "DEVICE_IDS",
+            "PYTORCH_NPU_ALLOC_CONF": "max_split_size_mb:256",
+        },
         "setup_cmd": "python3 -c 'import xarray' 2>/dev/null || pip3 install -q --no-index --find-links=/wh/ascend xarray netCDF4 h5py trimesh rtree cftime PyYAML scipy",
     },
     "hygon": {
@@ -88,20 +100,68 @@ PLATFORM_CONFIG = {
 }
 
 CONTAINER_NAME_PREFIX = "qs_graphcast"
+FLAGGEMS_PROFILE_CONFIGS = {
+    "inference": "configs/flaggems/graphcast_inference.yaml",
+    "training": "configs/flaggems/graphcast_training.yaml",
+}
 
 
 # ── helpers ─────────────────────────────────────────────────────────────────
+
 
 def run(cmd: list[str], **kwargs) -> subprocess.CompletedProcess:
     return subprocess.run(cmd, check=False, text=True, **kwargs)
 
 
-def red(msg: str) -> str:   return f"\033[31m{msg}\033[0m"
-def green(msg: str) -> str: return f"\033[32m{msg}\033[0m"
-def bold(msg: str) -> str:  return f"\033[1m{msg}\033[0m"
+def red(msg: str) -> str:
+    return f"\033[31m{msg}\033[0m"
+
+
+def green(msg: str) -> str:
+    return f"\033[32m{msg}\033[0m"
+
+
+def bold(msg: str) -> str:
+    return f"\033[1m{msg}\033[0m"
+
+
+def build_flagos_environment(
+    *,
+    platform: str,
+    mode: str | None,
+    ops: str | None,
+    profile: str,
+    config: str | None = None,
+    source_root: str | None = None,
+    variant: str = "installed",
+) -> dict[str, str]:
+    """Build one runtime environment for either inference or training."""
+
+    backend = PLATFORM_CONFIG[platform].get("backend_suffix", platform)
+    normalized_mode = (mode or "off").strip().lower()
+    env = {
+        "GRAPHCAST_BACKEND": backend,
+        "GRAPHCAST_FLAGOS_MODE": normalized_mode,
+    }
+    if normalized_mode != "flaggems":
+        return env
+    env["GRAPHCAST_FLAGGEMS_VARIANT"] = variant
+    env["GRAPHCAST_STRICT_FLAGOS"] = "1"
+    if ops:
+        env["GRAPHCAST_FLAGGEMS_OPS"] = ops
+    else:
+        env["GRAPHCAST_FLAGGEMS_CONFIG"] = config or FLAGGEMS_PROFILE_CONFIGS[profile]
+    if source_root:
+        env["GRAPHCAST_FLAGGEMS_SOURCE_ROOT"] = source_root
+    return env
+
+
+def _shell_environment(env: dict[str, str]) -> str:
+    return " ".join(f"{name}={shlex.quote(value)}" for name, value in env.items())
 
 
 # ── GPU detection ───────────────────────────────────────────────────────────
+
 
 def detect_platform() -> str | None:
     """Try each platform's GPU query tool; return first that succeeds."""
@@ -122,8 +182,7 @@ def detect_platform() -> str | None:
     return None
 
 
-def find_free_gpus(platform: str, count: int = 4, user_spec: str | None = None
-                   ) -> list[int]:
+def find_free_gpus(platform: str, count: int = 4, user_spec: str | None = None) -> list[int]:
     """Return list of free GPU IDs (memory < 5 GB)."""
     if user_spec:
         return [int(x.strip()) for x in user_spec.split(",")]
@@ -245,6 +304,7 @@ def _find_free_hygon(result: subprocess.CompletedProcess, count: int) -> list[in
     """Hygon: parse rocm-smi --showmeminfo vram output."""
     free: list[int] = []
     import re as _re
+
     for line in result.stdout.strip().split("\n"):
         line = line.strip()
         if not line:
@@ -281,18 +341,19 @@ def _find_free_nvidia(result: subprocess.CompletedProcess, count: int) -> list[i
 
 # ── data ────────────────────────────────────────────────────────────────────
 
+
 def ensure_data() -> bool:
     """Ensure data/ directory has cases, stats, checkpoints, wheelhouse."""
     data = SCRIPT_DIR / "data"
-    if (data / "cases" / "operational_25km").is_dir() and \
-       (data / "checkpoints" / "google_graphcast_operational_25km_compat_state.pt").is_file():
+    if (data / "cases" / "operational_25km").is_dir() and (
+        data / "checkpoints" / "google_graphcast_operational_25km_compat_state.pt"
+    ).is_file():
         return True
 
     print(bold("Data not found. Downloading (~1 GB)..."))
     for tool, flag in [("curl", "-L -o"), ("wget", "-O")]:
         if shutil.which(tool):
-            r = run(f"{tool} {flag} {DATA_ARCHIVE} {RELEASE_URL}".split(),
-                    cwd=SCRIPT_DIR, timeout=600)
+            run(f"{tool} {flag} {DATA_ARCHIVE} {RELEASE_URL}".split(), cwd=SCRIPT_DIR, timeout=600)
             break
     else:
         print(red("No curl/wget. Please download data manually:"))
@@ -307,13 +368,14 @@ def ensure_data() -> bool:
         return True
 
     print(red("Download failed."))
-    print(red(f"Please download manually from:"))
+    print(red("Please download manually from:"))
     print(red(f"  {RELEASE_URL}"))
     print(red(f"Then extract to: {SCRIPT_DIR / 'data'}"))
     return False
 
 
 # ── Docker ───────────────────────────────────────────────────────────────────
+
 
 def container_name(platform: str) -> str:
     return f"{CONTAINER_NAME_PREFIX}_{platform}"
@@ -328,8 +390,7 @@ def docker_bin(platform: str) -> list[str]:
 
 def container_running(name: str, platform: str) -> bool:
     d = docker_bin(platform)
-    r = run(d + ["ps", "--filter", f"name={name}", "--format", "{{.Names}}"],
-            capture_output=True)
+    r = run(d + ["ps", "--filter", f"name={name}", "--format", "{{.Names}}"], capture_output=True)
     return name in r.stdout
 
 
@@ -341,8 +402,10 @@ def container_exists(name: str, platform: str) -> bool:
 
 def _container_mount_ok(name: str, d: list[str]) -> bool:
     """Verify the /ws volume mount is healthy inside the container."""
-    r = run(d + ["exec", "-w", "/", name, "test", "-f", "/ws/ai4s/graphcast/quickstart"],
-            capture_output=True)
+    r = run(
+        d + ["exec", "-w", "/", name, "test", "-f", "/ws/ai4s/graphcast/quickstart"],
+        capture_output=True,
+    )
     return r.returncode == 0
 
 
@@ -437,36 +500,59 @@ def stop_container(platform: str) -> None:
 
 # ── main ────────────────────────────────────────────────────────────────────
 
+
 def main() -> None:
     parser = argparse.ArgumentParser(
         description="GraphCast one-click quickstart",
         usage="./quickstart [MODE] [OPTIONS...]",
     )
-    parser.add_argument("mode", nargs="?", default="infer",
-                        choices=["infer", "train", "all", "container-only"],
-                        help="Execution mode (default: infer)")
-    parser.add_argument("--rm", action="store_true",
-                        help="Remove container after execution")
-    parser.add_argument("--image", type=str, default=None,
-                        help="Docker image to use")
-    parser.add_argument("--devices", type=str, default=None,
-                        help="Comma-separated GPU/NPU IDs (e.g. 0,1,2,3)")
-    parser.add_argument("--steps", type=int, default=3,
-                        help="Training steps (default: 3)")
-    parser.add_argument("--flagos-mode", type=str, default=None,
-                        help="FlagOS mode: flaggems")
-    parser.add_argument("--flaggems-ops", type=str, default=None,
-                        help="FlagGems ops (comma-separated)")
-    parser.add_argument("--data-source", type=str, default=None,
-                        help="Path to graphcast-data directory")
+    parser.add_argument(
+        "mode",
+        nargs="?",
+        default="infer",
+        choices=["infer", "train", "all", "container-only"],
+        help="Execution mode (default: infer)",
+    )
+    parser.add_argument("--rm", action="store_true", help="Remove container after execution")
+    parser.add_argument("--image", type=str, default=None, help="Docker image to use")
+    parser.add_argument(
+        "--devices", type=str, default=None, help="Comma-separated GPU/NPU IDs (e.g. 0,1,2,3)"
+    )
+    parser.add_argument("--steps", type=int, default=3, help="Training steps (default: 3)")
+    parser.add_argument(
+        "--flagos-mode",
+        choices=("off", "flaggems"),
+        default="off",
+        help="FlagOS mode (default: off)",
+    )
+    parser.add_argument(
+        "--flaggems-ops", type=str, default=None, help="FlagGems ops override (comma-separated)"
+    )
+    parser.add_argument(
+        "--flaggems-config", type=str, default=None, help="FlagGems operator profile override"
+    )
+    parser.add_argument(
+        "--flaggems-src",
+        type=str,
+        default=None,
+        help="Optional FlagGems source root inside the container",
+    )
+    parser.add_argument(
+        "--flaggems-variant",
+        choices=("installed", "official", "internal"),
+        default="installed",
+        help="FlagGems source variant",
+    )
+    parser.add_argument(
+        "--data-source", type=str, default=None, help="Path to graphcast-data directory"
+    )
 
     args, extra = parser.parse_known_args()
 
     # 1. Detect platform
     platform = detect_platform()
     if not platform:
-        print(red("Could not detect platform. Tried: " +
-                  ", ".join(GPU_CHECK_CMDS)))
+        print(red("Could not detect platform. Tried: " + ", ".join(GPU_CHECK_CMDS)))
         print(red("Specify platform manually via --platform (not yet implemented)."))
         sys.exit(1)
     print(f"Detected platform: {bold(platform)}")
@@ -505,7 +591,17 @@ def main() -> None:
 
     if args.mode in ("infer", "all"):
         print(bold("=== Inference ==="))
+        infer_env = build_flagos_environment(
+            platform=platform,
+            mode=args.flagos_mode,
+            ops=args.flaggems_ops,
+            profile="inference",
+            config=args.flaggems_config,
+            source_root=args.flaggems_src,
+            variant=args.flaggems_variant,
+        )
         infer_cmd = (
+            f"{_shell_environment(infer_env)} "
             f"python3 scripts/inference/run_google_small_inference.py"
             f" --device {device_type}"
             f" --config configs/inference/google_graphcast_operational_25km.yaml"
@@ -514,32 +610,34 @@ def main() -> None:
             f" --output /tmp/pred.nc --report /dev/null"
             f" --synthetic-grid tiny"
         )
-        docker_exec(infer_cmd)
+        if docker_exec(infer_cmd) != 0:
+            print(red("Inference failed."))
+            sys.exit(1)
         print(green("Inference done."))
 
     if args.mode in ("train", "all"):
         print(bold("=== Training ==="))
-        train_env_parts = []
-        if args.flagos_mode:
-            backend_suffix = PLATFORM_CONFIG[platform].get("backend_suffix", platform)
-            train_env_parts.append(f"GRAPHCAST_BACKEND=flagos_{backend_suffix}")
-            train_env_parts.append(f"GRAPHCAST_FLAGOS_MODE={args.flagos_mode}")
-            if args.flaggems_ops:
-                train_env_parts.append(f"GRAPHCAST_FLAGGEMS_OPS={args.flaggems_ops}")
-        train_env = (" " + " ".join(train_env_parts)) if train_env_parts else ""
+        train_env = build_flagos_environment(
+            platform=platform,
+            mode=args.flagos_mode,
+            ops=args.flaggems_ops,
+            profile="training",
+            config=args.flaggems_config,
+            source_root=args.flaggems_src,
+            variant=args.flaggems_variant,
+        )
         device_list = ",".join(f"{device_type}:{i}" for i in range(len(devices)))
         train_cmd = (
-            f"{train_env} python3 -u scripts/training/lib/train_mp.py"
+            f"{_shell_environment(train_env)} "
+            f"python3 -u scripts/training/lib/train_mp.py"
             f" --steps {args.steps}"
             f" --devices {device_list}"
             f" --mesh2grid-grid-partitions 8"
             f" --lr 1e-6 --optimizer sgd --train-scope all"
         )
-        if args.flagos_mode:
-            train_cmd += f" --flagos-mode {args.flagos_mode}"
-        if args.flaggems_ops:
-            train_cmd += f" --flaggems-ops {args.flaggems_ops}"
-        docker_exec(train_cmd)
+        if docker_exec(train_cmd) != 0:
+            print(red("Training failed."))
+            sys.exit(1)
         print(green("Training done."))
 
     # 6. Cleanup

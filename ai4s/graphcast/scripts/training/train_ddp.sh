@@ -26,7 +26,10 @@ Optional environment variables:
   MESH2GRID_EDGE_CHUNK_SIZE=             # optional training-time chunk-size override
   GRAPHCAST_BACKEND=auto                 # native/flagos backend profile
   GRAPHCAST_FLAGOS_MODE=off              # off or flaggems
-  GRAPHCAST_FLAGGEMS_OPS=addmm,silu,layer_norm,cat,index,index_add_,add
+  GRAPHCAST_FLAGGEMS_CONFIG=configs/flaggems/graphcast_training.yaml
+  GRAPHCAST_FLAGGEMS_OPS=                 # optional comma-separated override
+  GRAPHCAST_FLAGGEMS_VARIANT=installed    # installed, official, or internal
+  FLAGGEMS_RUNTIME_DEST=third_party/flaggems-runtime
   GRAPHCAST_FLAGGEMS_SOURCE_ROOT=        # optional FlagGems source root
   GRAPHCAST_STRICT_FLAGOS=0              # fail if FlagOS setup fails
   CONFIG=configs/training/...            # model config
@@ -76,10 +79,14 @@ MESH2GRID_EDGE_CHUNK_SIZE="${MESH2GRID_EDGE_CHUNK_SIZE:-}"
 LOSS_MEAN_STEPS="${LOSS_MEAN_STEPS:-344}"
 GRAPHCAST_BACKEND="${GRAPHCAST_BACKEND:-auto}"
 GRAPHCAST_FLAGOS_MODE="${GRAPHCAST_FLAGOS_MODE:-off}"
-GRAPHCAST_FLAGGEMS_OPS="${GRAPHCAST_FLAGGEMS_OPS:-addmm,silu,layer_norm,cat,index,index_add_,add}"
+GRAPHCAST_FLAGGEMS_CONFIG="${GRAPHCAST_FLAGGEMS_CONFIG:-${SCRIPT_DIR}/configs/flaggems/graphcast_training.yaml}"
+GRAPHCAST_FLAGGEMS_OPS="${GRAPHCAST_FLAGGEMS_OPS:-}"
+GRAPHCAST_FLAGGEMS_VARIANT="${GRAPHCAST_FLAGGEMS_VARIANT:-installed}"
+FLAGGEMS_RUNTIME_DEST="${FLAGGEMS_RUNTIME_DEST:-${SCRIPT_DIR}/third_party/flaggems-runtime}"
 GRAPHCAST_STRICT_FLAGOS="${GRAPHCAST_STRICT_FLAGOS:-0}"
 
-export GRAPHCAST_BACKEND GRAPHCAST_FLAGOS_MODE GRAPHCAST_FLAGGEMS_OPS
+export GRAPHCAST_BACKEND GRAPHCAST_FLAGOS_MODE GRAPHCAST_FLAGGEMS_CONFIG GRAPHCAST_FLAGGEMS_OPS
+export GRAPHCAST_FLAGGEMS_VARIANT FLAGGEMS_RUNTIME_DEST
 export GRAPHCAST_FLAGGEMS_SOURCE_ROOT GRAPHCAST_STRICT_FLAGOS
 
 CONFIG="${CONFIG:-configs/training/google_graphcast_100km.yaml}"
@@ -132,10 +139,12 @@ fi
 printf 'running:'
 printf ' %q' "${cmd[@]}"
 printf '\n'
-printf 'backend env: GRAPHCAST_BACKEND=%q GRAPHCAST_FLAGOS_MODE=%q GRAPHCAST_FLAGGEMS_OPS=%q\n' \
+printf 'backend env: GRAPHCAST_BACKEND=%q GRAPHCAST_FLAGOS_MODE=%q GRAPHCAST_FLAGGEMS_CONFIG=%q GRAPHCAST_FLAGGEMS_OPS=%q GRAPHCAST_FLAGGEMS_VARIANT=%q\n' \
   "${GRAPHCAST_BACKEND}" \
   "${GRAPHCAST_FLAGOS_MODE}" \
-  "${GRAPHCAST_FLAGGEMS_OPS}"
+  "${GRAPHCAST_FLAGGEMS_CONFIG}" \
+  "${GRAPHCAST_FLAGGEMS_OPS}" \
+  "${GRAPHCAST_FLAGGEMS_VARIANT}"
 
 if [[ "${DRY_RUN:-0}" == "1" ]]; then
   exit 0

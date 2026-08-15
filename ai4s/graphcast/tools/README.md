@@ -1,40 +1,31 @@
-# FlagGems Candidate Staging
+# FlagGems Runtime Preparation
 
-`third_party/` is a local staging area for external runtime source. Full
-FlagGems trees remain ignored so platform snapshots and generated kernels are
-not committed with GraphCast.
+`third_party/` is an ignored staging area for external runtime source. The
+preparation tool fetches the active manifest from
+`flagos-common:zyx/flaggems-op-prcheck`, fetches the matching upstream
+FlagGems branch, and composes two source trees from that same baseline:
 
-The tracked [`flaggems-candidate.lock`](flaggems-candidate.lock) pins one
-complete candidate from `flagos-common`. That candidate consists of a fixed
-official FlagGems baseline plus only the validated operator-file replacements.
-Unchanged operators therefore continue to use the official implementation.
-The current lock includes optimized `index`, `index_add`/`index_add_`, Ascend
-`addmm`, and Ascend LayerNorm forward; the newer LayerNorm backward work is not
-part of this pinned candidate yet.
+- `official/FlagGems`: unchanged upstream source;
+- `internal/FlagGems`: upstream source plus the manifest's validated overlays.
 
-Prepare the ignored local candidate with:
+No commit is hard-coded in this repository. Each run records the resolved
+commits and overlay list in `third_party/flaggems-runtime/PROVENANCE.env`.
 
 ```bash
-FLAGOS_COMMON_ROOT=/path/to/flagos-common \
-  bash tools/prepare_flaggems_candidate.sh
+bash tools/prepare_flaggems_runtime.sh
 ```
 
-The default output is:
+Use `--offline` to rebuild from the existing cache or `--refresh` to replace a
+damaged cache. `prepare_flaggems_candidate.sh` remains as a compatibility alias.
 
-```text
-third_party/flaggems-candidate/FlagGems/
-```
-
-Select it without changing the Python environment:
+Select a prepared runtime without modifying the Python installation:
 
 ```bash
-GRAPHCAST_FLAGGEMS_SOURCE_ROOT="$PWD/third_party/flaggems-candidate/FlagGems" \
 GRAPHCAST_FLAGOS_MODE=flaggems \
-GRAPHCAST_FLAGGEMS_OPS=index,index_add_,addmm,layer_norm \
-  bash run_25km_inference.sh <inputs.nc> <target_template.nc> <forcings.nc>
+GRAPHCAST_FLAGGEMS_VARIANT=internal \
+  bash scripts/infer.sh
 ```
 
-The inference report records both the requested source root and the actual
-`flag_gems` module path. Use those fields to distinguish an official install
-from the candidate. Operator development and review artifacts stay in
-`flagos-common`; GraphCast uses only the public FlagGems runtime API.
+Set `GRAPHCAST_FLAGGEMS_VARIANT=official` for the matched upstream comparison,
+or leave it as `installed` to use the FlagGems package already present in the
+environment. An explicit `GRAPHCAST_FLAGGEMS_SOURCE_ROOT` takes precedence.

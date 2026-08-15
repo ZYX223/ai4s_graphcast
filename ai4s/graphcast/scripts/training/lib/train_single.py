@@ -12,21 +12,20 @@ pressure-level, and surface-variable weighting as
 from __future__ import annotations
 
 import argparse
-from contextlib import nullcontext
-from dataclasses import replace
 import json
 import os
-from pathlib import Path
 import sys
 import time
+from contextlib import nullcontext
+from dataclasses import replace
+from pathlib import Path
 from typing import Any
 
 import numpy as np
 import torch
 import torch.distributed as dist
-from torch.nn.parallel import DistributedDataParallel as DDP
 import xarray as xr
-
+from torch.nn.parallel import DistributedDataParallel as DDP
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 SRC_ROOT = REPO_ROOT / "src"
@@ -41,19 +40,27 @@ from graphcast_compat import (  # noqa: E402
     load_normalization_stats,
     predict_with_inputs_and_residuals,
 )
-from graphcast_compat.backend import resolve_runtime_backend, backend_report_lines  # noqa: E402
+from graphcast_compat.backend import (  # noqa: E402
+    backend_report_lines,
+    configure_flagos_environment,
+    resolve_runtime_backend,
+)
 from graphcast_compat.data import select_dataset_variables  # noqa: E402
 from graphcast_compat.normalization import normalize_dataset  # noqa: E402
 
-
 DEFAULT_CASE_DIR = REPO_ROOT / "cases" / "2021_20210101_day_operational_25km"
 DEFAULT_CONFIG = str(REPO_ROOT / "configs" / "training" / "google_graphcast_25km.yaml")
-DEFAULT_WEIGHTS = str(REPO_ROOT / "outputs" / "checkpoints" / "google_graphcast_operational_25km_compat_state.pt")
+DEFAULT_WEIGHTS = str(
+    REPO_ROOT / "outputs" / "checkpoints" / "google_graphcast_operational_25km_compat_state.pt"
+)
 DEFAULT_INPUTS = str(DEFAULT_CASE_DIR / "inputs.nc")
 DEFAULT_TARGETS = str(DEFAULT_CASE_DIR / "targets.nc")
 DEFAULT_FORCINGS = str(DEFAULT_CASE_DIR / "forcings.nc")
 DEFAULT_STATS_DIR = str(REPO_ROOT / "data" / "raw" / "google_graphcast_stats")
-DEFAULT_RUN_DIR = str(REPO_ROOT / "outputs" / "training" / "runs" / "operational_25km_pytorch_compat_loss")
+DEFAULT_RUN_DIR = str(
+    REPO_ROOT / "outputs" / "training" / "runs" / "operational_25km_pytorch_compat_loss"
+)
+DEFAULT_FLAGGEMS_CONFIG = REPO_ROOT / "configs/flaggems/graphcast_training.yaml"
 
 PER_VARIABLE_WEIGHTS = {
     "2m_temperature": 1.0,
@@ -324,7 +331,9 @@ def channel_weights_for_targets(targets: xr.Dataset) -> tuple[np.ndarray, dict[s
             repeated = np.tile(level_weight, time_count) / max(time_count, 1)
             var_weights = variable_weight * repeated.astype(np.float32)
         else:
-            channel_count = int(np.prod([array.sizes[dim] for dim in non_preserved], dtype=np.int64))
+            channel_count = int(
+                np.prod([array.sizes[dim] for dim in non_preserved], dtype=np.int64)
+            )
             var_weights = np.full(
                 channel_count,
                 variable_weight / max(time_count, 1),
@@ -419,7 +428,9 @@ def max_abs_state_diff(
         raise ValueError(f"state dict keys differ: missing={missing}, unexpected={unexpected}")
     for name in sorted(left):
         if left[name].shape != right[name].shape:
-            raise ValueError(f"state dict shape differs for {name}: {left[name].shape} vs {right[name].shape}")
+            raise ValueError(
+                f"state dict shape differs for {name}: {left[name].shape} vs {right[name].shape}"
+            )
         if left[name].numel():
             max_diff = max(max_diff, float((left[name] - right[name]).abs().max().item()))
     return max_diff
@@ -508,28 +519,30 @@ def build_report(summary: dict[str, Any]) -> str:
         f"- mesh2grid edge chunk size: `{summary['mesh2grid_edge_chunk_size']}`",
     ]
     lines.extend(summary.get("backend_lines", []))
-    lines.extend([
-        f"- trainable parameters: `{summary['trainable_parameters']}`",
-        f"- total parameters: `{summary['total_parameters']}`",
-        f"- trainable parameter sample: `{summary['trainable_parameter_sample']}`",
-        f"- steps: `{summary['steps']}`",
-        f"- lr: `{summary['lr']}`",
-        f"- crop: `{summary['crop']}`",
-        f"- input shape: `{summary['input_shape']}`",
-        f"- target shape: `{summary['target_shape']}`",
-        f"- final loss: `{summary['final_loss']}`",
-        f"- post-train loss: `{summary['post_train_loss']}`",
-        f"- saved checkpoint: `{summary['saved_checkpoint']}`",
-        f"- reload validation: `{summary['reload_validation']}`",
-        f"- inference validation: `{summary['inference_validation']}`",
-        f"- accelerator memory: `{summary['accelerator_memory']}`",
-        f"- total seconds: `{summary['total_seconds']:.3f}`",
-        f"- metrics jsonl: `{summary['metrics_jsonl']}`",
-        f"- summary json: `{summary['summary_json']}`",
-        "",
-        "## Step Metrics",
-        "",
-    ])
+    lines.extend(
+        [
+            f"- trainable parameters: `{summary['trainable_parameters']}`",
+            f"- total parameters: `{summary['total_parameters']}`",
+            f"- trainable parameter sample: `{summary['trainable_parameter_sample']}`",
+            f"- steps: `{summary['steps']}`",
+            f"- lr: `{summary['lr']}`",
+            f"- crop: `{summary['crop']}`",
+            f"- input shape: `{summary['input_shape']}`",
+            f"- target shape: `{summary['target_shape']}`",
+            f"- final loss: `{summary['final_loss']}`",
+            f"- post-train loss: `{summary['post_train_loss']}`",
+            f"- saved checkpoint: `{summary['saved_checkpoint']}`",
+            f"- reload validation: `{summary['reload_validation']}`",
+            f"- inference validation: `{summary['inference_validation']}`",
+            f"- accelerator memory: `{summary['accelerator_memory']}`",
+            f"- total seconds: `{summary['total_seconds']:.3f}`",
+            f"- metrics jsonl: `{summary['metrics_jsonl']}`",
+            f"- summary json: `{summary['summary_json']}`",
+            "",
+            "## Step Metrics",
+            "",
+        ]
+    )
     for item in summary["metrics"]:
         lines.append(
             "- step `{step}` loss `{loss}` grad_mean_abs `{grad_mean_abs}` "
@@ -575,9 +588,13 @@ def main(argv: list[str] | None = None) -> int:
         help="override config model_config.mesh2grid_edge_chunk_size for training",
     )
     parser.add_argument("--lat-start", type=int, default=0)
-    parser.add_argument("--lat-count", type=int, default=0, help="0 means full remaining latitude range")
+    parser.add_argument(
+        "--lat-count", type=int, default=0, help="0 means full remaining latitude range"
+    )
     parser.add_argument("--lon-start", type=int, default=0)
-    parser.add_argument("--lon-count", type=int, default=0, help="0 means full remaining longitude range")
+    parser.add_argument(
+        "--lon-count", type=int, default=0, help="0 means full remaining longitude range"
+    )
     parser.add_argument("--mesh-size", type=int, default=None)
     parser.add_argument(
         "--save-checkpoint",
@@ -605,13 +622,18 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--reload-loss-atol", type=float, default=1.0e-6)
     parser.add_argument(
         "--flagos-mode",
-        default=os.environ.get("GRAPHCAST_FLAGOS_MODE", "none"),
-        help="FlagOS backend mode: none or flaggems",
+        default=os.environ.get("GRAPHCAST_FLAGOS_MODE", "off"),
+        help="FlagOS backend mode: off or flaggems",
     )
     parser.add_argument(
         "--flaggems-ops",
         default=os.environ.get("GRAPHCAST_FLAGGEMS_OPS", ""),
         help="comma-separated FlagGems ops to enable",
+    )
+    parser.add_argument(
+        "--flaggems-config",
+        default=os.environ.get("GRAPHCAST_FLAGGEMS_CONFIG", str(DEFAULT_FLAGGEMS_CONFIG)),
+        help="FlagGems operator profile used when --flaggems-ops is empty",
     )
     parser.add_argument(
         "--flaggems-record-path",
@@ -620,13 +642,30 @@ def main(argv: list[str] | None = None) -> int:
     )
     parser.add_argument(
         "--flaggems-strict",
-        default=os.environ.get("GRAPHCAST_FLAGGEMS_STRICT", "1"),
+        default=os.environ.get(
+            "GRAPHCAST_STRICT_FLAGOS",
+            os.environ.get("GRAPHCAST_FLAGGEMS_STRICT", "1"),
+        ),
         help="fail if FlagGems setup fails",
     )
     parser.add_argument(
         "--flaggems-src",
-        default=os.environ.get("GRAPHCAST_FLAGGEMS_SRC", ""),
+        default=os.environ.get(
+            "GRAPHCAST_FLAGGEMS_SOURCE_ROOT",
+            os.environ.get("GRAPHCAST_FLAGGEMS_SRC", ""),
+        ),
         help="optional FlagGems source path",
+    )
+    parser.add_argument(
+        "--flaggems-variant",
+        choices=("installed", "official", "internal"),
+        default=os.environ.get("GRAPHCAST_FLAGGEMS_VARIANT", "installed"),
+        help="installed package or a runtime prepared under third_party",
+    )
+    parser.add_argument(
+        "--flaggems-runtime-dest",
+        default=os.environ.get("FLAGGEMS_RUNTIME_DEST", ""),
+        help="root containing prepared official/internal FlagGems trees",
     )
     parser.add_argument(
         "--bishengir-opt-dir",
@@ -634,6 +673,18 @@ def main(argv: list[str] | None = None) -> int:
         help="BishengIR opt binary directory",
     )
     args = parser.parse_args(argv)
+
+    configure_flagos_environment(
+        mode=args.flagos_mode,
+        ops=args.flaggems_ops,
+        config=args.flaggems_config,
+        source_root=args.flaggems_src,
+        record_path=args.flaggems_record_path,
+        strict=args.flaggems_strict,
+        bishengir_opt_dir=args.bishengir_opt_dir,
+        variant=args.flaggems_variant,
+        runtime_dest=args.flaggems_runtime_dest,
+    )
 
     if args.steps <= 0:
         raise ValueError("steps must be positive")

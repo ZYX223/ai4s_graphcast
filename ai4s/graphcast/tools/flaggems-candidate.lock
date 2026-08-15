@@ -1,9 +1,0 @@
-# Complete FlagGems candidate maintained by flagos-common.
-FLAGOS_COMMON_REPOSITORY=https://github.com/flagos-adaptation-lab/flagos-common.git
-FLAGOS_COMMON_COMMIT=3e2b2aac85238d0a0503e77c84e57a0e01e874c8
-FLAGGEMS_CANDIDATE_SUBDIR=third_party/flaggems-optimized/FlagGems
-FLAGGEMS_CANDIDATE_MANIFEST=third_party/flaggems-optimized/MANIFEST.sha256
-FLAGGEMS_UPSTREAM_BASE=2b182281b9ae8876721b3c1569464b441d04b2d7
-FLAGGEMS_CANDIDATE_VERSION=5.4.0dev
-# layer_norm in this pinned candidate contains the validated forward optimization only.
-FLAGGEMS_OPTIMIZED_OPS=index,index_add,index_add_,addmm,layer_norm
