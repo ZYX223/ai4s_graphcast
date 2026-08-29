@@ -24,6 +24,7 @@ Optional environment variables:
   FLAGGEMS_RUNTIME_DEST=third_party/flaggems-runtime
   GRAPHCAST_FLAGGEMS_SOURCE_ROOT=/path/to/FlagGems
   GRAPHCAST_STRICT_FLAGOS=0             # fail if requested FlagOS layer cannot start
+  GRAPHCAST_FUSE_POST_LAYER_NORM_RESIDUAL=0
   OUTPUT=outputs/predictions/pred.nc
   REPORT=outputs/reports/report.md
 
@@ -68,6 +69,7 @@ GRAPHCAST_FLAGGEMS_VARIANT="${GRAPHCAST_FLAGGEMS_VARIANT:-installed}"
 FLAGGEMS_RUNTIME_DEST="${FLAGGEMS_RUNTIME_DEST:-${SCRIPT_DIR}/third_party/flaggems-runtime}"
 GRAPHCAST_FLAGGEMS_SOURCE_ROOT="${GRAPHCAST_FLAGGEMS_SOURCE_ROOT:-}"
 GRAPHCAST_STRICT_FLAGOS="${GRAPHCAST_STRICT_FLAGOS:-0}"
+GRAPHCAST_FUSE_POST_LAYER_NORM_RESIDUAL="${GRAPHCAST_FUSE_POST_LAYER_NORM_RESIDUAL:-0}"
 if [[ -n "${GRAPHCAST_FLAGGEMS_SOURCE_ROOT}" ]]; then
   if [[ ! -f "${GRAPHCAST_FLAGGEMS_SOURCE_ROOT}/src/flag_gems/__init__.py" ]]; then
     echo "invalid GRAPHCAST_FLAGGEMS_SOURCE_ROOT: ${GRAPHCAST_FLAGGEMS_SOURCE_ROOT}" >&2
@@ -103,6 +105,10 @@ else
   exit 2
 fi
 
+case "${GRAPHCAST_FUSE_POST_LAYER_NORM_RESIDUAL,,}" in
+  1|true|yes|on) cmd+=(--fuse-post-layer-norm-residual) ;;
+esac
+
 printf 'running:'
 printf ' %q' "${cmd[@]}"
 printf '\n'
@@ -114,4 +120,6 @@ printf 'backend env: GRAPHCAST_BACKEND=%q GRAPHCAST_FLAGOS_MODE=%q GRAPHCAST_FLA
   "${GRAPHCAST_FLAGGEMS_VARIANT}" \
   "${GRAPHCAST_FLAGGEMS_SOURCE_ROOT}" \
   "${GRAPHCAST_STRICT_FLAGOS}"
+printf 'fusion env: GRAPHCAST_FUSE_POST_LAYER_NORM_RESIDUAL=%q\n' \
+  "${GRAPHCAST_FUSE_POST_LAYER_NORM_RESIDUAL}"
 "${cmd[@]}"

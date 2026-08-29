@@ -1,8 +1,13 @@
 # GraphCast — AI4S Multi-Platform Weather Prediction
 
 PyTorch-based implementation of Google DeepMind's GraphCast global weather forecasting
-model (0.25 deg resolution). Trained and validated on NVIDIA H100, Huawei Ascend 910C,
-Hygon BW1000, and T-Head PPU-ZW810E.
+model (0.25 deg resolution). The shared model and backend routing cover NVIDIA H100,
+Huawei Ascend 910C, Hygon BW1000, T-Head PPU-ZW810E, Moore Threads S5000, and
+MetaX C550.
+
+This directory is the canonical GraphCast workspace for training and inference. All
+workflows use the same implementation under `src/graphcast_compat`; platform and
+FlagGems choices are configuration, not separate model copies.
 
 ## Quick Start
 
@@ -18,6 +23,17 @@ Hygon BW1000, and T-Head PPU-ZW810E.
 
 The first run downloads data (~1 GB) from GitHub Releases automatically if `data/` is missing.
 If Docker is available, quickstart auto-detects your GPU/NPU platform and starts a container.
+
+## Canonical Workflows
+
+| Workflow | Entry point | Purpose |
+|----------|-------------|---------|
+| Quick start | `./quickstart infer` or `./quickstart train` | Auto-detect platform and container |
+| Inference | `bash scripts/infer.sh` | Operational 25 km inference |
+| Training | `bash scripts/train.sh` | Operational 25 km model-parallel training |
+
+Future GraphCast measurements should start from these entry points. Temporary model
+copies and machine-local runner forks are not supported sources of record.
 
 ## quickstart Usage
 
@@ -53,8 +69,10 @@ If Docker is available, quickstart auto-detects your GPU/NPU platform and starts
 ### Auto-Detection
 
 quickstart probes for `nvidia-smi`, `npu-smi`, `rocm-smi`, or PPU `nvidia-smi`
-to identify the platform, then selects 4 free GPUs (lowest IDs with < 5 GB memory).
-The correct Docker image and flags are chosen automatically.
+to identify the four platforms listed below, then selects 4 free devices (lowest IDs
+with < 5 GB memory). S5000 and C550 currently use the canonical manual entry points
+inside their prepared containers; their model and FlagGems routing remain in this same
+repository.
 
 | Platform | Image | Container name |
 |----------|-------|---------------|
@@ -95,9 +113,11 @@ bash tools/prepare_flaggems_runtime.sh
 | Platform | Device | Backend | FlagGems Ops | Status |
 |----------|--------|---------|-------------|--------|
 | NVIDIA H100 | `cuda` | `nvidia` | installed profile defaults to silu, add | ✓ |
-| Huawei Ascend 910C | `npu` | `ascend` | addmm, silu, layer_norm, cat, index, add | ✓ |
-| Hygon BW1000 | `cuda` (HIP) | `hygon` | addmm, silu, layer_norm, index | ✓ |
-| T-Head PPU-ZW810E | `cuda` (HGGC) | `ptg` | addmm, silu, layer_norm, index, add | ✓ |
+| Huawei Ascend 910C | `npu` | `ascend` | addmm, silu, native_layer_norm, cat, index, index_add_, add | ✓ |
+| Hygon BW1000 | `cuda` (HIP) | `hygon` | addmm, silu, native_layer_norm, cat, index, index_add_, add | ✓ |
+| T-Head PPU-ZW810E | `cuda` (HGGC) | `ptg` | addmm, silu, native_layer_norm, cat, index, index_add_, add | ✓ |
+| Moore Threads S5000 | `musa` | `mthreads` | addmm, silu, native_layer_norm, cat, index, index_add_, add | ✓ |
+| MetaX C550 | `cuda` (MACA) | `metax` | addmm, silu, native_layer_norm, cat, index, index_add_, add | ✓ |
 
 `GRAPHCAST_BACKEND` identifies the physical platform only. Whether FlagGems is
 enabled is controlled separately by `GRAPHCAST_FLAGOS_MODE`. Legacy names such
@@ -123,6 +143,7 @@ ai4s/graphcast/
 │   ├── training/           # model parallel, DDP, single-GPU
 │   └── inference/          # inference scripts
 ├── tools/                  # official/internal FlagGems runtime preparation
+├── tests/                  # routing, runtime, and model integration tests
 └── data/                   # cases, stats, checkpoints, wheelhouse (auto-downloaded)
 ```
 
@@ -147,6 +168,18 @@ bash scripts/infer.sh
 # FlagGems with the inference profile
 GRAPHCAST_FLAGOS_MODE=flaggems bash scripts/infer.sh
 ```
+
+## Local Checks
+
+Run the repository-level checks from the repository root:
+
+```bash
+python -m pytest ai4s/graphcast/tests
+pre-commit run --all-files
+```
+
+Hardware performance results are produced on the target accelerator; local checks only
+validate source organization, routing, and CPU-safe behavior.
 
 ## FlagGems Profiles and Source Selection
 

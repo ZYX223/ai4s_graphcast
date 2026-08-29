@@ -84,6 +84,7 @@ class RuntimeBackend:
             "flaggems_source_root": os.environ.get("GRAPHCAST_FLAGGEMS_SOURCE_ROOT"),
             "flaggems_module_origin": _module_origin("flag_gems"),
             "bishengir_opt_dir": self.flagos.bishengir_opt_dir,
+            "hygon_amdgcn_use_buffer_ops": os.environ.get("AMDGCN_USE_BUFFER_OPS"),
             "gather_backend": os.environ.get("GRAPHCAST_GATHER_BACKEND", "advanced_index"),
             "flagos_warnings": list(self.flagos.warnings),
             "flagos_error": self.flagos.error,
@@ -497,6 +498,35 @@ def _activate_flaggems_source_root() -> Path | None:
     return python_root
 
 
+def _configure_hygon_triton_knobs(
+    profile: BackendProfile,
+    ops: tuple[str, ...],
+) -> tuple[str, ...]:
+    """Avoid the Hygon buffer-ops lowering failure for GraphCast cat."""
+
+    if profile.name != "hygon" or "cat" not in ops:
+        return ()
+    if _truthy(os.environ.get("GRAPHCAST_HYGON_CAT_BUFFER_OPS")):
+        return ()
+    if "AMDGCN_USE_BUFFER_OPS" in os.environ:
+        return (
+            "Hygon FlagGems cat requested; respecting existing "
+            f"AMDGCN_USE_BUFFER_OPS={os.environ['AMDGCN_USE_BUFFER_OPS']}",
+        )
+
+    os.environ["AMDGCN_USE_BUFFER_OPS"] = "0"
+    warnings = [
+        "disabled AMDGCN_USE_BUFFER_OPS for Hygon FlagGems cat to avoid "
+        "TritonAMDGPUCanonicalizePointers failure",
+    ]
+    if "triton" in sys.modules or "triton.knobs" in sys.modules:
+        warnings.append(
+            "AMDGCN_USE_BUFFER_OPS was set after Triton import; restart the Python "
+            "process if Hygon cat still hits the old buffer-ops path"
+        )
+    return tuple(warnings)
+
+
 def _enable_flaggems(
     profile: BackendProfile,
     ops: tuple[str, ...],
@@ -519,6 +549,7 @@ def _enable_flaggems(
 
     bishengir_opt_dir, toolchain_warnings = _configure_flagos_toolchain(strict)
     warnings.extend(toolchain_warnings)
+    warnings.extend(_configure_hygon_triton_knobs(profile, ops))
 
     vendor = profile.flaggems_vendor
     if vendor:

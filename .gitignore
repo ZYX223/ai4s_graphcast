@@ -24,6 +24,8 @@ checkpoints/
 data/
 !**/data/.gitkeep
 ai4s/graphcast/third_party/
+ai4s/graphcast/outputs/
+ai4s/graphcast/results/
 
 # Logs & local env
 *.log

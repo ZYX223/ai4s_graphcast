@@ -1,7 +1,8 @@
 version: 1
 profile: graphcast_inference
 
-# Keep a conservative fallback for platforms without a validated model profile.
+# Operator names match the FlagGems only_enable registration keys. Platform
+# profiles include every operator validated by finite GraphCast inference.
 default_ops:
   - silu
   - add
@@ -10,18 +11,40 @@ platform_ops:
   ascend:
     - addmm
     - silu
-    - layer_norm
+    - native_layer_norm
     - cat
     - index
+    - index_add_
     - add
   hygon:
     - addmm
     - silu
-    - layer_norm
+    - native_layer_norm
+    - cat
     - index
+    - index_add_
+    - add
   ptg:
     - addmm
     - silu
-    - layer_norm
+    - native_layer_norm
+    - cat
     - index
+    - index_add_
+    - add
+  mthreads:
+    - addmm
+    - silu
+    - native_layer_norm
+    - cat
+    - index
+    - index_add_
+    - add
+  metax:
+    - addmm
+    - silu
+    - native_layer_norm
+    - cat
+    - index
+    - index_add_
     - add

@@ -44,6 +44,10 @@ from graphcast_compat import (  # noqa: E402
     synchronize,
 )
 from graphcast_compat.graph import default_latitudes, default_longitudes  # noqa: E402
+from graphcast_compat.operator_profile import (  # noqa: E402
+    OperatorEventTimer,
+    OperatorProfiler,
+)
 
 DEFAULT_CONFIG = "configs/inference/google_graphcast_small.yaml"
 DEFAULT_WEIGHTS = "data/checkpoints/google_graphcast_small_compat_state.pt"
@@ -138,6 +142,7 @@ def build_report(
         f"- device: `{runtime.device}`",
         f"- mesh size: `{config.mesh_size}`",
         f"- normalization mode: `{normalization_mode}`",
+        f"- post LayerNorm residual fusion: `{args.fuse_post_layer_norm_residual}`",
         *backend_report_lines(runtime),
         f"- grid feature tensor shape: `{grid_features_shape}`",
         f"- prediction variables: `{prediction_variables}`",
@@ -196,10 +201,37 @@ def main(argv: list[str] | None = None) -> int:
         default=None,
         help="optional mesh_size override; default uses 1 for synthetic-tiny, config otherwise",
     )
+    parser.add_argument(
+        "--operator-profile-path",
+        default=None,
+        help="optional JSON output for top-level PyTorch operator device timings",
+    )
+    parser.add_argument(
+        "--operator-profile-ops",
+        default="",
+        help="optional comma-separated operators retained from a Kineto trace",
+    )
+    parser.add_argument("--operator-event-path", default=None)
+    parser.add_argument(
+        "--operator-event-ops",
+        default="",
+        help="comma-separated dispatcher ops measured with device events",
+    )
+    parser.add_argument(
+        "--fuse-post-layer-norm-residual",
+        action="store_true",
+        help="use flag_gems.post_layer_norm_residual for single-consumer node updates",
+    )
     args = parser.parse_args(argv)
+    if args.operator_profile_path and args.operator_event_path:
+        raise ValueError("Kineto and event profiling cannot be enabled together")
+    if args.operator_event_path and not args.operator_event_ops:
+        raise ValueError("--operator-event-ops is required with --operator-event-path")
 
     t0 = time.perf_counter()
     runtime = resolve_runtime_backend(args.device)
+    if args.fuse_post_layer_norm_residual and runtime.flagos.mode != "flaggems":
+        raise ValueError("post LayerNorm residual fusion requires FlagGems mode")
     device = runtime.device
     inputs, targets_template, forcings, data_mode = load_or_build_datasets(args)
     config = choose_config(args, data_mode)
@@ -207,7 +239,10 @@ def main(argv: list[str] | None = None) -> int:
     report_path = Path(args.report)
 
     t1 = time.perf_counter()
-    model = GoogleSmallCompatibleModel(config)
+    model = GoogleSmallCompatibleModel(
+        config,
+        fuse_post_layer_norm_residual=args.fuse_post_layer_norm_residual,
+    )
     state = torch.load(args.weights, map_location="cpu")
     model.load_state_dict(state, strict=True)
     model.to(device)
@@ -229,6 +264,18 @@ def main(argv: list[str] | None = None) -> int:
     graph_seconds = time.perf_counter() - t2
 
     synchronize(runtime)
+    operator_profiler = OperatorProfiler(
+        args.operator_profile_path,
+        args.operator_profile_ops,
+    )
+    operator_event_timer = OperatorEventTimer(
+        args.operator_event_path,
+        args.operator_event_ops,
+    )
+    if operator_event_timer.enabled:
+        operator_event_timer.start()
+    else:
+        operator_profiler.start()
     t3 = time.perf_counter()
     if args.stats_dir:
         stats = load_normalization_stats(args.stats_dir)
@@ -245,6 +292,17 @@ def main(argv: list[str] | None = None) -> int:
         normalization_mode = "none"
     synchronize(runtime)
     inference_seconds = time.perf_counter() - t3
+    profile_metadata = {
+        "stage": "inference",
+        "flagos_mode": runtime.flagos.mode,
+        "flaggems_ops": list(runtime.flagos.requested_ops),
+        "post_layer_norm_residual_fusion": args.fuse_post_layer_norm_residual,
+        "device": str(device),
+    }
+    if operator_event_timer.enabled:
+        operator_event_timer.stop(metadata=profile_metadata)
+    else:
+        operator_profiler.stop(metadata=profile_metadata)
 
     output_path.parent.mkdir(parents=True, exist_ok=True)
     prediction.to_netcdf(output_path)
@@ -285,6 +343,10 @@ def main(argv: list[str] | None = None) -> int:
     print(f"flagos_status: {runtime.flagos.status}", flush=True)
     print(f"flaggems_variant: {runtime.flagos.variant}", flush=True)
     print(f"flaggems_ops: {list(runtime.flagos.requested_ops)}", flush=True)
+    print(
+        f"post_layer_norm_residual_fusion: {args.fuse_post_layer_norm_residual}",
+        flush=True,
+    )
     print(f"runtime_versions: {runtime.versions}", flush=True)
     if runtime.flagos.warnings:
         print(f"flagos_warnings: {list(runtime.flagos.warnings)}", flush=True)

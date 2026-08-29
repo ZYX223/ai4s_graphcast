@@ -45,6 +45,10 @@ from graphcast_compat.backend import (  # noqa: E402
     synchronize as _synchronize,
 )
 from graphcast_compat.normalization import normalize_dataset  # noqa: E402
+from graphcast_compat.operator_profile import (  # noqa: E402
+    OperatorEventTimer,
+    OperatorProfiler,
+)
 from train_ddp import (  # noqa: E402
     load_real_case,
     set_train_scope,
@@ -518,12 +522,41 @@ def main(argv: list[str] | None = None) -> int:
         "--operator-trace-report",
         default=os.environ.get("GRAPHCAST_OPERATOR_TRACE_REPORT"),
     )
+    parser.add_argument(
+        "--profile-step",
+        type=int,
+        default=0,
+        help="1-based training step to capture with torch.profiler; 0 disables profiling",
+    )
+    parser.add_argument(
+        "--operator-profile-path",
+        default=os.environ.get("GRAPHCAST_OPERATOR_PROFILE_PATH"),
+    )
+    parser.add_argument(
+        "--operator-profile-ops",
+        default="",
+        help="optional comma-separated operators retained from a Kineto trace",
+    )
+    parser.add_argument("--operator-event-path", default=None)
+    parser.add_argument(
+        "--operator-event-ops",
+        default="",
+        help="comma-separated dispatcher ops measured with device events",
+    )
     args = parser.parse_args(argv)
     if args.steps < 1:
         raise ValueError("--steps must be >= 1")
     if args.mesh2grid_grid_partitions < 1:
         raise ValueError("--mesh2grid-grid-partitions must be >= 1")
-
+    if args.profile_step < 0 or args.profile_step > args.steps:
+        raise ValueError("--profile-step must be 0 or within the configured training steps")
+    capture_paths = [args.operator_profile_path, args.operator_event_path]
+    if sum(bool(path) for path in capture_paths) > 1:
+        raise ValueError("Kineto and event profiling cannot be enabled together")
+    if bool(args.profile_step) != any(bool(path) for path in capture_paths):
+        raise ValueError("--profile-step and one operator profile path must be provided together")
+    if args.operator_event_path and not args.operator_event_ops:
+        raise ValueError("--operator-event-ops is required with --operator-event-path")
     devices = parse_devices(args.devices)
 
     configure_flagos_environment(
@@ -644,6 +677,14 @@ def main(argv: list[str] | None = None) -> int:
         else None
     )
     operator_trace = OperatorTrace(enabled=trace_enabled)
+    operator_profiler = OperatorProfiler(
+        args.operator_profile_path,
+        args.operator_profile_ops,
+    )
+    operator_event_timer = OperatorEventTimer(
+        args.operator_event_path,
+        args.operator_event_ops,
+    )
     step_losses = []
     train_t0 = time.perf_counter()
     try:
@@ -651,6 +692,12 @@ def main(argv: list[str] | None = None) -> int:
             for step in range(1, args.steps + 1):
                 for device in unique_devices(devices):
                     synchronize(device)
+                profile_this_step = step == args.profile_step
+                if profile_this_step:
+                    if operator_event_timer.enabled:
+                        operator_event_timer.start()
+                    else:
+                        operator_profiler.start()
                 with operator_trace.phase(f"step_{step}:zero_grad"):
                     if optimizer is not None:
                         optimizer.zero_grad(set_to_none=True)
@@ -722,6 +769,18 @@ def main(argv: list[str] | None = None) -> int:
                     f"step_seconds={time.perf_counter() - step_t0:.3f}",
                     flush=True,
                 )
+                if profile_this_step:
+                    profile_metadata = {
+                        "stage": "training",
+                        "step": step,
+                        "flagos_mode": args.flagos_mode,
+                        "flaggems_ops": args.flaggems_ops,
+                        "devices": [str(device) for device in devices],
+                    }
+                    if operator_event_timer.enabled:
+                        operator_event_timer.stop(metadata=profile_metadata)
+                    else:
+                        operator_profiler.stop(metadata=profile_metadata)
     except Exception:
         write_operator_trace(
             operator_trace,

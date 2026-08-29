@@ -72,9 +72,66 @@ def test_flaggems_operator_parser_deduplicates_and_has_no_hidden_default(
 @pytest.mark.parametrize(
     ("platform", "expected"),
     (
-        ("ascend", ("addmm", "silu", "layer_norm", "cat", "index", "add")),
-        ("hygon", ("addmm", "silu", "layer_norm", "index")),
-        ("ptg", ("addmm", "silu", "layer_norm", "index", "add")),
+        (
+            "ascend",
+            (
+                "addmm",
+                "silu",
+                "native_layer_norm",
+                "cat",
+                "index",
+                "index_add_",
+                "add",
+            ),
+        ),
+        (
+            "hygon",
+            (
+                "addmm",
+                "silu",
+                "native_layer_norm",
+                "cat",
+                "index",
+                "index_add_",
+                "add",
+            ),
+        ),
+        (
+            "ptg",
+            (
+                "addmm",
+                "silu",
+                "native_layer_norm",
+                "cat",
+                "index",
+                "index_add_",
+                "add",
+            ),
+        ),
+        (
+            "mthreads",
+            (
+                "addmm",
+                "silu",
+                "native_layer_norm",
+                "cat",
+                "index",
+                "index_add_",
+                "add",
+            ),
+        ),
+        (
+            "metax",
+            (
+                "addmm",
+                "silu",
+                "native_layer_norm",
+                "cat",
+                "index",
+                "index_add_",
+                "add",
+            ),
+        ),
         ("nvidia", ("silu", "add")),
     ),
 )
@@ -122,6 +179,22 @@ def test_explicit_ops_override_platform_profile(
         "index",
         "addmm",
     )
+
+
+def test_hygon_cat_disables_buffer_ops_before_flag_gems_import(
+    backend_module,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.delenv("AMDGCN_USE_BUFFER_OPS", raising=False)
+    monkeypatch.delenv("GRAPHCAST_HYGON_CAT_BUFFER_OPS", raising=False)
+
+    warnings = backend_module._configure_hygon_triton_knobs(
+        backend_module.BACKEND_PROFILES["hygon"],
+        ("cat",),
+    )
+
+    assert os.environ["AMDGCN_USE_BUFFER_OPS"] == "0"
+    assert "TritonAMDGPUCanonicalizePointers" in warnings[0]
 
 
 def test_cli_flagos_settings_use_canonical_environment_names(

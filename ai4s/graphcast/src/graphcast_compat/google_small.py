@@ -2,20 +2,25 @@
 
 from __future__ import annotations
 
+import os
+from collections.abc import Iterable
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Iterable
+from typing import Any
 
 import torch
+import yaml
 from torch import nn
 from torch.utils.checkpoint import checkpoint as activation_checkpoint
-import yaml
 
 from .backend import use_advanced_index_gather
 from .graph import GoogleSmallGraph, build_google_small_graph
 
-
 DEFAULT_CONFIG = Path("configs/inference/google_graphcast_small.yaml")
+
+
+def _environment_flag(name: str) -> bool:
+    return os.environ.get(name, "").strip().lower() in {"1", "true", "yes", "on"}
 
 
 @dataclass(frozen=True)
@@ -42,7 +47,7 @@ class GoogleSmallConfig:
     extra_mesh2grid_final_output_heads: dict[str, int] | None = None
 
     @classmethod
-    def from_yaml(cls, path: str | Path = DEFAULT_CONFIG) -> "GoogleSmallConfig":
+    def from_yaml(cls, path: str | Path = DEFAULT_CONFIG) -> GoogleSmallConfig:
         with Path(path).open("r", encoding="utf-8") as handle:
             config = yaml.safe_load(handle)
 
@@ -88,8 +93,7 @@ class GoogleSmallConfig:
             target_variables=tuple(task_config.get("target_variables", ())),
             forcing_variables=tuple(task_config.get("forcing_variables", ())),
             extra_mesh2grid_final_output_heads=(
-                dict(model_config.get("extra_mesh2grid_final_output_heads", {}))
-                or None
+                dict(model_config.get("extra_mesh2grid_final_output_heads", {})) or None
             ),
         )
 
@@ -176,6 +180,7 @@ class GoogleSmallGraphNet(nn.Module):
         message_passing_steps: int,
         config: GoogleSmallConfig,
         activation_checkpointing: bool = False,
+        fuse_post_layer_norm_residual: bool = False,
     ) -> None:
         super().__init__()
         self.edge_types = tuple(edge_types)
@@ -187,6 +192,7 @@ class GoogleSmallGraphNet(nn.Module):
         self.node_update_chunk_sizes = dict(node_update_chunk_sizes or {})
         self.decoder_node_chunk_sizes = dict(decoder_node_chunk_sizes or {})
         self.activation_checkpointing = activation_checkpointing
+        self.fuse_post_layer_norm_residual = fuse_post_layer_norm_residual
         self.encoder_device: torch.device | None = None
         self.processor_step_devices: tuple[torch.device | None, ...] = tuple(
             None for _ in range(message_passing_steps)
@@ -281,9 +287,7 @@ class GoogleSmallGraphNet(nn.Module):
         for node_type in self.node_types:
             base_name = f"encoder_nodes_{node_type}"
             if hasattr(self, f"{base_name}_mlp"):
-                nodes[node_type] = self._apply_mlp_with_layer_norm(
-                    base_name, nodes[node_type]
-                )
+                nodes[node_type] = self._apply_mlp_with_layer_norm(base_name, nodes[node_type])
 
         for step in range(self.message_passing_steps):
             step_device = self.processor_step_devices[step]
@@ -349,8 +353,7 @@ class GoogleSmallGraphNet(nn.Module):
 
         def wrapped_step(*tensors: torch.Tensor) -> tuple[torch.Tensor, ...]:
             step_nodes = {
-                node_type: tensors[index]
-                for index, node_type in enumerate(self.node_types)
+                node_type: tensors[index] for index, node_type in enumerate(self.node_types)
             }
             step_edges = {
                 edge_type: tensors[node_count + index]
@@ -373,8 +376,7 @@ class GoogleSmallGraphNet(nn.Module):
             use_reentrant=True,
         )
         out_nodes = {
-            node_type: flat_outputs[index]
-            for index, node_type in enumerate(self.node_types)
+            node_type: flat_outputs[index] for index, node_type in enumerate(self.node_types)
         }
         out_edges = {
             edge_type: flat_outputs[node_count + index]
@@ -478,28 +480,19 @@ class GoogleSmallGraphNet(nn.Module):
             else:
                 output_start, output_end = output_slice
                 if output_start < 0 or output_end <= output_start:
-                    raise ValueError(
-                        f"invalid node output slice for {node_type}: {output_slice}"
-                    )
+                    raise ValueError(f"invalid node output slice for {node_type}: {output_slice}")
                 if output_end > node_count:
                     raise ValueError(
-                        f"node output slice for {node_type} exceeds {node_count}: "
-                        f"{output_slice}"
+                        f"node output slice for {node_type} exceeds {node_count}: {output_slice}"
                     )
             output_count = output_end - output_start
-            if (
-                chunk_size is not None
-                and chunk_size > 0
-                and output_count > chunk_size
-            ):
+            if chunk_size is not None and chunk_size > 0 and output_count > chunk_size:
                 updated_chunks = []
                 for start in range(output_start, output_end, chunk_size):
                     end = min(start + chunk_size, output_end)
                     previous_chunk = previous_nodes[node_type][:, start:end, :]
                     if received_features:
-                        feature_chunks = [
-                            feature[:, start:end, :] for feature in received_features
-                        ]
+                        feature_chunks = [feature[:, start:end, :] for feature in received_features]
                         node_inputs = torch.cat(
                             [previous_chunk] + feature_chunks,
                             dim=-1,
@@ -507,11 +500,14 @@ class GoogleSmallGraphNet(nn.Module):
                         del feature_chunks
                     else:
                         node_inputs = previous_chunk
-                    node_delta = self._apply_mlp_with_layer_norm(
-                        f"processor_nodes_{step}_{node_type}", node_inputs
+                    updated_chunks.append(
+                        self._apply_mlp_with_layer_norm_residual(
+                            f"processor_nodes_{step}_{node_type}",
+                            node_inputs,
+                            previous_chunk,
+                        )
                     )
-                    updated_chunks.append(previous_chunk + node_delta)
-                    del previous_chunk, node_inputs, node_delta
+                    del previous_chunk, node_inputs
                 updated_nodes[node_type] = torch.cat(updated_chunks, dim=1)
                 del updated_chunks
                 continue
@@ -519,8 +515,7 @@ class GoogleSmallGraphNet(nn.Module):
             previous_output = previous_nodes[node_type][:, output_start:output_end, :]
             if received_features:
                 sliced_received_features = [
-                    feature[:, output_start:output_end, :]
-                    for feature in received_features
+                    feature[:, output_start:output_end, :] for feature in received_features
                 ]
                 node_inputs = torch.cat(
                     [previous_output] + sliced_received_features,
@@ -529,10 +524,11 @@ class GoogleSmallGraphNet(nn.Module):
                 del sliced_received_features
             else:
                 node_inputs = previous_output
-            node_delta = self._apply_mlp_with_layer_norm(
-                f"processor_nodes_{step}_{node_type}", node_inputs
+            updated_nodes[node_type] = self._apply_mlp_with_layer_norm_residual(
+                f"processor_nodes_{step}_{node_type}",
+                node_inputs,
+                previous_output,
             )
-            updated_nodes[node_type] = previous_output + node_delta
 
         updated_edges = {}
         for edge_type in self.edge_types:
@@ -547,6 +543,37 @@ class GoogleSmallGraphNet(nn.Module):
     def _apply_mlp_with_layer_norm(self, base_name: str, x: torch.Tensor) -> torch.Tensor:
         x = getattr(self, f"{base_name}_mlp")(x)
         return getattr(self, f"{base_name}_layer_norm")(x)
+
+    def _apply_mlp_with_layer_norm_residual(
+        self,
+        base_name: str,
+        x: torch.Tensor,
+        residual: torch.Tensor,
+    ) -> torch.Tensor:
+        x = getattr(self, f"{base_name}_mlp")(x)
+        layer_norm = getattr(self, f"{base_name}_layer_norm")
+        if not self.fuse_post_layer_norm_residual:
+            return layer_norm(x) + residual
+
+        # Node deltas have one residual consumer. Edge deltas are intentionally
+        # excluded because they are also consumed by the message aggregation.
+        try:
+            import flag_gems
+        except ImportError as exc:
+            raise RuntimeError("post_layer_norm_residual fusion requires FlagGems") from exc
+        fused_op = getattr(flag_gems, "post_layer_norm_residual", None)
+        if fused_op is None:
+            raise RuntimeError(
+                "the selected FlagGems runtime does not provide post_layer_norm_residual"
+            )
+        return fused_op(
+            x,
+            residual,
+            layer_norm.normalized_shape,
+            layer_norm.weight,
+            layer_norm.bias,
+            layer_norm.eps,
+        )
 
     def _apply_decoder_node_output(
         self,
@@ -575,24 +602,18 @@ class GoogleSmallGraphNet(nn.Module):
         self.encoder_device = normalize_optional_device(encoder_device)
         self.decoder_device = normalize_optional_device(decoder_device)
         if processor_step_devices is None:
-            self.processor_step_devices = tuple(
-                None for _ in range(self.message_passing_steps)
-            )
+            self.processor_step_devices = tuple(None for _ in range(self.message_passing_steps))
         else:
             normalized_steps = tuple(
                 normalize_optional_device(device) for device in processor_step_devices
             )
             if len(normalized_steps) != self.message_passing_steps:
-                raise ValueError(
-                    "processor_step_devices length must equal message_passing_steps"
-                )
+                raise ValueError("processor_step_devices length must equal message_passing_steps")
             self.processor_step_devices = normalized_steps
 
         if self.encoder_device is not None:
             for edge_type in self.edge_types:
-                self._move_mlp_with_layer_norm(
-                    f"encoder_edges_{edge_type}", self.encoder_device
-                )
+                self._move_mlp_with_layer_norm(f"encoder_edges_{edge_type}", self.encoder_device)
             for node_type in self.node_types:
                 base_name = f"encoder_nodes_{node_type}"
                 if hasattr(self, f"{base_name}_mlp"):
@@ -602,13 +623,9 @@ class GoogleSmallGraphNet(nn.Module):
             if device is None:
                 continue
             for edge_type in self.edge_types:
-                self._move_mlp_with_layer_norm(
-                    f"processor_edges_{step}_{edge_type}", device
-                )
+                self._move_mlp_with_layer_norm(f"processor_edges_{step}_{edge_type}", device)
             for node_type in self.node_types:
-                self._move_mlp_with_layer_norm(
-                    f"processor_nodes_{step}_{node_type}", device
-                )
+                self._move_mlp_with_layer_norm(f"processor_nodes_{step}_{node_type}", device)
 
         if self.decoder_device is not None:
             for name, module in self.named_children():
@@ -625,9 +642,7 @@ def aggregate_edges_to_nodes(
     receivers: torch.Tensor,
     num_nodes: int,
 ) -> torch.Tensor:
-    out = edge_features.new_zeros(
-        edge_features.shape[0], num_nodes, edge_features.shape[-1]
-    )
+    out = edge_features.new_zeros(edge_features.shape[0], num_nodes, edge_features.shape[-1])
     return out.index_add_(1, receivers, edge_features)
 
 
@@ -674,10 +689,16 @@ class GoogleSmallCompatibleModel(nn.Module):
         config: GoogleSmallConfig | None = None,
         *,
         activation_checkpointing: bool = False,
+        fuse_post_layer_norm_residual: bool | None = None,
     ) -> None:
         super().__init__()
+        if fuse_post_layer_norm_residual is None:
+            fuse_post_layer_norm_residual = _environment_flag(
+                "GRAPHCAST_FUSE_POST_LAYER_NORM_RESIDUAL"
+            )
         self.config = config or GoogleSmallConfig()
         self.activation_checkpointing = activation_checkpointing
+        self.fuse_post_layer_norm_residual = fuse_post_layer_norm_residual
         self._graph_initialized = False
         latent = self.config.latent_size
         node_input = self.config.node_input_dim
@@ -709,6 +730,7 @@ class GoogleSmallCompatibleModel(nn.Module):
             message_passing_steps=1,
             config=self.config,
             activation_checkpointing=activation_checkpointing,
+            fuse_post_layer_norm_residual=fuse_post_layer_norm_residual,
         )
 
         self.mesh_gnn = GoogleSmallGraphNet(
@@ -727,6 +749,7 @@ class GoogleSmallCompatibleModel(nn.Module):
             message_passing_steps=self.config.gnn_msg_steps,
             config=self.config,
             activation_checkpointing=activation_checkpointing,
+            fuse_post_layer_norm_residual=fuse_post_layer_norm_residual,
         )
 
         self.mesh2grid_gnn = GoogleSmallGraphNet(
@@ -741,9 +764,7 @@ class GoogleSmallCompatibleModel(nn.Module):
             },
             edge_processor_input_dims={"mesh2grid": latent * 3},
             node_output_dims={"grid_nodes": self.config.output_dim},
-            extra_final_node_output_dims=(
-                self.config.extra_mesh2grid_final_output_heads
-            ),
+            extra_final_node_output_dims=(self.config.extra_mesh2grid_final_output_heads),
             edge_update_chunk_sizes=(
                 {"mesh2grid": self.config.mesh2grid_edge_chunk_size}
                 if self.config.mesh2grid_edge_chunk_size
@@ -762,6 +783,7 @@ class GoogleSmallCompatibleModel(nn.Module):
             message_passing_steps=1,
             config=self.config,
             activation_checkpointing=activation_checkpointing,
+            fuse_post_layer_norm_residual=fuse_post_layer_norm_residual,
         )
 
     def set_activation_checkpointing(self, enabled: bool) -> None:
@@ -806,12 +828,8 @@ class GoogleSmallCompatibleModel(nn.Module):
         graph = build_google_small_graph(
             resolution=self.config.resolution,
             mesh_size=self.config.mesh_size,
-            radius_query_fraction_edge_length=(
-                self.config.radius_query_fraction_edge_length
-            ),
-            mesh2grid_edge_normalization_factor=(
-                self.config.mesh2grid_edge_normalization_factor
-            ),
+            radius_query_fraction_edge_length=(self.config.radius_query_fraction_edge_length),
+            mesh2grid_edge_normalization_factor=(self.config.mesh2grid_edge_normalization_factor),
             latitudes=latitudes,
             longitudes=longitudes,
         )
@@ -907,9 +925,7 @@ class GoogleSmallCompatibleModel(nn.Module):
                     self.grid2mesh_receivers.to(device=device),
                 )
             },
-            node_output_slices=(
-                {"grid_nodes": grid_output_slice} if grid_output_slice else None
-            ),
+            node_output_slices=({"grid_nodes": grid_output_slice} if grid_output_slice else None),
         )
 
         mesh_edges = self._edge_features_for_batch(
@@ -949,15 +965,11 @@ class GoogleSmallCompatibleModel(nn.Module):
         receivers = self.mesh2grid_receivers
         edge_mask = (receivers >= grid_start) & (receivers < grid_end)
         if not bool(edge_mask.any()):
-            raise ValueError(
-                f"mesh2grid partition [{grid_start}, {grid_end}) has no edges"
-            )
+            raise ValueError(f"mesh2grid partition [{grid_start}, {grid_end}) has no edges")
         edge_features = self.mesh2grid_edge_features[edge_mask]
         senders = self.mesh2grid_senders[edge_mask]
         local_receivers = receivers[edge_mask] - grid_start
-        mesh2grid_edges = self._edge_features_for_batch(
-            edge_features, batch_size, device, dtype
-        )
+        mesh2grid_edges = self._edge_features_for_batch(edge_features, batch_size, device, dtype)
         mesh2grid_nodes, _ = self.mesh2grid_gnn(
             {
                 "mesh_nodes": mesh_nodes,
@@ -985,10 +997,9 @@ class GoogleSmallCompatibleModel(nn.Module):
 
         latitudes = inputs.coords["lat"].values
         longitudes = inputs.coords["lon"].values
-        if (
-            not self._graph_initialized
-            or int(self.grid_node_geo_features.shape[0]) != len(latitudes) * len(longitudes)
-        ):
+        if not self._graph_initialized or int(self.grid_node_geo_features.shape[0]) != len(
+            latitudes
+        ) * len(longitudes):
             self.init_graph(latitudes=latitudes, longitudes=longitudes)
 
         device = next(self.parameters()).device
@@ -1015,9 +1026,7 @@ class GoogleSmallCompatibleModel(nn.Module):
         device: torch.device,
         dtype: torch.dtype,
     ) -> torch.Tensor:
-        return features.to(device=device, dtype=dtype).unsqueeze(0).expand(
-            batch_size, -1, -1
-        )
+        return features.to(device=device, dtype=dtype).unsqueeze(0).expand(batch_size, -1, -1)
 
 
 def build_google_small_compatible_model(
