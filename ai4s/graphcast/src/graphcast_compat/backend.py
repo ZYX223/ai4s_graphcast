@@ -285,6 +285,75 @@ def _musa_is_available() -> bool:
     return bool(hasattr(torch, "musa") and torch.musa.is_available())
 
 
+def configure_float32_math(
+    tensor_core_enabled: bool,
+    device_type: str,
+) -> str:
+    """Keep FP32 storage while selecting the runtime's fast-FP32 mode."""
+
+    enabled = bool(tensor_core_enabled)
+    if device_type == "npu":
+        _import_torch_npu()
+        npu = getattr(torch, "npu", None)
+        matmul = getattr(npu, "matmul", None)
+        convolution = getattr(npu, "conv", None)
+        if matmul is None or not hasattr(matmul, "allow_hf32"):
+            raise RuntimeError("torch_npu does not expose torch.npu.matmul.allow_hf32")
+        if convolution is None or not hasattr(convolution, "allow_hf32"):
+            raise RuntimeError("torch_npu does not expose torch.npu.conv.allow_hf32")
+        matmul.allow_hf32 = enabled
+        convolution.allow_hf32 = enabled
+        if (
+            bool(matmul.allow_hf32) != enabled
+            or bool(convolution.allow_hf32) != enabled
+        ):
+            raise RuntimeError("torch_npu did not apply the requested HF32 mode")
+        return "hf32" if enabled else "ieee_fp32"
+
+    if device_type == "musa":
+        _import_torch_musa()
+        mudnn = getattr(torch.backends, "mudnn", None)
+        if mudnn is None or not hasattr(mudnn, "allow_tf32"):
+            raise RuntimeError("torch_musa does not expose torch.backends.mudnn.allow_tf32")
+        mudnn.allow_tf32 = enabled
+        if bool(mudnn.allow_tf32) != enabled:
+            raise RuntimeError("torch_musa did not apply the requested TF32 mode")
+        return "tf32" if enabled else "ieee_fp32"
+
+    if device_type != "cuda":
+        if enabled:
+            raise RuntimeError(f"fast FP32 math is unsupported for {device_type!r}")
+        return "ieee_fp32"
+
+    # Hygon DTK uses a CUDA-compatible Python surface over HIP. Its pinned
+    # runtime requires the legacy switches even when newer names are present.
+    is_hip = bool(getattr(torch.version, "hip", None))
+    if is_hip:
+        torch.backends.cuda.matmul.allow_tf32 = enabled
+        torch.backends.cudnn.allow_tf32 = enabled
+        if (
+            bool(torch.backends.cuda.matmul.allow_tf32) != enabled
+            or bool(torch.backends.cudnn.allow_tf32) != enabled
+        ):
+            raise RuntimeError("HIP did not apply the requested TF32 mode")
+        return "tf32" if enabled else "ieee_fp32"
+
+    precision = "tf32" if enabled else "ieee"
+    cudnn_conv = getattr(torch.backends.cudnn, "conv", None)
+    if (
+        hasattr(torch.backends.cuda.matmul, "fp32_precision")
+        and cudnn_conv is not None
+        and hasattr(cudnn_conv, "fp32_precision")
+    ):
+        torch.backends.cuda.matmul.fp32_precision = precision
+        cudnn_conv.fp32_precision = precision
+    else:
+        torch.backends.cuda.matmul.allow_tf32 = enabled
+        torch.backends.cudnn.allow_tf32 = enabled
+        torch.set_float32_matmul_precision("high" if enabled else "highest")
+    return "tf32" if enabled else "ieee_fp32"
+
+
 def _infer_backend_from_device(requested_device: str) -> str:
     if requested_device.startswith("musa"):
         return "mthreads"
@@ -353,13 +422,29 @@ def _load_flaggems_ops(config_path: Path, platform: str) -> tuple[str, ...]:
     except yaml.YAMLError as exc:
         raise ValueError(f"invalid FlagGems operator profile: {config_path}: {exc}") from exc
 
-    if not isinstance(config, dict) or config.get("version") != 1:
-        raise ValueError(f"FlagGems operator profile must use version 1: {config_path}")
+    if not isinstance(config, dict):
+        raise ValueError(f"FlagGems operator profile must be a mapping: {config_path}")
 
-    platform_ops = config.get("platform_ops", {})
-    if not isinstance(platform_ops, dict):
-        raise ValueError(f"FlagGems platform_ops must be a mapping: {config_path}")
-    ops = platform_ops.get(platform, config.get("default_ops"))
+    version = config.get("version")
+    exclusions = None
+    if version == 2:
+        ops = config.get("ops")
+        exclusions = config.get("exclude_ops_by_backend", {})
+        if not isinstance(exclusions, dict):
+            raise ValueError(
+                f"FlagGems exclude_ops_by_backend must be a mapping: {config_path}"
+            )
+    elif version == 1:
+        # Training remains on the legacy per-platform schema until its separate
+        # device validation is complete.
+        platform_ops = config.get("platform_ops", {})
+        if not isinstance(platform_ops, dict):
+            raise ValueError(f"FlagGems platform_ops must be a mapping: {config_path}")
+        ops = platform_ops.get(platform, config.get("default_ops"))
+    else:
+        raise ValueError(
+            f"unsupported FlagGems operator profile version {version!r}: {config_path}"
+        )
     if not isinstance(ops, list) or not ops:
         raise ValueError(
             f"FlagGems operator profile has no non-empty list for {platform}: {config_path}"
@@ -368,7 +453,39 @@ def _load_flaggems_ops(config_path: Path, platform: str) -> tuple[str, ...]:
         raise ValueError(
             f"FlagGems operator profile entries must be non-empty strings: {config_path}"
         )
-    return tuple(dict.fromkeys(op.strip() for op in ops))
+    normalized = tuple(dict.fromkeys(op.strip() for op in ops))
+    if exclusions is None:
+        return normalized
+
+    for backend_name, excluded_ops in exclusions.items():
+        if not isinstance(backend_name, str) or not backend_name.strip():
+            raise ValueError(
+                f"FlagGems exclusion backend names must be non-empty strings: {config_path}"
+            )
+        if not isinstance(excluded_ops, list):
+            raise ValueError(
+                f"FlagGems exclusions for {backend_name} must be a list: {config_path}"
+            )
+        for excluded_op in excluded_ops:
+            if not isinstance(excluded_op, str) or not excluded_op.strip():
+                raise ValueError(
+                    f"FlagGems exclusions must be non-empty strings: {config_path}"
+                )
+            if excluded_op.strip() not in normalized:
+                raise ValueError(
+                    f"FlagGems exclusion {excluded_op!r} for {backend_name} "
+                    f"is not present in shared ops: {config_path}"
+                )
+
+    platform_exclusions = {
+        op.strip() for op in exclusions.get(platform, ())
+    }
+    resolved = tuple(op for op in normalized if op not in platform_exclusions)
+    if not resolved:
+        raise ValueError(
+            f"FlagGems exclusions remove every operator for {platform}: {config_path}"
+        )
+    return resolved
 
 
 def _resolve_flaggems_ops(profile: BackendProfile) -> tuple[str, ...]:

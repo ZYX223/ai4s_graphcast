@@ -112,10 +112,10 @@ bash tools/prepare_flaggems_runtime.sh
 
 | Platform | Device | Backend | FlagGems Ops | Status |
 |----------|--------|---------|-------------|--------|
-| NVIDIA H100 | `cuda` | `nvidia` | installed profile defaults to silu, add | ✓ |
+| NVIDIA H100 | `cuda` | `nvidia` | addmm, cat, native_layer_norm, index_add_, silu, index, add | ✓ |
 | Huawei Ascend 910C | `npu` | `ascend` | addmm, silu, native_layer_norm, cat, index, index_add_, add | ✓ |
 | Hygon BW1000 | `cuda` (HIP) | `hygon` | addmm, silu, native_layer_norm, cat, index, index_add_, add | ✓ |
-| T-Head PPU-ZW810E | `cuda` (HGGC) | `ptg` | addmm, silu, native_layer_norm, cat, index, index_add_, add | ✓ |
+| T-Head PPU-ZW810E | `cuda` (HGGC) | `ptg` | cat, native_layer_norm, silu, index, add | ✓ |
 | Moore Threads S5000 | `musa` | `mthreads` | addmm, silu, native_layer_norm, cat, index, index_add_, add | ✓ |
 | MetaX C550 | `cuda` (MACA) | `metax` | addmm, silu, native_layer_norm, cat, index, index_add_, add | ✓ |
 
@@ -188,9 +188,43 @@ Inference and training use independent checked-in profiles:
 - `configs/flaggems/graphcast_inference.yaml` controls inference operators;
 - `configs/flaggems/graphcast_training.yaml` controls training-forward operators.
 
-The training profile does not claim backward coverage. Backward correctness and
+The inference profile starts from one platform-independent seven-operator
+request. A short backend exclusion list records only correctness failures: the
+810E/PTG profile keeps `addmm` and `index_add_` Native because the exact 40-step
+autoregressive comparison exceeds the normalized error envelope. It does not
+duplicate full per-platform lists; actual dispatch evidence belongs to the run
+report. The training profile does not claim backward coverage. Backward correctness and
 performance must be validated separately. A non-empty
 `GRAPHCAST_FLAGGEMS_OPS` overrides the selected YAML profile.
+
+### Formal 40-step inference
+
+Round-1 performance uses the device-resident autoregressive runner rather than
+the single-step quickstart path. All 40 dependent 6-hour leads are measured;
+warm-up is synchronized before timing and only the final complete output is
+copied to the host.
+
+```bash
+GRAPHCAST_BACKEND=metax \
+GRAPHCAST_FLAGOS_MODE=flaggems \
+GRAPHCAST_FLAGGEMS_CONFIG=configs/flaggems/graphcast_inference.yaml \
+GRAPHCAST_FLAGGEMS_SOURCE_ROOT=/path/to/FlagGems \
+GRAPHCAST_STRICT_FLAGOS=1 \
+python scripts/inference/run_operational_40step_inference.py \
+  --device cuda:0 \
+  --config configs/inference/google_graphcast_operational_25km.yaml \
+  --weights /assets/google_graphcast_operational_25km_compat_state.pt \
+  --inputs /assets/inputs_official_forcings.nc \
+  --rollout-forcings /assets/rollout_forcings_40step.nc \
+  --target-template /assets/target_template.nc \
+  --stats-dir /assets/stats \
+  --output outputs/predictions/lead240.nc \
+  --report outputs/reports/round1.json
+```
+
+Set `GRAPHCAST_FLAGOS_MODE=off` for the paired Native baseline. A run is not
+performance evidence unless its JSON report records 40 steps, finite output,
+the expected source hashes, and `warmup_excluded_from_e2e=true`.
 
 By default FlagGems mode imports the package installed in the environment. Run
 `bash tools/prepare_flaggems_runtime.sh` to fetch the active internal manifest

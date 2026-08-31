@@ -1,50 +1,24 @@
-version: 1
+version: 2
 profile: graphcast_inference
+scope: inference
 
-# Operator names match the FlagGems only_enable registration keys. Platform
-# profiles include every operator validated by finite GraphCast inference.
-default_ops:
+# One logical inference contract is requested on every platform. Whether an
+# implementation is actually dispatched is measured and reported separately;
+# this file must not turn an observed platform failure into a silent default.
+ops:
+  - addmm
+  - cat
+  - native_layer_norm
+  - index_add_
   - silu
+  - index
   - add
 
-platform_ops:
-  ascend:
-    - addmm
-    - silu
-    - native_layer_norm
-    - cat
-    - index
-    - index_add_
-    - add
-  hygon:
-    - addmm
-    - silu
-    - native_layer_norm
-    - cat
-    - index
-    - index_add_
-    - add
+# Keep only measured correctness exceptions here; do not duplicate the shared
+# list per platform. On 810E, addmm alone exceeds the 40-step envelope, while
+# native_layer_norm + index_add_ together also exceeds it. Retain the more
+# frequently exercised LayerNorm path and keep these two interfaces Native.
+exclude_ops_by_backend:
   ptg:
     - addmm
-    - silu
-    - native_layer_norm
-    - cat
-    - index
     - index_add_
-    - add
-  mthreads:
-    - addmm
-    - silu
-    - native_layer_norm
-    - cat
-    - index
-    - index_add_
-    - add
-  metax:
-    - addmm
-    - silu
-    - native_layer_norm
-    - cat
-    - index
-    - index_add_
-    - add

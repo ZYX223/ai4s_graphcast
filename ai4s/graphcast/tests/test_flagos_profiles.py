@@ -14,6 +14,15 @@ import yaml
 GRAPHCAST_ROOT = Path(__file__).resolve().parents[1]
 BACKEND_PATH = GRAPHCAST_ROOT / "src/graphcast_compat/backend.py"
 QUICKSTART_PATH = GRAPHCAST_ROOT / "quickstart"
+INFERENCE_OPS = (
+    "addmm",
+    "cat",
+    "native_layer_norm",
+    "index_add_",
+    "silu",
+    "index",
+    "add",
+)
 
 
 @pytest.fixture
@@ -70,79 +79,48 @@ def test_flaggems_operator_parser_deduplicates_and_has_no_hidden_default(
 
 
 @pytest.mark.parametrize(
-    ("platform", "expected"),
+    ("platform", "expected_ops"),
     (
-        (
-            "ascend",
-            (
-                "addmm",
-                "silu",
-                "native_layer_norm",
-                "cat",
-                "index",
-                "index_add_",
-                "add",
-            ),
-        ),
-        (
-            "hygon",
-            (
-                "addmm",
-                "silu",
-                "native_layer_norm",
-                "cat",
-                "index",
-                "index_add_",
-                "add",
-            ),
-        ),
-        (
-            "ptg",
-            (
-                "addmm",
-                "silu",
-                "native_layer_norm",
-                "cat",
-                "index",
-                "index_add_",
-                "add",
-            ),
-        ),
-        (
-            "mthreads",
-            (
-                "addmm",
-                "silu",
-                "native_layer_norm",
-                "cat",
-                "index",
-                "index_add_",
-                "add",
-            ),
-        ),
-        (
-            "metax",
-            (
-                "addmm",
-                "silu",
-                "native_layer_norm",
-                "cat",
-                "index",
-                "index_add_",
-                "add",
-            ),
-        ),
-        ("nvidia", ("silu", "add")),
+        ("nvidia", INFERENCE_OPS),
+        ("ascend", INFERENCE_OPS),
+        ("hygon", INFERENCE_OPS),
+        ("ptg", ("cat", "native_layer_norm", "silu", "index", "add")),
+        ("mthreads", INFERENCE_OPS),
+        ("metax", INFERENCE_OPS),
     ),
 )
-def test_inference_profile_selects_platform_validated_ops(
+def test_inference_profile_uses_one_shared_operator_contract(
     backend_module,
     platform: str,
-    expected: tuple[str, ...],
+    expected_ops: tuple[str, ...],
 ) -> None:
     path = GRAPHCAST_ROOT / "configs/flaggems/graphcast_inference.yaml"
 
-    assert backend_module._load_flaggems_ops(path, platform) == expected
+    assert backend_module._load_flaggems_ops(path, platform) == expected_ops
+    profile = yaml.safe_load(path.read_text(encoding="utf-8"))
+    assert profile == {
+        "version": 2,
+        "profile": "graphcast_inference",
+        "scope": "inference",
+        "ops": list(INFERENCE_OPS),
+        "exclude_ops_by_backend": {
+            "ptg": ["addmm", "index_add_"],
+        },
+    }
+
+
+def test_v2_profile_rejects_an_exclusion_not_in_shared_ops(
+    backend_module,
+    tmp_path: Path,
+) -> None:
+    path = tmp_path / "invalid.yaml"
+    path.write_text(
+        "version: 2\nops: [add]\nexclude_ops_by_backend:\n  ptg: [addmm]\n",
+        encoding="utf-8",
+    )
+
+    with pytest.raises(ValueError, match="is not present in shared ops"):
+        backend_module._load_flaggems_ops(path, "ptg")
 
 
 def test_training_profile_is_independent_and_marks_forward_scope(backend_module) -> None:
