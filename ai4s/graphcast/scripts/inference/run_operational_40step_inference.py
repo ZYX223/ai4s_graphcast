@@ -44,8 +44,23 @@ from graphcast_compat.backend import (  # noqa: E402
 from graphcast_compat.backend import (  # noqa: E402
     synchronize as synchronize_runtime,
 )
+from graphcast_compat.inference_precision import (  # noqa: E402
+    InferencePrecisionPolicy,
+    resolve_inference_precision,
+    run_precision_forward,
+)
 
 FORWARD_FLOPS = 28_857_094_475_776
+
+
+@dataclass(frozen=True)
+class RolloutDtypeEvidence:
+    state: str
+    forcing: str
+    model_input: str
+    model_output: str
+    feedback: str
+    final_output: str
 
 
 @dataclass(frozen=True)
@@ -55,6 +70,7 @@ class RolloutMeasurement:
     e2e_seconds: float
     final_output: torch.Tensor
     finite: bool
+    dtype_evidence: RolloutDtypeEvidence
 
 
 def calculate_throughput(
@@ -91,6 +107,8 @@ def run_tensor_resident_rollout(
     warmup_calls: int,
     synchronize: Callable[[], None],
     clock: Callable[[], float] = time.perf_counter,
+    precision_policy: InferencePrecisionPolicy | None = None,
+    device_type: str | None = None,
 ) -> RolloutMeasurement:
     """Warm up outside the timer, then measure all dependent rollout steps."""
 
@@ -103,21 +121,52 @@ def run_tensor_resident_rollout(
     if warmup_calls < 1:
         raise ValueError("at least one warmup call is required")
 
+    policy = precision_policy or resolve_inference_precision("fp32")
     state = prepared.initial_state.clone()
+    resolved_device_type = device_type or state.device.type
     first_forcing = prepared.forcing_features[0]
+    model_input_dtype: str | None = None
+    model_output_dtype: str | None = None
+    feedback_dtype: str | None = None
+
+    def observe_forward(result: Any) -> None:
+        nonlocal model_input_dtype, model_output_dtype, feedback_dtype
+        if model_input_dtype is not None and model_input_dtype != result.model_input_dtype:
+            raise RuntimeError("model input dtype changed during rollout")
+        if model_output_dtype is not None and model_output_dtype != result.model_output_dtype:
+            raise RuntimeError("model output dtype changed during rollout")
+        model_input_dtype = result.model_input_dtype
+        model_output_dtype = result.model_output_dtype
+        feedback_dtype = str(result.prediction.dtype)
+
     with torch.inference_mode():
         for _ in range(warmup_calls):
-            warmup_output = model(torch.cat((state, first_forcing), dim=-1))
-            if tuple(warmup_output.shape[-1:]) != (int(prepared.output_channels),):
+            warmup = run_precision_forward(
+                model,
+                state,
+                first_forcing,
+                policy=policy,
+                device_type=resolved_device_type,
+            )
+            observe_forward(warmup)
+            if tuple(warmup.prediction.shape[-1:]) != (int(prepared.output_channels),):
                 raise RuntimeError("warmup output does not match the configured output channels")
-            del warmup_output
+            del warmup
         synchronize()
 
         started = clock()
         normalized_output: torch.Tensor | None = None
         for step_index in range(steps):
             forcing = prepared.forcing_features[step_index]
-            prediction = model(torch.cat((state, forcing), dim=-1))
+            forward = run_precision_forward(
+                model,
+                state,
+                forcing,
+                policy=policy,
+                device_type=resolved_device_type,
+            )
+            observe_forward(forward)
+            prediction = forward.prediction
             final_step = step_index + 1 == steps
             normalized_output = advance_device_rollout(
                 state,
@@ -127,7 +176,7 @@ def run_tensor_resident_rollout(
                 advance_state=not final_step,
                 return_absolute_output=final_step,
             )
-            del prediction
+            del forward, prediction
         if normalized_output is None:
             raise RuntimeError("the final rollout step did not produce an absolute output")
         finite = bool(torch.isfinite(normalized_output).all().item())
@@ -141,7 +190,46 @@ def run_tensor_resident_rollout(
         e2e_seconds=e2e_seconds,
         final_output=final_output,
         finite=finite,
+        dtype_evidence=RolloutDtypeEvidence(
+            state=str(state.dtype),
+            forcing=str(prepared.forcing_features.dtype),
+            model_input=str(model_input_dtype),
+            model_output=str(model_output_dtype),
+            feedback=str(feedback_dtype),
+            final_output=str(final_output.dtype),
+        ),
     )
+
+
+def precision_metadata(
+    policy: InferencePrecisionPolicy,
+    measurement: RolloutMeasurement,
+    *,
+    model: torch.nn.Module,
+    device_type: str,
+    float32_math_mode: str,
+) -> dict[str, Any]:
+    parameter_dtypes = {str(parameter.dtype) for parameter in model.parameters()}
+    if len(parameter_dtypes) != 1:
+        raise RuntimeError(f"model parameters require one dtype, found {sorted(parameter_dtypes)}")
+    evidence = measurement.dtype_evidence
+    return {
+        "requested": policy.requested,
+        "effective": policy.effective,
+        "autocast": {
+            "enabled": policy.autocast_dtype is not None,
+            "device_type": device_type,
+            "dtype": str(policy.autocast_dtype) if policy.autocast_dtype is not None else None,
+        },
+        "parameter_dtype": next(iter(parameter_dtypes)),
+        "state_dtype": evidence.state,
+        "forcing_dtype": evidence.forcing,
+        "model_input_dtype": evidence.model_input,
+        "model_output_dtype": evidence.model_output,
+        "feedback_dtype": evidence.feedback,
+        "final_output_dtype": evidence.final_output,
+        "float32_math_mode": float32_math_mode,
+    }
 
 
 def _sha256(path: Path) -> str:
@@ -237,7 +325,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--report", type=Path, required=True)
     parser.add_argument("--device", default="auto")
-    parser.add_argument("--precision", choices=("fp32",), default="fp32")
+    parser.add_argument("--precision", choices=("fp32", "bf16"), default="fp32")
     parser.add_argument(
         "--edge-input-projection",
         choices=("concatenated", "factorized"),
@@ -277,6 +365,7 @@ def main(argv: list[str] | None = None) -> int:
             raise FileNotFoundError(path)
 
     runtime = resolve_runtime_backend(args.device)
+    precision_policy = resolve_inference_precision(args.precision)
     float32_math_mode = configure_float32_math(False, runtime.profile.device_type)
     config = apply_edge_chunk_overrides(
         GoogleSmallConfig.from_yaml(args.config),
@@ -326,6 +415,8 @@ def main(argv: list[str] | None = None) -> int:
             steps=args.steps,
             warmup_calls=args.warmup_calls,
             synchronize=lambda: synchronize_runtime(runtime),
+            precision_policy=precision_policy,
+            device_type=runtime.device.type,
         )
     else:
         with suspend_prevalidated_flaggems_index_add_bounds(runtime) as runtime_evidence:
@@ -335,6 +426,8 @@ def main(argv: list[str] | None = None) -> int:
                 steps=args.steps,
                 warmup_calls=args.warmup_calls,
                 synchronize=lambda: synchronize_runtime(runtime),
+                precision_policy=precision_policy,
+                device_type=runtime.device.type,
             )
         model.verify_static_index_add(static_index_add_contract)
         static_runtime_evidence = runtime_evidence
@@ -374,12 +467,13 @@ def main(argv: list[str] | None = None) -> int:
                 else {"status": "not_requested"}
             ),
         },
-        "precision": {
-            "requested": args.precision,
-            "storage_dtype": "float32",
-            "float32_math_mode": float32_math_mode,
-            "tensor_core_enabled": False,
-        },
+        "precision": precision_metadata(
+            precision_policy,
+            measurement,
+            model=model,
+            device_type=runtime.device.type,
+            float32_math_mode=float32_math_mode,
+        ),
         "workload": {
             "steps": measurement.steps,
             "warmup_calls": measurement.warmup_calls,

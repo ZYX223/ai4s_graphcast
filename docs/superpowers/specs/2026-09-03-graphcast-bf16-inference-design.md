@@ -25,11 +25,12 @@ Training BF16 is outside this design.
 
 ## Precision contract
 
-The public precision modes are `fp32` and `bf16-mixed`. Existing `fp32`
+The public precision modes are `fp32` and `bf16`. Existing `fp32`
 behaviour remains byte-for-byte compatible at the interface level and remains
 the default.
 
-`bf16-mixed` has the following mandatory semantics:
+`bf16` is reported as `mixed_precision` and has the following mandatory
+semantics:
 
 1. Checkpoint tensors and persistent model parameters remain FP32.
 2. CPU preprocessing, normalization, initial state, forcing tensors, feedback

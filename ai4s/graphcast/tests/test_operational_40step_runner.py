@@ -14,6 +14,7 @@ for path in (GRAPHCAST_ROOT, SRC_ROOT):
         sys.path.insert(0, str(path))
 
 from graphcast_compat.google_small import GoogleSmallConfig  # noqa: E402
+from graphcast_compat.inference_precision import resolve_inference_precision  # noqa: E402
 from scripts.inference import run_operational_40step_inference as operational_runner  # noqa: E402
 from scripts.inference.run_operational_40step_inference import (  # noqa: E402
     RolloutMeasurement,
@@ -209,6 +210,76 @@ def test_formal_five_platform_runner_defaults_to_ieee_fp32() -> None:
     assert args.grid2mesh_edge_chunk_size is None
     assert args.mesh2grid_edge_chunk_size is None
     assert args.index_add_execution == "inline"
+
+
+def test_formal_runner_accepts_bf16_mixed_precision() -> None:
+    args = parse_args([*_required_cli_args(), "--precision", "bf16"])
+
+    assert args.precision == "bf16"
+
+
+def test_bf16_rollout_keeps_state_and_feedback_in_fp32() -> None:
+    model = torch.nn.Linear(5, 1, bias=False).eval()
+    with torch.no_grad():
+        model.weight.fill_(0.25)
+
+    result = run_tensor_resident_rollout(
+        model,
+        _prepared(3),
+        steps=3,
+        warmup_calls=1,
+        synchronize=lambda: None,
+        precision_policy=resolve_inference_precision("bf16"),
+        device_type="cpu",
+    )
+
+    assert next(model.parameters()).dtype == torch.float32
+    assert result.dtype_evidence.state == "torch.float32"
+    assert result.dtype_evidence.forcing == "torch.float32"
+    assert result.dtype_evidence.model_input == "torch.float32"
+    assert result.dtype_evidence.model_output == "torch.bfloat16"
+    assert result.dtype_evidence.feedback == "torch.float32"
+    assert result.dtype_evidence.final_output == "torch.float32"
+    assert result.final_output.dtype == torch.float32
+
+
+def test_precision_report_distinguishes_request_from_observed_dtypes() -> None:
+    model = torch.nn.Linear(5, 1, bias=False).eval()
+    measurement = run_tensor_resident_rollout(
+        model,
+        _prepared(1),
+        steps=1,
+        warmup_calls=1,
+        synchronize=lambda: None,
+        precision_policy=resolve_inference_precision("bf16"),
+        device_type="cpu",
+    )
+
+    metadata = operational_runner.precision_metadata(
+        resolve_inference_precision("bf16"),
+        measurement,
+        model=model,
+        device_type="cpu",
+        float32_math_mode="ieee_fp32",
+    )
+
+    assert metadata == {
+        "requested": "bf16",
+        "effective": "mixed_precision",
+        "autocast": {
+            "enabled": True,
+            "device_type": "cpu",
+            "dtype": "torch.bfloat16",
+        },
+        "parameter_dtype": "torch.float32",
+        "state_dtype": "torch.float32",
+        "forcing_dtype": "torch.float32",
+        "model_input_dtype": "torch.float32",
+        "model_output_dtype": "torch.bfloat16",
+        "feedback_dtype": "torch.float32",
+        "final_output_dtype": "torch.float32",
+        "float32_math_mode": "ieee_fp32",
+    }
 
 
 def test_formal_runner_accepts_explicit_prevalidated_static_index_add() -> None:
