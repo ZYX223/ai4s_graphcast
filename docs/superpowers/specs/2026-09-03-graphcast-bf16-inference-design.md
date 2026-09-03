@@ -35,8 +35,13 @@ semantics:
 1. Checkpoint tensors and persistent model parameters remain FP32.
 2. CPU preprocessing, normalization, initial state, forcing tensors, feedback
    scales, and the persistent device-resident autoregressive state remain FP32.
-3. Only the complete per-lead model forward is entered under
-   `torch.autocast(device_type=runtime.device.type, dtype=torch.bfloat16)`.
+3. At each lead, temporary copies of the normalized state and forcing are cast
+   to BF16 and concatenated into the model input. The complete model forward is
+   also entered under
+   `torch.autocast(device_type=runtime.device.type, dtype=torch.bfloat16)` so
+   FP32 parameter storage is retained while eligible parameter views and
+   operations use BF16. This follows the observable boundary of the official
+   GraphCast `Bfloat16Cast` wrapper without claiming bitwise JAX equivalence.
 4. The model prediction is checked for a supported floating dtype and converted
    to FP32 immediately after the forward and before residual reconstruction or
    state mutation.
@@ -85,7 +90,9 @@ For every platform, correctness is evaluated in this order:
 
 1. FP32 Native produces the reference from the exact checkpoint, inputs,
    forcings, statistics, source revision, and 40-lead workload.
-2. BF16 Native is compared with FP32 Native to measure the precision change.
+2. BF16 Native is compared with FP32 Native to measure cross-precision drift.
+   This comparison is diagnostic and does not apply the same-precision FP32
+   acceptance thresholds.
 3. BF16 FlagGems is compared with BF16 Native to isolate replacement-specific
    error from BF16 quantization error.
 
@@ -104,6 +111,12 @@ envelope is frozen from Native FP32 versus Native BF16 evidence before examining
 FlagGems results; FlagGems must not add a statistically material error outside
 that frozen envelope. Thresholds must not be tuned after candidate results are
 visible.
+
+Forecast skill is a separate comparison against real future weather targets,
+not against FP32 model output. At minimum, each precision reports
+latitude-weighted RMSE using `cos(latitude)` grid-cell weights. ACC is reported
+only when a matching climatology is available. A zero-filled target template is
+never treated as weather truth.
 
 ## Performance and MFU design
 

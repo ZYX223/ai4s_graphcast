@@ -52,8 +52,17 @@ def run_precision_forward(
 
     if state.dtype != torch.float32 or forcing.dtype != torch.float32:
         raise TypeError("persistent state and forcing must remain FP32")
-    model_input = torch.cat((state, forcing), dim=-1)
     with policy.context(device_type):
+        if policy.autocast_dtype is None:
+            model_input = torch.cat((state, forcing), dim=-1)
+        else:
+            model_input = torch.cat(
+                (
+                    state.to(dtype=policy.autocast_dtype),
+                    forcing.to(dtype=policy.autocast_dtype),
+                ),
+                dim=-1,
+            )
         model_output = model(model_input)
     if not model_output.is_floating_point():
         raise TypeError("model prediction must be floating point")

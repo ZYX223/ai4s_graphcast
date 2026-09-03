@@ -7,14 +7,14 @@ import argparse
 import json
 import os
 from pathlib import Path
-from typing import Any
+from typing import Any, Literal
 
 import numpy as np
 import xarray as xr
 
-
 NORMALIZED_MAX_ABS_LIMIT = 1.0e-2
 NORMALIZED_RMSE_LIMIT = 1.0e-3
+ComparisonKind = Literal["same_precision", "cross_precision_drift"]
 
 
 def compare_outputs(
@@ -23,8 +23,13 @@ def compare_outputs(
     *,
     mean: xr.Dataset,
     stddev: xr.Dataset,
+    comparison_kind: ComparisonKind = "same_precision",
 ) -> dict[str, Any]:
-    """Return a unit-independent final-state correctness envelope."""
+    """Compare outputs as a same-precision gate or a cross-precision drift."""
+
+    if comparison_kind not in ("same_precision", "cross_precision_drift"):
+        raise ValueError(f"unsupported comparison kind: {comparison_kind!r}")
+    gate_applied = comparison_kind == "same_precision"
 
     if set(native.data_vars) != set(candidate.data_vars):
         raise ValueError("Native and candidate outputs have different variables")
@@ -60,12 +65,17 @@ def compare_outputs(
         normalized_rmse = float(
             np.sqrt(np.mean(np.square(normalized_difference)))
         )
-        within_envelope = bool(
-            finite
-            and normalized_max_abs <= NORMALIZED_MAX_ABS_LIMIT
-            and normalized_rmse <= NORMALIZED_RMSE_LIMIT
+        within_envelope = (
+            bool(
+                finite
+                and normalized_max_abs <= NORMALIZED_MAX_ABS_LIMIT
+                and normalized_rmse <= NORMALIZED_RMSE_LIMIT
+            )
+            if gate_applied
+            else None
         )
-        passed = passed and within_envelope
+        if within_envelope is not None:
+            passed = passed and within_envelope
         rows.append(
             {
                 "variable": name,
@@ -84,13 +94,19 @@ def compare_outputs(
         )
 
     return {
-        "schema": "graphcast.round1_correctness.v2",
-        "status": "passed" if passed else "failed",
+        "schema": "graphcast.output_comparison.v3",
+        "status": ("passed" if passed else "failed") if gate_applied else "measured",
+        "comparison_kind": comparison_kind,
+        "acceptance_gate_applied": gate_applied,
         "comparison_space": "(physical_value - mean_by_level) / stddev_by_level",
-        "limits": {
-            "normalized_max_abs": NORMALIZED_MAX_ABS_LIMIT,
-            "normalized_rmse": NORMALIZED_RMSE_LIMIT,
-        },
+        "limits": (
+            {
+                "normalized_max_abs": NORMALIZED_MAX_ABS_LIMIT,
+                "normalized_rmse": NORMALIZED_RMSE_LIMIT,
+            }
+            if gate_applied
+            else None
+        ),
         "variables": rows,
     }
 
@@ -111,6 +127,11 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--candidate", type=Path, required=True)
     parser.add_argument("--stats-dir", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument(
+        "--comparison-kind",
+        choices=("same_precision", "cross_precision_drift"),
+        default="same_precision",
+    )
     return parser.parse_args()
 
 
@@ -120,10 +141,16 @@ def main() -> int:
     candidate = xr.open_dataset(args.candidate).load()
     mean = xr.open_dataset(args.stats_dir / "mean_by_level.nc").load()
     stddev = xr.open_dataset(args.stats_dir / "stddev_by_level.nc").load()
-    result = compare_outputs(native, candidate, mean=mean, stddev=stddev)
+    result = compare_outputs(
+        native,
+        candidate,
+        mean=mean,
+        stddev=stddev,
+        comparison_kind=args.comparison_kind,
+    )
     _write_json(args.output, result)
     print(json.dumps(result, sort_keys=True), flush=True)
-    return 0 if result["status"] == "passed" else 1
+    return 1 if result["status"] == "failed" else 0
 
 
 if __name__ == "__main__":

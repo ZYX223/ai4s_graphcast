@@ -49,10 +49,33 @@ def test_bf16_policy_autocasts_forward_and_returns_fp32_feedback_tensor() -> Non
     assert next(model.parameters()).dtype == torch.float32
     assert state.dtype == torch.float32
     assert forcing.dtype == torch.float32
-    assert result.model_input_dtype == "torch.float32"
+    assert result.model_input_dtype == "torch.bfloat16"
     assert result.model_output_dtype == "torch.bfloat16"
     assert result.prediction.dtype == torch.float32
     assert result.prediction.tolist() == [[[5.0], [5.0]]]
+
+
+def test_bf16_policy_casts_the_temporary_model_input_like_official_graphcast() -> None:
+    class InputDtypeProbe(torch.nn.Linear):
+        observed_input_dtype: torch.dtype | None = None
+
+        def forward(self, value: torch.Tensor) -> torch.Tensor:
+            self.observed_input_dtype = value.dtype
+            return super().forward(value)
+
+    model = InputDtypeProbe(2, 1, bias=False).eval()
+    result = inference_precision.run_precision_forward(
+        model,
+        torch.ones((1, 1, 1), dtype=torch.float32),
+        torch.ones((1, 1, 1), dtype=torch.float32),
+        policy=inference_precision.resolve_inference_precision("bf16"),
+        device_type="cpu",
+    )
+
+    assert model.observed_input_dtype == torch.bfloat16
+    assert result.model_input_dtype == "torch.bfloat16"
+    assert result.model_output_dtype == "torch.bfloat16"
+    assert result.prediction.dtype == torch.float32
 
 
 @pytest.mark.parametrize("wrong_operand", ["state", "forcing"])
@@ -75,9 +98,13 @@ def test_forward_rejects_non_fp32_persistent_inputs(wrong_operand: str) -> None:
 
 
 def test_bf16_policy_rejects_an_fp32_only_forward() -> None:
+    class Fp32OnlyForward(torch.nn.Module):
+        def forward(self, value: torch.Tensor) -> torch.Tensor:
+            return value.float()
+
     with pytest.raises(RuntimeError, match="BF16 autocast produced torch.float32"):
         inference_precision.run_precision_forward(
-            torch.nn.Identity(),
+            Fp32OnlyForward(),
             torch.ones((1, 1, 1), dtype=torch.float32),
             torch.ones((1, 1, 1), dtype=torch.float32),
             policy=inference_precision.resolve_inference_precision("bf16"),

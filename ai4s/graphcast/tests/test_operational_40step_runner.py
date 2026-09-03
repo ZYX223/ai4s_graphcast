@@ -236,7 +236,7 @@ def test_bf16_rollout_keeps_state_and_feedback_in_fp32() -> None:
     assert next(model.parameters()).dtype == torch.float32
     assert result.dtype_evidence.state == "torch.float32"
     assert result.dtype_evidence.forcing == "torch.float32"
-    assert result.dtype_evidence.model_input == "torch.float32"
+    assert result.dtype_evidence.model_input == "torch.bfloat16"
     assert result.dtype_evidence.model_output == "torch.bfloat16"
     assert result.dtype_evidence.feedback == "torch.float32"
     assert result.dtype_evidence.final_output == "torch.float32"
@@ -274,7 +274,7 @@ def test_precision_report_distinguishes_request_from_observed_dtypes() -> None:
         "parameter_dtype": "torch.float32",
         "state_dtype": "torch.float32",
         "forcing_dtype": "torch.float32",
-        "model_input_dtype": "torch.float32",
+        "model_input_dtype": "torch.bfloat16",
         "model_output_dtype": "torch.bfloat16",
         "feedback_dtype": "torch.float32",
         "final_output_dtype": "torch.float32",
