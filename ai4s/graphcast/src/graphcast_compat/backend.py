@@ -506,17 +506,22 @@ def _infer_backend_from_device(requested_device: str) -> str:
     return "cpu"
 
 
-def _normalize_backend_name(value: str | None, requested_device: str) -> str:
+def _normalize_configured_backend_name(value: str | None) -> str | None:
     raw_name = (value or "").strip().lower()
-    if not raw_name:
-        return _infer_backend_from_device(requested_device)
+    if not raw_name or raw_name == "auto":
+        return None
     name = BACKEND_ALIASES.get(raw_name, raw_name)
-    if name == "auto":
-        return _infer_backend_from_device(requested_device)
     if name not in BACKEND_PROFILES:
         allowed = ", ".join(sorted(BACKEND_PROFILES))
         raise ValueError(f"unknown GRAPHCAST_BACKEND={value!r}; allowed: {allowed}")
     return name
+
+
+def _normalize_backend_name(value: str | None, requested_device: str) -> str:
+    configured = _normalize_configured_backend_name(value)
+    if configured is not None:
+        return configured
+    return _infer_backend_from_device(requested_device)
 
 
 def _resolve_device(profile: BackendProfile, requested_device: str) -> torch.device:
@@ -913,13 +918,31 @@ def _runtime_versions() -> dict[str, str]:
     return versions
 
 
-def resolve_runtime_backend(requested_device: str = "auto") -> RuntimeBackend:
+def resolve_runtime_backend(
+    requested_device: str = "auto",
+    *,
+    expected_profile: str | None = None,
+) -> RuntimeBackend:
     """Resolve device/backend from CLI device and GRAPHCAST_* environment."""
 
-    backend_name = _normalize_backend_name(
-        os.environ.get("GRAPHCAST_BACKEND"),
-        requested_device,
+    configured_backend = _normalize_configured_backend_name(
+        os.environ.get("GRAPHCAST_BACKEND")
     )
+    if expected_profile is not None and expected_profile not in BACKEND_PROFILES:
+        allowed = ", ".join(sorted(BACKEND_PROFILES))
+        raise ValueError(
+            f"unknown expected runtime backend {expected_profile!r}; allowed: {allowed}"
+        )
+    if expected_profile is not None and configured_backend is None:
+        backend_name = expected_profile
+    elif configured_backend is not None:
+        backend_name = configured_backend
+    else:
+        backend_name = _infer_backend_from_device(requested_device)
+    if expected_profile is not None and backend_name != expected_profile:
+        raise RuntimeError(
+            f"expected runtime backend {expected_profile!r}, found {backend_name!r}"
+        )
     profile = BACKEND_PROFILES[backend_name]
     flagos = _configure_flagos(profile)
     device = _resolve_device(profile, requested_device)

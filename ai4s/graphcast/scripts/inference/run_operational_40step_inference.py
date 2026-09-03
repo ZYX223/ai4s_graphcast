@@ -73,6 +73,77 @@ class RolloutMeasurement:
     dtype_evidence: RolloutDtypeEvidence
 
 
+@dataclass(frozen=True)
+class ModelExecutionProfile:
+    name: str
+    platform: str
+    runtime_backend: str
+    edge_input_projection: str
+    grid2mesh_edge_chunk_size: int | None
+    mesh2grid_edge_chunk_size: int | None
+    mesh2grid_full_grid_fast_path: bool
+    index_add_execution: str
+
+    def to_metadata(self) -> dict[str, Any]:
+        return {
+            "name": self.name,
+            "platform": self.platform,
+            "runtime_backend": self.runtime_backend,
+            "configuration_overrides": {
+                "edge_input_projection": self.edge_input_projection,
+                "grid2mesh_edge_chunk_size": self.grid2mesh_edge_chunk_size,
+                "mesh2grid_edge_chunk_size": self.mesh2grid_edge_chunk_size,
+                "mesh2grid_full_grid_fast_path": self.mesh2grid_full_grid_fast_path,
+                "index_add_execution": self.index_add_execution,
+            },
+        }
+
+
+DOMESTIC_PLATFORMS = frozenset(("c550", "bw3000", "s5000", "910c", "810e"))
+PLATFORM_RUNTIME_BACKENDS = {
+    "h100": "nvidia",
+    "c550": "metax",
+    "bw3000": "hygon",
+    "s5000": "mthreads",
+    "910c": "ascend",
+    "810e": "ptg",
+}
+
+
+def resolve_model_execution_profile(platform: str, name: str) -> ModelExecutionProfile:
+    if platform == "h100" and name == "baseline":
+        return ModelExecutionProfile(
+            name=name,
+            platform=platform,
+            runtime_backend=PLATFORM_RUNTIME_BACKENDS[platform],
+            edge_input_projection="concatenated",
+            grid2mesh_edge_chunk_size=None,
+            mesh2grid_edge_chunk_size=None,
+            mesh2grid_full_grid_fast_path=False,
+            index_add_execution="inline",
+        )
+    if platform in DOMESTIC_PLATFORMS and name == "domestic-v1":
+        return ModelExecutionProfile(
+            name=name,
+            platform=platform,
+            runtime_backend=PLATFORM_RUNTIME_BACKENDS[platform],
+            edge_input_projection="factorized",
+            grid2mesh_edge_chunk_size=131072,
+            mesh2grid_edge_chunk_size=131072,
+            mesh2grid_full_grid_fast_path=True,
+            index_add_execution="inline",
+        )
+    raise ValueError(f"model execution profile {name!r} is not valid for platform {platform!r}")
+
+
+def validate_runtime_platform(platform: str, backend: str) -> None:
+    expected = PLATFORM_RUNTIME_BACKENDS[platform]
+    if backend != expected:
+        raise RuntimeError(
+            f"platform {platform!r} requires runtime backend {expected!r}, found {backend!r}"
+        )
+
+
 def calculate_throughput(
     *,
     forward_flops: int,
@@ -304,14 +375,21 @@ def apply_edge_chunk_overrides(
     )
 
 
-def model_execution_metadata(model: GoogleSmallCompatibleModel) -> dict[str, Any]:
-    return {
+def model_execution_metadata(
+    model: GoogleSmallCompatibleModel,
+    *,
+    profile: ModelExecutionProfile | None = None,
+) -> dict[str, Any]:
+    metadata: dict[str, Any] = {
         "edge_input_projection": model.edge_input_projection_mode,
         "mesh2grid_full_grid_fast_path": model.mesh2grid_full_grid_fast_path,
         "index_add_execution": model.index_add_execution,
         "grid2mesh_edge_chunk_size": model.config.grid2mesh_edge_chunk_size,
         "mesh2grid_edge_chunk_size": model.config.mesh2grid_edge_chunk_size,
     }
+    if profile is not None:
+        metadata["model_execution_profile"] = profile.to_metadata()
+    return metadata
 
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
@@ -324,28 +402,33 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--stats-dir", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--report", type=Path, required=True)
+    parser.add_argument(
+        "--platform",
+        choices=("h100", "c550", "bw3000", "s5000", "910c", "810e"),
+        required=True,
+    )
+    parser.add_argument(
+        "--model-execution-profile",
+        dest="model_execution_profile_name",
+        choices=("baseline", "domestic-v1"),
+        required=True,
+    )
     parser.add_argument("--device", default="auto")
     parser.add_argument("--precision", choices=("fp32", "bf16"), default="fp32")
-    parser.add_argument(
-        "--edge-input-projection",
-        choices=("concatenated", "factorized"),
-        default="concatenated",
-    )
-    parser.add_argument("--grid2mesh-edge-chunk-size", type=int)
-    parser.add_argument("--mesh2grid-edge-chunk-size", type=int)
-    parser.add_argument("--mesh2grid-full-grid-fast-path", action="store_true")
-    parser.add_argument(
-        "--index-add-execution",
-        choices=("inline", "prevalidated-static"),
-        default="inline",
-    )
     parser.add_argument("--steps", type=int, default=40)
     parser.add_argument("--warmup-calls", type=int, default=1)
     parser.add_argument("--forward-flops", type=int, default=FORWARD_FLOPS)
     parser.add_argument("--peak-tflops-per-device", type=float, default=0.0)
     parser.add_argument("--device-count", type=int, default=1)
     parser.add_argument("--overwrite", action="store_true")
-    return parser.parse_args(argv)
+    args = parser.parse_args(argv)
+    try:
+        args.model_execution_profile = resolve_model_execution_profile(
+            args.platform, args.model_execution_profile_name
+        )
+    except ValueError as error:
+        parser.error(str(error))
+    return args
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -364,13 +447,18 @@ def main(argv: list[str] | None = None) -> int:
         if not path.is_file():
             raise FileNotFoundError(path)
 
-    runtime = resolve_runtime_backend(args.device)
+    model_execution_profile = args.model_execution_profile
+    runtime = resolve_runtime_backend(
+        args.device,
+        expected_profile=model_execution_profile.runtime_backend,
+    )
+    validate_runtime_platform(args.platform, runtime.profile.name)
     precision_policy = resolve_inference_precision(args.precision)
     float32_math_mode = configure_float32_math(False, runtime.profile.device_type)
     config = apply_edge_chunk_overrides(
         GoogleSmallConfig.from_yaml(args.config),
-        grid2mesh=args.grid2mesh_edge_chunk_size,
-        mesh2grid=args.mesh2grid_edge_chunk_size,
+        grid2mesh=model_execution_profile.grid2mesh_edge_chunk_size,
+        mesh2grid=model_execution_profile.mesh2grid_edge_chunk_size,
     )
     inputs = xr.open_dataset(args.inputs).load()
     forcings = xr.open_dataset(args.rollout_forcings).load()
@@ -379,9 +467,11 @@ def main(argv: list[str] | None = None) -> int:
 
     model = build_model_for_run(
         config,
-        edge_input_projection=args.edge_input_projection,
-        mesh2grid_full_grid_fast_path=args.mesh2grid_full_grid_fast_path,
-        index_add_execution=args.index_add_execution,
+        edge_input_projection=model_execution_profile.edge_input_projection,
+        mesh2grid_full_grid_fast_path=(
+            model_execution_profile.mesh2grid_full_grid_fast_path
+        ),
+        index_add_execution=model_execution_profile.index_add_execution,
     )
     model.load_state_dict(
         _select_state_dict(torch.load(args.weights, map_location="cpu")),
@@ -394,7 +484,7 @@ def main(argv: list[str] | None = None) -> int:
     model.to(runtime.device)
     model.eval()
     static_index_add_contract = None
-    if args.index_add_execution == "prevalidated-static":
+    if model_execution_profile.index_add_execution == "prevalidated-static":
         static_index_add_contract = model.prevalidate_static_index_add()
     prepared = prepare_device_rollout(
         inputs,
@@ -480,7 +570,7 @@ def main(argv: list[str] | None = None) -> int:
             "warmup_excluded_from_e2e": True,
             "final_output_d2h_included_in_e2e": True,
             "device_count": args.device_count,
-            **model_execution_metadata(model),
+            **model_execution_metadata(model, profile=model_execution_profile),
             "static_index_add": (
                 {
                     **static_index_add_contract.to_metadata(),

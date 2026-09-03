@@ -214,6 +214,8 @@ GRAPHCAST_FLAGGEMS_SOURCE_ROOT=/path/to/FlagGems \
 GRAPHCAST_FLAGGEMS_RECORD_PATH=outputs/logs/flaggems-dispatch.log \
 GRAPHCAST_STRICT_FLAGOS=1 \
 python scripts/inference/run_operational_40step_inference.py \
+  --platform c550 \
+  --model-execution-profile domestic-v1 \
   --device cuda:0 \
   --config configs/inference/google_graphcast_operational_25km.yaml \
   --weights /assets/google_graphcast_operational_25km_compat_state.pt \
@@ -222,25 +224,29 @@ python scripts/inference/run_operational_40step_inference.py \
   --target-template /assets/target_template.nc \
   --stats-dir /assets/stats \
   --output outputs/predictions/lead240.nc \
-  --report outputs/reports/round1.json \
-  --edge-input-projection factorized \
-  --grid2mesh-edge-chunk-size 131072 \
-  --mesh2grid-edge-chunk-size 131072 \
-  --mesh2grid-full-grid-fast-path \
-  --index-add-execution prevalidated-static
+  --report outputs/reports/round1.json
 ```
 
 Set `GRAPHCAST_FLAGOS_MODE=off` for the paired Native baseline. A run is not
 performance evidence unless its JSON report records the requested step count,
 finite output, expected source hashes, and `warmup_excluded_from_e2e=true`.
 
-The retained model-side options are the factorized edge projection, explicit
-grid2mesh/mesh2grid edge chunks, the full-grid mesh2grid fast path, and static
-GraphCast receiver-index prevalidation. The established inference gather route
-remains `GRAPHCAST_GATHER_MODE=advanced_index`; these options do not switch it
-to `index_select` or replace FlagGems kernels. Removed experiments (encoder/node
-factorization, aggregation-buffer reuse, opaque custom-op boundaries and graph
-capture) are intentionally not accepted by the formal runner.
+The formal runner uses one required platform/profile pair. `h100/baseline`
+keeps concatenated edge projection, the configured edge chunks, no full-grid
+fast path and inline `index_add`. `c550`, `bw3000`, `s5000`, `910c` and `810e`
+must use `domestic-v1`, which selects factorized edge projection, 131072-edge
+grid2mesh and mesh2grid chunks, the full-grid mesh2grid fast path and inline
+`index_add`. The mapping is identical for FP32 and BF16, and a mismatched pair
+is rejected before model or device initialization. Native and FlagGems A/B runs
+on one domestic platform use the same profile.
+
+The established inference gather route remains
+`GRAPHCAST_GATHER_MODE=advanced_index`; the model profile does not switch it to
+`index_select` or replace FlagGems kernels. Retired experiments and low-level
+model-option overrides (encoder/node factorization, aggregation-buffer reuse,
+static/opaque operator boundaries and graph capture) are intentionally not
+accepted by the formal runner. The report records the profile name, platform,
+and every expanded model setting.
 
 By default FlagGems mode imports the package installed in the environment. Run
 `bash tools/prepare_flaggems_runtime.sh` to fetch the active internal manifest

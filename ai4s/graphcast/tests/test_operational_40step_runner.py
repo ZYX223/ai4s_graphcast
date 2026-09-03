@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import sys
 from pathlib import Path
 from types import SimpleNamespace
@@ -57,6 +58,168 @@ def _required_cli_args() -> list[str]:
     ]
 
 
+def _profiled_cli_args(
+    *, platform: str = "h100", profile: str = "baseline", precision: str = "fp32"
+) -> list[str]:
+    return [
+        *_required_cli_args(),
+        "--platform",
+        platform,
+        "--model-execution-profile",
+        profile,
+        "--precision",
+        precision,
+    ]
+
+
+def _profile_resolver():
+    resolver = getattr(operational_runner, "resolve_model_execution_profile", None)
+    assert callable(resolver), "model execution profile resolver is missing"
+    return resolver
+
+
+def _runtime_platform_validator():
+    validator = getattr(operational_runner, "validate_runtime_platform", None)
+    assert callable(validator), "runtime platform validator is missing"
+    return validator
+
+
+def test_h100_baseline_expands_to_the_conservative_reference_path() -> None:
+    profile = _profile_resolver()("h100", "baseline")
+
+    assert profile.to_metadata() == {
+        "name": "baseline",
+        "platform": "h100",
+        "runtime_backend": "nvidia",
+        "configuration_overrides": {
+            "edge_input_projection": "concatenated",
+            "grid2mesh_edge_chunk_size": None,
+            "mesh2grid_edge_chunk_size": None,
+            "mesh2grid_full_grid_fast_path": False,
+            "index_add_execution": "inline",
+        },
+    }
+
+
+@pytest.mark.parametrize("platform", ("c550", "bw3000", "s5000", "910c", "810e"))
+def test_domestic_v1_expands_identically_on_all_five_platforms(platform: str) -> None:
+    profile = _profile_resolver()(platform, "domestic-v1")
+
+    assert profile.to_metadata() == {
+        "name": "domestic-v1",
+        "platform": platform,
+        "runtime_backend": operational_runner.PLATFORM_RUNTIME_BACKENDS[platform],
+        "configuration_overrides": {
+            "edge_input_projection": "factorized",
+            "grid2mesh_edge_chunk_size": 131072,
+            "mesh2grid_edge_chunk_size": 131072,
+            "mesh2grid_full_grid_fast_path": True,
+            "index_add_execution": "inline",
+        },
+    }
+
+
+@pytest.mark.parametrize(
+    ("platform", "profile"),
+    (
+        ("h100", "domestic-v1"),
+        ("c550", "baseline"),
+        ("bw3000", "baseline"),
+        ("s5000", "baseline"),
+        ("910c", "baseline"),
+        ("810e", "baseline"),
+    ),
+)
+def test_model_execution_profile_rejects_cross_platform_use(
+    platform: str, profile: str
+) -> None:
+    with pytest.raises(ValueError, match="not valid"):
+        _profile_resolver()(platform, profile)
+
+
+@pytest.mark.parametrize(
+    ("platform", "profile"),
+    (
+        ("h100", "baseline"),
+        ("c550", "domestic-v1"),
+        ("bw3000", "domestic-v1"),
+        ("s5000", "domestic-v1"),
+        ("910c", "domestic-v1"),
+        ("810e", "domestic-v1"),
+    ),
+)
+@pytest.mark.parametrize("precision", ("fp32", "bf16"))
+def test_formal_cli_applies_profile_independently_of_precision(
+    platform: str, profile: str, precision: str
+) -> None:
+    args = parse_args(
+        _profiled_cli_args(platform=platform, profile=profile, precision=precision)
+    )
+
+    assert args.precision == precision
+    assert args.model_execution_profile.name == profile
+    assert args.model_execution_profile.platform == platform
+
+
+@pytest.mark.parametrize(
+    "missing_pair",
+    (("--platform", "h100"), ("--model-execution-profile", "baseline")),
+)
+def test_formal_cli_requires_platform_and_model_execution_profile(
+    missing_pair: tuple[str, str],
+) -> None:
+    arguments = _profiled_cli_args()
+    index = arguments.index(missing_pair[0])
+    del arguments[index : index + 2]
+    with pytest.raises(SystemExit):
+        parse_args(arguments)
+
+
+@pytest.mark.parametrize(
+    ("platform", "backend"),
+    (
+        ("h100", "nvidia"),
+        ("c550", "metax"),
+        ("bw3000", "hygon"),
+        ("s5000", "mthreads"),
+        ("910c", "ascend"),
+        ("810e", "ptg"),
+    ),
+)
+def test_runtime_platform_validator_accepts_only_the_bound_backend(
+    platform: str, backend: str
+) -> None:
+    _runtime_platform_validator()(platform, backend)
+
+
+@pytest.mark.parametrize(
+    ("platform", "backend"),
+    (("h100", "metax"), ("c550", "nvidia"), ("910c", "ptg"), ("810e", "ascend")),
+)
+def test_runtime_platform_validator_rejects_swapped_backends(
+    platform: str, backend: str
+) -> None:
+    with pytest.raises(RuntimeError, match="requires runtime backend"):
+        _runtime_platform_validator()(platform, backend)
+
+
+@pytest.mark.parametrize(
+    "retired_args",
+    (
+        ("--edge-input-projection", "factorized"),
+        ("--grid2mesh-edge-chunk-size", "131072"),
+        ("--mesh2grid-edge-chunk-size", "131072"),
+        ("--mesh2grid-full-grid-fast-path",),
+        ("--index-add-execution", "prevalidated-static"),
+    ),
+)
+def test_formal_cli_rejects_low_level_model_optimization_overrides(
+    retired_args: tuple[str, ...],
+) -> None:
+    with pytest.raises(SystemExit):
+        parse_args([*_profiled_cli_args(), *retired_args])
+
+
 @pytest.mark.parametrize(
     "removed_args",
     (
@@ -73,7 +236,7 @@ def test_formal_runner_rejects_retired_experimental_paths(
     removed_args: tuple[str, ...],
 ) -> None:
     with pytest.raises(SystemExit):
-        parse_args([*_required_cli_args(), *removed_args])
+        parse_args([*_profiled_cli_args(), *removed_args])
 
 
 def _prepared(steps: int):
@@ -181,39 +344,17 @@ def test_throughput_uses_all_40_forward_flops_and_measured_e2e() -> None:
     assert metrics["mfu"] == pytest.approx(0.26745984729953084)
 
 
-def test_formal_five_platform_runner_defaults_to_ieee_fp32() -> None:
-    args = parse_args(
-        [
-            "--config",
-            "config.yaml",
-            "--weights",
-            "weights.pt",
-            "--inputs",
-            "inputs.nc",
-            "--rollout-forcings",
-            "forcings.nc",
-            "--target-template",
-            "target.nc",
-            "--stats-dir",
-            "stats",
-            "--output",
-            "prediction.nc",
-            "--report",
-            "report.json",
-        ]
-    )
+def test_formal_h100_baseline_defaults_to_ieee_fp32() -> None:
+    args = parse_args(_profiled_cli_args())
 
     assert args.precision == "fp32"
     assert args.steps == 40
-    assert args.edge_input_projection == "concatenated"
-    assert args.mesh2grid_full_grid_fast_path is False
-    assert args.grid2mesh_edge_chunk_size is None
-    assert args.mesh2grid_edge_chunk_size is None
-    assert args.index_add_execution == "inline"
+    assert args.model_execution_profile.name == "baseline"
+    assert args.model_execution_profile.platform == "h100"
 
 
 def test_formal_runner_accepts_bf16_mixed_precision() -> None:
-    args = parse_args([*_required_cli_args(), "--precision", "bf16"])
+    args = parse_args(_profiled_cli_args(precision="bf16"))
 
     assert args.precision == "bf16"
 
@@ -282,60 +423,6 @@ def test_precision_report_distinguishes_request_from_observed_dtypes() -> None:
     }
 
 
-def test_formal_runner_accepts_explicit_prevalidated_static_index_add() -> None:
-    args = parse_args(
-        [
-            "--config",
-            "config.yaml",
-            "--weights",
-            "weights.pt",
-            "--inputs",
-            "inputs.nc",
-            "--rollout-forcings",
-            "forcings.nc",
-            "--target-template",
-            "target.nc",
-            "--stats-dir",
-            "stats",
-            "--output",
-            "prediction.nc",
-            "--report",
-            "report.json",
-            "--index-add-execution",
-            "prevalidated-static",
-        ]
-    )
-
-    assert args.index_add_execution == "prevalidated-static"
-
-
-def test_formal_five_platform_runner_accepts_factorized_edge_projection() -> None:
-    args = parse_args(
-        [
-            "--config",
-            "config.yaml",
-            "--weights",
-            "weights.pt",
-            "--inputs",
-            "inputs.nc",
-            "--rollout-forcings",
-            "forcings.nc",
-            "--target-template",
-            "target.nc",
-            "--stats-dir",
-            "stats",
-            "--output",
-            "prediction.nc",
-            "--report",
-            "report.json",
-            "--edge-input-projection",
-            "factorized",
-        ]
-    )
-
-    assert args.edge_input_projection == "factorized"
-
-
 def test_operational_model_builder_threads_factorized_edge_projection() -> None:
     model = operational_runner.build_model_for_run(
         GoogleSmallConfig(
@@ -353,6 +440,213 @@ def test_operational_model_builder_threads_factorized_edge_projection() -> None:
     assert model.grid2mesh_gnn.edge_input_projection_mode == "factorized"
     assert model.mesh_gnn.edge_input_projection_mode == "factorized"
     assert model.mesh2grid_gnn.edge_input_projection_mode == "factorized"
+
+
+def test_report_model_metadata_binds_domestic_profile_to_effective_settings() -> None:
+    profile = _profile_resolver()("c550", "domestic-v1")
+    config = operational_runner.apply_edge_chunk_overrides(
+        GoogleSmallConfig(
+            latent_size=4,
+            hidden_layers=1,
+            gnn_msg_steps=1,
+            node_input_dim=4,
+            edge_input_dim=1,
+            output_dim=1,
+        ),
+        grid2mesh=profile.grid2mesh_edge_chunk_size,
+        mesh2grid=profile.mesh2grid_edge_chunk_size,
+    )
+    model = operational_runner.build_model_for_run(
+        config,
+        edge_input_projection=profile.edge_input_projection,
+        mesh2grid_full_grid_fast_path=profile.mesh2grid_full_grid_fast_path,
+        index_add_execution=profile.index_add_execution,
+    )
+
+    metadata = operational_runner.model_execution_metadata(model, profile=profile)
+
+    assert metadata.get("model_execution_profile") == profile.to_metadata()
+
+
+def test_baseline_report_separates_profile_overrides_from_effective_chunks() -> None:
+    profile = _profile_resolver()("h100", "baseline")
+    config = GoogleSmallConfig(
+        latent_size=4,
+        hidden_layers=1,
+        gnn_msg_steps=1,
+        node_input_dim=4,
+        edge_input_dim=1,
+        output_dim=1,
+        grid2mesh_edge_chunk_size=131072,
+        mesh2grid_edge_chunk_size=131072,
+    )
+    model = operational_runner.build_model_for_run(
+        config,
+        edge_input_projection=profile.edge_input_projection,
+        mesh2grid_full_grid_fast_path=profile.mesh2grid_full_grid_fast_path,
+        index_add_execution=profile.index_add_execution,
+    )
+
+    metadata = operational_runner.model_execution_metadata(model, profile=profile)
+
+    assert metadata["model_execution_profile"]["configuration_overrides"] == {
+        "edge_input_projection": "concatenated",
+        "grid2mesh_edge_chunk_size": None,
+        "mesh2grid_edge_chunk_size": None,
+        "mesh2grid_full_grid_fast_path": False,
+        "index_add_execution": "inline",
+    }
+    assert metadata["grid2mesh_edge_chunk_size"] == 131072
+    assert metadata["mesh2grid_edge_chunk_size"] == 131072
+
+
+def test_main_binds_runtime_builder_and_report_to_one_domestic_profile(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    assets = {
+        name: tmp_path / name
+        for name in ("config.yaml", "weights.pt", "inputs.nc", "forcings.nc", "target.nc")
+    }
+    for path in assets.values():
+        path.write_bytes(b"fixture")
+    stats_dir = tmp_path / "stats"
+    stats_dir.mkdir()
+    output = tmp_path / "prediction.nc"
+    report_path = tmp_path / "report.json"
+    events: list[str] = []
+    captured: dict[str, object] = {}
+
+    class FakeDataset:
+        coords = {
+            "lat": SimpleNamespace(values=[0.0]),
+            "lon": SimpleNamespace(values=[0.0]),
+        }
+
+        def load(self):
+            return self
+
+    class FakeRuntime:
+        profile = SimpleNamespace(name="metax", device_type="cuda")
+        device = torch.device("cpu")
+
+        def to_metadata(self):
+            return {"backend": "metax"}
+
+    class FakeModel:
+        def __init__(self, config, **settings) -> None:
+            self.config = config
+            self.edge_input_projection_mode = settings["edge_input_projection"]
+            self.mesh2grid_full_grid_fast_path = settings[
+                "mesh2grid_full_grid_fast_path"
+            ]
+            self.index_add_execution = settings["index_add_execution"]
+
+        def load_state_dict(self, state_dict, strict=True) -> None:
+            assert strict
+
+        def init_graph(self, **coordinates) -> None:
+            assert set(coordinates) == {"latitudes", "longitudes"}
+
+        def to(self, device):
+            return self
+
+        def eval(self):
+            return self
+
+    config = GoogleSmallConfig(
+        latent_size=4,
+        hidden_layers=1,
+        gnn_msg_steps=1,
+        node_input_dim=4,
+        edge_input_dim=1,
+        output_dim=1,
+        grid2mesh_edge_chunk_size=17,
+        mesh2grid_edge_chunk_size=19,
+    )
+
+    def fake_resolve_runtime(device, *, expected_profile):
+        events.append("runtime")
+        captured["expected_backend"] = expected_profile
+        return FakeRuntime()
+
+    def fake_build_model(effective_config, **settings):
+        events.append("model")
+        captured["effective_config"] = effective_config
+        captured["settings"] = settings
+        return FakeModel(effective_config, **settings)
+
+    monkeypatch.setattr(operational_runner, "resolve_runtime_backend", fake_resolve_runtime)
+    monkeypatch.setattr(operational_runner, "configure_float32_math", lambda *args: "ieee_fp32")
+    monkeypatch.setattr(GoogleSmallConfig, "from_yaml", lambda path: config)
+    monkeypatch.setattr(operational_runner.xr, "open_dataset", lambda path: FakeDataset())
+    monkeypatch.setattr(operational_runner, "load_normalization_stats", lambda path: object())
+    monkeypatch.setattr(operational_runner, "build_model_for_run", fake_build_model)
+    monkeypatch.setattr(
+        operational_runner.torch,
+        "load",
+        lambda *args, **kwargs: {"weight": torch.zeros(1)},
+    )
+    monkeypatch.setattr(operational_runner, "prepare_device_rollout", lambda *args, **kwargs: object())
+    monkeypatch.setattr(operational_runner, "reset_peak_memory", lambda runtime: None)
+    monkeypatch.setattr(
+        operational_runner,
+        "run_tensor_resident_rollout",
+        lambda *args, **kwargs: RolloutMeasurement(
+            steps=40,
+            warmup_calls=1,
+            e2e_seconds=10.0,
+            final_output=torch.zeros(1),
+            finite=True,
+            dtype_evidence=SimpleNamespace(),
+        ),
+    )
+    monkeypatch.setattr(operational_runner, "require_complete_flaggems_dispatch", lambda runtime: None)
+
+    class FakePrediction:
+        def to_netcdf(self, path) -> None:
+            Path(path).write_bytes(b"prediction")
+
+    monkeypatch.setattr(
+        operational_runner,
+        "normalized_output_to_prediction",
+        lambda *args, **kwargs: FakePrediction(),
+    )
+    monkeypatch.setattr(operational_runner, "precision_metadata", lambda *args, **kwargs: {})
+    monkeypatch.setattr(operational_runner, "memory_text", lambda runtime: {})
+
+    result = operational_runner.main(
+        [
+            "--config", str(assets["config.yaml"]),
+            "--weights", str(assets["weights.pt"]),
+            "--inputs", str(assets["inputs.nc"]),
+            "--rollout-forcings", str(assets["forcings.nc"]),
+            "--target-template", str(assets["target.nc"]),
+            "--stats-dir", str(stats_dir),
+            "--output", str(output),
+            "--report", str(report_path),
+            "--platform", "c550",
+            "--model-execution-profile", "domestic-v1",
+        ]
+    )
+
+    assert result == 0
+    assert events == ["runtime", "model"]
+    assert captured["expected_backend"] == "metax"
+    assert captured["settings"] == {
+        "edge_input_projection": "factorized",
+        "mesh2grid_full_grid_fast_path": True,
+        "index_add_execution": "inline",
+    }
+    effective_config = captured["effective_config"]
+    assert effective_config.grid2mesh_edge_chunk_size == 131072
+    assert effective_config.mesh2grid_edge_chunk_size == 131072
+    report = json.loads(report_path.read_text(encoding="utf-8"))
+    assert report["runtime"]["backend"] == "metax"
+    assert report["workload"]["model_execution_profile"]["name"] == "domestic-v1"
+    assert report["workload"]["edge_input_projection"] == "factorized"
+    assert report["workload"]["grid2mesh_edge_chunk_size"] == 131072
+    assert report["workload"]["mesh2grid_edge_chunk_size"] == 131072
 
 
 def test_operational_report_metadata_uses_effective_edge_projection_mode() -> None:
@@ -375,36 +669,6 @@ def test_operational_report_metadata_uses_effective_edge_projection_mode() -> No
         "grid2mesh_edge_chunk_size": None,
         "mesh2grid_edge_chunk_size": None,
     }
-
-
-def test_formal_runner_accepts_edge_chunk_overrides() -> None:
-    args = parse_args(
-        [
-            "--config",
-            "config.yaml",
-            "--weights",
-            "weights.pt",
-            "--inputs",
-            "inputs.nc",
-            "--rollout-forcings",
-            "forcings.nc",
-            "--target-template",
-            "target.nc",
-            "--stats-dir",
-            "stats",
-            "--output",
-            "prediction.nc",
-            "--report",
-            "report.json",
-            "--grid2mesh-edge-chunk-size",
-            "262144",
-            "--mesh2grid-edge-chunk-size",
-            "196608",
-        ]
-    )
-
-    assert args.grid2mesh_edge_chunk_size == 262144
-    assert args.mesh2grid_edge_chunk_size == 196608
 
 
 @pytest.mark.parametrize("value", [0, -1])
@@ -453,32 +717,6 @@ def test_edge_chunk_overrides_return_new_config_and_drive_model_metadata() -> No
         "grid2mesh_edge_chunk_size": 262144,
         "mesh2grid_edge_chunk_size": 196608,
     }
-
-
-def test_formal_runner_accepts_full_grid_fast_path() -> None:
-    args = parse_args(
-        [
-            "--config",
-            "config.yaml",
-            "--weights",
-            "weights.pt",
-            "--inputs",
-            "inputs.nc",
-            "--rollout-forcings",
-            "forcings.nc",
-            "--target-template",
-            "target.nc",
-            "--stats-dir",
-            "stats",
-            "--output",
-            "prediction.nc",
-            "--report",
-            "report.json",
-            "--mesh2grid-full-grid-fast-path",
-        ]
-    )
-
-    assert args.mesh2grid_full_grid_fast_path is True
 
 
 def test_operational_model_builder_threads_full_grid_fast_path() -> None:

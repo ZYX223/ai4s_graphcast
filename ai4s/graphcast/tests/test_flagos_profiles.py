@@ -70,6 +70,64 @@ def test_backend_profiles_represent_physical_platforms(backend_module) -> None:
     assert backend_module._normalize_backend_name("flagos_hygon", "auto") == "hygon"
 
 
+def test_runtime_backend_rejects_expected_profile_before_side_effects(
+    backend_module,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    events: list[str] = []
+    monkeypatch.setenv("GRAPHCAST_BACKEND", "metax")
+    monkeypatch.setattr(
+        backend_module,
+        "_configure_flagos",
+        lambda profile: events.append(f"configure:{profile.name}"),
+    )
+    monkeypatch.setattr(
+        backend_module,
+        "_resolve_device",
+        lambda profile, requested: events.append(f"device:{profile.name}:{requested}"),
+    )
+
+    with pytest.raises(RuntimeError, match="expected runtime backend 'nvidia'.*'metax'"):
+        backend_module.resolve_runtime_backend("cuda:0", expected_profile="nvidia")
+
+    assert events == []
+
+
+@pytest.mark.parametrize("configured_backend", (None, "auto"))
+def test_expected_runtime_backend_bypasses_ambient_backend_probing(
+    backend_module,
+    monkeypatch: pytest.MonkeyPatch,
+    configured_backend: str | None,
+) -> None:
+    events: list[str] = []
+    if configured_backend is None:
+        monkeypatch.delenv("GRAPHCAST_BACKEND", raising=False)
+    else:
+        monkeypatch.setenv("GRAPHCAST_BACKEND", configured_backend)
+    monkeypatch.setattr(
+        backend_module,
+        "_infer_backend_from_device",
+        lambda requested: events.append(f"infer:{requested}") or "nvidia",
+    )
+    monkeypatch.setattr(
+        backend_module,
+        "_configure_flagos",
+        lambda profile: events.append(f"configure:{profile.name}") or object(),
+    )
+    monkeypatch.setattr(
+        backend_module,
+        "_resolve_device",
+        lambda profile, requested: events.append(f"device:{profile.name}:{requested}")
+        or object(),
+    )
+    monkeypatch.setattr(backend_module, "_runtime_versions", lambda: {})
+
+    runtime = backend_module.resolve_runtime_backend("auto", expected_profile="metax")
+
+    assert runtime.profile.name == "metax"
+    assert events == ["configure:metax", "device:metax:auto"]
+
+
 def test_flaggems_operator_parser_deduplicates_and_has_no_hidden_default(
     backend_module,
 ) -> None:
