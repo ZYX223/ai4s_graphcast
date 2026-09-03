@@ -61,6 +61,16 @@ def tensor_error_metrics(
     }
 
 
+def compare_prediction_variants(
+    reference: torch.Tensor,
+    candidates: dict[str, torch.Tensor],
+) -> dict[str, dict[str, Any]]:
+    return {
+        name: tensor_error_metrics(reference, candidate)
+        for name, candidate in candidates.items()
+    }
+
+
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--config", type=Path, required=True)
@@ -131,6 +141,18 @@ def main(argv: list[str] | None = None) -> int:
                 grid_start=0,
                 grid_end=int(bf16_grid2mesh["grid_nodes"].shape[1]),
             )
+            fp32_pre_bf16_decoder = model.forward_mesh2grid_partition(
+                mesh_nodes=fp32_mesh["mesh_nodes"],
+                grid_nodes=fp32_grid2mesh["grid_nodes"],
+                grid_start=0,
+                grid_end=int(fp32_grid2mesh["grid_nodes"].shape[1]),
+            )
+        bf16_pre_fp32_decoder = model.forward_mesh2grid_partition(
+            mesh_nodes=bf16_mesh["mesh_nodes"],
+            grid_nodes=bf16_grid2mesh["grid_nodes"],
+            grid_start=0,
+            grid_end=int(bf16_grid2mesh["grid_nodes"].shape[1]),
+        )
 
     report = {
         "schema": "graphcast.bf16_stage_diagnostics.v1",
@@ -153,6 +175,14 @@ def main(argv: list[str] | None = None) -> int:
                 bf16_prediction,
             ),
         },
+        "prediction_variants": compare_prediction_variants(
+            fp32_prediction,
+            {
+                "bf16_all": bf16_prediction,
+                "fp32_pre_bf16_decoder": fp32_pre_bf16_decoder,
+                "bf16_pre_fp32_decoder": bf16_pre_fp32_decoder,
+            },
+        ),
     }
     _write_json(args.output, report)
     print(json.dumps(report, sort_keys=True), flush=True)

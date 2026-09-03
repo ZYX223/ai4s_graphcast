@@ -10,7 +10,10 @@ GRAPHCAST_ROOT = Path(__file__).resolve().parents[1]
 if str(GRAPHCAST_ROOT) not in sys.path:
     sys.path.insert(0, str(GRAPHCAST_ROOT))
 
-from tools.diagnose_bf16_stages import tensor_error_metrics  # noqa: E402
+from tools.diagnose_bf16_stages import (  # noqa: E402
+    compare_prediction_variants,
+    tensor_error_metrics,
+)
 
 
 def test_tensor_error_metrics_reports_relative_error_and_dtypes() -> None:
@@ -34,3 +37,18 @@ def test_tensor_error_metrics_reports_relative_error_and_dtypes() -> None:
 def test_tensor_error_metrics_rejects_layout_mismatch() -> None:
     with pytest.raises(ValueError, match="matching shapes"):
         tensor_error_metrics(torch.zeros(2), torch.zeros(1, 2))
+
+
+def test_compare_prediction_variants_names_each_precision_boundary() -> None:
+    reference = torch.tensor([1.0, 2.0], dtype=torch.float32)
+
+    result = compare_prediction_variants(
+        reference,
+        {
+            "bf16_all": reference.to(torch.bfloat16),
+            "bf16_pre_fp32_decoder": reference.clone(),
+        },
+    )
+
+    assert set(result) == {"bf16_all", "bf16_pre_fp32_decoder"}
+    assert result["bf16_pre_fp32_decoder"]["relative_rmse"] == 0.0
