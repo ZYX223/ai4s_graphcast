@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import importlib.machinery
 import importlib.util
+import logging
 import os
 import subprocess
 import sys
@@ -23,6 +24,7 @@ INFERENCE_OPS = (
     "index",
     "add",
 )
+PTG_INFERENCE_OPS = tuple(op for op in INFERENCE_OPS if op != "addmm")
 
 
 @pytest.fixture
@@ -84,7 +86,7 @@ def test_flaggems_operator_parser_deduplicates_and_has_no_hidden_default(
         ("nvidia", INFERENCE_OPS),
         ("ascend", INFERENCE_OPS),
         ("hygon", INFERENCE_OPS),
-        ("ptg", ("cat", "native_layer_norm", "silu", "index", "add")),
+        ("ptg", PTG_INFERENCE_OPS),
         ("mthreads", INFERENCE_OPS),
         ("metax", INFERENCE_OPS),
     ),
@@ -103,10 +105,177 @@ def test_inference_profile_uses_one_shared_operator_contract(
         "profile": "graphcast_inference",
         "scope": "inference",
         "ops": list(INFERENCE_OPS),
-        "exclude_ops_by_backend": {
-            "ptg": ["addmm", "index_add_"],
-        },
+        "exclude_ops_by_backend": {"ptg": ["addmm"]},
     }
+
+
+def test_gather_mode_defaults_to_the_index_interface_and_metadata_reports_it(
+    backend_module,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.delenv("GRAPHCAST_GATHER_MODE", raising=False)
+    monkeypatch.delenv("GRAPHCAST_GATHER_BACKEND", raising=False)
+    profile = backend_module.BACKEND_PROFILES["nvidia"]
+    flagos = backend_module.FlagOSState(
+        mode="off",
+        strict=False,
+        requested_ops=(),
+        status="disabled",
+    )
+    runtime = backend_module.RuntimeBackend(
+        profile=profile,
+        device="cpu",
+        flagos=flagos,
+        versions={},
+    )
+
+    assert backend_module.graphcast_gather_mode() == "advanced_index"
+    assert runtime.to_metadata()["gather_backend"] == "advanced_index"
+
+    monkeypatch.setenv("GRAPHCAST_GATHER_MODE", "index_select")
+    assert backend_module.graphcast_gather_mode() == "index_select"
+    assert runtime.to_metadata()["gather_backend"] == "index_select"
+
+
+def test_dispatch_audit_requires_all_seven_core_operators(
+    backend_module,
+    tmp_path: Path,
+) -> None:
+    record = tmp_path / "flaggems-dispatch.log"
+    record.write_text(
+        "\n".join(
+            (
+                "[DEBUG] flag_gems.ops.addmm.addmm: GEMS ADDMM, shape",
+                "[DEBUG] _ascend.ops.cat.cat: GEMS_ASCEND CAT",
+                "[DEBUG] flag_gems.ops.native_layer_norm.native_layer_norm: GEMS NATIVE_LAYER_NORM",
+                "[DEBUG] _hygon.ops.index_add.index_add_: GEMS_HYGON INDEX_ADD_",
+                "[DEBUG] _hygon.ops.silu.silu: GEMS_HYGON SILU",
+                "[DEBUG] flag_gems.runtime._ascend.ops.index.index: GEMS_ASCEND INDEX",
+                "[DEBUG] flag_gems.ops.add.add: GEMS ADD",
+            )
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+    complete = backend_module.audit_flaggems_dispatch(record, INFERENCE_OPS)
+
+    assert complete.status == "passed"
+    assert complete.observed_ops == INFERENCE_OPS
+    assert complete.missing_ops == ()
+    assert complete.counts == dict.fromkeys(INFERENCE_OPS, 1)
+
+    record.write_text(
+        "[DEBUG] flag_gems.ops.cat.cat: GEMS CAT\n",
+        encoding="utf-8",
+    )
+    incomplete = backend_module.audit_flaggems_dispatch(record, INFERENCE_OPS)
+
+    assert incomplete.status == "failed_missing_ops"
+    assert incomplete.observed_ops == ("cat",)
+    assert incomplete.missing_ops == (
+        "addmm",
+        "native_layer_norm",
+        "index_add_",
+        "silu",
+        "index",
+        "add",
+    )
+
+
+def test_dispatch_audit_recognizes_common_index_add_log_spelling(
+    backend_module,
+    tmp_path: Path,
+) -> None:
+    record = tmp_path / "flaggems-dispatch.log"
+    record.write_text(
+        "[DEBUG] flag_gems.ops.index_add.index_add_: GEMS INDEX ADD_\n",
+        encoding="utf-8",
+    )
+
+    audit = backend_module.audit_flaggems_dispatch(record, ("index_add_",))
+
+    assert audit.status == "passed"
+    assert audit.observed_ops == ("index_add_",)
+    assert audit.missing_ops == ()
+    assert audit.counts == {"index_add_": 1}
+
+
+def test_dispatch_recording_binds_short_vendor_logger_names(
+    backend_module,
+) -> None:
+    def addmm_impl():
+        return None
+
+    addmm_impl.__module__ = "_metax.ops.addmm"
+    flaggems = types.SimpleNamespace(FULL_CONFIG_BY_FUNC={"addmm": (("addmm", addmm_impl),)})
+    base_logger = logging.getLogger("flag_gems")
+    vendor_logger = logging.getLogger("_metax.ops.addmm")
+    handler = logging.NullHandler()
+    base_logger.addHandler(handler)
+    try:
+        backend_module._bind_flaggems_record_loggers(flaggems, ("addmm",))
+
+        assert handler in vendor_logger.handlers
+        assert vendor_logger.level == logging.DEBUG
+        assert vendor_logger.propagate is False
+    finally:
+        if handler in vendor_logger.handlers:
+            vendor_logger.removeHandler(handler)
+        base_logger.removeHandler(handler)
+
+
+def test_formal_flaggems_run_fails_closed_when_a_registered_op_is_not_observed(
+    backend_module,
+    tmp_path: Path,
+) -> None:
+    record = tmp_path / "flaggems-dispatch.log"
+    record.write_text(
+        "[DEBUG] flag_gems.ops.cat.cat: GEMS CAT\n",
+        encoding="utf-8",
+    )
+    profile = backend_module.BACKEND_PROFILES["metax"]
+    runtime = backend_module.RuntimeBackend(
+        profile=profile,
+        device="cuda:0",
+        flagos=backend_module.FlagOSState(
+            mode="flaggems",
+            strict=True,
+            requested_ops=INFERENCE_OPS,
+            status="enabled_only_enable",
+            record_path=str(record),
+            registered_ops=INFERENCE_OPS,
+        ),
+        versions={},
+    )
+
+    with pytest.raises(RuntimeError, match="not observed.*addmm.*index_add_"):
+        backend_module.require_complete_flaggems_dispatch(runtime)
+
+
+def test_formal_flaggems_run_fails_before_dispatch_when_registration_is_missing(
+    backend_module,
+    tmp_path: Path,
+) -> None:
+    record = tmp_path / "flaggems-dispatch.log"
+    record.write_text("", encoding="utf-8")
+    profile = backend_module.BACKEND_PROFILES["metax"]
+    runtime = backend_module.RuntimeBackend(
+        profile=profile,
+        device="cuda:0",
+        flagos=backend_module.FlagOSState(
+            mode="flaggems",
+            strict=True,
+            requested_ops=INFERENCE_OPS,
+            status="enabled_only_enable",
+            record_path=str(record),
+            registered_ops=("cat",),
+        ),
+        versions={},
+    )
+
+    with pytest.raises(RuntimeError, match="not registered.*addmm.*index_add_"):
+        backend_module.require_complete_flaggems_dispatch(runtime)
 
 
 def test_v2_profile_rejects_an_exclusion_not_in_shared_ops(
@@ -279,6 +448,45 @@ def test_backend_resolves_prepared_variant_from_runtime_root(
     assert os.environ["GRAPHCAST_FLAGGEMS_SOURCE_ROOT"] == str(
         tmp_path / "runtime/official/FlagGems"
     )
+
+
+def test_explicit_flaggems_source_root_beats_editable_import_redirect(
+    backend_module,
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    expected_root = tmp_path / "expected" / "FlagGems"
+    expected_package = expected_root / "src/flag_gems"
+    expected_package.mkdir(parents=True)
+    (expected_package / "__init__.py").write_text(
+        "ORIGIN = 'expected'\n",
+        encoding="utf-8",
+    )
+    shadow_package = tmp_path / "editable" / "flag_gems"
+    shadow_package.mkdir(parents=True)
+    shadow_init = shadow_package / "__init__.py"
+    shadow_init.write_text("ORIGIN = 'editable'\n", encoding="utf-8")
+
+    class EditableRedirect:
+        def find_spec(self, fullname, path=None, target=None):
+            if fullname != "flag_gems":
+                return None
+            return importlib.util.spec_from_file_location(fullname, shadow_init)
+
+    monkeypatch.setattr(sys, "meta_path", [EditableRedirect(), *sys.meta_path])
+    monkeypatch.setenv("GRAPHCAST_FLAGGEMS_SOURCE_ROOT", str(expected_root))
+    previous_module = sys.modules.pop("flag_gems", None)
+    try:
+        activated = backend_module._activate_flaggems_source_root()
+        imported = importlib.import_module("flag_gems")
+
+        assert activated == expected_root / "src"
+        assert imported.ORIGIN == "expected"
+        assert Path(imported.__file__).resolve().is_relative_to(activated)
+    finally:
+        sys.modules.pop("flag_gems", None)
+        if previous_module is not None:
+            sys.modules["flag_gems"] = previous_module
 
 
 def test_flaggems_never_falls_back_to_enabling_all_operators(

@@ -8,12 +8,15 @@ FlagOS operator layers.
 from __future__ import annotations
 
 import importlib
+import importlib.abc
+import importlib.machinery
 import importlib.metadata as metadata
 import importlib.util
 import logging
 import os
 import sys
 from collections.abc import Callable
+from contextlib import contextmanager
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -25,6 +28,36 @@ DEFAULT_FLAGGEMS_CONFIG = (
     Path(__file__).resolve().parents[2] / "configs/flaggems/graphcast_inference.yaml"
 )
 DEFAULT_FLAGGEMS_RUNTIME_DEST = Path(__file__).resolve().parents[2] / "third_party/flaggems-runtime"
+
+
+class _ExplicitFlagGemsSourceFinder(importlib.abc.MetaPathFinder):
+    """Resolve only ``flag_gems`` from an explicitly selected source tree.
+
+    Vendor images commonly contain a PEP 660 editable finder ahead of Python's
+    normal path finder.  Such a finder can redirect ``import flag_gems`` to the
+    image checkout even when the requested source tree is first on
+    ``PYTHONPATH``.  This narrow finder affects only the ``flag_gems`` package
+    and its children; all unrelated imports keep their original resolution.
+    """
+
+    def __init__(self, python_root: Path) -> None:
+        self.python_root = python_root
+
+    def find_spec(
+        self,
+        fullname: str,
+        path: Any = None,
+        target: Any = None,
+    ) -> Any:
+        if fullname == "flag_gems":
+            return importlib.machinery.PathFinder.find_spec(
+                fullname,
+                [str(self.python_root)],
+                target,
+            )
+        if fullname.startswith("flag_gems."):
+            return importlib.machinery.PathFinder.find_spec(fullname, path, target)
+        return None
 
 
 @dataclass(frozen=True)
@@ -59,6 +92,33 @@ class FlagOSState:
 
 
 @dataclass(frozen=True)
+class FlagGemsDispatchAudit:
+    status: str
+    requested_ops: tuple[str, ...]
+    required_observed_ops: tuple[str, ...]
+    observed_ops: tuple[str, ...]
+    missing_ops: tuple[str, ...]
+    counts: dict[str, int]
+    record_path: str
+
+    def to_metadata(self) -> dict[str, Any]:
+        return {
+            "status": self.status,
+            "requested_ops": list(self.requested_ops),
+            "required_observed_ops": list(self.required_observed_ops),
+            "observed_ops": list(self.observed_ops),
+            "missing_ops": list(self.missing_ops),
+            "configured_coverage": f"{len(self.requested_ops)}/{len(self.requested_ops)}",
+            "active_coverage": (
+                f"{sum(self.counts[op] > 0 for op in self.required_observed_ops)}"
+                f"/{len(self.required_observed_ops)}"
+            ),
+            "counts": dict(self.counts),
+            "record_path": self.record_path,
+        }
+
+
+@dataclass(frozen=True)
 class RuntimeBackend:
     profile: BackendProfile
     device: torch.device
@@ -85,13 +145,90 @@ class RuntimeBackend:
             "flaggems_module_origin": _module_origin("flag_gems"),
             "bishengir_opt_dir": self.flagos.bishengir_opt_dir,
             "hygon_amdgcn_use_buffer_ops": os.environ.get("AMDGCN_USE_BUFFER_OPS"),
-            "gather_backend": os.environ.get("GRAPHCAST_GATHER_BACKEND", "advanced_index"),
+            "gather_backend": graphcast_gather_mode(),
             "flagos_warnings": list(self.flagos.warnings),
             "flagos_error": self.flagos.error,
             "flaggems_patched_ops": list(self.flagos.patched_ops),
             "flaggems_registered_ops": list(self.flagos.registered_ops),
             "versions": dict(self.versions),
         }
+
+
+def _dispatch_op_from_record_line(line: str) -> str | None:
+    message = line.split(": ", 1)[-1].strip().upper()
+    if "NATIVE_LAYER_NORM" in message:
+        return "native_layer_norm"
+    if "INDEX_ADD" in message or "INDEX ADD" in message:
+        return "index_add_"
+    if "ADDMM" in message:
+        return "addmm"
+    if message == "GEMS CAT" or message.endswith(" CAT"):
+        return "cat"
+    if "SILU FORWARD" in message or message.endswith(" SILU"):
+        return "silu"
+    if message.endswith(" INDEX"):
+        return "index"
+    if message == "GEMS ADD":
+        return "add"
+    return None
+
+
+def audit_flaggems_dispatch(
+    record_path: Path,
+    requested_ops: tuple[str, ...],
+) -> FlagGemsDispatchAudit:
+    requested = tuple(dict.fromkeys(requested_ops))
+    counts = dict.fromkeys(requested, 0)
+    if not record_path.is_file():
+        return FlagGemsDispatchAudit(
+            status="failed_missing_record",
+            requested_ops=requested,
+            required_observed_ops=requested,
+            observed_ops=(),
+            missing_ops=requested,
+            counts=counts,
+            record_path=str(record_path),
+        )
+
+    for line in record_path.read_text(encoding="utf-8", errors="replace").splitlines():
+        op = _dispatch_op_from_record_line(line)
+        if op in counts:
+            counts[op] += 1
+
+    observed = tuple(op for op in requested if counts[op] > 0)
+    missing = tuple(op for op in requested if counts[op] == 0)
+    status = "failed_missing_ops" if missing else "passed"
+    return FlagGemsDispatchAudit(
+        status=status,
+        requested_ops=requested,
+        required_observed_ops=requested,
+        observed_ops=observed,
+        missing_ops=missing,
+        counts=counts,
+        record_path=str(record_path),
+    )
+
+
+def require_complete_flaggems_dispatch(
+    runtime: RuntimeBackend,
+) -> FlagGemsDispatchAudit | None:
+    if runtime.flagos.mode != "flaggems":
+        return None
+
+    requested = runtime.flagos.requested_ops
+    registered = {name.split(".", 1)[0] for name in runtime.flagos.registered_ops}
+    missing_registered = tuple(op for op in requested if op not in registered)
+    if missing_registered:
+        raise RuntimeError("FlagGems operators not registered: " + ", ".join(missing_registered))
+
+    if not runtime.flagos.record_path:
+        raise RuntimeError("FlagGems dispatch record path is required for formal runs")
+    audit = audit_flaggems_dispatch(Path(runtime.flagos.record_path), requested)
+    if not audit.status.startswith("passed"):
+        raise RuntimeError(
+            "FlagGems operators not observed in the model run: " + ", ".join(audit.missing_ops)
+        )
+    return audit
 
 
 BACKEND_PROFILES: dict[str, BackendProfile] = {
@@ -303,10 +440,7 @@ def configure_float32_math(
             raise RuntimeError("torch_npu does not expose torch.npu.conv.allow_hf32")
         matmul.allow_hf32 = enabled
         convolution.allow_hf32 = enabled
-        if (
-            bool(matmul.allow_hf32) != enabled
-            or bool(convolution.allow_hf32) != enabled
-        ):
+        if bool(matmul.allow_hf32) != enabled or bool(convolution.allow_hf32) != enabled:
             raise RuntimeError("torch_npu did not apply the requested HF32 mode")
         return "hf32" if enabled else "ieee_fp32"
 
@@ -431,9 +565,7 @@ def _load_flaggems_ops(config_path: Path, platform: str) -> tuple[str, ...]:
         ops = config.get("ops")
         exclusions = config.get("exclude_ops_by_backend", {})
         if not isinstance(exclusions, dict):
-            raise ValueError(
-                f"FlagGems exclude_ops_by_backend must be a mapping: {config_path}"
-            )
+            raise ValueError(f"FlagGems exclude_ops_by_backend must be a mapping: {config_path}")
     elif version == 1:
         # Training remains on the legacy per-platform schema until its separate
         # device validation is complete.
@@ -468,23 +600,17 @@ def _load_flaggems_ops(config_path: Path, platform: str) -> tuple[str, ...]:
             )
         for excluded_op in excluded_ops:
             if not isinstance(excluded_op, str) or not excluded_op.strip():
-                raise ValueError(
-                    f"FlagGems exclusions must be non-empty strings: {config_path}"
-                )
+                raise ValueError(f"FlagGems exclusions must be non-empty strings: {config_path}")
             if excluded_op.strip() not in normalized:
                 raise ValueError(
                     f"FlagGems exclusion {excluded_op!r} for {backend_name} "
                     f"is not present in shared ops: {config_path}"
                 )
 
-    platform_exclusions = {
-        op.strip() for op in exclusions.get(platform, ())
-    }
+    platform_exclusions = {op.strip() for op in exclusions.get(platform, ())}
     resolved = tuple(op for op in normalized if op not in platform_exclusions)
     if not resolved:
-        raise ValueError(
-            f"FlagGems exclusions remove every operator for {platform}: {config_path}"
-        )
+        raise ValueError(f"FlagGems exclusions remove every operator for {platform}: {config_path}")
     return resolved
 
 
@@ -610,8 +736,14 @@ def _activate_flaggems_source_root() -> Path | None:
     python_root = root / "src"
     if not (python_root / "flag_gems/__init__.py").is_file():
         raise RuntimeError(f"invalid GRAPHCAST_FLAGGEMS_SOURCE_ROOT: {root}")
-    if str(python_root) not in sys.path:
-        sys.path.insert(0, str(python_root))
+    python_root_text = str(python_root)
+    sys.path[:] = [entry for entry in sys.path if entry != python_root_text]
+    sys.path.insert(0, python_root_text)
+    sys.meta_path[:] = [
+        finder for finder in sys.meta_path if not isinstance(finder, _ExplicitFlagGemsSourceFinder)
+    ]
+    sys.meta_path.insert(0, _ExplicitFlagGemsSourceFinder(python_root))
+    importlib.invalidate_caches()
     return python_root
 
 
@@ -690,7 +822,6 @@ def _enable_flaggems(
                     f"{module_origin}"
                 ) from exc
 
-        _bind_ascend_record_loggers()
         patched_ops: list[str] = []
         if _using_ascend_vendor() and "index" in ops:
             # GraphCast gathers node features as src[:, idx, :] (dim-1 index).
@@ -709,7 +840,7 @@ def _enable_flaggems(
         flag_gems.only_enable(include=list(ops), **record_kwargs)
         status = "enabled_only_enable"
 
-        _bind_ascend_record_loggers()
+        _bind_flaggems_record_loggers(flag_gems, ops)
         registered_ops = _safe_list(flag_gems, "all_registered_ops")
         registered_keys = _safe_list(flag_gems, "all_registered_keys")
     except Exception as exc:  # noqa: BLE001
@@ -800,6 +931,57 @@ def resolve_runtime_backend(requested_device: str = "auto") -> RuntimeBackend:
     )
 
 
+@contextmanager
+def suspend_prevalidated_flaggems_index_add_bounds(
+    runtime: RuntimeBackend,
+):
+    """Temporarily skip a bounds check already proven for GraphCast static indices."""
+
+    if runtime.flagos.mode != "flaggems" or not runtime.flagos.strict:
+        raise RuntimeError("prevalidated static index_add requires strict FlagGems mode")
+
+    import flag_gems
+
+    registrations = getattr(flag_gems, "FULL_CONFIG_BY_FUNC", {}).get("index_add_")
+    if not isinstance(registrations, list) or len(registrations) != 1:
+        raise RuntimeError("expected exactly one active FlagGems index_add_ registration")
+    registration = registrations[0]
+    if not isinstance(registration, tuple) or len(registration) != 2:
+        raise RuntimeError("unexpected FlagGems index_add_ registration format")
+    registered_name, registered_function = registration
+    if registered_name != "index_add_" or not callable(registered_function):
+        raise RuntimeError("unexpected FlagGems index_add_ registration")
+    active_globals = getattr(registered_function, "__globals__", None)
+    if not isinstance(active_globals, dict):
+        raise RuntimeError("active FlagGems index_add_ has no mutable Python globals")
+    original_check = active_globals.get("_assert_index_in_bounds")
+    if not callable(original_check):
+        raise RuntimeError("active FlagGems index_add_ bounds check was not found")
+
+    def already_prevalidated(_index: torch.Tensor, _upper_bound: int) -> None:
+        return None
+
+    evidence = {
+        "status": "active",
+        "platform_profile": runtime.profile.name,
+        "active_module": str(getattr(registered_function, "__module__", "unknown")),
+        "registered_name": registered_name,
+        "original_check": str(getattr(original_check, "__name__", "unknown")),
+        "restored": False,
+    }
+    active_globals["_assert_index_in_bounds"] = already_prevalidated
+    try:
+        yield evidence
+    finally:
+        replacement_unchanged = (
+            active_globals.get("_assert_index_in_bounds") is already_prevalidated
+        )
+        active_globals["_assert_index_in_bounds"] = original_check
+        evidence["restored"] = True
+        if not replacement_unchanged:
+            raise RuntimeError("FlagGems index_add_ bounds replacement changed during execution")
+
+
 def synchronize(runtime: RuntimeBackend | torch.device) -> None:
     device = runtime.device if isinstance(runtime, RuntimeBackend) else runtime
     if device.type == "cuda":
@@ -864,7 +1046,7 @@ def backend_report_lines(runtime: RuntimeBackend) -> list[str]:
 
 
 def graphcast_gather_mode() -> str:
-    return os.environ.get("GRAPHCAST_GATHER_MODE", "index_select").strip().lower()
+    return os.environ.get("GRAPHCAST_GATHER_MODE", "advanced_index").strip().lower()
 
 
 def use_advanced_index_gather() -> bool:
@@ -876,17 +1058,49 @@ def _using_ascend_vendor() -> bool:
 
 
 def _bind_ascend_record_loggers() -> None:
+    _bind_record_logger_names(
+        (
+            "_ascend.ops.index",
+            "_ascend.ops.index_add",
+            "flag_gems.ops.index_add",
+            "flag_gems.runtime.backend._ascend.ops.index",
+            "flag_gems.runtime.backend._ascend.ops.index_add",
+            "flag_gems.runtime._ascend.ops.index",
+            "flag_gems.runtime._ascend.ops.index_add",
+        )
+    )
+
+
+def _bind_flaggems_record_loggers(flag_gems: Any, ops: tuple[str, ...]) -> None:
+    """Route dynamically-loaded vendor loggers into FlagGems' record file.
+
+    Some vendor modules are loaded under short names such as
+    ``_metax.ops.addmm``.  Those loggers are not children of ``flag_gems`` and
+    therefore do not inherit the file handler installed by
+    ``only_enable(record=True)``.  Bind the exact implementation modules from
+    FlagGems' registration table so a missing record means a missing call, not
+    merely a logging namespace mismatch.
+    """
+
+    names: set[str] = set()
+    by_function = getattr(flag_gems, "FULL_CONFIG_BY_FUNC", None)
+    if isinstance(by_function, dict):
+        for op in ops:
+            for entry in by_function.get(op, ()):
+                if not isinstance(entry, tuple | list) or len(entry) < 2:
+                    continue
+                implementation = entry[1]
+                module_name = getattr(implementation, "__module__", "")
+                if module_name:
+                    names.add(str(module_name))
+    _bind_record_logger_names(tuple(sorted(names)))
+    _bind_ascend_record_loggers()
+
+
+def _bind_record_logger_names(names: tuple[str, ...]) -> None:
     flag_logger = logging.getLogger("flag_gems")
     flag_handlers = list(flag_logger.handlers)
-    for name in (
-        "_ascend.ops.index",
-        "_ascend.ops.index_add",
-        "flag_gems.ops.index_add",
-        "flag_gems.runtime.backend._ascend.ops.index",
-        "flag_gems.runtime.backend._ascend.ops.index_add",
-        "flag_gems.runtime._ascend.ops.index",
-        "flag_gems.runtime._ascend.ops.index_add",
-    ):
+    for name in names:
         logger = logging.getLogger(name)
         logger.setLevel(logging.DEBUG)
         if name.startswith("flag_gems."):

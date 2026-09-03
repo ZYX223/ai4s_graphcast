@@ -29,3 +29,9 @@ GRAPHCAST_FLAGGEMS_VARIANT=internal \
 Set `GRAPHCAST_FLAGGEMS_VARIANT=official` for the matched upstream comparison,
 or leave it as `installed` to use the FlagGems package already present in the
 environment. An explicit `GRAPHCAST_FLAGGEMS_SOURCE_ROOT` takes precedence.
+
+## Dense GEMM roof and MFU
+
+The retained six-platform GEMM workload, hardware-path profiler launchers, and
+the path-matched GraphCast MFU calculator are documented in
+[`dense_gemm_peak/README.md`](dense_gemm_peak/README.md).

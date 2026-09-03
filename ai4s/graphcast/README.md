@@ -2,7 +2,7 @@
 
 PyTorch-based implementation of Google DeepMind's GraphCast global weather forecasting
 model (0.25 deg resolution). The shared model and backend routing cover NVIDIA H100,
-Huawei Ascend 910C, Hygon BW1000, T-Head PPU-ZW810E, Moore Threads S5000, and
+Huawei Ascend 910C, Hygon BW3000, T-Head PPU-ZW810E, Moore Threads S5000, and
 MetaX C550.
 
 This directory is the canonical GraphCast workspace for training and inference. All
@@ -78,7 +78,7 @@ repository.
 |----------|-------|---------------|
 | NVIDIA H100 | chenwei/graphcast_flaggems5.0.2 | `qs_graphcast_nvidia` |
 | Ascend 910C | chenwei/graphcast_flaggems5.3.0rc2 | `qs_graphcast_ascend` |
-| Hygon BW1000 | chenwei/graphcast_flaggems5.0.2 | `qs_graphcast_hygon` |
+| Hygon BW3000 | chenwei/graphcast_flaggems5.0.2 | `qs_graphcast_hygon` |
 | PPU-ZW810E | chenwei/graphcast_flaggems5.3.0rc2_verified_5op | `qs_graphcast_ppu` |
 
 ### Examples
@@ -114,8 +114,8 @@ bash tools/prepare_flaggems_runtime.sh
 |----------|--------|---------|-------------|--------|
 | NVIDIA H100 | `cuda` | `nvidia` | addmm, cat, native_layer_norm, index_add_, silu, index, add | ✓ |
 | Huawei Ascend 910C | `npu` | `ascend` | addmm, silu, native_layer_norm, cat, index, index_add_, add | ✓ |
-| Hygon BW1000 | `cuda` (HIP) | `hygon` | addmm, silu, native_layer_norm, cat, index, index_add_, add | ✓ |
-| T-Head PPU-ZW810E | `cuda` (HGGC) | `ptg` | cat, native_layer_norm, silu, index, add | ✓ |
+| Hygon BW3000 | `cuda` (HIP) | `hygon` | addmm, silu, native_layer_norm, cat, index, index_add_, add | ✓ |
+| T-Head PPU-ZW810E | `cuda` (HGGC) | `ptg` | cat, native_layer_norm, index_add_, silu, index, add | ✓ (6/7) |
 | Moore Threads S5000 | `musa` | `mthreads` | addmm, silu, native_layer_norm, cat, index, index_add_, add | ✓ |
 | MetaX C550 | `cuda` (MACA) | `metax` | addmm, silu, native_layer_norm, cat, index, index_add_, add | ✓ |
 
@@ -188,27 +188,30 @@ Inference and training use independent checked-in profiles:
 - `configs/flaggems/graphcast_inference.yaml` controls inference operators;
 - `configs/flaggems/graphcast_training.yaml` controls training-forward operators.
 
-The inference profile starts from one platform-independent seven-operator
-request. A short backend exclusion list records only correctness failures: the
-810E/PTG profile keeps `addmm` and `index_add_` Native because the exact 40-step
-autoregressive comparison exceeds the normalized error envelope. It does not
-duplicate full per-platform lists; actual dispatch evidence belongs to the run
-report. The training profile does not claim backward coverage. Backward correctness and
-performance must be validated separately. A non-empty
+The inference profile starts from one platform-independent seven-operator request:
+`addmm`, `cat`, `native_layer_norm`, `index_add_`, `silu`, `index`, and `add`.
+The only checked-in correctness exclusion is PTG/810E `addmm`; the validated
+production route therefore requires 7/7 on C550, BW3000, S5000 and 910C, and
+6/7 on 810E with `addmm` left Native. Formal FlagGems runs record implementation
+entry logs and refuse to publish unless every effective requested operator was
+registered and observed. The training profile does not claim backward coverage.
+Backward correctness and performance must be validated separately. A non-empty
 `GRAPHCAST_FLAGGEMS_OPS` overrides the selected YAML profile.
 
-### Formal 40-step inference
+### Formal autoregressive inference
 
 Round-1 performance uses the device-resident autoregressive runner rather than
-the single-step quickstart path. All 40 dependent 6-hour leads are measured;
-warm-up is synchronized before timing and only the final complete output is
-copied to the host.
+the single-step quickstart path. The default is 40 dependent 6-hour leads, but
+`--steps` accepts any positive count when the forcing asset contains exactly
+that many frames. Warm-up is synchronized before timing and only the final
+complete output is copied to the host.
 
 ```bash
 GRAPHCAST_BACKEND=metax \
 GRAPHCAST_FLAGOS_MODE=flaggems \
 GRAPHCAST_FLAGGEMS_CONFIG=configs/flaggems/graphcast_inference.yaml \
 GRAPHCAST_FLAGGEMS_SOURCE_ROOT=/path/to/FlagGems \
+GRAPHCAST_FLAGGEMS_RECORD_PATH=outputs/logs/flaggems-dispatch.log \
 GRAPHCAST_STRICT_FLAGOS=1 \
 python scripts/inference/run_operational_40step_inference.py \
   --device cuda:0 \
@@ -219,12 +222,25 @@ python scripts/inference/run_operational_40step_inference.py \
   --target-template /assets/target_template.nc \
   --stats-dir /assets/stats \
   --output outputs/predictions/lead240.nc \
-  --report outputs/reports/round1.json
+  --report outputs/reports/round1.json \
+  --edge-input-projection factorized \
+  --grid2mesh-edge-chunk-size 131072 \
+  --mesh2grid-edge-chunk-size 131072 \
+  --mesh2grid-full-grid-fast-path \
+  --index-add-execution prevalidated-static
 ```
 
 Set `GRAPHCAST_FLAGOS_MODE=off` for the paired Native baseline. A run is not
-performance evidence unless its JSON report records 40 steps, finite output,
-the expected source hashes, and `warmup_excluded_from_e2e=true`.
+performance evidence unless its JSON report records the requested step count,
+finite output, expected source hashes, and `warmup_excluded_from_e2e=true`.
+
+The retained model-side options are the factorized edge projection, explicit
+grid2mesh/mesh2grid edge chunks, the full-grid mesh2grid fast path, and static
+GraphCast receiver-index prevalidation. The established inference gather route
+remains `GRAPHCAST_GATHER_MODE=advanced_index`; these options do not switch it
+to `index_select` or replace FlagGems kernels. Removed experiments (encoder/node
+factorization, aggregation-buffer reuse, opaque custom-op boundaries and graph
+capture) are intentionally not accepted by the formal runner.
 
 By default FlagGems mode imports the package installed in the environment. Run
 `bash tools/prepare_flaggems_runtime.sh` to fetch the active internal manifest

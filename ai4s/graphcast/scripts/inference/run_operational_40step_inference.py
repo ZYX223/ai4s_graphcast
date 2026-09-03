@@ -4,19 +4,19 @@
 from __future__ import annotations
 
 import argparse
-from dataclasses import dataclass
 import hashlib
 import json
 import math
 import os
-from pathlib import Path
 import sys
 import time
-from typing import Any, Callable
+from collections.abc import Callable
+from dataclasses import dataclass, replace
+from pathlib import Path
+from typing import Any
 
 import torch
 import xarray as xr
-
 
 GRAPHCAST_ROOT = Path(__file__).resolve().parents[2]
 SRC_ROOT = GRAPHCAST_ROOT / "src"
@@ -36,11 +36,14 @@ from graphcast_compat.autoregressive_inference import (  # noqa: E402
 from graphcast_compat.backend import (  # noqa: E402
     configure_float32_math,
     memory_text,
+    require_complete_flaggems_dispatch,
     reset_peak_memory,
     resolve_runtime_backend,
+    suspend_prevalidated_flaggems_index_add_bounds,
+)
+from graphcast_compat.backend import (  # noqa: E402
     synchronize as synchronize_runtime,
 )
-
 
 FORWARD_FLOPS = 28_857_094_475_776
 
@@ -91,11 +94,11 @@ def run_tensor_resident_rollout(
 ) -> RolloutMeasurement:
     """Warm up outside the timer, then measure all dependent rollout steps."""
 
-    if steps != 40:
-        raise ValueError(f"formal operational rollout requires exactly 40 steps, got {steps}")
+    if steps <= 0:
+        raise ValueError(f"rollout steps must be positive, got {steps}")
     if int(prepared.steps) != steps:
         raise ValueError(
-            f"40-step rollout requires exactly 40 forcing frames, got {prepared.steps}"
+            f"requested {steps} rollout steps but received {prepared.steps} forcing frames"
         )
     if warmup_calls < 1:
         raise ValueError("at least one warmup call is required")
@@ -150,15 +153,19 @@ def _sha256(path: Path) -> str:
 
 
 def _select_state_dict(payload: Any) -> dict[str, torch.Tensor]:
-    if isinstance(payload, dict) and payload and all(
-        isinstance(value, torch.Tensor) for value in payload.values()
+    if (
+        isinstance(payload, dict)
+        and payload
+        and all(isinstance(value, torch.Tensor) for value in payload.values())
     ):
         return payload
     if isinstance(payload, dict):
         for key in ("model_state_dict", "model_state", "state_dict"):
             value = payload.get(key)
-            if isinstance(value, dict) and value and all(
-                isinstance(tensor, torch.Tensor) for tensor in value.values()
+            if (
+                isinstance(value, dict)
+                and value
+                and all(isinstance(tensor, torch.Tensor) for tensor in value.values())
             ):
                 return value
     raise ValueError("checkpoint does not contain a supported model state dictionary")
@@ -174,6 +181,51 @@ def _write_json(path: Path, payload: dict[str, Any]) -> None:
     os.replace(temporary, path)
 
 
+def build_model_for_run(
+    config: GoogleSmallConfig,
+    *,
+    edge_input_projection: str,
+    mesh2grid_full_grid_fast_path: bool = False,
+    index_add_execution: str = "inline",
+) -> GoogleSmallCompatibleModel:
+    return GoogleSmallCompatibleModel(
+        config,
+        edge_input_projection_mode=edge_input_projection,
+        mesh2grid_full_grid_fast_path=mesh2grid_full_grid_fast_path,
+        index_add_execution=index_add_execution,
+    )
+
+
+def apply_edge_chunk_overrides(
+    config: GoogleSmallConfig,
+    *,
+    grid2mesh: int | None,
+    mesh2grid: int | None,
+) -> GoogleSmallConfig:
+    for value in (grid2mesh, mesh2grid):
+        if value is not None and value <= 0:
+            raise ValueError("edge chunk size must be positive")
+    return replace(
+        config,
+        grid2mesh_edge_chunk_size=(
+            grid2mesh if grid2mesh is not None else config.grid2mesh_edge_chunk_size
+        ),
+        mesh2grid_edge_chunk_size=(
+            mesh2grid if mesh2grid is not None else config.mesh2grid_edge_chunk_size
+        ),
+    )
+
+
+def model_execution_metadata(model: GoogleSmallCompatibleModel) -> dict[str, Any]:
+    return {
+        "edge_input_projection": model.edge_input_projection_mode,
+        "mesh2grid_full_grid_fast_path": model.mesh2grid_full_grid_fast_path,
+        "index_add_execution": model.index_add_execution,
+        "grid2mesh_edge_chunk_size": model.config.grid2mesh_edge_chunk_size,
+        "mesh2grid_edge_chunk_size": model.config.mesh2grid_edge_chunk_size,
+    }
+
+
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--config", type=Path, required=True)
@@ -186,6 +238,19 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--report", type=Path, required=True)
     parser.add_argument("--device", default="auto")
     parser.add_argument("--precision", choices=("fp32",), default="fp32")
+    parser.add_argument(
+        "--edge-input-projection",
+        choices=("concatenated", "factorized"),
+        default="concatenated",
+    )
+    parser.add_argument("--grid2mesh-edge-chunk-size", type=int)
+    parser.add_argument("--mesh2grid-edge-chunk-size", type=int)
+    parser.add_argument("--mesh2grid-full-grid-fast-path", action="store_true")
+    parser.add_argument(
+        "--index-add-execution",
+        choices=("inline", "prevalidated-static"),
+        default="inline",
+    )
     parser.add_argument("--steps", type=int, default=40)
     parser.add_argument("--warmup-calls", type=int, default=1)
     parser.add_argument("--forward-flops", type=int, default=FORWARD_FLOPS)
@@ -213,13 +278,22 @@ def main(argv: list[str] | None = None) -> int:
 
     runtime = resolve_runtime_backend(args.device)
     float32_math_mode = configure_float32_math(False, runtime.profile.device_type)
-    config = GoogleSmallConfig.from_yaml(args.config)
+    config = apply_edge_chunk_overrides(
+        GoogleSmallConfig.from_yaml(args.config),
+        grid2mesh=args.grid2mesh_edge_chunk_size,
+        mesh2grid=args.mesh2grid_edge_chunk_size,
+    )
     inputs = xr.open_dataset(args.inputs).load()
     forcings = xr.open_dataset(args.rollout_forcings).load()
     target_template = xr.open_dataset(args.target_template).load()
     stats = load_normalization_stats(args.stats_dir)
 
-    model = GoogleSmallCompatibleModel(config)
+    model = build_model_for_run(
+        config,
+        edge_input_projection=args.edge_input_projection,
+        mesh2grid_full_grid_fast_path=args.mesh2grid_full_grid_fast_path,
+        index_add_execution=args.index_add_execution,
+    )
     model.load_state_dict(
         _select_state_dict(torch.load(args.weights, map_location="cpu")),
         strict=True,
@@ -230,6 +304,9 @@ def main(argv: list[str] | None = None) -> int:
     )
     model.to(runtime.device)
     model.eval()
+    static_index_add_contract = None
+    if args.index_add_execution == "prevalidated-static":
+        static_index_add_contract = model.prevalidate_static_index_add()
     prepared = prepare_device_rollout(
         inputs,
         target_template,
@@ -240,13 +317,29 @@ def main(argv: list[str] | None = None) -> int:
     )
 
     reset_peak_memory(runtime)
-    measurement = run_tensor_resident_rollout(
-        model,
-        prepared,
-        steps=args.steps,
-        warmup_calls=args.warmup_calls,
-        synchronize=lambda: synchronize_runtime(runtime),
-    )
+    static_runtime_evidence: dict[str, Any] = {"status": "not_requested"}
+
+    if static_index_add_contract is None:
+        measurement = run_tensor_resident_rollout(
+            model,
+            prepared,
+            steps=args.steps,
+            warmup_calls=args.warmup_calls,
+            synchronize=lambda: synchronize_runtime(runtime),
+        )
+    else:
+        with suspend_prevalidated_flaggems_index_add_bounds(runtime) as runtime_evidence:
+            measurement = run_tensor_resident_rollout(
+                model,
+                prepared,
+                steps=args.steps,
+                warmup_calls=args.warmup_calls,
+                synchronize=lambda: synchronize_runtime(runtime),
+            )
+        model.verify_static_index_add(static_index_add_contract)
+        static_runtime_evidence = runtime_evidence
+
+    dispatch_audit = require_complete_flaggems_dispatch(runtime)
     prediction = normalized_output_to_prediction(
         measurement.final_output,
         target_template,
@@ -273,7 +366,14 @@ def main(argv: list[str] | None = None) -> int:
             "rollout_forcings_sha256": _sha256(args.rollout_forcings),
             "target_template_sha256": _sha256(args.target_template),
         },
-        "runtime": runtime.to_metadata(),
+        "runtime": {
+            **runtime.to_metadata(),
+            "flaggems_dispatch": (
+                dispatch_audit.to_metadata()
+                if dispatch_audit is not None
+                else {"status": "not_requested"}
+            ),
+        },
         "precision": {
             "requested": args.precision,
             "storage_dtype": "float32",
@@ -286,6 +386,15 @@ def main(argv: list[str] | None = None) -> int:
             "warmup_excluded_from_e2e": True,
             "final_output_d2h_included_in_e2e": True,
             "device_count": args.device_count,
+            **model_execution_metadata(model),
+            "static_index_add": (
+                {
+                    **static_index_add_contract.to_metadata(),
+                    "runtime_patch": static_runtime_evidence,
+                }
+                if static_index_add_contract is not None
+                else {"status": "not_requested"}
+            ),
         },
         "measurement": {
             "e2e_seconds": measurement.e2e_seconds,

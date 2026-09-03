@@ -14,11 +14,8 @@ ops:
   - index
   - add
 
-# Keep only measured correctness exceptions here; do not duplicate the shared
-# list per platform. On 810E, addmm alone exceeds the 40-step envelope, while
-# native_layer_norm + index_add_ together also exceeds it. Retain the more
-# frequently exercised LayerNorm path and keep these two interfaces Native.
+# The 810E addmm path fails the model-level FP32 correctness envelope. Keep
+# index_add_ enabled: the validated 6/7 production profile excludes addmm only.
 exclude_ops_by_backend:
   ptg:
     - addmm
-    - index_add_

@@ -19,6 +19,7 @@ model_config:
   hidden_layers: 1
   radius_query_fraction_edge_length: 0.5999912857713345
   mesh2grid_edge_normalization_factor: 0.6180338738074472
+  grid2mesh_edge_chunk_size: 131072
   mesh2grid_edge_chunk_size: 131072
   extra_mesh2grid_final_output_heads:
     mesh_nodes: 83

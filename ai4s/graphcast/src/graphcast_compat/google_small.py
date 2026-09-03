@@ -17,6 +17,7 @@ from .backend import use_advanced_index_gather
 from .graph import GoogleSmallGraph, build_google_small_graph
 
 DEFAULT_CONFIG = Path("configs/inference/google_graphcast_small.yaml")
+INDEX_ADD_EXECUTIONS = frozenset({"inline", "prevalidated-static"})
 
 
 def _environment_flag(name: str) -> bool:
@@ -35,6 +36,7 @@ class GoogleSmallConfig:
     radius_query_fraction_edge_length: float = 0.6
     mesh2grid_edge_normalization_factor: float = 0.6180338738074472
     grid2mesh_node_chunk_size: int | None = None
+    grid2mesh_edge_chunk_size: int | None = None
     mesh2grid_edge_chunk_size: int | None = None
     mesh2grid_node_chunk_size: int | None = None
     mesh2grid_decoder_chunk_size: int | None = None
@@ -71,6 +73,11 @@ class GoogleSmallConfig:
                 if model_config.get("grid2mesh_node_chunk_size") is not None
                 else None
             ),
+            grid2mesh_edge_chunk_size=(
+                int(model_config["grid2mesh_edge_chunk_size"])
+                if model_config.get("grid2mesh_edge_chunk_size") is not None
+                else None
+            ),
             mesh2grid_edge_chunk_size=(
                 int(model_config["mesh2grid_edge_chunk_size"])
                 if model_config.get("mesh2grid_edge_chunk_size") is not None
@@ -96,6 +103,48 @@ class GoogleSmallConfig:
                 dict(model_config.get("extra_mesh2grid_final_output_heads", {})) or None
             ),
         )
+
+
+@dataclass(frozen=True)
+class StaticIndexAddBufferContract:
+    name: str
+    shape: tuple[int, ...]
+    stride: tuple[int, ...]
+    dtype: str
+    device: str
+    data_ptr: int
+    version: int
+    numel: int
+    lower_bound: int
+    upper_value: int
+    upper_bound: int
+
+    def to_metadata(self) -> dict[str, Any]:
+        return {
+            "name": self.name,
+            "shape": list(self.shape),
+            "stride": list(self.stride),
+            "dtype": self.dtype,
+            "device": self.device,
+            "data_ptr": self.data_ptr,
+            "version": self.version,
+            "numel": self.numel,
+            "lower_bound": self.lower_bound,
+            "upper_value": self.upper_value,
+            "upper_bound": self.upper_bound,
+        }
+
+
+@dataclass(frozen=True)
+class StaticIndexAddContract:
+    buffers: tuple[StaticIndexAddBufferContract, ...]
+
+    def to_metadata(self) -> dict[str, Any]:
+        return {
+            "status": "verified",
+            "scope": "graphcast_static_receiver_buffers",
+            "buffers": [item.to_metadata() for item in self.buffers],
+        }
 
 
 class HaikuStyleMLP(nn.Module):
@@ -181,8 +230,20 @@ class GoogleSmallGraphNet(nn.Module):
         config: GoogleSmallConfig,
         activation_checkpointing: bool = False,
         fuse_post_layer_norm_residual: bool = False,
+        edge_input_projection_mode: str = "concatenated",
+        index_add_execution: str = "inline",
     ) -> None:
         super().__init__()
+        if edge_input_projection_mode not in {"concatenated", "factorized"}:
+            raise ValueError(
+                "edge input projection mode must be 'concatenated' or 'factorized', "
+                f"got {edge_input_projection_mode!r}"
+            )
+        if index_add_execution not in INDEX_ADD_EXECUTIONS:
+            raise ValueError(
+                "index_add execution must be 'inline' or 'prevalidated-static', "
+                f"got {index_add_execution!r}"
+            )
         self.edge_types = tuple(edge_types)
         self.edge_node_sets = edge_node_sets
         self.node_types = tuple(node_types)
@@ -193,6 +254,8 @@ class GoogleSmallGraphNet(nn.Module):
         self.decoder_node_chunk_sizes = dict(decoder_node_chunk_sizes or {})
         self.activation_checkpointing = activation_checkpointing
         self.fuse_post_layer_norm_residual = fuse_post_layer_norm_residual
+        self.edge_input_projection_mode = edge_input_projection_mode
+        self.index_add_execution = index_add_execution
         self.encoder_device: torch.device | None = None
         self.processor_step_devices: tuple[torch.device | None, ...] = tuple(
             None for _ in range(message_passing_steps)
@@ -268,10 +331,12 @@ class GoogleSmallGraphNet(nn.Module):
         edge_indices: dict[str, tuple[torch.Tensor, torch.Tensor]],
         *,
         node_output_slices: dict[str, tuple[int, int]] | None = None,
+        encoded_node_types: Iterable[str] = (),
     ) -> Any:
         nodes = dict(nodes)
         edges = dict(edges)
         node_output_slices = dict(node_output_slices or {})
+        encoded_node_types = frozenset(encoded_node_types)
 
         if self.encoder_device is not None:
             nodes = move_tensor_dict(nodes, self.encoder_device)
@@ -286,7 +351,7 @@ class GoogleSmallGraphNet(nn.Module):
 
         for node_type in self.node_types:
             base_name = f"encoder_nodes_{node_type}"
-            if hasattr(self, f"{base_name}_mlp"):
+            if node_type not in encoded_node_types and hasattr(self, f"{base_name}_mlp"):
                 nodes[node_type] = self._apply_mlp_with_layer_norm(base_name, nodes[node_type])
 
         for step in range(self.message_passing_steps):
@@ -400,13 +465,20 @@ class GoogleSmallGraphNet(nn.Module):
         for edge_type in self.edge_types:
             sender_type, receiver_type = self.edge_node_sets[edge_type]
             senders, receivers = edge_indices[edge_type]
+            factorized_projection = None
+            if self.edge_input_projection_mode == "factorized":
+                factorized_projection = self._prepare_factorized_edge_projection(
+                    f"processor_edges_{step}_{edge_type}",
+                    previous_nodes[sender_type],
+                    previous_nodes[receiver_type],
+                )
             chunk_size = self.edge_update_chunk_sizes.get(edge_type)
             edge_count = int(previous_edges[edge_type].shape[1])
             if chunk_size is not None and chunk_size > 0 and edge_count > chunk_size:
                 aggregated = previous_nodes[receiver_type].new_zeros(
                     previous_nodes[receiver_type].shape[0],
                     previous_nodes[receiver_type].shape[1],
-                    previous_nodes[receiver_type].shape[-1],
+                    previous_nodes[receiver_type].shape[2],
                 )
                 for start in range(0, edge_count, chunk_size):
                     end = min(start + chunk_size, edge_count)
@@ -417,40 +489,64 @@ class GoogleSmallGraphNet(nn.Module):
                         edge_chunk = self._apply_mlp_with_layer_norm(
                             f"encoder_edges_{edge_type}", edge_chunk
                         )
-                    edge_inputs = torch.cat(
-                        [
+                    if factorized_projection is None:
+                        edge_inputs = torch.cat(
+                            [
+                                edge_chunk,
+                                gather_node_features(
+                                    previous_nodes[sender_type],
+                                    chunk_senders,
+                                ),
+                                gather_node_features(
+                                    previous_nodes[receiver_type],
+                                    chunk_receivers,
+                                ),
+                            ],
+                            dim=-1,
+                        )
+                        edge_delta = self._apply_mlp_with_layer_norm(
+                            f"processor_edges_{step}_{edge_type}", edge_inputs
+                        )
+                    else:
+                        edge_inputs = None
+                        edge_delta = self._apply_factorized_edge_projection(
+                            f"processor_edges_{step}_{edge_type}",
                             edge_chunk,
-                            gather_node_features(
-                                previous_nodes[sender_type],
-                                chunk_senders,
-                            ),
-                            gather_node_features(
-                                previous_nodes[receiver_type],
-                                chunk_receivers,
-                            ),
-                        ],
-                        dim=-1,
+                            chunk_senders,
+                            chunk_receivers,
+                            factorized_projection,
+                        )
+                    execute_index_add_(
+                        aggregated,
+                        chunk_receivers,
+                        edge_delta,
+                        execution=self.index_add_execution,
                     )
-                    edge_delta = self._apply_mlp_with_layer_norm(
-                        f"processor_edges_{step}_{edge_type}", edge_inputs
-                    )
-                    aggregated.index_add_(1, chunk_receivers, edge_delta)
                     del edge_chunk, edge_inputs, edge_delta
                 edge_updates[edge_type] = None
                 received_by_node_type[receiver_type].append(aggregated)
                 continue
 
-            edge_inputs = torch.cat(
-                [
+            if factorized_projection is None:
+                edge_inputs = torch.cat(
+                    [
+                        previous_edges[edge_type],
+                        gather_node_features(previous_nodes[sender_type], senders),
+                        gather_node_features(previous_nodes[receiver_type], receivers),
+                    ],
+                    dim=-1,
+                )
+                edge_delta = self._apply_mlp_with_layer_norm(
+                    f"processor_edges_{step}_{edge_type}", edge_inputs
+                )
+            else:
+                edge_delta = self._apply_factorized_edge_projection(
+                    f"processor_edges_{step}_{edge_type}",
                     previous_edges[edge_type],
-                    gather_node_features(previous_nodes[sender_type], senders),
-                    gather_node_features(previous_nodes[receiver_type], receivers),
-                ],
-                dim=-1,
-            )
-            edge_delta = self._apply_mlp_with_layer_norm(
-                f"processor_edges_{step}_{edge_type}", edge_inputs
-            )
+                    senders,
+                    receivers,
+                    factorized_projection,
+                )
             edge_updates[edge_type] = edge_delta
 
         updated_nodes = {}
@@ -469,6 +565,7 @@ class GoogleSmallGraphNet(nn.Module):
                         edge_delta,
                         receivers,
                         previous_nodes[node_type].shape[1],
+                        index_add_execution=self.index_add_execution,
                     )
                 )
 
@@ -539,6 +636,63 @@ class GoogleSmallGraphNet(nn.Module):
                 else previous_edges[edge_type] + edge_delta
             )
         return updated_nodes, updated_edges
+
+    def _prepare_factorized_edge_projection(
+        self,
+        base_name: str,
+        sender_nodes: torch.Tensor,
+        receiver_nodes: torch.Tensor,
+    ) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
+        mlp = getattr(self, f"{base_name}_mlp")
+        linear_0 = mlp.linear_0
+        sender_features = int(sender_nodes.shape[-1])
+        receiver_features = int(receiver_nodes.shape[-1])
+        edge_features = int(linear_0.in_features) - sender_features - receiver_features
+        if edge_features <= 0:
+            raise ValueError(
+                f"{base_name} cannot split {linear_0.in_features} input features into "
+                f"edge + sender({sender_features}) + receiver({receiver_features})"
+            )
+        edge_weight, sender_weight, receiver_weight = linear_0.weight.split(
+            (edge_features, sender_features, receiver_features),
+            dim=1,
+        )
+        # Keep both node projections on addmm so the factorized path stays
+        # inside the existing inference operator contract.  The learned bias
+        # is still applied exactly once by the edge projection below.
+        zero_bias = linear_0.bias.new_zeros(linear_0.out_features)
+        sender_projection = torch.nn.functional.linear(
+            sender_nodes,
+            sender_weight,
+            zero_bias,
+        )
+        receiver_projection = torch.nn.functional.linear(
+            receiver_nodes,
+            receiver_weight,
+            zero_bias,
+        )
+        return edge_weight, sender_projection, receiver_projection
+
+    def _apply_factorized_edge_projection(
+        self,
+        base_name: str,
+        edge_features: torch.Tensor,
+        senders: torch.Tensor,
+        receivers: torch.Tensor,
+        projection: tuple[torch.Tensor, torch.Tensor, torch.Tensor],
+    ) -> torch.Tensor:
+        edge_weight, sender_projection, receiver_projection = projection
+        if int(edge_features.shape[-1]) != int(edge_weight.shape[1]):
+            raise ValueError(
+                f"{base_name} expected {edge_weight.shape[1]} edge features, "
+                f"got {edge_features.shape[-1]}"
+            )
+        mlp = getattr(self, f"{base_name}_mlp")
+        hidden = torch.nn.functional.linear(edge_features, edge_weight, mlp.linear_0.bias)
+        hidden = hidden + gather_node_features(sender_projection, senders)
+        hidden = hidden + gather_node_features(receiver_projection, receivers)
+        output = mlp.linear_1(mlp.activation(hidden))
+        return getattr(self, f"{base_name}_layer_norm")(output)
 
     def _apply_mlp_with_layer_norm(self, base_name: str, x: torch.Tensor) -> torch.Tensor:
         x = getattr(self, f"{base_name}_mlp")(x)
@@ -637,13 +791,38 @@ class GoogleSmallGraphNet(nn.Module):
         getattr(self, f"{base_name}_layer_norm").to(device)
 
 
+def execute_index_add_(
+    out: torch.Tensor,
+    receivers: torch.Tensor,
+    edge_features: torch.Tensor,
+    *,
+    execution: str,
+) -> torch.Tensor:
+    if execution in {"inline", "prevalidated-static"}:
+        return out.index_add_(1, receivers, edge_features)
+    raise ValueError(
+        f"index_add execution must be 'inline' or 'prevalidated-static', got {execution!r}"
+    )
+
+
 def aggregate_edges_to_nodes(
     edge_features: torch.Tensor,
     receivers: torch.Tensor,
     num_nodes: int,
+    *,
+    index_add_execution: str = "inline",
 ) -> torch.Tensor:
-    out = edge_features.new_zeros(edge_features.shape[0], num_nodes, edge_features.shape[-1])
-    return out.index_add_(1, receivers, edge_features)
+    out = edge_features.new_zeros(
+        edge_features.shape[0],
+        num_nodes,
+        edge_features.shape[-1],
+    )
+    return execute_index_add_(
+        out,
+        receivers,
+        edge_features,
+        execution=index_add_execution,
+    )
 
 
 def gather_node_features(
@@ -690,6 +869,9 @@ class GoogleSmallCompatibleModel(nn.Module):
         *,
         activation_checkpointing: bool = False,
         fuse_post_layer_norm_residual: bool | None = None,
+        edge_input_projection_mode: str = "concatenated",
+        mesh2grid_full_grid_fast_path: bool = False,
+        index_add_execution: str = "inline",
     ) -> None:
         super().__init__()
         if fuse_post_layer_norm_residual is None:
@@ -699,6 +881,9 @@ class GoogleSmallCompatibleModel(nn.Module):
         self.config = config or GoogleSmallConfig()
         self.activation_checkpointing = activation_checkpointing
         self.fuse_post_layer_norm_residual = fuse_post_layer_norm_residual
+        self.edge_input_projection_mode = edge_input_projection_mode
+        self.mesh2grid_full_grid_fast_path = mesh2grid_full_grid_fast_path
+        self.index_add_execution = index_add_execution
         self._graph_initialized = False
         latent = self.config.latent_size
         node_input = self.config.node_input_dim
@@ -720,7 +905,11 @@ class GoogleSmallCompatibleModel(nn.Module):
             edge_processor_input_dims={"grid2mesh": latent * 3},
             node_output_dims=None,
             extra_final_node_output_dims=None,
-            edge_update_chunk_sizes=None,
+            edge_update_chunk_sizes=(
+                {"grid2mesh": self.config.grid2mesh_edge_chunk_size}
+                if self.config.grid2mesh_edge_chunk_size
+                else None
+            ),
             node_update_chunk_sizes=(
                 {"grid_nodes": self.config.grid2mesh_node_chunk_size}
                 if self.config.grid2mesh_node_chunk_size
@@ -731,6 +920,8 @@ class GoogleSmallCompatibleModel(nn.Module):
             config=self.config,
             activation_checkpointing=activation_checkpointing,
             fuse_post_layer_norm_residual=fuse_post_layer_norm_residual,
+            edge_input_projection_mode=edge_input_projection_mode,
+            index_add_execution=index_add_execution,
         )
 
         self.mesh_gnn = GoogleSmallGraphNet(
@@ -750,6 +941,8 @@ class GoogleSmallCompatibleModel(nn.Module):
             config=self.config,
             activation_checkpointing=activation_checkpointing,
             fuse_post_layer_norm_residual=fuse_post_layer_norm_residual,
+            edge_input_projection_mode=edge_input_projection_mode,
+            index_add_execution=index_add_execution,
         )
 
         self.mesh2grid_gnn = GoogleSmallGraphNet(
@@ -784,6 +977,8 @@ class GoogleSmallCompatibleModel(nn.Module):
             config=self.config,
             activation_checkpointing=activation_checkpointing,
             fuse_post_layer_norm_residual=fuse_post_layer_norm_residual,
+            edge_input_projection_mode=edge_input_projection_mode,
+            index_add_execution=index_add_execution,
         )
 
     def set_activation_checkpointing(self, enabled: bool) -> None:
@@ -856,6 +1051,80 @@ class GoogleSmallCompatibleModel(nn.Module):
         self._num_mesh_nodes = graph.num_mesh_nodes
         return graph
 
+    def prevalidate_static_index_add(self) -> StaticIndexAddContract:
+        if self.index_add_execution != "prevalidated-static":
+            raise RuntimeError("static index_add prevalidation was not requested")
+        if self.training:
+            raise RuntimeError("static index_add prevalidation is inference-only")
+        if not self._graph_initialized:
+            raise RuntimeError("the GraphCast graph must be initialized before prevalidation")
+        if not self.mesh2grid_full_grid_fast_path:
+            raise ValueError("prevalidated static index_add requires the full-grid fast path")
+
+        specifications = (
+            ("grid2mesh_receivers", self.grid2mesh_receivers, int(self._num_mesh_nodes)),
+            ("mesh_receivers", self.mesh_receivers, int(self._num_mesh_nodes)),
+            ("mesh2grid_receivers", self.mesh2grid_receivers, int(self._num_grid_nodes)),
+        )
+        contracts: list[StaticIndexAddBufferContract] = []
+        for name, tensor, upper_bound in specifications:
+            if tensor.ndim != 1:
+                raise ValueError(f"{name} must be a one-dimensional index tensor")
+            if tensor.dtype not in (torch.int32, torch.int64):
+                raise ValueError(f"{name} must use int32 or int64 indices")
+            if not tensor.is_contiguous():
+                raise ValueError(f"{name} must be contiguous")
+            if tensor.numel() <= 0:
+                raise ValueError(f"{name} must not be empty")
+            lower, upper = torch.aminmax(tensor)
+            lower_value = int(lower.item())
+            upper_value = int(upper.item())
+            if lower_value < 0 or upper_value >= upper_bound:
+                raise ValueError(
+                    f"{name} is out of bounds: observed [{lower_value}, {upper_value}], "
+                    f"required [0, {upper_bound})"
+                )
+            contracts.append(
+                StaticIndexAddBufferContract(
+                    name=name,
+                    shape=tuple(int(value) for value in tensor.shape),
+                    stride=tuple(int(value) for value in tensor.stride()),
+                    dtype=str(tensor.dtype),
+                    device=str(tensor.device),
+                    data_ptr=int(tensor.data_ptr()),
+                    version=int(tensor._version),
+                    numel=int(tensor.numel()),
+                    lower_bound=lower_value,
+                    upper_value=upper_value,
+                    upper_bound=upper_bound,
+                )
+            )
+        return StaticIndexAddContract(buffers=tuple(contracts))
+
+    def verify_static_index_add(self, contract: StaticIndexAddContract) -> None:
+        for expected in contract.buffers:
+            tensor = getattr(self, expected.name)
+            observed = (
+                tuple(int(value) for value in tensor.shape),
+                tuple(int(value) for value in tensor.stride()),
+                str(tensor.dtype),
+                str(tensor.device),
+                int(tensor.data_ptr()),
+                int(tensor._version),
+                int(tensor.numel()),
+            )
+            frozen = (
+                expected.shape,
+                expected.stride,
+                expected.dtype,
+                expected.device,
+                expected.data_ptr,
+                expected.version,
+                expected.numel,
+            )
+            if observed != frozen:
+                raise RuntimeError(f"{expected.name} changed after static index_add prevalidation")
+
     def forward(self, grid_node_features: torch.Tensor) -> torch.Tensor:
         """Run a minimal stacked-tensor forward pass.
 
@@ -872,6 +1141,19 @@ class GoogleSmallCompatibleModel(nn.Module):
             grid_start=0,
             grid_end=int(grid2mesh_nodes["grid_nodes"].shape[1]),
         )
+
+    def forward_from_state_forcing(
+        self,
+        state: torch.Tensor,
+        forcing: torch.Tensor,
+    ) -> torch.Tensor:
+        if state.ndim != 3 or forcing.ndim != 3:
+            raise ValueError("state and forcing must both have [batch, grid_nodes, channels]")
+        if state.shape[:-1] != forcing.shape[:-1]:
+            raise ValueError("state and forcing must have matching batch and grid dimensions")
+        if state.device != forcing.device or state.dtype != forcing.dtype:
+            raise ValueError("state and forcing must have matching device and dtype")
+        return self(torch.cat((state, forcing), dim=-1))
 
     def forward_pre_mesh2grid(
         self,
@@ -956,19 +1238,13 @@ class GoogleSmallCompatibleModel(nn.Module):
             self.init_graph()
         if grid_start < 0 or grid_end <= grid_start:
             raise ValueError("grid partition must satisfy 0 <= start < end")
-        if grid_end > int(self.mesh2grid_receivers.max().item()) + 1:
-            raise ValueError("grid partition end exceeds initialized graph grid range")
-
         batch_size = grid_nodes.shape[0]
         device = grid_nodes.device
         dtype = grid_nodes.dtype
-        receivers = self.mesh2grid_receivers
-        edge_mask = (receivers >= grid_start) & (receivers < grid_end)
-        if not bool(edge_mask.any()):
-            raise ValueError(f"mesh2grid partition [{grid_start}, {grid_end}) has no edges")
-        edge_features = self.mesh2grid_edge_features[edge_mask]
-        senders = self.mesh2grid_senders[edge_mask]
-        local_receivers = receivers[edge_mask] - grid_start
+        edge_features, senders, local_receivers = self._select_mesh2grid_partition_inputs(
+            grid_start=grid_start,
+            grid_end=grid_end,
+        )
         mesh2grid_edges = self._edge_features_for_batch(edge_features, batch_size, device, dtype)
         mesh2grid_nodes, _ = self.mesh2grid_gnn(
             {
@@ -984,6 +1260,35 @@ class GoogleSmallCompatibleModel(nn.Module):
             },
         )
         return mesh2grid_nodes["grid_nodes"]
+
+    def _select_mesh2grid_partition_inputs(
+        self,
+        *,
+        grid_start: int,
+        grid_end: int,
+    ) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
+        if (
+            self.mesh2grid_full_grid_fast_path
+            and grid_start == 0
+            and grid_end == int(self._num_grid_nodes)
+        ):
+            return (
+                self.mesh2grid_edge_features,
+                self.mesh2grid_senders,
+                self.mesh2grid_receivers,
+            )
+
+        receivers = self.mesh2grid_receivers
+        if grid_end > int(receivers.max().item()) + 1:
+            raise ValueError("grid partition end exceeds initialized graph grid range")
+        edge_mask = (receivers >= grid_start) & (receivers < grid_end)
+        if not bool(edge_mask.any()):
+            raise ValueError(f"mesh2grid partition [{grid_start}, {grid_end}) has no edges")
+        return (
+            self.mesh2grid_edge_features[edge_mask],
+            self.mesh2grid_senders[edge_mask],
+            receivers[edge_mask] - grid_start,
+        )
 
     def predict_xarray(
         self,
