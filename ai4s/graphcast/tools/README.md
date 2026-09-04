@@ -35,3 +35,9 @@ environment. An explicit `GRAPHCAST_FLAGGEMS_SOURCE_ROOT` takes precedence.
 The retained six-platform GEMM workload, hardware-path profiler launchers, and
 the path-matched GraphCast MFU calculator are documented in
 [`dense_gemm_peak/README.md`](dense_gemm_peak/README.md).
+
+## BF16 inference validation
+
+The reusable Native-FP32-reference, streaming BF16 trajectory comparison, and
+three-run performance workflow is documented in
+[`bf16_inference/README.md`](bf16_inference/README.md).

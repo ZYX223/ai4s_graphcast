@@ -5,8 +5,10 @@ import sys
 from pathlib import Path
 from types import SimpleNamespace
 
+import numpy as np
 import pytest
 import torch
+import xarray as xr
 
 GRAPHCAST_ROOT = Path(__file__).resolve().parents[1]
 SRC_ROOT = GRAPHCAST_ROOT / "src"
@@ -23,6 +25,12 @@ from scripts.inference.run_operational_40step_inference import (  # noqa: E402
     parse_args,
     run_tensor_resident_rollout,
 )
+
+
+def _trajectory_writer():
+    writer = getattr(operational_runner, "TrajectoryNetCDFWriter", None)
+    assert writer is not None, "trajectory NetCDF writer is missing"
+    return writer
 
 
 class CountingModel(torch.nn.Module):
@@ -308,6 +316,247 @@ def test_rollout_supports_any_positive_autoregressive_step_count() -> None:
     assert model.calls == 4
 
 
+def test_diagnostic_callback_receives_every_dependent_absolute_output() -> None:
+    captured: list[tuple[int, torch.Tensor]] = []
+
+    result = run_tensor_resident_rollout(
+        CountingModel([]),
+        _prepared(3),
+        steps=3,
+        warmup_calls=1,
+        synchronize=lambda: None,
+        trajectory_callback=lambda step, value: captured.append((step, value.clone())),
+    )
+
+    assert [step for step, _ in captured] == [0, 1, 2]
+    assert [value.item() for _, value in captured] == [1.0, 2.0, 3.0]
+    assert all(value.device.type == "cpu" for _, value in captured)
+    assert all(value.dtype == torch.float32 for _, value in captured)
+    assert result.final_output.item() == 3.0
+
+
+def test_trajectory_writer_publishes_one_atomic_multilead_netcdf(tmp_path: Path) -> None:
+    output = tmp_path / "trajectory.nc"
+    valid_times = xr.DataArray(
+        np.asarray([["2022-01-01T06", "2022-01-01T12"]], dtype="datetime64[h]"),
+        dims=("batch", "time"),
+        coords={"batch": [0], "time": [6, 12]},
+    )
+    writer = _trajectory_writer()(
+        output,
+        steps=2,
+        step_hours=6,
+        valid_times=valid_times,
+    )
+    first = xr.Dataset(
+        {
+            "temperature": (
+                ("batch", "time", "lat", "lon"),
+                torch.ones((1, 1, 2, 2)).numpy(),
+            )
+        },
+        coords={"batch": [0], "time": [6], "lat": [-45.0, 45.0], "lon": [0.0, 180.0]},
+    )
+    second = first.copy(deep=True)
+    second["temperature"] *= 2.0
+
+    writer.append(0, first)
+    assert not output.exists()
+    writer.append(1, second)
+    writer.finalize()
+
+    with xr.open_dataset(output) as trajectory:
+        assert trajectory.attrs["schema"] == "graphcast.inference_trajectory.v1"
+        assert trajectory.attrs["performance_eligible"] == 0
+        assert (
+            trajectory["lead_time"].values / np.timedelta64(1, "h")
+        ).tolist() == [6.0, 12.0]
+        assert trajectory["temperature"].dims == ("batch", "lead_time", "lat", "lon")
+        assert "valid_time" in trajectory.coords
+        assert trajectory["valid_time"].dims == ("batch", "lead_time")
+        assert np.array_equal(
+            trajectory["forecast_reference_time"].values.astype("datetime64[h]"),
+            np.asarray(["2022-01-01T00"], dtype="datetime64[h]"),
+        )
+        assert np.array_equal(
+            trajectory["valid_time"].values.astype("datetime64[h]"),
+            valid_times.values,
+        )
+        assert trajectory["temperature"].isel(lead_time=0).mean().item() == 1.0
+        assert trajectory["temperature"].isel(lead_time=1).mean().item() == 2.0
+
+
+def test_trajectory_writer_rejects_valid_times_inconsistent_with_step_hours(
+    tmp_path: Path,
+) -> None:
+    irregular = xr.DataArray(
+        np.asarray([["2022-01-01T06", "2022-01-01T18"]], dtype="datetime64[h]"),
+        dims=("batch", "time"),
+        coords={"batch": [0], "time": [6, 18]},
+    )
+
+    with pytest.raises(ValueError, match="regular autoregressive leads"):
+        _trajectory_writer()(
+            tmp_path / "trajectory.nc",
+            steps=2,
+            step_hours=6,
+            valid_times=irregular,
+        )
+
+
+def test_trajectory_writer_requires_auditable_valid_times(tmp_path: Path) -> None:
+    with pytest.raises(ValueError, match="require forcing valid times"):
+        _trajectory_writer()(
+            tmp_path / "trajectory.nc",
+            steps=2,
+            step_hours=6,
+        )
+
+
+def test_incomplete_trajectory_is_not_published(tmp_path: Path) -> None:
+    output = tmp_path / "trajectory.nc"
+    valid_times = xr.DataArray(
+        np.asarray([["2022-01-01T06", "2022-01-01T12"]], dtype="datetime64[h]"),
+        dims=("batch", "time"),
+        coords={"batch": [0], "time": [6, 12]},
+    )
+    writer = _trajectory_writer()(
+        output,
+        steps=2,
+        step_hours=6,
+        valid_times=valid_times,
+    )
+    first = xr.Dataset(
+        {"temperature": (("batch", "time", "lat", "lon"), np.ones((1, 1, 1, 1)))},
+        coords={"batch": [0], "time": [6], "lat": [0.0], "lon": [0.0]},
+    )
+    writer.append(0, first)
+
+    with pytest.raises(RuntimeError, match="wrote 1 of 2"):
+        writer.finalize()
+
+    assert not output.exists()
+    assert list(tmp_path.iterdir()) == []
+
+
+def test_formal_cli_accepts_optional_diagnostic_trajectory_output() -> None:
+    args = parse_args([*_profiled_cli_args(), "--trajectory-output", "trajectory.nc"])
+
+    assert args.trajectory_output == Path("trajectory.nc")
+
+
+def test_main_rejects_nonfinite_peak_before_loading_assets() -> None:
+    with pytest.raises(ValueError, match="finite and nonnegative"):
+        operational_runner.main(
+            [*_profiled_cli_args(), "--peak-tflops-per-device", "nan"]
+        )
+
+
+def test_runner_outputs_cannot_alias_normalization_stats(tmp_path: Path) -> None:
+    assets = {
+        name: tmp_path / name
+        for name in ("config.yaml", "weights.pt", "inputs.nc", "forcings.nc", "target.nc")
+    }
+    for path in assets.values():
+        path.write_bytes(b"fixture")
+    stats_dir = tmp_path / "stats"
+    stats_dir.mkdir()
+    for name in operational_runner.REQUIRED_STATS_FILES:
+        (stats_dir / name).write_bytes(b"stats")
+
+    with pytest.raises(ValueError, match="must be distinct"):
+        operational_runner.main(
+            [
+                "--config", str(assets["config.yaml"]),
+                "--weights", str(assets["weights.pt"]),
+                "--inputs", str(assets["inputs.nc"]),
+                "--rollout-forcings", str(assets["forcings.nc"]),
+                "--target-template", str(assets["target.nc"]),
+                "--stats-dir", str(stats_dir),
+                "--output", str(stats_dir / "stddev_by_level.nc"),
+                "--report", str(tmp_path / "report.json"),
+                "--platform", "h100",
+                "--model-execution-profile", "baseline",
+            ]
+        )
+
+
+def test_overwrite_backups_restore_the_previous_artifact_set(tmp_path: Path) -> None:
+    paths = [tmp_path / name for name in ("prediction.nc", "trajectory.nc", "report.json")]
+    for index, path in enumerate(paths):
+        path.write_text(f"old-{index}", encoding="utf-8")
+
+    backups = operational_runner._backup_existing_outputs(paths)
+    paths[0].write_text("new", encoding="utf-8")
+    for path in paths:
+        path.unlink(missing_ok=True)
+    operational_runner._restore_output_backups(backups)
+
+    assert [path.read_text(encoding="utf-8") for path in paths] == [
+        "old-0",
+        "old-1",
+        "old-2",
+    ]
+
+
+def test_report_staging_rejects_nonstandard_json_numbers(tmp_path: Path) -> None:
+    with pytest.raises(ValueError, match="Out of range float values"):
+        operational_runner._stage_json(tmp_path / "report.json", {"value": float("inf")})
+    assert list(tmp_path.iterdir()) == []
+
+
+def test_normalization_stats_reject_nonfinite_or_nonpositive_scales() -> None:
+    valid = xr.Dataset({"temperature": xr.DataArray([1.0])})
+    invalid = xr.Dataset({"temperature": xr.DataArray([float("inf")])})
+    stats = SimpleNamespace(
+        mean_by_level=valid,
+        stddev_by_level=invalid,
+        diffs_stddev_by_level=valid,
+    )
+
+    with pytest.raises(ValueError, match="stddev_by_level.*positive finite"):
+        operational_runner.validate_normalization_stats(
+            stats,
+            inputs=valid,
+            forcings=xr.Dataset(),
+            target_template=valid,
+        )
+
+
+def test_normalization_stats_allow_unused_official_placeholder_values() -> None:
+    active = xr.Dataset({"temperature": xr.DataArray([1.0])})
+    scales = xr.Dataset(
+        {
+            "temperature": xr.DataArray([1.0]),
+            "seconds_since_epoch": xr.DataArray([float("nan")]),
+        }
+    )
+    residual_scales = xr.Dataset(
+        {
+            "temperature": xr.DataArray([1.0]),
+            "seconds_since_epoch": xr.DataArray([0.0]),
+        }
+    )
+    stats = SimpleNamespace(
+        mean_by_level=scales,
+        stddev_by_level=scales,
+        diffs_stddev_by_level=residual_scales,
+    )
+
+    operational_runner.validate_normalization_stats(
+        stats,
+        inputs=active,
+        forcings=xr.Dataset(),
+        target_template=active,
+    )
+
+
+def test_physical_prediction_finiteness_is_checked_after_denormalization() -> None:
+    prediction = xr.Dataset({"temperature": xr.DataArray([1.0, float("inf")])})
+
+    assert operational_runner.dataset_is_finite(prediction) is False
+
+
 @pytest.mark.parametrize("steps", [0, -1])
 def test_rollout_rejects_non_positive_step_counts(steps: int) -> None:
     with pytest.raises(ValueError, match="positive"):
@@ -500,9 +749,16 @@ def test_baseline_report_separates_profile_overrides_from_effective_chunks() -> 
     assert metadata["mesh2grid_edge_chunk_size"] == 131072
 
 
+@pytest.mark.parametrize(
+    ("physical_finite", "expected_exit", "expected_status"),
+    ((True, 0, "passed"), (False, 1, "failed_nonfinite")),
+)
 def test_main_binds_runtime_builder_and_report_to_one_domestic_profile(
     monkeypatch: pytest.MonkeyPatch,
     tmp_path: Path,
+    physical_finite: bool,
+    expected_exit: int,
+    expected_status: str,
 ) -> None:
     assets = {
         name: tmp_path / name
@@ -512,7 +768,10 @@ def test_main_binds_runtime_builder_and_report_to_one_domestic_profile(
         path.write_bytes(b"fixture")
     stats_dir = tmp_path / "stats"
     stats_dir.mkdir()
+    for name in operational_runner.REQUIRED_STATS_FILES:
+        (stats_dir / name).write_bytes(b"stats")
     output = tmp_path / "prediction.nc"
+    trajectory_output = tmp_path / "trajectory.nc"
     report_path = tmp_path / "report.json"
     events: list[str] = []
     captured: dict[str, object] = {}
@@ -521,6 +780,13 @@ def test_main_binds_runtime_builder_and_report_to_one_domestic_profile(
         coords = {
             "lat": SimpleNamespace(values=[0.0]),
             "lon": SimpleNamespace(values=[0.0]),
+            "datetime": xr.DataArray(
+                np.asarray(
+                    [["2022-01-01T12", "2022-01-02T00", "2022-01-02T12"]],
+                    dtype="datetime64[h]",
+                ),
+                dims=("batch", "time"),
+            ),
         }
 
         def load(self):
@@ -581,27 +847,45 @@ def test_main_binds_runtime_builder_and_report_to_one_domestic_profile(
     monkeypatch.setattr(GoogleSmallConfig, "from_yaml", lambda path: config)
     monkeypatch.setattr(operational_runner.xr, "open_dataset", lambda path: FakeDataset())
     monkeypatch.setattr(operational_runner, "load_normalization_stats", lambda path: object())
+    monkeypatch.setattr(
+        operational_runner,
+        "validate_normalization_stats",
+        lambda stats, **datasets: None,
+    )
     monkeypatch.setattr(operational_runner, "build_model_for_run", fake_build_model)
     monkeypatch.setattr(
         operational_runner.torch,
         "load",
         lambda *args, **kwargs: {"weight": torch.zeros(1)},
     )
-    monkeypatch.setattr(operational_runner, "prepare_device_rollout", lambda *args, **kwargs: object())
-    monkeypatch.setattr(operational_runner, "reset_peak_memory", lambda runtime: None)
     monkeypatch.setattr(
         operational_runner,
-        "run_tensor_resident_rollout",
-        lambda *args, **kwargs: RolloutMeasurement(
-            steps=40,
+        "prepare_device_rollout",
+        lambda *args, **kwargs: object(),
+    )
+    monkeypatch.setattr(operational_runner, "reset_peak_memory", lambda runtime: None)
+
+    def fake_rollout(*args, **kwargs):
+        assert kwargs["steps"] == 3
+        callback = kwargs.get("trajectory_callback")
+        assert callable(callback)
+        for step in range(3):
+            callback(step, torch.full((1,), float(step)))
+        return RolloutMeasurement(
+            steps=3,
             warmup_calls=1,
             e2e_seconds=10.0,
             final_output=torch.zeros(1),
             finite=True,
             dtype_evidence=SimpleNamespace(),
-        ),
+        )
+
+    monkeypatch.setattr(operational_runner, "run_tensor_resident_rollout", fake_rollout)
+    monkeypatch.setattr(
+        operational_runner,
+        "require_complete_flaggems_dispatch",
+        lambda runtime: None,
     )
-    monkeypatch.setattr(operational_runner, "require_complete_flaggems_dispatch", lambda runtime: None)
 
     class FakePrediction:
         def to_netcdf(self, path) -> None:
@@ -612,8 +896,38 @@ def test_main_binds_runtime_builder_and_report_to_one_domestic_profile(
         "normalized_output_to_prediction",
         lambda *args, **kwargs: FakePrediction(),
     )
+    monkeypatch.setattr(
+        operational_runner,
+        "dataset_is_finite",
+        lambda dataset: physical_finite,
+    )
     monkeypatch.setattr(operational_runner, "precision_metadata", lambda *args, **kwargs: {})
     monkeypatch.setattr(operational_runner, "memory_text", lambda runtime: {})
+
+    class FakeTrajectoryWriter:
+        def __init__(self, path, *, steps, step_hours, valid_times=None) -> None:
+            assert valid_times.sizes["time"] == 3
+            captured["trajectory_writer"] = (path, steps, step_hours)
+
+        def append(self, step, prediction) -> None:
+            captured.setdefault("trajectory_appends", []).append(
+                (step, type(prediction).__name__)
+            )
+
+        def seal(self) -> Path:
+            captured["trajectory_sealed"] = True
+            staged = tmp_path / "staged-trajectory.nc"
+            staged.write_bytes(b"trajectory")
+            return staged
+
+        def publish(self) -> None:
+            captured["trajectory_published"] = True
+            trajectory_output.write_bytes(b"trajectory")
+
+        def abort(self) -> None:
+            captured["trajectory_aborted"] = True
+
+    monkeypatch.setattr(operational_runner, "TrajectoryNetCDFWriter", FakeTrajectoryWriter)
 
     result = operational_runner.main(
         [
@@ -624,13 +938,16 @@ def test_main_binds_runtime_builder_and_report_to_one_domestic_profile(
             "--target-template", str(assets["target.nc"]),
             "--stats-dir", str(stats_dir),
             "--output", str(output),
+            "--trajectory-output", str(trajectory_output),
             "--report", str(report_path),
             "--platform", "c550",
             "--model-execution-profile", "domestic-v1",
+            "--steps", "3",
+            "--step-hours", "12",
         ]
     )
 
-    assert result == 0
+    assert result == expected_exit
     assert events == ["runtime", "model"]
     assert captured["expected_backend"] == "metax"
     assert captured["settings"] == {
@@ -642,11 +959,36 @@ def test_main_binds_runtime_builder_and_report_to_one_domestic_profile(
     assert effective_config.grid2mesh_edge_chunk_size == 131072
     assert effective_config.mesh2grid_edge_chunk_size == 131072
     report = json.loads(report_path.read_text(encoding="utf-8"))
+    assert report["status"] == expected_status
+    assert report["measurement"]["physical_output_finite"] is physical_finite
     assert report["runtime"]["backend"] == "metax"
+    assert set(report["source"]["normalization_stats"]) == set(
+        operational_runner.REQUIRED_STATS_FILES
+    )
     assert report["workload"]["model_execution_profile"]["name"] == "domestic-v1"
     assert report["workload"]["edge_input_projection"] == "factorized"
     assert report["workload"]["grid2mesh_edge_chunk_size"] == 131072
     assert report["workload"]["mesh2grid_edge_chunk_size"] == 131072
+    assert report["schema"] == "graphcast.operational_rollout.v2"
+    assert report["workload"]["steps"] == 3
+    assert report["workload"]["step_hours"] == 12
+    assert captured["trajectory_writer"] == (trajectory_output, 3, 12)
+    assert captured["trajectory_appends"] == [
+        (0, "FakePrediction"),
+        (1, "FakePrediction"),
+        (2, "FakePrediction"),
+    ]
+    assert captured["trajectory_sealed"] is True
+    assert captured["trajectory_published"] is True
+    assert "trajectory_aborted" not in captured
+    assert report["artifacts"]["publication"] == "report_terminal_last"
+    assert report["artifacts"]["prediction"]["sha256"]
+    assert report["artifacts"]["trajectory"]["sha256"]
+    assert report["diagnostics"] == {
+        "trajectory": str(trajectory_output.resolve()),
+        "all_leads_captured": True,
+        "performance_eligible": False,
+    }
 
 
 def test_operational_report_metadata_uses_effective_edge_projection_mode() -> None:

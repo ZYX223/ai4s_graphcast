@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Run the operational GraphCast model as a device-resident 40-step rollout."""
+"""Run GraphCast as a device-resident autoregressive rollout of any positive length."""
 
 from __future__ import annotations
 
@@ -9,12 +9,14 @@ import json
 import math
 import os
 import sys
+import tempfile
 import time
 from collections.abc import Callable
 from dataclasses import dataclass, replace
 from pathlib import Path
 from typing import Any
 
+import numpy as np
 import torch
 import xarray as xr
 
@@ -49,6 +51,7 @@ from graphcast_compat.inference_precision import (  # noqa: E402
     resolve_inference_precision,
     run_precision_forward,
 )
+from graphcast_compat.normalization import REQUIRED_STATS_FILES  # noqa: E402
 
 FORWARD_FLOPS = 28_857_094_475_776
 
@@ -71,6 +74,274 @@ class RolloutMeasurement:
     final_output: torch.Tensor
     finite: bool
     dtype_evidence: RolloutDtypeEvidence
+
+
+class TrajectoryNetCDFWriter:
+    """Stream physical predictions into one terminally published NetCDF file."""
+
+    def __init__(
+        self,
+        output: Path,
+        *,
+        steps: int,
+        step_hours: int,
+        valid_times: xr.DataArray | None = None,
+    ) -> None:
+        if steps <= 0 or step_hours <= 0:
+            raise ValueError("trajectory steps and step hours must be positive")
+        self.output = output
+        self.steps = steps
+        self.step_hours = step_hours
+        self.output.parent.mkdir(parents=True, exist_ok=True)
+        descriptor, temporary = tempfile.mkstemp(
+            prefix=f".{output.stem}.", suffix=".tmp.nc", dir=output.parent
+        )
+        os.close(descriptor)
+        os.unlink(temporary)
+        self._temporary = Path(temporary)
+        self._dataset: Any | None = None
+        self._next_step = 0
+        self._signature: dict[str, tuple[tuple[str, ...], tuple[int, ...]]] | None = None
+        self._coordinate_values: dict[str, np.ndarray] = {}
+        self._valid_times = valid_times
+        if valid_times is None:
+            raise ValueError("diagnostic trajectories require forcing valid times")
+        time_dimensions = [
+            dimension
+            for dimension in ("time", "lead_time")
+            if dimension in valid_times.dims
+        ]
+        if len(time_dimensions) != 1 or valid_times.sizes[time_dimensions[0]] != steps:
+            raise ValueError("valid times must contain exactly one value per trajectory lead")
+        if not np.issubdtype(valid_times.dtype, np.datetime64):
+            raise ValueError("valid times must use a datetime64 dtype")
+        self._valid_time_dimension = time_dimensions[0]
+        reference_dimensions = tuple(
+            dimension
+            for dimension in valid_times.dims
+            if dimension != self._valid_time_dimension
+        )
+        if reference_dimensions not in ((), ("batch",)):
+            raise ValueError("valid times may vary only over batch and lead")
+        ordered_valid_times = np.moveaxis(
+            np.asarray(valid_times.values),
+            valid_times.dims.index(self._valid_time_dimension),
+            -1,
+        )
+        lead_offsets = (
+            np.arange(1, steps + 1, dtype=np.int64) * np.timedelta64(step_hours, "h")
+        )
+        references = ordered_valid_times - lead_offsets
+        if not np.all(references == references[..., :1]):
+            raise ValueError(
+                "valid times must be regular autoregressive leads from one initialization"
+            )
+        self._reference_dimensions = reference_dimensions
+        self._reference_values = references[..., 0]
+
+    @staticmethod
+    def _lead_dimension(prediction: xr.Dataset) -> str | None:
+        for name in ("time", "lead_time"):
+            if name in prediction.dims:
+                if prediction.sizes[name] != 1:
+                    raise ValueError("each trajectory prediction must contain one lead")
+                return name
+        return None
+
+    @staticmethod
+    def _copy_attributes(destination: Any, attributes: dict[str, Any]) -> None:
+        safe = {
+            name: value
+            for name, value in attributes.items()
+            if name != "_FillValue" and isinstance(value, (str, int, float, np.number))
+        }
+        if safe:
+            destination.setncatts(safe)
+
+    def _initialize(self, prediction: xr.Dataset, lead_dimension: str | None) -> None:
+        import netCDF4
+
+        dataset = netCDF4.Dataset(self._temporary, mode="w", format="NETCDF4")
+        dataset.setncatts(
+            {
+                "schema": "graphcast.inference_trajectory.v1",
+                "steps": self.steps,
+                "step_hours": self.step_hours,
+                "performance_eligible": 0,
+                "diagnostic_output_d2h_each_step": 1,
+            }
+        )
+        dataset.createDimension("lead_time", self.steps)
+        lead_coordinate = dataset.createVariable("lead_time", "i8", ("lead_time",))
+        lead_coordinate[:] = np.arange(1, self.steps + 1, dtype=np.int64) * self.step_hours
+        lead_coordinate.setncatts(
+            {
+                "units": "hours",
+                "dtype": "timedelta64[ns]",
+                "standard_name": "forecast_period",
+            }
+        )
+
+        for dimension, size in prediction.sizes.items():
+            if dimension != lead_dimension:
+                dataset.createDimension(dimension, int(size))
+        for name, coordinate in prediction.coords.items():
+            if name == lead_dimension or lead_dimension in coordinate.dims:
+                continue
+            if coordinate.ndim != 1 or coordinate.dims != (name,):
+                continue
+            values = np.asarray(coordinate.values)
+            if values.dtype.kind not in "biuf":
+                continue
+            variable = dataset.createVariable(name, values.dtype, (name,))
+            variable[:] = values
+            self._copy_attributes(variable, coordinate.attrs)
+            self._coordinate_values[name] = values.copy()
+
+        if "batch" not in dataset.dimensions:
+            raise ValueError("diagnostic trajectory predictions require a batch dimension")
+        if self._reference_dimensions == ():
+            if len(dataset.dimensions["batch"]) != 1:
+                raise ValueError("one-dimensional valid times require a single prediction batch")
+            reference_values = np.asarray([self._reference_values])
+            valid_time_values = np.asarray(self._valid_times.values).reshape(1, self.steps)
+        else:
+            if self._valid_times.sizes["batch"] != len(dataset.dimensions["batch"]):
+                raise ValueError("valid-time batch size differs from prediction")
+            if "batch" in self._valid_times.coords and "batch" in prediction.coords:
+                if not np.array_equal(
+                    np.asarray(self._valid_times["batch"].values),
+                    np.asarray(prediction["batch"].values),
+                ):
+                    raise ValueError("valid-time batch labels differ from prediction")
+            reference_values = np.asarray(self._reference_values)
+            valid_time_values = np.moveaxis(
+                np.asarray(self._valid_times.values),
+                self._valid_times.dims.index(self._valid_time_dimension),
+                -1,
+            )
+        forecast_reference_time = dataset.createVariable(
+            "forecast_reference_time", "i8", ("batch",)
+        )
+        forecast_reference_time[:] = reference_values.astype("datetime64[s]").astype(
+            np.int64
+        )
+        forecast_reference_time.setncatts(
+            {
+                "units": "seconds since 1970-01-01 00:00:00",
+                "calendar": "proleptic_gregorian",
+                "standard_name": "forecast_reference_time",
+            }
+        )
+        valid_time = dataset.createVariable(
+            "valid_time", "i8", ("batch", "lead_time")
+        )
+        valid_time[:] = valid_time_values.astype("datetime64[s]").astype(np.int64)
+        valid_time.setncatts(
+            {
+                "units": "seconds since 1970-01-01 00:00:00",
+                "calendar": "proleptic_gregorian",
+                "standard_name": "time",
+            }
+        )
+
+        signature: dict[str, tuple[tuple[str, ...], tuple[int, ...]]] = {}
+        for name, array in prediction.data_vars.items():
+            dimensions = tuple(
+                "lead_time" if dimension == lead_dimension else dimension
+                for dimension in array.dims
+            )
+            if lead_dimension is None:
+                dimensions = ("lead_time", *dimensions)
+            dataset.createVariable(
+                name,
+                np.asarray(array.values).dtype,
+                dimensions,
+                zlib=True,
+                complevel=1,
+            )
+            self._copy_attributes(dataset.variables[name], array.attrs)
+            existing = str(array.attrs.get("coordinates", "")).split()
+            dataset.variables[name].setncattr(
+                "coordinates",
+                " ".join([*existing, "valid_time", "forecast_reference_time"]),
+            )
+            shape = tuple(
+                int(size)
+                for dimension, size in zip(array.dims, array.shape)
+                if dimension != lead_dimension
+            )
+            signature[name] = (array.dims, shape)
+        self._dataset = dataset
+        self._signature = signature
+
+    def _validate(self, prediction: xr.Dataset, lead_dimension: str | None) -> None:
+        assert self._signature is not None
+        if set(prediction.data_vars) != set(self._signature):
+            raise ValueError("trajectory variables changed between leads")
+        for name, (dimensions, shape) in self._signature.items():
+            array = prediction[name]
+            current_shape = tuple(
+                int(size)
+                for dimension, size in zip(array.dims, array.shape)
+                if dimension != lead_dimension
+            )
+            if array.dims != dimensions or current_shape != shape:
+                raise ValueError(f"trajectory layout changed for {name!r}")
+        for name, expected in self._coordinate_values.items():
+            if name not in prediction.coords or not np.array_equal(
+                np.asarray(prediction[name].values), expected
+            ):
+                raise ValueError(f"trajectory coordinate changed between leads: {name}")
+
+    def append(self, step_index: int, prediction: xr.Dataset) -> None:
+        if step_index != self._next_step or step_index >= self.steps:
+            raise ValueError("trajectory leads must be appended once in order")
+        lead_dimension = self._lead_dimension(prediction)
+        if self._dataset is None:
+            self._initialize(prediction, lead_dimension)
+        else:
+            self._validate(prediction, lead_dimension)
+        assert self._dataset is not None
+        for name, array in prediction.data_vars.items():
+            values = np.asarray(array.values)
+            if lead_dimension is None:
+                target = (step_index, *([slice(None)] * values.ndim))
+            else:
+                source_axis = array.dims.index(lead_dimension)
+                values = np.take(values, 0, axis=source_axis)
+                target = tuple(
+                    step_index if dimension == lead_dimension else slice(None)
+                    for dimension in array.dims
+                )
+            self._dataset.variables[name][target] = values
+        self._dataset.sync()
+        self._next_step += 1
+
+    def seal(self) -> Path:
+        if self._next_step != self.steps or self._dataset is None:
+            self.abort()
+            raise RuntimeError(
+                f"trajectory is incomplete: wrote {self._next_step} of {self.steps} leads"
+            )
+        self._dataset.close()
+        self._dataset = None
+        return self._temporary
+
+    def publish(self) -> None:
+        if self._dataset is not None:
+            self.seal()
+        os.replace(self._temporary, self.output)
+
+    def finalize(self) -> None:
+        self.seal()
+        self.publish()
+
+    def abort(self) -> None:
+        if self._dataset is not None:
+            self._dataset.close()
+            self._dataset = None
+        self._temporary.unlink(missing_ok=True)
 
 
 @dataclass(frozen=True)
@@ -170,6 +441,52 @@ def calculate_throughput(
     }
 
 
+def dataset_is_finite(dataset: xr.Dataset) -> bool:
+    return bool(dataset.data_vars) and all(
+        np.isfinite(np.asarray(variable.values)).all()
+        for variable in dataset.data_vars.values()
+    )
+
+
+def validate_normalization_stats(
+    stats: Any,
+    *,
+    inputs: xr.Dataset,
+    forcings: xr.Dataset,
+    target_template: xr.Dataset,
+) -> None:
+    standard_variables = (
+        set(inputs.data_vars)
+        | set(forcings.data_vars)
+        | set(target_template.data_vars)
+    )
+    residual_variables = set(inputs.data_vars) & set(target_template.data_vars)
+    required_variables = {
+        "mean_by_level": standard_variables,
+        "stddev_by_level": standard_variables,
+        "diffs_stddev_by_level": residual_variables,
+    }
+    for name, variables in required_variables.items():
+        dataset = getattr(stats, name)
+        if not dataset.data_vars:
+            raise ValueError(f"{name} requires a non-empty variable set")
+        missing = sorted(variables - set(dataset.data_vars))
+        if missing:
+            raise ValueError(f"{name} is missing required variables: {', '.join(missing)}")
+        for variable_name in sorted(variables):
+            variable = dataset[variable_name]
+            values = np.asarray(variable.values)
+            if not np.isfinite(values).all():
+                qualifier = "positive finite" if name != "mean_by_level" else "finite"
+                raise ValueError(
+                    f"{name} variable {variable_name!r} must contain {qualifier} values"
+                )
+            if name != "mean_by_level" and np.any(values <= 0.0):
+                raise ValueError(
+                    f"{name} variable {variable_name!r} must contain positive finite values"
+                )
+
+
 def run_tensor_resident_rollout(
     model: torch.nn.Module,
     prepared: Any,
@@ -180,6 +497,7 @@ def run_tensor_resident_rollout(
     clock: Callable[[], float] = time.perf_counter,
     precision_policy: InferencePrecisionPolicy | None = None,
     device_type: str | None = None,
+    trajectory_callback: Callable[[int, torch.Tensor], None] | None = None,
 ) -> RolloutMeasurement:
     """Warm up outside the timer, then measure all dependent rollout steps."""
 
@@ -227,6 +545,8 @@ def run_tensor_resident_rollout(
 
         started = clock()
         normalized_output: torch.Tensor | None = None
+        final_output: torch.Tensor | None = None
+        finite = True
         for step_index in range(steps):
             forcing = prepared.forcing_features[step_index]
             forward = run_precision_forward(
@@ -245,13 +565,22 @@ def run_tensor_resident_rollout(
                 prediction,
                 prepared,
                 advance_state=not final_step,
-                return_absolute_output=final_step,
+                return_absolute_output=final_step or trajectory_callback is not None,
             )
+            if normalized_output is not None and trajectory_callback is not None:
+                finite = finite and bool(torch.isfinite(normalized_output).all().item())
+                captured = normalized_output.detach().to(
+                    device="cpu", dtype=torch.float32
+                )
+                trajectory_callback(step_index, captured)
+                if final_step:
+                    final_output = captured
             del forward, prediction
         if normalized_output is None:
             raise RuntimeError("the final rollout step did not produce an absolute output")
-        finite = bool(torch.isfinite(normalized_output).all().item())
-        final_output = normalized_output.detach().to(device="cpu", dtype=torch.float32)
+        finite = finite and bool(torch.isfinite(normalized_output).all().item())
+        if final_output is None:
+            final_output = normalized_output.detach().to(device="cpu", dtype=torch.float32)
         synchronize()
         e2e_seconds = clock() - started
 
@@ -330,14 +659,83 @@ def _select_state_dict(payload: Any) -> dict[str, torch.Tensor]:
     raise ValueError("checkpoint does not contain a supported model state dictionary")
 
 
-def _write_json(path: Path, payload: dict[str, Any]) -> None:
+def _stage_json(path: Path, payload: dict[str, Any]) -> Path:
     path.parent.mkdir(parents=True, exist_ok=True)
-    temporary = path.with_name(f".{path.name}.{os.getpid()}.tmp")
-    temporary.write_text(
-        json.dumps(payload, indent=2, sort_keys=True) + "\n",
-        encoding="utf-8",
+    descriptor, temporary_name = tempfile.mkstemp(
+        prefix=f".{path.name}.", suffix=".tmp", dir=path.parent
     )
-    os.replace(temporary, path)
+    temporary = Path(temporary_name)
+    try:
+        with os.fdopen(descriptor, "w", encoding="utf-8") as handle:
+            handle.write(
+                json.dumps(payload, allow_nan=False, indent=2, sort_keys=True) + "\n"
+            )
+            handle.flush()
+            os.fsync(handle.fileno())
+    except BaseException:
+        temporary.unlink(missing_ok=True)
+        raise
+    return temporary
+
+
+def _write_json(path: Path, payload: dict[str, Any]) -> None:
+    """Atomically publish one JSON artifact for diagnostic-tool compatibility."""
+
+    os.replace(_stage_json(path, payload), path)
+
+
+def _stage_netcdf(path: Path, dataset: xr.Dataset) -> Path:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    descriptor, temporary_name = tempfile.mkstemp(
+        prefix=f".{path.stem}.", suffix=f".tmp{path.suffix}", dir=path.parent
+    )
+    os.close(descriptor)
+    temporary = Path(temporary_name)
+    temporary.unlink()
+    try:
+        dataset.to_netcdf(temporary)
+    except BaseException:
+        temporary.unlink(missing_ok=True)
+        raise
+    return temporary
+
+
+def _require_distinct_paths(paths: dict[str, Path]) -> None:
+    seen: dict[Path, str] = {}
+    for label, path in paths.items():
+        canonical = path.resolve()
+        if canonical in seen:
+            raise ValueError(
+                f"runner input and output paths must be distinct: {seen[canonical]} and {label}"
+            )
+        seen[canonical] = label
+
+
+def _backup_existing_outputs(paths: list[Path]) -> dict[Path, Path]:
+    backups: dict[Path, Path] = {}
+    try:
+        for path in paths:
+            if not path.exists():
+                continue
+            descriptor, backup_name = tempfile.mkstemp(
+                prefix=f".{path.name}.", suffix=".backup", dir=path.parent
+            )
+            os.close(descriptor)
+            backup = Path(backup_name)
+            backup.unlink()
+            os.replace(path, backup)
+            backups[path] = backup
+    except BaseException:
+        for original, backup in reversed(tuple(backups.items())):
+            os.replace(backup, original)
+        raise
+    return backups
+
+
+def _restore_output_backups(backups: dict[Path, Path]) -> None:
+    for original, backup in reversed(tuple(backups.items())):
+        original.unlink(missing_ok=True)
+        os.replace(backup, original)
 
 
 def build_model_for_run(
@@ -415,11 +813,22 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     )
     parser.add_argument("--device", default="auto")
     parser.add_argument("--precision", choices=("fp32", "bf16"), default="fp32")
-    parser.add_argument("--steps", type=int, default=40)
+    parser.add_argument(
+        "--steps",
+        type=int,
+        default=40,
+        help="Number of dependent autoregressive leads (default: 40)",
+    )
     parser.add_argument("--warmup-calls", type=int, default=1)
     parser.add_argument("--forward-flops", type=int, default=FORWARD_FLOPS)
     parser.add_argument("--peak-tflops-per-device", type=float, default=0.0)
     parser.add_argument("--device-count", type=int, default=1)
+    parser.add_argument(
+        "--trajectory-output",
+        type=Path,
+        help="Diagnostic-only NetCDF containing every autoregressive lead",
+    )
+    parser.add_argument("--step-hours", type=int, default=6)
     parser.add_argument("--overwrite", action="store_true")
     args = parser.parse_args(argv)
     try:
@@ -433,19 +842,47 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
 
 def main(argv: list[str] | None = None) -> int:
     args = parse_args(argv)
+    if args.step_hours <= 0:
+        raise ValueError("step hours must be positive")
+    if not math.isfinite(args.peak_tflops_per_device) or args.peak_tflops_per_device < 0:
+        raise ValueError("peak TFLOPS per device must be finite and nonnegative")
+    outputs = [args.output, args.report]
+    if args.trajectory_output is not None:
+        outputs.append(args.trajectory_output)
+    input_paths = {
+        "config": args.config,
+        "weights": args.weights,
+        "inputs": args.inputs,
+        "rollout_forcings": args.rollout_forcings,
+        "target_template": args.target_template,
+        **{
+            f"stats/{name}": args.stats_dir / name
+            for name in REQUIRED_STATS_FILES
+        },
+    }
+    output_paths = {"prediction": args.output, "report": args.report}
+    if args.trajectory_output is not None:
+        output_paths["trajectory"] = args.trajectory_output
+    _require_distinct_paths({**input_paths, **output_paths})
     if args.output.exists() and not args.overwrite:
         raise FileExistsError(f"output already exists: {args.output}")
     if args.report.exists() and not args.overwrite:
         raise FileExistsError(f"report already exists: {args.report}")
-    for path in (
-        args.config,
-        args.weights,
-        args.inputs,
-        args.rollout_forcings,
-        args.target_template,
+    if (
+        args.trajectory_output is not None
+        and args.trajectory_output.exists()
+        and not args.overwrite
     ):
+        raise FileExistsError(
+            f"trajectory output already exists: {args.trajectory_output}"
+        )
+    for path in input_paths.values():
         if not path.is_file():
             raise FileNotFoundError(path)
+    source_identities = {
+        name: {"path": str(path.resolve()), "sha256": _sha256(path)}
+        for name, path in input_paths.items()
+    }
 
     model_execution_profile = args.model_execution_profile
     runtime = resolve_runtime_backend(
@@ -464,6 +901,12 @@ def main(argv: list[str] | None = None) -> int:
     forcings = xr.open_dataset(args.rollout_forcings).load()
     target_template = xr.open_dataset(args.target_template).load()
     stats = load_normalization_stats(args.stats_dir)
+    validate_normalization_stats(
+        stats,
+        inputs=inputs,
+        forcings=forcings,
+        target_template=target_template,
+    )
 
     model = build_model_for_run(
         config,
@@ -497,19 +940,39 @@ def main(argv: list[str] | None = None) -> int:
 
     reset_peak_memory(runtime)
     static_runtime_evidence: dict[str, Any] = {"status": "not_requested"}
-
-    if static_index_add_contract is None:
-        measurement = run_tensor_resident_rollout(
-            model,
-            prepared,
+    trajectory_writer = (
+        TrajectoryNetCDFWriter(
+            args.trajectory_output,
             steps=args.steps,
-            warmup_calls=args.warmup_calls,
-            synchronize=lambda: synchronize_runtime(runtime),
-            precision_policy=precision_policy,
-            device_type=runtime.device.type,
+            step_hours=args.step_hours,
+            valid_times=forcings.coords.get("datetime"),
         )
-    else:
-        with suspend_prevalidated_flaggems_index_add_bounds(runtime) as runtime_evidence:
+        if args.trajectory_output is not None
+        else None
+    )
+    trajectory_physical_finite = True
+
+    def capture_trajectory(step_index: int, normalized_output: torch.Tensor) -> None:
+        nonlocal trajectory_physical_finite
+        assert trajectory_writer is not None
+        prediction = normalized_output_to_prediction(
+            normalized_output, target_template, stats
+        )
+        trajectory_physical_finite = (
+            trajectory_physical_finite and dataset_is_finite(prediction)
+        )
+        trajectory_writer.append(
+            step_index,
+            prediction,
+        )
+
+    staged_prediction: Path | None = None
+    staged_report: Path | None = None
+    publication_started = False
+    output_backups: dict[Path, Path] = {}
+    try:
+        trajectory_callback = capture_trajectory if trajectory_writer is not None else None
+        if static_index_add_contract is None:
             measurement = run_tensor_resident_rollout(
                 model,
                 prepared,
@@ -518,81 +981,166 @@ def main(argv: list[str] | None = None) -> int:
                 synchronize=lambda: synchronize_runtime(runtime),
                 precision_policy=precision_policy,
                 device_type=runtime.device.type,
+                trajectory_callback=trajectory_callback,
             )
-        model.verify_static_index_add(static_index_add_contract)
-        static_runtime_evidence = runtime_evidence
+        else:
+            with suspend_prevalidated_flaggems_index_add_bounds(runtime) as runtime_evidence:
+                measurement = run_tensor_resident_rollout(
+                    model,
+                    prepared,
+                    steps=args.steps,
+                    warmup_calls=args.warmup_calls,
+                    synchronize=lambda: synchronize_runtime(runtime),
+                    precision_policy=precision_policy,
+                    device_type=runtime.device.type,
+                    trajectory_callback=trajectory_callback,
+                )
+            model.verify_static_index_add(static_index_add_contract)
+            static_runtime_evidence = runtime_evidence
 
-    dispatch_audit = require_complete_flaggems_dispatch(runtime)
-    prediction = normalized_output_to_prediction(
-        measurement.final_output,
-        target_template,
-        stats,
-    )
-    args.output.parent.mkdir(parents=True, exist_ok=True)
-    prediction.to_netcdf(args.output)
-    metrics = calculate_throughput(
-        forward_flops=args.forward_flops,
-        steps=args.steps,
-        e2e_seconds=measurement.e2e_seconds,
-        peak_tflops_per_device=args.peak_tflops_per_device,
-        device_count=args.device_count,
-    )
-    report = {
-        "schema": "graphcast.operational_40step.v1",
-        "status": "passed" if measurement.finite else "failed_nonfinite",
-        "source": {
-            "config": str(args.config.resolve()),
-            "config_sha256": _sha256(args.config),
-            "weights": str(args.weights.resolve()),
-            "weights_sha256": _sha256(args.weights),
-            "inputs_sha256": _sha256(args.inputs),
-            "rollout_forcings_sha256": _sha256(args.rollout_forcings),
-            "target_template_sha256": _sha256(args.target_template),
-        },
-        "runtime": {
-            **runtime.to_metadata(),
-            "flaggems_dispatch": (
-                dispatch_audit.to_metadata()
-                if dispatch_audit is not None
-                else {"status": "not_requested"}
+        dispatch_audit = require_complete_flaggems_dispatch(runtime)
+        prediction = normalized_output_to_prediction(
+            measurement.final_output,
+            target_template,
+            stats,
+        )
+        physical_finite = dataset_is_finite(prediction) and trajectory_physical_finite
+        for name, path in input_paths.items():
+            if _sha256(path) != source_identities[name]["sha256"]:
+                raise RuntimeError(f"runner input changed during inference: {name}")
+        staged_prediction = _stage_netcdf(args.output, prediction)
+        staged_trajectory = None
+        if trajectory_writer is not None:
+            staged_trajectory = trajectory_writer.seal()
+        metrics = calculate_throughput(
+            forward_flops=args.forward_flops,
+            steps=args.steps,
+            e2e_seconds=measurement.e2e_seconds,
+            peak_tflops_per_device=args.peak_tflops_per_device,
+            device_count=args.device_count,
+        )
+        passed = measurement.finite and physical_finite
+        performance_eligible = trajectory_writer is None and passed
+        report = {
+            "schema": "graphcast.operational_rollout.v2",
+            "status": "passed" if passed else "failed_nonfinite",
+            "source": {
+                "config": source_identities["config"]["path"],
+                "config_sha256": source_identities["config"]["sha256"],
+                "weights": source_identities["weights"]["path"],
+                "weights_sha256": source_identities["weights"]["sha256"],
+                "inputs_sha256": source_identities["inputs"]["sha256"],
+                "rollout_forcings_sha256": source_identities["rollout_forcings"][
+                    "sha256"
+                ],
+                "target_template_sha256": source_identities["target_template"][
+                    "sha256"
+                ],
+                "normalization_stats": {
+                    name: source_identities[f"stats/{name}"]
+                    for name in REQUIRED_STATS_FILES
+                },
+            },
+            "runtime": {
+                **runtime.to_metadata(),
+                "flaggems_dispatch": (
+                    dispatch_audit.to_metadata()
+                    if dispatch_audit is not None
+                    else {"status": "not_requested"}
+                ),
+            },
+            "precision": precision_metadata(
+                precision_policy,
+                measurement,
+                model=model,
+                device_type=runtime.device.type,
+                float32_math_mode=float32_math_mode,
             ),
-        },
-        "precision": precision_metadata(
-            precision_policy,
-            measurement,
-            model=model,
-            device_type=runtime.device.type,
-            float32_math_mode=float32_math_mode,
-        ),
-        "workload": {
-            "steps": measurement.steps,
-            "warmup_calls": measurement.warmup_calls,
-            "warmup_excluded_from_e2e": True,
-            "final_output_d2h_included_in_e2e": True,
-            "device_count": args.device_count,
-            **model_execution_metadata(model, profile=model_execution_profile),
-            "static_index_add": (
-                {
-                    **static_index_add_contract.to_metadata(),
-                    "runtime_patch": static_runtime_evidence,
-                }
-                if static_index_add_contract is not None
-                else {"status": "not_requested"}
-            ),
-        },
-        "measurement": {
-            "e2e_seconds": measurement.e2e_seconds,
-            "forward_flops_per_step": args.forward_flops,
-            **metrics,
-            "peak_tflops_per_device": args.peak_tflops_per_device,
-            "finite": measurement.finite,
-            "memory": memory_text(runtime),
-        },
-        "output": str(args.output.resolve()),
-    }
-    _write_json(args.report, report)
-    print(json.dumps(report, sort_keys=True), flush=True)
-    return 0 if measurement.finite else 1
+            "workload": {
+                "steps": measurement.steps,
+                "step_hours": args.step_hours,
+                "warmup_calls": measurement.warmup_calls,
+                "warmup_excluded_from_e2e": True,
+                "final_output_d2h_included_in_e2e": True,
+                "device_count": args.device_count,
+                **model_execution_metadata(model, profile=model_execution_profile),
+                "static_index_add": (
+                    {
+                        **static_index_add_contract.to_metadata(),
+                        "runtime_patch": static_runtime_evidence,
+                    }
+                    if static_index_add_contract is not None
+                    else {"status": "not_requested"}
+                ),
+            },
+            "measurement": {
+                "e2e_seconds": measurement.e2e_seconds,
+                "forward_flops_per_step": args.forward_flops,
+                **metrics,
+                "peak_tflops_per_device": args.peak_tflops_per_device,
+                "normalized_output_finite": measurement.finite,
+                "physical_output_finite": physical_finite,
+                "finite": passed,
+                "memory": memory_text(runtime),
+                "performance_eligible": performance_eligible,
+            },
+            "diagnostics": {
+                "trajectory": (
+                    str(args.trajectory_output.resolve())
+                    if args.trajectory_output is not None
+                    else None
+                ),
+                "all_leads_captured": trajectory_writer is not None,
+                "performance_eligible": performance_eligible,
+            },
+            "artifacts": {
+                "publication": "report_terminal_last",
+                "prediction": {
+                    "path": str(args.output.resolve()),
+                    "sha256": _sha256(staged_prediction),
+                },
+                "trajectory": (
+                    {
+                        "path": str(args.trajectory_output.resolve()),
+                        "sha256": _sha256(staged_trajectory),
+                    }
+                    if staged_trajectory is not None
+                    else None
+                ),
+            },
+            "output": str(args.output.resolve()),
+        }
+        staged_report = _stage_json(args.report, report)
+        if args.overwrite:
+            output_backups = _backup_existing_outputs(outputs)
+        publication_started = True
+        os.replace(staged_prediction, args.output)
+        staged_prediction = None
+        if trajectory_writer is not None:
+            trajectory_writer.publish()
+        os.replace(staged_report, args.report)
+        staged_report = None
+        obsolete_backups = tuple(output_backups.values())
+        output_backups = {}
+        for backup in obsolete_backups:
+            try:
+                backup.unlink(missing_ok=True)
+            except OSError:
+                pass
+    except BaseException:
+        if staged_prediction is not None:
+            staged_prediction.unlink(missing_ok=True)
+        if staged_report is not None:
+            staged_report.unlink(missing_ok=True)
+        if trajectory_writer is not None:
+            trajectory_writer.abort()
+        if publication_started:
+            for path in outputs:
+                path.unlink(missing_ok=True)
+            _restore_output_backups(output_backups)
+        raise
+    print(json.dumps(report, allow_nan=False, sort_keys=True), flush=True)
+    return 0 if passed else 1
 
 
 if __name__ == "__main__":

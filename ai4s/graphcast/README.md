@@ -231,6 +231,41 @@ Set `GRAPHCAST_FLAGOS_MODE=off` for the paired Native baseline. A run is not
 performance evidence unless its JSON report records the requested step count,
 finite output, expected source hashes, and `warmup_excluded_from_e2e=true`.
 
+For forecast diagnostics, add `--trajectory-output PATH` to both the Native and
+candidate runs. This deliberately copies every physical lead to the host and
+marks the run as ineligible for performance/MFU reporting. The existing script
+name is retained for compatibility; neither capture nor evaluation requires 40
+leads. `--steps=N` accepts any positive `N`, and the runner rejects a forcing
+asset whose number of time frames differs from `N`.
+
+Evaluate the resulting trajectories against real targets and a matching
+climatology with the WeatherBench-style spherical area weighting:
+
+```bash
+python scripts/inference/evaluate_forecast_skill.py \
+  --truth /assets/targets.nc \
+  --native outputs/native-trajectory.nc \
+  --candidate outputs/flaggems-trajectory.nc \
+  --climatology /assets/climatology.nc \
+  --stddev /assets/stats/stddev_by_level.nc \
+  --output-json outputs/forecast-diagnostics.json \
+  --output-netcdf outputs/forecast-diagnostics.nc
+```
+
+The diagnostic result contains every available lead and pressure level, Native
+and candidate MSE/RMSE/MAE/bias, climatology-relative ACC, their deltas, and the
+optional Native/candidate normalized drift. It also reports raw implementation
+parity (`max_abs`, `mean_abs`, RMSE, relative L2 and allclose); use
+`--raw-atol`/`--raw-rtol` to record the intended numerical tolerance without
+turning that tolerance into a weather-skill decision. Trajectory files remain
+lazy and only one variable/lead/level record is loaded at a time, so memory does
+not grow with the complete autoregressive horizon. It validates variables,
+coordinates, units and valid times before comparison. Aggregate RMSE is
+`sqrt(mean(MSE over initialization times))`; it is not a single-case maximum.
+Use multiple initialization times before making a weather-skill claim. Treat
+the JSON as the terminal artifact: it binds the metrics NetCDF by SHA-256. The
+rollout report similarly binds the prediction and optional trajectory hashes.
+
 The formal runner uses one required platform/profile pair. `h100/baseline`
 keeps concatenated edge projection, the configured edge chunks, no full-grid
 fast path and inline `index_add`. `c550`, `bw3000`, `s5000`, `910c` and `810e`
