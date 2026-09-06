@@ -198,6 +198,14 @@ registered and observed. The training profile does not claim backward coverage.
 Backward correctness and performance must be validated separately. A non-empty
 `GRAPHCAST_FLAGGEMS_OPS` overrides the selected YAML profile.
 
+The default 810E exclusion above preserves the previously accepted strict-FP32
+route. The separately validated TF32 7/7 route requires the RNE-v2 AddMM patch
+from `flagos-common:zyx/flaggems-op-prcheck/patches/flaggems/wip-addmm`,
+the compatible v5.3.5 runtime, and an explicit seven-op override when invoking
+the autoregressive Python entry point:
+`GRAPHCAST_FLAGGEMS_OPS=addmm,cat,native_layer_norm,index_add_,silu,index,add`.
+Do not infer 7/7 from enabling FlagGems alone; check the observed dispatch report.
+
 ### Formal autoregressive inference
 
 Round-1 performance uses the device-resident autoregressive runner rather than
@@ -230,6 +238,121 @@ python scripts/inference/run_operational_40step_inference.py \
 Set `GRAPHCAST_FLAGOS_MODE=off` for the paired Native baseline. A run is not
 performance evidence unless its JSON report records the requested step count,
 finite output, expected source hashes, and `warmup_excluded_from_e2e=true`.
+
+Use `--precision fp32` for strict FP32, `--precision tf32` for platform
+TF32/HF32, or `--precision bf16` for BF16 autocast with FP32 state/feedback.
+The same model-side profile remains active in all three modes. On S5000,
+the TF32 request sets and checks both `torch.backends.musa.matmul.allow_tf32`
+(when available) and `torch.backends.mudnn.allow_tf32`.
+`domestic-v1` uses prevalidated static indices on S5000; only FlagGems enters
+the operator's trusted-index scope. Native retains its ordinary index_add
+implementation, with model-side static-buffer validation before/after rollout.
+
+### Project fixed-baseline inference acceptance (5%)
+
+`scripts/inference/diagnose_inference.py` is the project acceptance entry point
+for FP32, TF32/HF32 and BF16. It ports the metric from the colleague handoff
+`checkpoint_prediction_validation/diagnostic_package` (2026-06-10). It is **not**
+a weather-skill assessment or an operator-level allclose test.
+
+For each of U/V/P/T/Q/W and all 13 pressure levels, compute
+`mean(abs(candidate-reference)) / mean(abs(reference)) * 100`, then take the
+unweighted arithmetic mean of those 78 percentages. `P` means geopotential.
+Both that overall mean and the geopotential 500 hPa percentage must be **strictly
+less than 5%**, independently against **both** fixed references (JAX FP32 and
+PyTorch GPU). The worst layer is reported, not a separate gate. No latitude
+weights, standard-deviation normalization, pointwise MAPE, or averaging over
+rollout steps is substituted. Percentages are compared before display rounding.
+
+The supplied NPZ is an external ~550 MB asset, not a Git payload. Its checksum
+and the original diagnostic's checksum are pinned in
+`configs/inference/diagnostic_baseline_day10.json`. That manifest deliberately
+starts as `unverified`: the original package lacks complete initialization and
+input/checkpoint lineage. To produce formal acceptance, make a reviewed copy
+with `provenance_status: verified` and fill:
+
+- `provenance_evidence`: the reviewed source/conversion evidence;
+- `initialization_time`: an ISO-8601 UTC timestamp without a timezone suffix;
+- `lead_hours`: the actual NPZ reference lead (currently 240);
+- `source.weights_sha256`, `inputs_sha256`, `rollout_forcings_sha256`,
+  `target_template_sha256` and `source.normalization_stats`: the **approved
+  equivalent PyTorch case's** identities, in the same shape as the runner's
+  `report.json.source` (three normalization filenames mapped to `sha256`);
+- `units`: the verified unit string for each of the six full variable names.
+
+Do not simply bless the current candidate's source hashes: establish their
+relationship to the reference-generation case first. Different encodings or
+converted checkpoints need documented equivalence and an approved identity;
+the evaluator never silently ignores a hash mismatch. An unverified reference
+can produce trial metrics, but its status is `unverified_reference`, not passed.
+
+Score existing runs offline, without allocating a device or rerunning inference:
+
+For **newly rebuilt** references, use the [dual-reference workflow](tools/inference_reference/README.md).
+It audits original/converted weights, freezes one case, runs pinned official JAX
+strict FP32 and H100 Torch Native eager strict FP32 independently, then qualifies
+their agreement before acceptance. New metadata v2 separates provenance from
+numerical qualification: a traceable but `unqualified` reference cannot pass a
+candidate. Initialization, steps, step hours and selected lead remain configurable.
+The historical reference and its unknown-lineage status are not overwritten.
+
+```bash
+python scripts/inference/diagnose_inference.py \
+  --baseline /assets/graphcast_operational_25km_day10_uvptqw_baselines.npz \
+  --baseline-metadata /assets/reviewed-diagnostic-baseline.json \
+  --run-dir /results/c550-native-tf32 \
+  --run-dir /results/c550-flaggems-tf32 \
+  --output-dir /results/c550-tf32-acceptance
+```
+
+Each run directory must contain `prediction.nc` and its hash-binding
+`report.json`. Repeat `--run-dir` for other platforms/precisions. The evaluator
+selects the NPZ's physical lead, validates initialization, coordinates, units,
+case identities and finite output, and fails closed on missing/invalid data.
+It does not assume `time_index=39` or take the last frame blindly. The current
+reference is at 240 h (40 dependent 6 h leads); future baselines may use another
+positive horizon without changing the evaluator. The updated runner labels its
+final prediction using the actual forcing valid time and rollout horizon,
+rather than retaining the reusable target template's time. Historical files
+with stale template times must have their provenance/time semantics resolved;
+they are not silently relabeled by this evaluator.
+
+Outputs are `summary.json` (terminal, binding the detailed CSV by hash) and
+`details.csv` (156 reference/variable/level records per valid run). The summary
+includes the four percentages, case/source/runtime/precision metadata and
+observed core-op counts expressed as `7/7`, `6/7`, etc. Missing observation
+evidence is `unverified`; configured operator lists are not counted as hits.
+Operator coverage and 5% acceptance remain separate dimensions. A requested
+TF32/HF32 mode is not by itself proof of the matrix instructions actually used.
+
+Exit codes: `0` all runs passed; `1` numerical acceptance/nonfinite failure;
+`2` invalid inputs, unverified reference, or publication error. Output
+directories must be new. The runner's own `status: passed` describes successful
+finite execution, **not** this project acceptance; use the diagnostic summary
+for the latter.
+
+To score automatically after a new run, use the existing environment-driven
+`tools/bf16_inference/run_bf16_case.sh` (legacy name retained, now accepting
+`PRECISION=fp32|tf32|bf16`) with:
+
+```bash
+export GRAPHCAST_ACCEPTANCE_BASELINE=/assets/graphcast_operational_25km_day10_uvptqw_baselines.npz
+export GRAPHCAST_ACCEPTANCE_METADATA=/assets/reviewed-diagnostic-baseline.json
+```
+
+The hook runs after inference, retaining the model `rc` and separate
+`diagnostic_rc`, `diagnostic.log`, and `acceptance/` outputs. It propagates a
+nonzero diagnostic status. Omitting both variables keeps the existing execution
+workflow. Offline scoring does not enter E2E or MFU timing. Each platform's
+Native and FlagGems runs retain the same model execution profile. The TF32 entry
+sets the backend's math controls, including `torch.backends.musa.matmul` on
+TorchMUSA versions exposing it, while keeping persistent tensors FP32.
+
+### Auxiliary drift and weather-skill diagnostics
+
+The existing normalized-drift tools remain for debugging; their historical
+thresholds and BF16 campaign summaries do not replace the fixed-baseline gate.
+Training loss validation is outside this inference change.
 
 For forecast diagnostics, add `--trajectory-output PATH` to both the Native and
 candidate runs. This deliberately copies every physical lead to the host and

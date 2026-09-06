@@ -449,6 +449,14 @@ def configure_float32_math(
         mudnn = getattr(torch.backends, "mudnn", None)
         if mudnn is None or not hasattr(mudnn, "allow_tf32"):
             raise RuntimeError("torch_musa does not expose torch.backends.mudnn.allow_tf32")
+        musa = getattr(torch.backends, "musa", None)
+        if musa is not None:
+            matmul = getattr(musa, "matmul", None)
+            if matmul is None or not hasattr(matmul, "allow_tf32"):
+                raise RuntimeError("torch_musa does not expose torch.backends.musa.matmul.allow_tf32")
+            matmul.allow_tf32 = enabled
+            if bool(matmul.allow_tf32) != enabled:
+                raise RuntimeError("torch_musa did not apply the requested matmul TF32 mode")
         mudnn.allow_tf32 = enabled
         if bool(mudnn.allow_tf32) != enabled:
             raise RuntimeError("torch_musa did not apply the requested TF32 mode")
@@ -955,10 +963,16 @@ def resolve_runtime_backend(
 
 
 @contextmanager
-def suspend_prevalidated_flaggems_index_add_bounds(
+def use_prevalidated_flaggems_index_add(
     runtime: RuntimeBackend,
 ):
-    """Temporarily skip a bounds check already proven for GraphCast static indices."""
+    """Enter the active backend's public trusted-static-index scope.
+
+    GraphCast validates its immutable receiver buffers before entering this
+    scope.  The operator remains responsible for binding that trust to the
+    actual index storage and for falling back to its ordinary bounds check
+    whenever the storage, view, version, device, or upper bound changes.
+    """
 
     if runtime.flagos.mode != "flaggems" or not runtime.flagos.strict:
         raise RuntimeError("prevalidated static index_add requires strict FlagGems mode")
@@ -976,33 +990,26 @@ def suspend_prevalidated_flaggems_index_add_bounds(
         raise RuntimeError("unexpected FlagGems index_add_ registration")
     active_globals = getattr(registered_function, "__globals__", None)
     if not isinstance(active_globals, dict):
-        raise RuntimeError("active FlagGems index_add_ has no mutable Python globals")
-    original_check = active_globals.get("_assert_index_in_bounds")
-    if not callable(original_check):
-        raise RuntimeError("active FlagGems index_add_ bounds check was not found")
-
-    def already_prevalidated(_index: torch.Tensor, _upper_bound: int) -> None:
-        return None
+        raise RuntimeError("active FlagGems index_add_ has no Python globals")
+    trusted_scope = active_globals.get("use_trusted_index_add_inference")
+    if not callable(trusted_scope):
+        raise RuntimeError(
+            "active FlagGems index_add_ does not expose a trusted inference scope"
+        )
 
     evidence = {
         "status": "active",
         "platform_profile": runtime.profile.name,
         "active_module": str(getattr(registered_function, "__module__", "unknown")),
         "registered_name": registered_name,
-        "original_check": str(getattr(original_check, "__name__", "unknown")),
-        "restored": False,
+        "scope_api": "use_trusted_index_add_inference",
+        "closed": False,
     }
-    active_globals["_assert_index_in_bounds"] = already_prevalidated
-    try:
-        yield evidence
-    finally:
-        replacement_unchanged = (
-            active_globals.get("_assert_index_in_bounds") is already_prevalidated
-        )
-        active_globals["_assert_index_in_bounds"] = original_check
-        evidence["restored"] = True
-        if not replacement_unchanged:
-            raise RuntimeError("FlagGems index_add_ bounds replacement changed during execution")
+    with trusted_scope():
+        try:
+            yield evidence
+        finally:
+            evidence["closed"] = True
 
 
 def synchronize(runtime: RuntimeBackend | torch.device) -> None:

@@ -15,7 +15,7 @@ for path in (GRAPHCAST_ROOT, SRC_ROOT):
         sys.path.insert(0, str(path))
 
 from graphcast_compat.backend import (  # noqa: E402
-    suspend_prevalidated_flaggems_index_add_bounds,
+    use_prevalidated_flaggems_index_add,
 )
 from graphcast_compat.google_small import (  # noqa: E402
     GoogleSmallCompatibleModel,
@@ -105,15 +105,25 @@ def test_static_receiver_contract_rejects_invalid_or_partial_graphs() -> None:
         partitioned.prevalidate_static_index_add()
 
 
-def test_runtime_bound_check_suspension_targets_registration_and_restores(
+def test_runtime_prevalidated_index_add_enters_public_trusted_scope(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     fake_flag_gems = types.ModuleType("flag_gems")
     exec(
+        "from contextlib import contextmanager\n"
+        "trusted_scope_active = False\n"
         "def _assert_index_in_bounds(index, upper_bound):\n"
         "    return ('checked', index, upper_bound)\n"
+        "@contextmanager\n"
+        "def use_trusted_index_add_inference():\n"
+        "    global trusted_scope_active\n"
+        "    trusted_scope_active = True\n"
+        "    try:\n"
+        "        yield\n"
+        "    finally:\n"
+        "        trusted_scope_active = False\n"
         "def index_add_(out, dim, index, src, alpha=1):\n"
-        "    return _assert_index_in_bounds(index, out.shape[dim])\n",
+        "    return (trusted_scope_active, _assert_index_in_bounds(index, out.shape[dim]))\n",
         fake_flag_gems.__dict__,
     )
     original_check = fake_flag_gems._assert_index_in_bounds
@@ -124,13 +134,41 @@ def test_runtime_bound_check_suspension_targets_registration_and_restores(
         flagos=SimpleNamespace(mode="flaggems", strict=True),
     )
 
-    with suspend_prevalidated_flaggems_index_add_bounds(runtime) as evidence:
-        assert fake_flag_gems.index_add_(torch.zeros(1), 0, "index", None) is None
+    with use_prevalidated_flaggems_index_add(runtime) as evidence:
+        assert fake_flag_gems.index_add_(torch.zeros(1), 0, "index", None) == (
+            True,
+            ("checked", "index", 1),
+        )
         assert evidence["platform_profile"] == "metax"
+        assert evidence["scope_api"] == "use_trusted_index_add_inference"
+        assert fake_flag_gems._assert_index_in_bounds is original_check
 
     assert fake_flag_gems._assert_index_in_bounds is original_check
     assert fake_flag_gems.index_add_(torch.zeros(1), 0, "index", None) == (
-        "checked",
-        "index",
-        1,
+        False,
+        ("checked", "index", 1),
     )
+    assert evidence["closed"] is True
+
+
+def test_runtime_prevalidated_index_add_rejects_missing_public_scope(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    fake_flag_gems = types.ModuleType("flag_gems")
+    exec(
+        "def index_add_(out, dim, index, src, alpha=1):\n"
+        "    return out\n",
+        fake_flag_gems.__dict__,
+    )
+    fake_flag_gems.FULL_CONFIG_BY_FUNC = {
+        "index_add_": [("index_add_", fake_flag_gems.index_add_)]
+    }
+    monkeypatch.setitem(sys.modules, "flag_gems", fake_flag_gems)
+    runtime = SimpleNamespace(
+        profile=SimpleNamespace(name="mthreads"),
+        flagos=SimpleNamespace(mode="flaggems", strict=True),
+    )
+
+    with pytest.raises(RuntimeError, match="trusted inference scope"):
+        with use_prevalidated_flaggems_index_add(runtime):
+            pass

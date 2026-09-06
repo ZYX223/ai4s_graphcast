@@ -33,6 +33,34 @@ def _trajectory_writer():
     return writer
 
 
+@pytest.mark.parametrize("steps", [2, 40])
+def test_final_prediction_uses_actual_rollout_time_not_template_time(steps):
+    stamp = getattr(operational_runner, "stamp_final_prediction_time", None)
+    assert callable(stamp), "final prediction time stamping is missing"
+    init = np.datetime64("2021-01-01T00", "ns")
+    leads = np.arange(1, steps + 1) * np.timedelta64(6, "h")
+    times = xr.DataArray((init + leads)[None, :], dims=("batch", "time"))
+    prediction = xr.Dataset(
+        {"temperature": (("batch", "time", "lat", "lon"), np.ones((1, 1, 1, 1)))},
+        coords={"batch": [0], "time": [np.timedelta64(6, "h")], "lat": [0.], "lon": [0.]},
+    )
+    actual = stamp(prediction, steps=steps, step_hours=6, valid_times=times)
+    assert actual.time.values[0] == np.timedelta64(steps * 6, "h")
+    assert actual.datetime.values[0, 0] == init + np.timedelta64(steps * 6, "h")
+    assert actual.forecast_reference_time.values[0] == init
+    assert actual.temperature.values.tolist() == [[[[1.]]]]
+    assert prediction.time.values[0] == np.timedelta64(6, "h")
+
+
+def test_final_prediction_rejects_irregular_forcing_times():
+    stamp = getattr(operational_runner, "stamp_final_prediction_time", None)
+    assert callable(stamp), "final prediction time stamping is missing"
+    prediction = xr.Dataset(coords={"batch": [0], "time": [np.timedelta64(6, "h")]})
+    times = xr.DataArray(np.asarray([["2021-01-01T06", "2021-01-01T18"]], dtype="datetime64[h]"), dims=("batch", "time"))
+    with pytest.raises(ValueError):
+        stamp(prediction, steps=2, step_hours=6, valid_times=times)
+
+
 class CountingModel(torch.nn.Module):
     def __init__(self, events: list[str]) -> None:
         super().__init__()
@@ -110,7 +138,7 @@ def test_h100_baseline_expands_to_the_conservative_reference_path() -> None:
 
 
 @pytest.mark.parametrize("platform", ("c550", "bw3000", "s5000", "910c", "810e"))
-def test_domestic_v1_expands_identically_on_all_five_platforms(platform: str) -> None:
+def test_domestic_v1_selects_only_the_s5000_trusted_index_path(platform: str) -> None:
     profile = _profile_resolver()(platform, "domestic-v1")
 
     assert profile.to_metadata() == {
@@ -122,7 +150,9 @@ def test_domestic_v1_expands_identically_on_all_five_platforms(platform: str) ->
             "grid2mesh_edge_chunk_size": 131072,
             "mesh2grid_edge_chunk_size": 131072,
             "mesh2grid_full_grid_fast_path": True,
-            "index_add_execution": "inline",
+            "index_add_execution": (
+                "prevalidated-static" if platform == "s5000" else "inline"
+            ),
         },
     }
 
@@ -156,7 +186,7 @@ def test_model_execution_profile_rejects_cross_platform_use(
         ("810e", "domestic-v1"),
     ),
 )
-@pytest.mark.parametrize("precision", ("fp32", "bf16"))
+@pytest.mark.parametrize("precision", ("fp32", "tf32", "bf16"))
 def test_formal_cli_applies_profile_independently_of_precision(
     platform: str, profile: str, precision: str
 ) -> None:
@@ -753,12 +783,23 @@ def test_baseline_report_separates_profile_overrides_from_effective_chunks() -> 
     ("physical_finite", "expected_exit", "expected_status"),
     ((True, 0, "passed"), (False, 1, "failed_nonfinite")),
 )
+@pytest.mark.parametrize(
+    ("platform", "backend", "device_type", "index_mode"),
+    (
+        ("c550", "metax", "cuda", "inline"),
+        ("s5000", "mthreads", "musa", "prevalidated-static"),
+    ),
+)
 def test_main_binds_runtime_builder_and_report_to_one_domestic_profile(
     monkeypatch: pytest.MonkeyPatch,
     tmp_path: Path,
     physical_finite: bool,
     expected_exit: int,
     expected_status: str,
+    platform: str,
+    backend: str,
+    device_type: str,
+    index_mode: str,
 ) -> None:
     assets = {
         name: tmp_path / name
@@ -793,11 +834,12 @@ def test_main_binds_runtime_builder_and_report_to_one_domestic_profile(
             return self
 
     class FakeRuntime:
-        profile = SimpleNamespace(name="metax", device_type="cuda")
+        profile = SimpleNamespace(name=backend, device_type=device_type)
         device = torch.device("cpu")
+        flagos = SimpleNamespace(mode="off", strict=False)
 
         def to_metadata(self):
-            return {"backend": "metax"}
+            return {"backend": backend}
 
     class FakeModel:
         def __init__(self, config, **settings) -> None:
@@ -819,6 +861,15 @@ def test_main_binds_runtime_builder_and_report_to_one_domestic_profile(
 
         def eval(self):
             return self
+
+        def prevalidate_static_index_add(self):
+            events.append("prevalidate")
+            self.contract = SimpleNamespace(to_metadata=lambda: {"status": "validated"})
+            return self.contract
+
+        def verify_static_index_add(self, contract):
+            assert contract is self.contract
+            events.append("verify")
 
     config = GoogleSmallConfig(
         latent_size=4,
@@ -843,7 +894,16 @@ def test_main_binds_runtime_builder_and_report_to_one_domestic_profile(
         return FakeModel(effective_config, **settings)
 
     monkeypatch.setattr(operational_runner, "resolve_runtime_backend", fake_resolve_runtime)
-    monkeypatch.setattr(operational_runner, "configure_float32_math", lambda *args: "ieee_fp32")
+
+    def fake_configure_float32_math(enabled, device_type):
+        captured["float32_math_request"] = (enabled, device_type)
+        return "tf32" if enabled else "ieee_fp32"
+
+    monkeypatch.setattr(
+        operational_runner,
+        "configure_float32_math",
+        fake_configure_float32_math,
+    )
     monkeypatch.setattr(GoogleSmallConfig, "from_yaml", lambda path: config)
     monkeypatch.setattr(operational_runner.xr, "open_dataset", lambda path: FakeDataset())
     monkeypatch.setattr(operational_runner, "load_normalization_stats", lambda path: object())
@@ -887,14 +947,13 @@ def test_main_binds_runtime_builder_and_report_to_one_domestic_profile(
         lambda runtime: None,
     )
 
-    class FakePrediction:
-        def to_netcdf(self, path) -> None:
-            Path(path).write_bytes(b"prediction")
-
     monkeypatch.setattr(
         operational_runner,
         "normalized_output_to_prediction",
-        lambda *args, **kwargs: FakePrediction(),
+        lambda *args, **kwargs: xr.Dataset(
+            {"temperature": (("batch", "time", "lat", "lon"), np.ones((1, 1, 1, 1)))},
+            coords={"batch": [0], "time": [np.timedelta64(6, "h")], "lat": [0.], "lon": [0.]},
+        ),
     )
     monkeypatch.setattr(
         operational_runner,
@@ -940,20 +999,25 @@ def test_main_binds_runtime_builder_and_report_to_one_domestic_profile(
             "--output", str(output),
             "--trajectory-output", str(trajectory_output),
             "--report", str(report_path),
-            "--platform", "c550",
+            "--platform", platform,
             "--model-execution-profile", "domestic-v1",
+            "--precision", "tf32",
             "--steps", "3",
             "--step-hours", "12",
         ]
     )
 
     assert result == expected_exit
-    assert events == ["runtime", "model"]
-    assert captured["expected_backend"] == "metax"
+    expected_events = ["runtime", "model"]
+    if platform == "s5000":
+        expected_events += ["prevalidate", "verify"]
+    assert events == expected_events
+    assert captured["expected_backend"] == backend
+    assert captured["float32_math_request"] == (True, device_type)
     assert captured["settings"] == {
         "edge_input_projection": "factorized",
         "mesh2grid_full_grid_fast_path": True,
-        "index_add_execution": "inline",
+        "index_add_execution": index_mode,
     }
     effective_config = captured["effective_config"]
     assert effective_config.grid2mesh_edge_chunk_size == 131072
@@ -961,7 +1025,11 @@ def test_main_binds_runtime_builder_and_report_to_one_domestic_profile(
     report = json.loads(report_path.read_text(encoding="utf-8"))
     assert report["status"] == expected_status
     assert report["measurement"]["physical_output_finite"] is physical_finite
-    assert report["runtime"]["backend"] == "metax"
+    assert report["runtime"]["backend"] == backend
+    if platform == "s5000":
+        assert report["workload"]["static_index_add"]["runtime_trusted_scope"] == {
+            "status": "not_applicable_native"
+        }
     assert set(report["source"]["normalization_stats"]) == set(
         operational_runner.REQUIRED_STATS_FILES
     )
@@ -974,9 +1042,9 @@ def test_main_binds_runtime_builder_and_report_to_one_domestic_profile(
     assert report["workload"]["step_hours"] == 12
     assert captured["trajectory_writer"] == (trajectory_output, 3, 12)
     assert captured["trajectory_appends"] == [
-        (0, "FakePrediction"),
-        (1, "FakePrediction"),
-        (2, "FakePrediction"),
+        (0, "Dataset"),
+        (1, "Dataset"),
+        (2, "Dataset"),
     ]
     assert captured["trajectory_sealed"] is True
     assert captured["trajectory_published"] is True

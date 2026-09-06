@@ -12,6 +12,7 @@ import sys
 import tempfile
 import time
 from collections.abc import Callable
+from contextlib import nullcontext
 from dataclasses import dataclass, replace
 from pathlib import Path
 from typing import Any
@@ -41,7 +42,7 @@ from graphcast_compat.backend import (  # noqa: E402
     require_complete_flaggems_dispatch,
     reset_peak_memory,
     resolve_runtime_backend,
-    suspend_prevalidated_flaggems_index_add_bounds,
+    use_prevalidated_flaggems_index_add,
 )
 from graphcast_compat.backend import (  # noqa: E402
     synchronize as synchronize_runtime,
@@ -402,7 +403,9 @@ def resolve_model_execution_profile(platform: str, name: str) -> ModelExecutionP
             grid2mesh_edge_chunk_size=131072,
             mesh2grid_edge_chunk_size=131072,
             mesh2grid_full_grid_fast_path=True,
-            index_add_execution="inline",
+            index_add_execution=(
+                "prevalidated-static" if platform == "s5000" else "inline"
+            ),
         )
     raise ValueError(f"model execution profile {name!r} is not valid for platform {platform!r}")
 
@@ -659,6 +662,43 @@ def _select_state_dict(payload: Any) -> dict[str, torch.Tensor]:
     raise ValueError("checkpoint does not contain a supported model state dictionary")
 
 
+def stamp_final_prediction_time(
+    prediction: xr.Dataset,
+    *,
+    steps: int,
+    step_hours: int,
+    valid_times: xr.DataArray | None,
+) -> xr.Dataset:
+    """Label the final physical output, not the reusable one-step template."""
+    if steps <= 0 or step_hours <= 0 or prediction.sizes.get("time") != 1:
+        raise ValueError("final prediction requires one frame and a positive rollout horizon")
+    result = prediction.drop_vars(
+        [name for name in ("datetime", "valid_time", "forecast_reference_time") if name in prediction]
+    ).assign_coords(time=[np.timedelta64(steps * step_hours, "h")])
+    if valid_times is None:
+        # Missing initialization evidence must remain missing, never copied from the template.
+        return result
+    if "time" not in valid_times.dims or valid_times.sizes["time"] != steps:
+        raise ValueError("forcing valid times do not cover the rollout horizon")
+    if valid_times.dims == ("time",):
+        values = np.asarray(valid_times)[None, :]
+    elif set(valid_times.dims) == {"batch", "time"}:
+        values = np.asarray(valid_times.transpose("batch", "time"))
+    else:
+        raise ValueError("forcing valid times require time and optional batch dimensions")
+    if (values.shape[0] != prediction.sizes.get("batch")
+            or not np.issubdtype(values.dtype, np.datetime64) or np.isnat(values).any()):
+        raise ValueError("forcing valid-time batch or dtype is invalid")
+    leads = np.arange(1, steps + 1) * np.timedelta64(step_hours, "h")
+    initializations = values - leads
+    if not np.all(initializations == initializations[:, :1]):
+        raise ValueError("forcing valid times do not describe a regular autoregressive rollout")
+    return result.assign_coords(
+        datetime=(("batch", "time"), values[:, -1:]),
+        forecast_reference_time=("batch", initializations[:, 0]),
+    )
+
+
 def _stage_json(path: Path, payload: dict[str, Any]) -> Path:
     path.parent.mkdir(parents=True, exist_ok=True)
     descriptor, temporary_name = tempfile.mkstemp(
@@ -812,7 +852,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         required=True,
     )
     parser.add_argument("--device", default="auto")
-    parser.add_argument("--precision", choices=("fp32", "bf16"), default="fp32")
+    parser.add_argument("--precision", choices=("fp32", "tf32", "bf16"), default="fp32")
     parser.add_argument(
         "--steps",
         type=int,
@@ -891,7 +931,10 @@ def main(argv: list[str] | None = None) -> int:
     )
     validate_runtime_platform(args.platform, runtime.profile.name)
     precision_policy = resolve_inference_precision(args.precision)
-    float32_math_mode = configure_float32_math(False, runtime.profile.device_type)
+    float32_math_mode = configure_float32_math(
+        precision_policy.fast_float32_math,
+        runtime.profile.device_type,
+    )
     config = apply_edge_chunk_overrides(
         GoogleSmallConfig.from_yaml(args.config),
         grid2mesh=model_execution_profile.grid2mesh_edge_chunk_size,
@@ -984,7 +1027,12 @@ def main(argv: list[str] | None = None) -> int:
                 trajectory_callback=trajectory_callback,
             )
         else:
-            with suspend_prevalidated_flaggems_index_add_bounds(runtime) as runtime_evidence:
+            trusted_scope = (
+                nullcontext({"status": "not_applicable_native"})
+                if runtime.flagos.mode == "off"
+                else use_prevalidated_flaggems_index_add(runtime)
+            )
+            with trusted_scope as runtime_evidence:
                 measurement = run_tensor_resident_rollout(
                     model,
                     prepared,
@@ -1003,6 +1051,10 @@ def main(argv: list[str] | None = None) -> int:
             measurement.final_output,
             target_template,
             stats,
+        )
+        prediction = stamp_final_prediction_time(
+            prediction, steps=args.steps, step_hours=args.step_hours,
+            valid_times=forcings.coords.get("datetime"),
         )
         physical_finite = dataset_is_finite(prediction) and trajectory_physical_finite
         for name, path in input_paths.items():
@@ -1067,7 +1119,7 @@ def main(argv: list[str] | None = None) -> int:
                 "static_index_add": (
                     {
                         **static_index_add_contract.to_metadata(),
-                        "runtime_patch": static_runtime_evidence,
+                        "runtime_trusted_scope": static_runtime_evidence,
                     }
                     if static_index_add_contract is not None
                     else {"status": "not_requested"}

@@ -58,3 +58,24 @@ def test_ascend_fp32_disables_and_verifies_hf32(
     assert mode == "ieee_fp32"
     assert npu.matmul.allow_hf32 is False
     assert npu.conv.allow_hf32 is False
+
+
+@pytest.mark.parametrize("enabled", [True, False])
+def test_musa_29_updates_matmul_switch_not_only_mudnn(monkeypatch, enabled):
+    matmul = SimpleNamespace(allow_tf32=not enabled)
+    mudnn = SimpleNamespace(allow_tf32=not enabled)
+    monkeypatch.setattr(backend, "_import_torch_musa", lambda: None)
+    monkeypatch.setattr(backend.torch, "backends", SimpleNamespace(
+        musa=SimpleNamespace(matmul=matmul), mudnn=mudnn,
+    ))
+    backend.configure_float32_math(enabled, "musa")
+    assert matmul.allow_tf32 is enabled
+    assert mudnn.allow_tf32 is enabled
+
+
+def test_legacy_musa_can_use_its_existing_mudnn_switch(monkeypatch):
+    mudnn = SimpleNamespace(allow_tf32=False)
+    monkeypatch.setattr(backend, "_import_torch_musa", lambda: None)
+    monkeypatch.setattr(backend.torch, "backends", SimpleNamespace(mudnn=mudnn))
+    assert backend.configure_float32_math(True, "musa") == "tf32"
+    assert mudnn.allow_tf32 is True

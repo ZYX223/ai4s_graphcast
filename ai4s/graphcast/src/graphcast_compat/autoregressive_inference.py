@@ -269,8 +269,11 @@ def normalized_output_to_prediction(
     """Restore the final physical xarray prediction from normalized output."""
 
     normalized = grid_node_outputs_to_prediction(normalized_output, target_template)
-    return unnormalize_dataset(
+    physical_prediction = unnormalize_dataset(
         normalized,
         scales=stats.stddev_by_level,
         locations=stats.mean_by_level,
     )
+    for name, template in target_template.data_vars.items():
+        physical_prediction[name].attrs = template.attrs.copy()
+    return physical_prediction

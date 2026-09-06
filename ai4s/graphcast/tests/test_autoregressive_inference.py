@@ -116,14 +116,20 @@ def test_prepare_and_advance_keep_history_and_forcings_on_device() -> None:
     torch.testing.assert_close(state, torch.tensor([[[20.0, 21.0, 40.0, 50.0]]]))
 
 
-def test_final_normalized_output_round_trips_to_target_layout() -> None:
+def test_final_normalized_output_preserves_target_units_without_mutating_template() -> None:
     _, target, _, stats, _ = _datasets()
+    target["state"].attrs["units"] = "K"
+    original_target = target.copy(deep=True)
+
     prediction = normalized_output_to_prediction(
         torch.tensor([[[-1.0], [0.0], [1.5], [2.0]]]),
         target,
         stats,
     )
-    np.testing.assert_allclose(
+
+    np.testing.assert_array_equal(
         prediction["state"].values,
         np.asarray([8.0, 10.0, 13.0, 14.0], dtype=np.float32).reshape(1, 1, 2, 2),
     )
+    assert prediction["state"].attrs["units"] == "K"
+    xr.testing.assert_identical(target, original_target)

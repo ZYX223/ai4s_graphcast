@@ -13,9 +13,10 @@ import torch
 class InferencePrecisionPolicy:
     """Immutable precision boundary for one inference process."""
 
-    requested: Literal["fp32", "bf16"]
-    effective: Literal["strict_fp32", "mixed_precision"]
+    requested: Literal["fp32", "tf32", "bf16"]
+    effective: Literal["strict_fp32", "fast_fp32", "mixed_precision"]
     autocast_dtype: torch.dtype | None
+    fast_float32_math: bool
 
     def context(self, device_type: str):
         if self.autocast_dtype is None:
@@ -34,9 +35,13 @@ class PrecisionForwardResult:
 
 def resolve_inference_precision(name: str) -> InferencePrecisionPolicy:
     if name == "fp32":
-        return InferencePrecisionPolicy("fp32", "strict_fp32", None)
+        return InferencePrecisionPolicy("fp32", "strict_fp32", None, False)
+    if name == "tf32":
+        return InferencePrecisionPolicy("tf32", "fast_fp32", None, True)
     if name == "bf16":
-        return InferencePrecisionPolicy("bf16", "mixed_precision", torch.bfloat16)
+        return InferencePrecisionPolicy(
+            "bf16", "mixed_precision", torch.bfloat16, False
+        )
     raise ValueError(f"unsupported inference precision: {name!r}")
 
 

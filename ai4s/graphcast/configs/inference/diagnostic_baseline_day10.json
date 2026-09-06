@@ -1,0 +1,12 @@
+{
+  "schema": "graphcast.fixed_baseline.v1",
+  "provenance_status": "unverified",
+  "provenance_evidence": "Handoff checkpoint_prediction_validation/diagnostic_package, 2026-06-10. Input/weight lineage and initialization have not been verified. Do not change status without evidence.",
+  "baseline_filename": "graphcast_operational_25km_day10_uvptqw_baselines.npz",
+  "baseline_sha256": "fb8570cf866a73e0c533bcc71e8ff4e1638547c24232e754afee9f7a19fe905b",
+  "original_diagnostic_sha256": "68861349b1f91b23e6ce051896522e762e26e77293f5f9e771d418365e1b3089",
+  "initialization_time": null,
+  "lead_hours": 240,
+  "source": {},
+  "units": {}
+}

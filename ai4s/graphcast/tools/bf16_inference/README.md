@@ -1,5 +1,13 @@
 # GraphCast BF16 inference validation
 
+Project inference acceptance is now the separate fixed-baseline 5% evaluator:
+`scripts/inference/diagnose_inference.py`. See the GraphCast README for its
+reference-provenance requirements, offline/batch CLI and optional
+`GRAPHCAST_ACCEPTANCE_BASELINE` / `GRAPHCAST_ACCEPTANCE_METADATA` post-run hook.
+These legacy-named runners support `PRECISION=fp32|tf32|bf16`. The historical
+finite/drift checks and the BF16-only MFU summarizer below are auxiliary evidence,
+not substitutes for the new acceptance summary. No training policy changes.
+
 These tools retain the BF16 validation workflow used for the six-platform
 GraphCast campaign. They do not contain machine addresses, device allocation,
 or asset locations; those remain explicit inputs to each run.

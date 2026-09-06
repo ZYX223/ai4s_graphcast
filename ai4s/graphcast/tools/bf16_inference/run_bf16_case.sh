@@ -24,12 +24,16 @@ case "${MODE}" in
   *) echo "unsupported MODE=${MODE}" >&2; exit 2 ;;
 esac
 case "${PRECISION}" in
-  fp32|bf16) ;;
+  fp32|tf32|bf16) ;;
   *) echo "unsupported PRECISION=${PRECISION}" >&2; exit 2 ;;
 esac
 if ! [[ "${STEPS}" =~ ^[1-9][0-9]*$ ]]; then
   echo "STEPS must be a positive integer" >&2
   exit 2
+fi
+if [[ -n "${GRAPHCAST_ACCEPTANCE_BASELINE:-}${GRAPHCAST_ACCEPTANCE_METADATA:-}" ]]; then
+  : "${GRAPHCAST_ACCEPTANCE_BASELINE:?}"
+  : "${GRAPHCAST_ACCEPTANCE_METADATA:?}"
 fi
 
 RUN_OUTPUT="${OUTPUT_ROOT}/${RUN_NAME}"
@@ -123,5 +127,18 @@ if [[ "${status}" -eq 0 ]]; then
     outputs+=("${trajectory_artifact}")
   fi
   sha256sum "${outputs[@]}" > "${RUN_OUTPUT}/output_sha256.txt"
+fi
+if [[ "${status}" -eq 0 && -n "${GRAPHCAST_ACCEPTANCE_BASELINE:-}" ]]; then
+  # Offline evaluation is outside the runner's E2E timer. Keep execution and
+  # acceptance return codes separate; finite output alone is not acceptance.
+  set +e
+  "${PYTHON_BIN}" "${PROJECT_ROOT}/scripts/inference/diagnose_inference.py" \
+    --run-dir "${RUN_OUTPUT}" \
+    --baseline "${GRAPHCAST_ACCEPTANCE_BASELINE}" \
+    --baseline-metadata "${GRAPHCAST_ACCEPTANCE_METADATA}" \
+    --output-dir "${RUN_OUTPUT}/acceptance" > "${RUN_OUTPUT}/diagnostic.log" 2>&1
+  status=$?
+  set -e
+  printf '%s\n' "${status}" > "${RUN_OUTPUT}/diagnostic_rc"
 fi
 exit "${status}"
