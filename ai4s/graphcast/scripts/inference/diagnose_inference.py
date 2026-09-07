@@ -18,6 +18,7 @@ from typing import Any
 
 import numpy as np
 import xarray as xr
+from xarray.coding.times import CFTimedeltaCoder
 
 GRAPHCAST_ROOT = Path(__file__).resolve().parents[2]
 if str(GRAPHCAST_ROOT) not in sys.path:
@@ -185,6 +186,23 @@ def _compare(candidate: xr.Dataset, baseline: Any) -> list[dict]:
     return comparisons
 
 
+def _open_prediction_dataset(path: Path) -> xr.Dataset:
+    try:
+        return xr.open_dataset(
+            path,
+            decode_timedelta=CFTimedeltaCoder(decode_via_dtype=True),
+        )
+    except ValueError as error:
+        # xarray 2025.6 cannot decode files that carry both the serialized
+        # timedelta dtype attribute and the backend's dtype encoding.
+        if "existing key dtype in attrs" not in str(error):
+            raise
+        return xr.open_dataset(
+            path,
+            decode_timedelta=CFTimedeltaCoder(decode_via_dtype=False),
+        )
+
+
 def diagnose_run(run_dir: Path, baseline_path: Path, metadata: dict) -> dict:
     """Evaluate one immutable runner result; unknown provenance never passes."""
     if not isinstance(metadata, dict):
@@ -218,8 +236,8 @@ def diagnose_run(run_dir: Path, baseline_path: Path, metadata: dict) -> dict:
                    "baseline_sha256": baseline_digest},
         "acceptance_passed": False, "comparisons": [],
     }
-    with np.load(baseline_path, allow_pickle=False) as baseline, xr.open_dataset(
-        prediction_path, decode_timedelta=True
+    with np.load(baseline_path, allow_pickle=False) as baseline, _open_prediction_dataset(
+        prediction_path
     ) as dataset:
         if (sorted(baseline["baseline_keys"].tolist()) != sorted(REFERENCE_KEYS)
                 or sorted(baseline["variable_names"].tolist()) != sorted(VARIABLES)

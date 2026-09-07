@@ -146,6 +146,48 @@ def test_non_40_step_baseline_selects_by_lead_time(tmp_path):
     assert evaluate(tmp_path, lead=12)["status"] == "passed"
 
 
+def test_prediction_time_dtype_attribute_is_decoded_without_conflicting_with_encoding(
+    tmp_path, monkeypatch,
+):
+    baseline, manifest, run, candidate = fixture(tmp_path)
+    candidate = candidate.assign_coords(
+        time=(
+            "time",
+            np.asarray([240 * 60 * 60], dtype=np.int64),
+            {"dtype": "timedelta64[s]", "units": "seconds"},
+        )
+    )
+    rewrite_candidate(run, candidate)
+    diagnostic = module()
+    real_open_dataset = diagnostic.xr.open_dataset
+
+    def xarray_2025_6_open_dataset(*args, decode_timedelta=None, **kwargs):
+        if (
+            isinstance(decode_timedelta, diagnostic.CFTimedeltaCoder)
+            and decode_timedelta.decode_via_dtype
+        ):
+            raise ValueError(
+                "failed to prevent overwriting existing key dtype in attrs"
+            )
+        if isinstance(decode_timedelta, diagnostic.CFTimedeltaCoder):
+            decode_timedelta = True
+        return real_open_dataset(
+            *args,
+            decode_timedelta=decode_timedelta,
+            **kwargs,
+        )
+
+    monkeypatch.setattr(diagnostic.xr, "open_dataset", xarray_2025_6_open_dataset)
+
+    result = diagnostic.diagnose_run(
+        run,
+        baseline,
+        json.loads(manifest.read_text()),
+    )
+
+    assert result["status"] == "passed"
+
+
 @pytest.mark.parametrize("change", ["lead", "initialization", "coordinates", "units", "variable", "batch"])
 def test_mismatched_candidate_is_not_comparable(tmp_path, change):
     baseline, manifest, run, candidate = fixture(tmp_path)
