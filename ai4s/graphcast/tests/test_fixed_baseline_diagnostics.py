@@ -188,6 +188,39 @@ def test_prediction_time_dtype_attribute_is_decoded_without_conflicting_with_enc
     assert result["status"] == "passed"
 
 
+def test_legacy_xarray_without_configurable_timedelta_coder_is_supported(
+    tmp_path, monkeypatch,
+):
+    baseline, manifest, run, _ = fixture(tmp_path)
+    diagnostic = module()
+    real_open_dataset = diagnostic.xr.open_dataset
+    observed = []
+
+    class LegacyCFTimedeltaCoder:
+        def __init__(self, **_kwargs):
+            raise TypeError("CFTimedeltaCoder() takes no arguments")
+
+    def legacy_open_dataset(*args, decode_timedelta=None, **kwargs):
+        observed.append(decode_timedelta)
+        return real_open_dataset(
+            *args,
+            decode_timedelta=decode_timedelta,
+            **kwargs,
+        )
+
+    monkeypatch.setattr(diagnostic, "CFTimedeltaCoder", LegacyCFTimedeltaCoder)
+    monkeypatch.setattr(diagnostic.xr, "open_dataset", legacy_open_dataset)
+
+    result = diagnostic.diagnose_run(
+        run,
+        baseline,
+        json.loads(manifest.read_text()),
+    )
+
+    assert result["status"] == "passed"
+    assert observed == [True]
+
+
 @pytest.mark.parametrize("change", ["lead", "initialization", "coordinates", "units", "variable", "batch"])
 def test_mismatched_candidate_is_not_comparable(tmp_path, change):
     baseline, manifest, run, candidate = fixture(tmp_path)

@@ -187,10 +187,19 @@ def _compare(candidate: xr.Dataset, baseline: Any) -> list[dict]:
 
 
 def _open_prediction_dataset(path: Path) -> xr.Dataset:
+    def decoder(*, decode_via_dtype: bool) -> Any:
+        try:
+            return CFTimedeltaCoder(decode_via_dtype=decode_via_dtype)
+        except TypeError:
+            # Older xarray releases expose CFTimedeltaCoder without the
+            # configurable constructor.  Their supported public API is the
+            # legacy boolean decode_timedelta switch.
+            return True
+
     try:
         return xr.open_dataset(
             path,
-            decode_timedelta=CFTimedeltaCoder(decode_via_dtype=True),
+            decode_timedelta=decoder(decode_via_dtype=True),
         )
     except ValueError as error:
         # xarray 2025.6 cannot decode files that carry both the serialized
@@ -199,7 +208,7 @@ def _open_prediction_dataset(path: Path) -> xr.Dataset:
             raise
         return xr.open_dataset(
             path,
-            decode_timedelta=CFTimedeltaCoder(decode_via_dtype=False),
+            decode_timedelta=decoder(decode_via_dtype=False),
         )
 
 
