@@ -8,8 +8,6 @@ The real-window training data implementation is reused from the project team's
 
 The following files are byte-identical to that commit:
 
-- `src/graphcast_compat/official_training_data.py`
-- `src/graphcast_compat/official_training_corpus.py`
 - `src/graphcast_compat/epoch_plan.py`
 - `src/graphcast_compat/official_solar.py`
 - `src/graphcast/__init__.py`
@@ -44,6 +42,14 @@ Torch-compatible NumPy adapter above. Consequently, importing `data_utils`,
 - Existing target `graphcast_compat.data`, `normalization`, `google_small`, and
   backend modules remain unchanged; the imported data code reads the target
   operational YAML contract through its existing `config_path` interface.
+- `src/graphcast_compat/official_training_data.py` and
+  `official_training_corpus.py` start from the colleague implementations but
+  have two local lifecycle adaptations: corpus first-shard bootstrap uses an
+  internal metadata-only dataset mode while each shard's time deltas and the
+  requested rollout are validated against the assembled global corpus
+  timeline, and corpus close delegates to `OfficialTrainingDataset.close()`
+  so extraction-cache storage is released. Standalone dataset validation is
+  unchanged.
 - `pandas` and `typing_extensions` are declared as direct runtime dependencies
   of the imported bridge/upstream modules. JAX is not a runtime dependency.
 - Behavior tests were adapted to pytest and the target operational 13-level

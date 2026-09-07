@@ -22,7 +22,7 @@ from graphcast_compat.official_training_data import (
     _parse_bound,
     _resolve_target_rollout_steps,
     _time_values,
-    _validate_six_hour_spacing,
+    _validate_six_hour_deltas,
     OfficialTrainingDataset,
     TrainingSample,
 )
@@ -202,6 +202,7 @@ class OfficialTrainingCorpus:
             lon_start=lon_start,
             lon_count=lon_count,
             extraction_cache_max_gib=extraction_cache_max_gib,
+            _metadata_only=True,
         )
         template.close()
         self._dataset = template
@@ -219,7 +220,7 @@ class OfficialTrainingCorpus:
             )
             try:
                 shard_timestamps = _time_values(source)
-                _validate_six_hour_spacing(shard_timestamps)
+                _validate_six_hour_deltas(shard_timestamps)
                 if (
                     previous_last is not None
                     and shard_timestamps[0] <= previous_last
@@ -674,6 +675,7 @@ class OfficialTrainingCorpus:
         )
 
     def close(self) -> None:
+        self._dataset.close()
         for source in self._open_sources.values():
             source.close()
         self._open_sources.clear()

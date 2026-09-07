@@ -119,14 +119,20 @@ def _time_values(source: xr.Dataset) -> np.ndarray:
     return (datetimes[0] + offsets).astype("datetime64[ns]")
 
 
-def _validate_six_hour_spacing(timestamps: np.ndarray) -> None:
-    if len(timestamps) < 3:
-        raise ValueError("official training source requires at least three times")
+def _validate_six_hour_deltas(timestamps: np.ndarray) -> None:
+    if not len(timestamps):
+        raise ValueError("official training source requires at least one time")
     delta_seconds = np.diff(timestamps).astype("timedelta64[s]").astype(np.int64)
     if not np.all(delta_seconds == _SIX_HOURS_SECONDS):
         raise ValueError(
             "official training source must use contiguous six-hour time spacing"
         )
+
+
+def _validate_six_hour_spacing(timestamps: np.ndarray) -> None:
+    if len(timestamps) < 3:
+        raise ValueError("official training source requires at least three times")
+    _validate_six_hour_deltas(timestamps)
 
 
 def _resolve_count(count: int, start: int, total: int, name: str) -> int:
@@ -257,6 +263,7 @@ class OfficialTrainingDataset:
         lon_start: int = 0,
         lon_count: int = 0,
         extraction_cache_max_gib: float = 0.0,
+        _metadata_only: bool = False,
     ):
         if data_role not in {"train", "validation"}:
             raise ValueError("data_role must be train or validation")
@@ -381,7 +388,8 @@ class OfficialTrainingDataset:
                 "official source pressure levels do not match the model contract"
             )
         self.timestamps = _time_values(source)
-        _validate_six_hour_spacing(self.timestamps)
+        if not _metadata_only:
+            _validate_six_hour_spacing(self.timestamps)
 
         source_latitudes = np.asarray(source.coords["lat"].values, dtype=np.float32)
         source_longitudes = np.asarray(source.coords["lon"].values, dtype=np.float32)
@@ -433,31 +441,34 @@ class OfficialTrainingDataset:
             source.close()
             raise ValueError("split_start must be earlier than split_end")
         self._window_indices_by_rollout: dict[int, tuple[int, ...]] = {}
-        for active_rollout in range(1, self.rollout_steps + 1):
-            valid, _ = _eligible_reference_indices(
-                self.timestamps,
-                rollout_steps=active_rollout,
-                split_start=start,
-                split_end=end,
-                training_stage=training_stage,
-            )
-            if not valid:
-                source.close()
-                raise ValueError(
-                    "split contains no complete GraphCast windows for "
-                    f"rollout={active_rollout}"
+        if _metadata_only:
+            self.window_indices = ()
+        else:
+            for active_rollout in range(1, self.rollout_steps + 1):
+                valid, _ = _eligible_reference_indices(
+                    self.timestamps,
+                    rollout_steps=active_rollout,
+                    split_start=start,
+                    split_end=end,
+                    training_stage=training_stage,
                 )
-            order = np.asarray(valid, dtype=np.int64)
-            if shuffle:
-                order = np.random.default_rng(
-                    np.random.SeedSequence([seed, active_rollout])
-                ).permutation(order)
-            self._window_indices_by_rollout[active_rollout] = tuple(
-                int(index) for index in order
-            )
-        self.window_indices = self._window_indices_by_rollout[
-            self.rollout_steps
-        ]
+                if not valid:
+                    source.close()
+                    raise ValueError(
+                        "split contains no complete GraphCast windows for "
+                        f"rollout={active_rollout}"
+                    )
+                order = np.asarray(valid, dtype=np.int64)
+                if shuffle:
+                    order = np.random.default_rng(
+                        np.random.SeedSequence([seed, active_rollout])
+                    ).permutation(order)
+                self._window_indices_by_rollout[active_rollout] = tuple(
+                    int(index) for index in order
+                )
+            self.window_indices = self._window_indices_by_rollout[
+                self.rollout_steps
+            ]
         self._source = source
 
     @property

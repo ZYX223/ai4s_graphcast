@@ -4,6 +4,7 @@ import json
 from pathlib import Path
 import sys
 
+import numpy as np
 import pytest
 
 from test_training_data_integration import CONFIG_PATH, _write_source
@@ -88,6 +89,49 @@ def test_cross_shard_active_horizon_preserves_maximum_window_plan(tmp_path):
     assert sample.forcings.sizes["time"] == 1
 
 
+@pytest.mark.parametrize("first_time_count", (1, 2))
+def test_short_first_shard_is_valid_when_global_corpus_completes_window(
+    tmp_path,
+    first_time_count,
+):
+    first = _write_source(
+        tmp_path / "first.nc",
+        start="2017-01-01T00:00:00",
+        time_count=first_time_count,
+    )
+    second = _write_source(
+        tmp_path / "second.nc",
+        start=np.datetime_as_string(
+            np.datetime64("2017-01-01T00:00:00")
+            + np.timedelta64(6 * first_time_count, "h"),
+            unit="s",
+        ),
+        time_count=6 - first_time_count,
+    )
+    corpus = OfficialTrainingCorpus(
+        _write_manifest(tmp_path / "corpus.json", [first, second]),
+        config_path=CONFIG_PATH,
+        rollout_steps=2,
+        max_open_shards=1,
+    )
+    try:
+        assert corpus.window_count == 3
+        assert corpus.open_shard_count == 0
+        sample = corpus.sample_indices(
+            window_indices=(1,),
+            sample_weights=(1.0,),
+        )
+    finally:
+        corpus.close()
+
+    assert sample.reference_datetimes == ("2017-01-01T06:00:00",)
+    assert sample.target_datetimes_by_sample == (
+        ("2017-01-01T12:00:00", "2017-01-01T18:00:00"),
+    )
+    assert sample.inputs.sizes["time"] == 2
+    assert sample.targets.sizes["time"] == 2
+
+
 def test_replacement_sampling_is_fixed_seed_and_records_valid_count(tmp_path):
     shard = _write_source(tmp_path / "source.nc", start="2017-01-01T00:00:00", time_count=8)
     corpus = OfficialTrainingCorpus(
@@ -111,6 +155,29 @@ def test_replacement_sampling_is_fixed_seed_and_records_valid_count(tmp_path):
     assert sample.global_window_indices == positions
     assert sample.global_valid_sample_count == 8
     assert len(set(positions)) < len(positions)
+
+
+def test_close_releases_delegated_extraction_cache_when_dataset_is_retained(tmp_path):
+    shard = _write_source(
+        tmp_path / "source.nc",
+        start="2017-01-01T00:00:00",
+        time_count=8,
+    )
+    corpus = OfficialTrainingCorpus(
+        _write_manifest(tmp_path / "corpus.json", [shard]),
+        config_path=CONFIG_PATH,
+        rollout_steps=2,
+        extraction_cache_max_gib=1.0,
+    )
+    delegated_dataset = corpus._dataset
+    corpus.sample_indices(window_indices=(1,), sample_weights=(1.0,))
+    assert delegated_dataset.extraction_cache_status["entries"] == 1
+    assert delegated_dataset.extraction_cache_status["current_bytes"] > 0
+
+    corpus.close()
+
+    assert delegated_dataset.extraction_cache_status["entries"] == 0
+    assert delegated_dataset.extraction_cache_status["current_bytes"] == 0
 
 
 def test_gap_excludes_only_windows_that_cross_the_gap(tmp_path):
