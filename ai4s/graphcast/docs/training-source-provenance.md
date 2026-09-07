@@ -111,3 +111,36 @@ loss-gradient equality, upstream weighting, zero sample padding, unequal
 microbatch updates, schedule boundaries, restored next-update equivalence, and
 valid-sample DP scaling. No source-text assertion or accelerator acceptance
 claim is included.
+
+## Formal training entry integration (Task 3)
+
+`training_engine.py`, `training_runtime.py`, `scripts/training/run_training.py`
+and `train_official.sh` are slim target-side orchestration composing the pinned
+data/primitives above; the colleague's broad epoch runner is not copied.
+`configs/training/operational_tf32_schedule.json` preserves the source
+`configs/training/published_era5_311k.json` values: 1000 warmup, 299000
+one-step cosine, and 11000 curriculum updates at 3e-7, rollout 2 through 12
+in increments every 1000 updates. Budget overrides are explicit.
+
+The variable multipliers are from pinned
+`scripts/training/run_official_parallel_training.py:75–81`: 2m temperature
+1.0, 10m u/v wind, mean sea-level pressure and total precipitation 0.1;
+atmospheric variables retain the imported loss builder's default 1.0.
+The ordinary source epoch policy is preserved: eligibility is fixed by the
+maximum configured rollout, with shorter trajectories extracted by phase.
+The source's special update-indexed replacement sampler is not used.
+
+The target's public model placement API already supports the required four
+stages, so no shared model or inference behavior was changed. Precision and
+strict FlagGems registration reuse the existing target backend. Unknown
+forward/backward coverage and training MFU are explicitly unverified/unavailable.
+Content hashes identify ordered corpus shards and stats; model/task/channel
+configuration, training policy, optimizer, schedule, batch topology, order seed,
+and the next epoch cursor are validated when restoring. Deployment paths and
+unrelated source hashes are not resume identity.
+
+Task 3 evidence includes hand-derived FP32 BPTT and accumulated updates, real
+two-rank CPU Gloo including zero-valid rank participation, collective nonfinite
+aborts, exact model/optimizer/RNG/cursor continuation, and subprocess CLI tests
+that forbid importing accelerator/data payload modules during dry-run. These
+are unit/integration checks, not full-model accelerator or performance evidence.

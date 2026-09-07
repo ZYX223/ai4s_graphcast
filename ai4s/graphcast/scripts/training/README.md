@@ -1,6 +1,94 @@
 # 训练脚本说明
 
-本目录包含 GraphCast 在不同配置下的训练入口脚本。所有脚本应在 Docker 容器内运行。
+## 正式 TF32 自回归入口
+
+`run_training.py` / `train_official.sh` 连接真实 ERA5 corpus、可微多 lead
+反馈、加权 loss、AdamW 和优化器边界恢复。默认参数、激活与 loss 使用 FP32，
+通过现有 `configure_float32_math` 请求 TF32（Ascend 为 HF32）；
+`--tensor-core disabled` 请求 IEEE FP32。不使用 autocast 或 BF16。
+旧的短 `train_mp.sh` 等入口继续用于已有算子回归；下文旧脚本的设备历史记录
+不构成此正式入口的显存或性能验收。
+
+本次证据仅为 CPU 张量/真实小网格数据集成、两进程 CPU Gloo 和 CLI dry-run。
+尚未验证完整模型的四卡显存适配、12 lead TF32 + AdamW、加速器通信、
+训练天气技能或性能。前向/反向 FlagGems coverage 标为 `unverified`，
+training MFU 为 `null`（没有已验证的训练 FLOPs 分子与匹配峰值）。
+
+从 `ai4s/graphcast` 目录执行：
+
+```bash
+# 仅检查参数、阶段预算和逻辑拓扑，不加载数据、权重、torch 或 FlagGems。
+bash scripts/training/train_official.sh --dry-run --dp 1 --devices 0,1,2,3
+python scripts/training/run_training.py --dry-run --dp 2 \
+  --devices 0,1,2,3,4,5,6,7 --global-batch-size 6 --micro-batch-size 2
+
+# 后续完整模型设备验证的调用形式（本次未执行）。
+python scripts/training/run_training.py \
+  --corpus /data/era5/corpus.json --stats /data/stats \
+  --pretrained-checkpoint /data/operational_pytorch.pt \
+  --device-type cuda --backend native --dp 1 --global-batch-size 4 \
+  --micro-batch-size 1 --checkpoint-segments 2 --loss-grid-chunk-size 16384 \
+  --max-updates 2 --checkpoint-every 1 --output-dir /runs/native-tf32
+
+# 一个 DP 进程拥有四个 MP 设备；两进程拥有八个可见逻辑设备。
+torchrun --standalone --nproc-per-node=2 scripts/training/run_training.py \
+  --dp 2 --devices 0,1,2,3,4,5,6,7 --global-batch-size 6 --micro-batch-size 2 \
+  --corpus /data/era5/corpus.json --stats /data/stats \
+  --max-updates 2 --output-dir /runs/native-dp2
+
+# 恢复时保持 config、corpus 内容、stats、种子、拓扑、batch 和阶段预算一致。
+python scripts/training/run_training.py \
+  --corpus /data/era5/corpus.json --stats /data/stats \
+  --resume-checkpoint /runs/native-tf32/update-000000002.pt \
+  --device-type cuda --backend native --dp 1 --global-batch-size 4 \
+  --micro-batch-size 1 --checkpoint-segments 2 --loss-grid-chunk-size 16384 \
+  --max-updates 4 --checkpoint-every 1 --output-dir /runs/native-tf32
+```
+
+`--pretrained-checkpoint` 是已有转换工具生成的 PyTorch state dict，不能与
+`--resume-checkpoint` 同时提供；两者都不提供时从固定种子初始化。
+恢复文件需要同目录 `.sha256` sidecar。`--max-updates` 是绝对停止步数，
+可从 2 改为 4 而不改变 schedule。只有成功完成 optimizer update 后才能保存；
+每个保存包含模型、AdamW、schedule、下一批 cursor 和各 DP rank 的 RNG。
+保存的是内容 SHA256 与训练语义，因此原样搬迁 corpus/stats 路径可恢复，
+同路径改动数据、stats、配置或精度策略会被拒绝。首次正式运行/恢复会读取完整
+shard 文件计算内容哈希，可能增加启动时间。
+
+`--global-batch-size` 是一个 optimizer update 的全局样本槽位数；必须整除 DP。
+`--micro-batch-size` 是每个 rank 一次前向/反向的最多样本数。例：DP=2、
+全局 batch=6、micro=2 时，全局微批次分别为 4 和 2 个样本，累积两次。
+epoch 尾部补齐样本权重为零；每次更新按全局有效样本数归一化，
+loss 缩放为 `DP × 本 rank 当前微批次有效数 / 整次更新全局有效数`。
+全补齐 rank 仍执行可微零 loss 和 collective，全局全补齐微批次一致跳过。
+每次更新仅手动同步一次梯度、clip global norm 到 32、AdamW step 一次，
+没有额外 DDP 包装。rollout lead 数与累积次数、optimizer update 数分开记录。
+
+正式模型固定 MP=4：输入阶段在卡 0，16 个 mesh steps 的前/后八步在卡 1/2，
+输出阶段在卡 3。DP rank r 使用逻辑卡 `4r..4r+3`。`--devices` 只接受从 0
+起连续的完整逻辑序列；通过 CUDA/NPU/MUSA 的可见设备环境变量选择物理卡。
+所有 rank 必须在同一节点看到完整设备列表，不能设置为每个进程仅可见四卡。
+此入口会检查 operational 配置和真实 721×1440 四分之一度全球坐标与 13 层，
+裁剪数据不会被当作完整模型验收。
+
+默认 schedule 位于 `configs/training/operational_tf32_schedule.json`：
+1000 次一步线性 warmup（0→1e-3）、299000 次一步半余弦（1e-3→0），
+11000 次恒定 3e-7 的 curriculum（从 2 到 12 lead，每 1000 次加一）。
+`--warmup-updates`、`--one-step-updates`、`--curriculum-updates` 可覆盖预算，
+0 表示省略阶段；`--curriculum-every-updates` 可改变递增间隔。
+epoch universe 始终取最大配置 rollout 可用的窗口，短阶段只缩短提取 horizon，
+阶段切换不改变 epoch 顺序。每个 epoch 固定种子洗牌、有效窗口各用一次。
+这没有采用同事特殊 recipe 的按 update 有放回采样；短运行不等于复现论文训练。
+
+Native 与 FlagGems 必须在两个新进程分别启动，后者使用 `--backend flaggems`。
+入口显式选择现有 training allowlist，严格要求注册成功；可用
+`--flaggems-config`、`--flaggems-ops`、`--flaggems-variant` 选择现有运行时。
+这些开关不证明反向覆盖；不自动降级到 Native，也不修改已安装运行时或 overlays。
+日志记录请求/解析的 backend 与 precision、拓扑、有效样本、阶段/epoch/rollout、
+loss/分变量 loss、有限性/裁剪前 norm、数据/计算时间、各卡峰值显存与保存状态。
+下一步边界是代码审查后的完整模型 Native TF32 短更新，再取得 FlagGems
+真实前向/反向 trace 与数值对照；七天 ERA5 handoff 不足以支持长期训练结论。
+
+以下保留既有短训练脚本说明，其部署示例以 Docker 容器为主。
 
 ## 脚本一览
 

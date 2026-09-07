@@ -9,6 +9,16 @@ This directory is the canonical GraphCast workspace for training and inference. 
 workflows use the same implementation under `src/graphcast_compat`; platform and
 FlagGems choices are configuration, not separate model copies.
 
+The formal TF32/HF32 autoregressive training entry is
+`scripts/training/run_training.py` (or `train_official.sh`). It keeps FP32
+storage, uses MP=4 per DP process, and supports weighted accumulation,
+rollout schedules and exact optimizer-boundary resume. Start with
+`python scripts/training/run_training.py --dry-run`; see the
+[training guide](scripts/training/README.md) for corpus, DP=2 and restore examples.
+Current acceptance is CPU integration and CLI validation only; full-model
+accelerator memory, training accuracy, FlagGems backward coverage and MFU remain
+unverified. The existing quickstart/short training probes remain available.
+
 ## Quick Start
 
 ```bash
