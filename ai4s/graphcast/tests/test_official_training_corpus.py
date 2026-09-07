@@ -6,6 +6,7 @@ import sys
 
 import numpy as np
 import pytest
+import xarray as xr
 
 from test_training_data_integration import CONFIG_PATH, _write_source
 
@@ -30,6 +31,30 @@ def _write_manifest(path: Path, shards: list[Path]) -> Path:
         ),
         encoding="utf-8",
     )
+    return path
+
+
+def _write_numeric_time_source(
+    path: Path,
+    *,
+    start: str,
+    time_count: int,
+) -> Path:
+    _write_source(path, start=start, time_count=time_count)
+    with xr.open_dataset(path) as source:
+        loaded = source.load()
+    loaded = loaded.assign_coords(
+        time=np.arange(time_count, dtype=np.int32) * 6,
+        datetime=(
+            ("batch", "time"),
+            np.full(
+                (1, time_count),
+                np.datetime64(start),
+                dtype="datetime64[ns]",
+            ),
+        ),
+    )
+    loaded.to_netcdf(path, mode="w")
     return path
 
 
@@ -130,6 +155,38 @@ def test_short_first_shard_is_valid_when_global_corpus_completes_window(
     )
     assert sample.inputs.sizes["time"] == 2
     assert sample.targets.sizes["time"] == 2
+
+
+def test_singleton_numeric_time_shard_preserves_time_dimension_in_corpus(tmp_path):
+    first = _write_numeric_time_source(
+        tmp_path / "first.nc",
+        start="2017-01-01T00:00:00",
+        time_count=1,
+    )
+    second = _write_numeric_time_source(
+        tmp_path / "second.nc",
+        start="2017-01-01T06:00:00",
+        time_count=5,
+    )
+    corpus = OfficialTrainingCorpus(
+        _write_manifest(tmp_path / "corpus.json", [first, second]),
+        config_path=CONFIG_PATH,
+        rollout_steps=2,
+        max_open_shards=1,
+    )
+    try:
+        sample = corpus.sample_indices(
+            window_indices=(1,),
+            sample_weights=(1.0,),
+        )
+    finally:
+        corpus.close()
+
+    assert corpus.window_count == 3
+    assert sample.reference_datetimes == ("2017-01-01T06:00:00",)
+    assert sample.target_datetimes_by_sample == (
+        ("2017-01-01T12:00:00", "2017-01-01T18:00:00"),
+    )
 
 
 def test_replacement_sampling_is_fixed_seed_and_records_valid_count(tmp_path):

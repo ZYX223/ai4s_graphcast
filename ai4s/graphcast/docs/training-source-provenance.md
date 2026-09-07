@@ -44,7 +44,9 @@ Torch-compatible NumPy adapter above. Consequently, importing `data_utils`,
   operational YAML contract through its existing `config_path` interface.
 - `src/graphcast_compat/official_training_data.py` and
   `official_training_corpus.py` start from the colleague implementations but
-  have two local lifecycle adaptations: corpus first-shard bootstrap uses an
+  have three local source/lifecycle adaptations: numeric-time sources preserve
+  a singleton `time` dimension while still rejecting non-singleton extra or
+  misaligned datetime coordinates; corpus first-shard bootstrap uses an
   internal metadata-only dataset mode while each shard's time deltas and the
   requested rollout are validated against the assembled global corpus
   timeline, and corpus close delegates to `OfficialTrainingDataset.close()`

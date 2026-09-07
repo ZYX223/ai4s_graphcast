@@ -96,8 +96,14 @@ def _time_values(source: xr.Dataset) -> np.ndarray:
         raise ValueError(
             "numeric source time requires a datetime reference coordinate"
         )
-    datetimes = np.asarray(source.coords["datetime"].values)
-    datetimes = np.squeeze(datetimes)
+    datetime_coordinate = source.coords["datetime"]
+    if "time" not in datetime_coordinate.dims or any(
+        int(datetime_coordinate.sizes[dimension]) != 1
+        for dimension in datetime_coordinate.dims
+        if dimension != "time"
+    ):
+        raise ValueError("datetime coordinate must align with the time dimension")
+    datetimes = np.asarray(datetime_coordinate.values).reshape(-1)
     if datetimes.ndim != 1 or len(datetimes) != len(raw_time):
         raise ValueError("datetime coordinate must align with the time dimension")
     datetimes = datetimes.astype("datetime64[ns]")
