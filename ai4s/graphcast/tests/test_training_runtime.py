@@ -122,6 +122,28 @@ def test_epoch_planning_work_is_not_repeated_within_an_epoch(monkeypatch):
     assert rebuilt == [1]
 
 
+def test_training_start_record_binds_loss_logs_to_actual_session_without_mutation():
+    import json
+    import graphcast_compat.training_runtime as runtime
+    assert hasattr(runtime, "training_start_record"), "loss comparison start metadata is missing"
+    session = make_session([])
+    before = state_object_sha256(session.model.state_dict())
+    record = runtime.training_start_record(session, {"requested_backend": "native"})
+    comparison = json.loads(json.dumps(record))["loss_comparison"]
+    assert record["event"] == "start"
+    assert comparison["start_optimizer_step"] == 0
+    assert comparison["resume_contract"]["global_batch_size"] == 3
+    assert comparison["resume_contract"]["seed"] == 7
+    assert len(comparison["starting_parameters_sha256"]) == 64
+    assert state_object_sha256(session.model.state_dict()) == before
+    session.update()
+    later = runtime.training_start_record(session, {})["loss_comparison"]
+    assert later["start_optimizer_step"] == 1
+    # LR0 leaves weights unchanged but AdamW bookkeeping has advanced.
+    assert later["starting_parameters_sha256"] == comparison["starting_parameters_sha256"]
+    assert later["starting_optimizer_sha256"] != comparison["starting_optimizer_sha256"]
+
+
 def test_real_corpus_normalization_and_padded_updates_equal_full_batch(tmp_path):
     import xarray as xr
     from test_training_data_integration import _write_source, CONFIG_PATH

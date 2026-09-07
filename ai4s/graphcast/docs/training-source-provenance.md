@@ -144,3 +144,43 @@ two-rank CPU Gloo including zero-valid rank participation, collective nonfinite
 aborts, exact model/optimizer/RNG/cursor continuation, and subprocess CLI tests
 that forbid importing accelerator/data payload modules during dry-run. These
 are unit/integration checks, not full-model accelerator or performance evidence.
+
+## Lightweight training loss diagnostic
+
+`scripts/training/diagnose_training_loss.py` adapts the project team's
+`flagos-graphcast-operator-handoff/tests/checkpoint_prediction_validation/diagnostic_package/diagnose_training_loss.py`.
+The source file read on 2026-09-07 has SHA256
+`117d635c1e9732aeb6852110fba8def994acc6647a485f3dd487a98545ea52be`.
+It is a project-team diagnostic, not a Google GraphCast weather-skill standard.
+The original file is unchanged; its historical small-1deg JAX baseline CSV is
+not imported or silently used for operational 25km training.
+
+The reused loss metric is `sum(abs(candidate-reference))/sum(abs(reference))*100`,
+with the original inclusive `<= 5%` default. Per-step relative mean/max remain
+explanatory metrics, not replacements for that ratio of sums. Adaptations are:
+
+- Require an explicit reference and inclusive optimizer-step interval, reject
+  incomplete coverage, duplicate/nonintegral steps and nonfinite loss/gradient
+  evidence. Support both logs' column names, including `optimizer_step/loss`.
+- Check the shared training recipe and per-update epoch/batch, rollout, phase,
+  learning rate and effective samples. A numerically small loss error without
+  comparison metadata is measured but unverified, never a formal pass. An
+  all-zero-reference or all-zero-learning-rate interval is not acceptance.
+- Serialize a small start event in `updates.jsonl` per training invocation,
+  reusing the existing resume contract and hashing initial parameters/optimizer
+  once outside update timing. Static graph buffers are not hashed. Metadata is
+  associated with each invocation, including appended resume segments; it does
+  not add a new checkpoint schema or change training numerical behavior.
+- Compare semantic recipe fields rather than the entire resume contract:
+  Native/FlagGems backend names and vendor/version details can differ. Current
+  controlled comparisons require the same DP/MP and microbatch layout as well
+  as global batch; alternative layouts need a separate comparison protocol.
+  The reference must separately identify as Native with FlagGems disabled;
+  both runs' resolved backend/precision must agree with their requests. TF32
+  and HF32 are compatible request families, not proof of hardware instructions.
+- Replace JAX-specific report labels with generic reference labels and emit
+  strict JSON plus exit codes. Do not overwrite inputs or existing results.
+
+The standalone diagnostic imports only the Python standard library. It does
+not run training, load checkpoints or allocate accelerator memory, and it does
+not compute weather ACC or declare trained-checkpoint weather acceptance.

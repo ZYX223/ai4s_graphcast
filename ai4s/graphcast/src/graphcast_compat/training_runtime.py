@@ -44,6 +44,20 @@ def validate_operational_grid(dataset, pressure_levels):
         raise ValueError("formal training requires the complete 721 x 1440 quarter-degree global grid")
 
 
+def training_start_record(session, metadata):
+    """One small CPU-readable comparison record per invocation, not per update.
+
+    Reuse the existing resume contract; hash only parameters and optimizer state,
+    not the large static graph buffers. This runs outside update timing.
+    """
+    return {"event": "start", **metadata, "loss_comparison": {
+        "start_optimizer_step": session.cursor.global_optimizer_step,
+        "starting_parameters_sha256": state_object_sha256(dict(session.model.named_parameters())),
+        "starting_optimizer_sha256": state_object_sha256(session.optimizer.state_dict()),
+        "resume_contract": session.resume_contract,
+    }}
+
+
 class TrainingSession:
     """Fixed maximum-rollout epoch universe and exact next-update cursor.
 
@@ -269,7 +283,10 @@ def run_formal_training(args, *, schedule, metadata):
                     "memory_acceptance": "unverified", "maximum_rollout_eligibility": maximum_rollout,
                     "resume_checkpoint": args.resume_checkpoint}
                 if ctx.is_primary:
-                    print(json.dumps({"event": "start", **resolved}), flush=True)
+                    line = json.dumps(training_start_record(session, resolved), sort_keys=True)
+                    print(line, flush=True)
+                    with (output / "updates.jsonl").open("a", encoding="utf-8") as stream:
+                        stream.write(line + "\n")
                 for device in devices:
                     reset_peak_memory(device)
                 while session.cursor.global_optimizer_step < metadata["stop_at_update"]:

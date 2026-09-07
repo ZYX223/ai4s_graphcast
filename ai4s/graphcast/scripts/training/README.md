@@ -90,6 +90,56 @@ loss/分变量 loss、有限性/裁剪前 norm、数据/计算时间、各卡峰
 
 以下保留既有短训练脚本说明，其部署示例以 Docker 容器为主。
 
+## 当前阶段：轻量 loss 诊断
+
+使用项目同事诊断包的 loss 算法，暂不启动 12 案例天气技巧评估：
+
+```
+E = sum(abs(candidate_loss - reference_loss)) / sum(abs(reference_loss)) * 100
+```
+
+默认 **E ≤ 5%**。这不是逐步百分比的平均，也不是天气 ACC 的 `<5%`
+退化门槛。逐步相对误差最大值和均值另行输出，不作为主门槛。
+
+同平台 Native TF32 和 FlagGems TF32 应使用相同初始权重、数据/统计量、
+seed、batch、DP/MP、微批次、loss 权重及 schedule，在两个独立进程运行。
+不要把精度、数据或 rollout 不同的日志直接相比；不要仅比较 LR=0 的区间。
+目前没有该新入口的实机 loss 通过结果，下列路径仅为后续运行示例。
+
+```bash
+# 两份日志应完整包含预先指定的 optimizer updates 1–13。
+python scripts/training/diagnose_training_loss.py /runs/flaggems-tf32/updates.jsonl \
+  --baseline /runs/native-tf32/updates.jsonl \
+  --start-step 1 --end-step 13 \
+  --output-json /runs/diagnostics/native-vs-flaggems-loss.json
+```
+
+不硬编码训练步数。`--start-step/--end-step` 是必填的闭区间，缺少其中任何一步
+即拒绝比较；不能仅用 step 交集。重复 step 也拒绝，恢复时应从正确 checkpoint
+继续追加无重叠 updates，不能靠覆盖记录消除失败。
+参考侧必须记录为 Native，且实际解析为 FlagGems 关闭；仅文件名写 Native 不够。
+两侧请求与实际解析的 backend/精度必须一致，TF32/HF32 按相同请求族比较。
+这只验证软件解析记录，不等于已经证明实际矩阵硬件指令或算子覆盖。
+
+新正式入口在 `updates.jsonl` 每次启动写一条 `event=start` 记录，后面是
+`event=update` 记录。start 记录包含本次起始参数/optimizer 指纹、起始 update
+和已有 resume contract；不重复读取训练数据来生成诊断指纹。读取该日志的
+其他工具应按 event 过滤更新行。恢复追加的每个启动记录只绑定其后的更新。
+只有 rank 0 写日志；诊断仍是 CPU 离线工作，不混入训练耗时/MFU。
+
+两侧都自动识别 `optimizer_step/loss`；旧 CSV/JSONL 可通过
+`--step-column/--loss-column` 和 `--baseline-step-column/--baseline-loss-column`
+指定字段。不再自动寻找附带的 small-1deg JAX CSV；该数据不是当前 25km 基线。
+若旧日志没有 start 记录，可用 `--candidate-metadata/--baseline-metadata`
+提供从对应原始运行保留的 start-event JSON，不能人为补造缺失证据。
+缺少配置、起始状态或梯度有限性证据时，仍输出数值，但状态是未验证。
+
+退出码：0 为区间完整、配置可比且 loss 指标通过；1 为可比条件下 loss 超阈值；
+2 为缺失/重复/非法记录、不可比配置、无有效学习率或参考等未验证条件。
+JSON 中 `metric_passed` 仅表示数值门槛，最终以 `status=passed` 和退出码 0 为准。
+输出文件必须是新路径；不会覆盖旧诊断或输入日志。所有结果的
+`weather_skill` 均为 `not_evaluated`；梯度/参数更新及恢复测试仍需独立保留。
+
 ## 脚本一览
 
 | 脚本 | 用途 | 卡数 | 模型并行 | Grid 分区 | 适用场景 |

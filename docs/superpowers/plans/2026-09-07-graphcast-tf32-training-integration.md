@@ -35,7 +35,7 @@
 - Produces colleague `OfficialTrainingDataset`, `OfficialTrainingCorpus`, `TrainingSample`, `EpochPlan` interfaces, including `sample_weights`, `global_valid_sample_count`, and rank-local sample metadata.
 - Upstream import `from graphcast import data_utils, losses, UPSTREAM_COMMIT` must work without importing JAX or FlagGems.
 
-- [ ] Add tests first. Port small in-memory NetCDF fixtures from colleague tests. Check actual two-input-frame / future-target extraction, configurable rollout, model pressure-level selection, fixed-seed ordering, and final-batch zero weighting. A hand-checked epoch case is:
+- [x] Add tests first. Port small in-memory NetCDF fixtures from colleague tests. Check actual two-input-frame / future-target extraction, configurable rollout, model pressure-level selection, fixed-seed ordering, and final-batch zero weighting. A hand-checked epoch case is:
 
 ```python
 plan = EpochPlan.create(range(3), epoch=0, seed=27, global_batch_size=2)
@@ -44,10 +44,10 @@ assert plan.batches[1].window_indices == (2, 2)
 assert plan.batches[1].sample_weights == (1.0, 0.0)
 ```
 
-- [ ] Run `python -m pytest ai4s/graphcast/tests/test_training_data_integration.py -q`; record expected failure due to absent modules/behavior, not a fixture typo.
-- [ ] Port the selected pinned implementations using apply_patch. Retain original algorithms, lazy NetCDF access and upstream copyright. Reuse the colleague Torch-only solar bridge only to satisfy the data dependency. Resolve config/stat differences at callers; avoid unrelated features.
-- [ ] Run focused tests, then `python -m pytest ai4s/graphcast/tests -q`; inspect imports with `PYTHONPATH=ai4s/graphcast/src python -c 'from graphcast import data_utils, losses; from graphcast_compat.official_training_corpus import OfficialTrainingCorpus'`.
-- [ ] Self-review source diff/provenance and commit assigned files as `feat(graphcast): integrate real-window training data`.
+- [x] Run `python -m pytest ai4s/graphcast/tests/test_training_data_integration.py -q`; record expected failure due to absent modules/behavior, not a fixture typo.
+- [x] Port the selected pinned implementations using apply_patch. Retain original algorithms, lazy NetCDF access and upstream copyright. Reuse the colleague Torch-only solar bridge only to satisfy the data dependency. Resolve config/stat differences at callers; avoid unrelated features.
+- [x] Run focused tests, then `python -m pytest ai4s/graphcast/tests -q`; inspect imports with `PYTHONPATH=ai4s/graphcast/src python -c 'from graphcast import data_utils, losses; from graphcast_compat.official_training_corpus import OfficialTrainingCorpus'`.
+- [x] Self-review source diff/provenance and commit assigned files as `feat(graphcast): integrate real-window training data`.
 
 ### Task 2: Differentiable training, batch and restore primitives
 
@@ -62,12 +62,12 @@ assert plan.batches[1].sample_weights == (1.0, 0.0)
 - Produces colleague `MicrobatchPlan`, `TrainingSchedule`, `TrainingCursor`, RNG capture/restore, `build_training_checkpoint`, atomic save/load, `build_graphcast_adamw`, `clip_graphcast_gradients`, and `DistributedContext`/valid-sample loss scaling.
 - Standard update uses `optimizer.zero_grad(set_to_none=True)`, weighted microbatch loss `.backward()`, DP gradient synchronization once, global clip, then `optimizer.step()`.
 
-- [ ] Port relevant behavior tests first. Required hand-derived cases include a two-lead scalar residual model with full BPTT; checkpointed and uncheckpointed loss/gradient equality; nonuniform latitude/pressure weights against pinned upstream; zero-padding effects; full-batch versus unequal microbatch update equality. Use colleague fixtures where they assert real values, not source text.
-- [ ] Run selected new tests and record missing-feature failures.
-- [ ] Port the pinned primitives with minimal API adaptations. Keep direct official weighting functions. Keep FP32 loss arithmetic and state feedback attached. Use existing normalization/data modules. Preserve parameter grouping, zero-LR optimizer bookkeeping, and exact valid-sample scaling.
-- [ ] Keep semantic checkpoint fields and atomic/checksum integrity; avoid absolute deployment paths and unrelated code hashes as resume identity. Test restored next update, not merely object serialization.
-- [ ] For DP, retain disjoint MP device groups with DP ranks and the colleague manual synchronization mechanism; no inference of one-rank-one-GPU semantics. Adapt accelerator methods without copying stale precision flags. CPU Gloo fixtures can validate communication behavior.
-- [ ] Run the new focused tests and full target test suite. Commit assigned files as `feat(graphcast): integrate autoregressive training primitives`.
+- [x] Port relevant behavior tests first. Required hand-derived cases include a two-lead scalar residual model with full BPTT; checkpointed and uncheckpointed loss/gradient equality; nonuniform latitude/pressure weights against pinned upstream; zero-padding effects; full-batch versus unequal microbatch update equality. Use colleague fixtures where they assert real values, not source text.
+- [x] Run selected new tests and record missing-feature failures.
+- [x] Port the pinned primitives with minimal API adaptations. Keep direct official weighting functions. Keep FP32 loss arithmetic and state feedback attached. Use existing normalization/data modules. Preserve parameter grouping, zero-LR optimizer bookkeeping, and exact valid-sample scaling.
+- [x] Keep semantic checkpoint fields and atomic/checksum integrity; avoid absolute deployment paths and unrelated code hashes as resume identity. Test restored next update, not merely object serialization.
+- [x] For DP, retain disjoint MP device groups with DP ranks and the colleague manual synchronization mechanism; no inference of one-rank-one-GPU semantics. Adapt accelerator methods without copying stale precision flags. CPU Gloo fixtures can validate communication behavior.
+- [x] Run the new focused tests and full target test suite. Commit assigned files as `feat(graphcast): integrate autoregressive training primitives`.
 
 ### Task 3: Formal TF32 training entry and integration
 
@@ -86,15 +86,43 @@ assert plan.batches[1].sample_weights == (1.0, 0.0)
 - CLI exposes config, corpus, stats, pretrained checkpoint versus resume checkpoint, output directory, devices/DP, batch and microbatch, stage budgets, tensor-core enabled/disabled, Native/FlagGems selection, checkpoint segments/loss chunk, seed, and dry-run. Default formal precision is TF32/HF32 with FP32 storage.
 - Reuse existing model stage placement: input stage, two halves of 16 mesh steps, output stage over four devices. Retain current activation checkpoint behavior; autoregressive segment checkpoint and weighted loss chunking wrap it.
 
-- [ ] Write integration tests first. Compare a complete two-update sequence with stop/save/reconstruct/resume; compare unequal/padded accumulated updates with a single valid global batch. Test schedule transitions and no repeated data on restore. Test engine with FP32 tensor fixtures; these are not full-model acceptance.
-- [ ] Add CLI tests using subprocess `--help` and `--dry-run` that validate MP/DP/batch arithmetic before allocating accelerator tensors or importing FlagGems. Verify unsupported precision and ambiguous pretrained/resume inputs fail clearly. No source-text tests.
-- [ ] Run tests and record missing-feature failures.
-- [ ] Implement the small update engine by composing the imported loss/optimizer/context functions. Normalize valid samples globally, synchronize/clip/update once. Handle zero-valid rank participation without skipping collectives. Fail on nonfinite loss/gradients.
-- [ ] Implement runtime and CLI using one code path for Native/FlagGems. Call existing float32 math configuration before model execution. Preserve FP32 storage, current inference defaults, and old short training scripts. Do not copy the 3844-line colleague runner.
-- [ ] Log requested and resolved precision/backend, topology, effective samples, update/epoch/rollout, data/compute times, loss, finite/grad norm, memory and checkpoint status. Label unmeasured coverage/MFU unavailable rather than inventing numbers. Checkpoint only after successful optimizer updates and preserve semantic restore consistency.
-- [ ] Run focused tests, full `python -m pytest ai4s/graphcast/tests -q`, shell syntax checks and CLI dry-run for DP=1 and DP=2. Verify no accelerator training or deployment side effect occurred. Update README and provenance with commands and next full-model validation boundary.
-- [ ] Commit assigned files as `feat(graphcast): add formal TF32 autoregressive training entry`.
+- [x] Write integration tests first. Compare a complete two-update sequence with stop/save/reconstruct/resume; compare unequal/padded accumulated updates with a single valid global batch. Test schedule transitions and no repeated data on restore. Test engine with FP32 tensor fixtures; these are not full-model acceptance.
+- [x] Add CLI tests using subprocess `--help` and `--dry-run` that validate MP/DP/batch arithmetic before allocating accelerator tensors or importing FlagGems. Verify unsupported precision and ambiguous pretrained/resume inputs fail clearly. No source-text tests.
+- [x] Run tests and record missing-feature failures.
+- [x] Implement the small update engine by composing the imported loss/optimizer/context functions. Normalize valid samples globally, synchronize/clip/update once. Handle zero-valid rank participation without skipping collectives. Fail on nonfinite loss/gradients.
+- [x] Implement runtime and CLI using one code path for Native/FlagGems. Call existing float32 math configuration before model execution. Preserve FP32 storage, current inference defaults, and old short training scripts. Do not copy the 3844-line colleague runner.
+- [x] Log requested and resolved precision/backend, topology, effective samples, update/epoch/rollout, data/compute times, loss, finite/grad norm, memory and checkpoint status. Label unmeasured coverage/MFU unavailable rather than inventing numbers. Checkpoint only after successful optimizer updates and preserve semantic restore consistency.
+- [x] Run focused tests, full `python -m pytest ai4s/graphcast/tests -q`, shell syntax checks and CLI dry-run for DP=1 and DP=2. Verify no accelerator training or deployment side effect occurred. Update README and provenance with commands and next full-model validation boundary.
+- [x] Commit assigned files as `feat(graphcast): add formal TF32 autoregressive training entry`.
 
 ## Review and handoff
 
 Each task gets a task-scoped independent review after implementation. Final review checks cross-module data/weighting/precision/restore contracts and inference preservation. This implementation stage ends with local commits and CPU/CLI evidence, not a push or six-platform training-performance claim.
+
+### Local code integration closeout — 2026-09-07
+
+Tasks 1–3 are implemented and locally committed through `d185f726d9349a6e3ed0c0a988093755dbca604a`.
+The previously interrupted whole-range review of `3e43521..d185f72` is now complete:
+no new Critical/Important blocker; data, BPTT, valid-sample scaling, once-only DP
+synchronization, TF32 control and exact-resume joins were checked. A fresh
+pre-diagnostic suite passed 377 tests in 35.34 s. After the separately approved
+lightweight loss diagnostic integration, the complete suite passed 424 tests
+in 34.01 s; isolated runtime checks still expose the pre-existing NumPy/NetCDF
+ABI warning, not a test failure. No environment change was made.
+
+One known Minor limitation remains outside the prescribed binary-padding path:
+the generic AR loss primitive's clamp_min(1) misnormalizes fractional sample
+weights whose total is below one. The formal corpus and engine reject nonbinary
+weights, so that case is not supported by this entry. It is not a claim of
+general fractional-weight correctness.
+
+The lightweight diagnostic's independent review found a Native-reference
+identity false-pass; failing regressions reproduced it, the fix verifies
+requested/resolved backend and precision, and re-review closed the issue.
+Checkpoint weather-skill evaluation remains deferred by the user's later choice.
+
+Read-only remote verification on this date found the requested
+`zyx/flaggems-profile-routing` branch at `3e435216adb7af56a32e02a4a8490dde3d405eb0`.
+Training integration is therefore local only. No remote push, accelerator
+training, four-card full-model memory/communication validation, TF32 numerical
+acceptance, backward coverage or training MFU has been completed by this stage.
