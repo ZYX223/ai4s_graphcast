@@ -61,3 +61,53 @@ Torch-compatible NumPy adapter above. Consequently, importing `data_utils`,
 
 No HRES conversion, deployment, dataset, checkpoint, or runtime-launch code is
 included in this integration.
+
+## Differentiable training primitives
+
+The following Task 2 modules are derived from the same pinned project-team
+commit `6c5654c10c32a9a9b018eac88e4653a2b58be13d`:
+
+- `src/graphcast_compat/autoregressive_training.py`
+- `src/graphcast_compat/gradient_accumulation.py`
+- `src/graphcast_compat/training_recipe.py`
+- `src/graphcast_compat/training_schedule.py`
+- `src/graphcast_compat/training_state.py`
+- `src/graphcast_compat/distributed_training.py`
+
+The imported behavior retains differentiable normalized-residual feedback,
+official WeatherNext latitude and pressure-level weighting, sample-masked
+losses, unequal-microbatch scaling, the published AdamW parameter grouping and
+gradient clip, update-indexed learning-rate/rollout schedules, rank-local RNG
+state, semantic optimizer-boundary checkpoints, and checksum-protected atomic
+checkpoint I/O.
+
+Local integration adaptations are deliberately narrow:
+
+- Autoregressive batch construction imports the target's existing
+  `graphcast_compat.data` and `normalization` functions. Reentrant and
+  non-reentrant rollout checkpointing use PyTorch's built-in checkpoint
+  implementation when the colleague profiling package is absent; no broad
+  profiling module was imported.
+- `training_accelerator.py` contains only device discovery/context, collective
+  backend selection, synchronization, and accelerator RNG calls needed by
+  training state and distributed context. Vendor imports are delegated to the
+  existing target backend. It does not contain precision, FlagGems, memory,
+  environment-repair, or runtime-routing policy.
+- Distributed execution is DP-over-MP: each process owns a disjoint contiguous
+  model-parallel device group, and gradients are synchronized once per update
+  in deterministic parameter-name order. The colleague's unused DDP wrapper
+  and profiler-result merge functions are intentionally omitted so the target
+  engine cannot accidentally apply a second gradient average or inherit broad
+  profiling code.
+- Resume identity is expressed by caller-supplied semantic fields in
+  `metadata.resume_contract`; deployment paths and unrelated source hashes are
+  not required. The historical `cuda_device_indices` checkpoint field name is
+  retained for compatibility while its `accelerator_type` distinguishes CUDA,
+  MUSA, and NPU state.
+
+The focused pytest ports use hand-derived tensor values and real CPU Gloo
+collectives. They cover two-lead full BPTT, checkpointed/uncheckpointed
+loss-gradient equality, upstream weighting, zero sample padding, unequal
+microbatch updates, schedule boundaries, restored next-update equivalence, and
+valid-sample DP scaling. No source-text assertion or accelerator acceptance
+claim is included.
