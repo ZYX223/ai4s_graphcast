@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
 set -euo pipefail
 TRAINING_SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
-# One process owns four model-parallel cards. DP=2 is launched explicitly with
-# torchrun (see README); this wrapper does not alter visibility or environments.
-exec python "${TRAINING_SCRIPT_DIR}/run_training.py" "$@"
+# Both public launchers share the canonical epoch runner and platform policy.
+exec bash "${TRAINING_SCRIPT_DIR}/train_pipeline.sh" "$@"

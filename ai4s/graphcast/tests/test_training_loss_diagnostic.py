@@ -204,28 +204,25 @@ def test_context_is_associated_with_each_resume_segment(tmp_path):
     assert compare(candidate, reference)["status"] == "incomparable_training"
 
 
-def test_actual_training_session_records_feed_diagnostic_without_conversion(tmp_path):
+def test_state_hash_record_feeds_legacy_diagnostic_without_training_loop(tmp_path):
     sys.path.insert(0, str(ROOT / "src"))
-    from graphcast_compat.training_runtime import TrainingSession, training_start_record
-    from graphcast_compat.training_schedule import TrainingSchedule
+    from graphcast_compat.training_runtime import training_start_record
     from graphcast_compat.training_recipe import build_graphcast_adamw
-    from test_training_engine import Residual, batch, context
+    import torch
+    from types import SimpleNamespace
     contract = start_record()["loss_comparison"]["resume_contract"]
     def session():
-        model = Residual()
-        def prepare(indices, weights, rank, replicas, rollout):
-            return batch([i + 1 for i in indices], list(weights), rollout)
-        return TrainingSession(model, build_graphcast_adamw(model, lr=.001),
-            context=context(), schedule=TrainingSchedule.constant(name="fixture", learning_rate=.001, rollout_steps=2),
-            window_indices=tuple(range(8)), global_batch_size=4, micro_batch_size=1,
-            seed=7, shuffle=False, prepare_batch=prepare, resume_contract=contract)
+        torch.manual_seed(7)
+        model = torch.nn.Linear(1, 1)
+        return SimpleNamespace(model=model, optimizer=build_graphcast_adamw(model, lr=.001),
+            cursor=SimpleNamespace(global_optimizer_step=0), resume_contract=contract)
     paths = [tmp_path / "first.jsonl", tmp_path / "second.jsonl"]
     for path in paths:
         trainer = session()
         start = training_start_record(trainer, {
             "requested_backend": "native", "resolved_precision": "tf32",
             "resolved_backend": {"flagos_mode": "off", "flagos_status": "disabled"}})
-        rows = [{"event": "update", **trainer.update()} for _ in range(2)]
+        rows = updates()
         write_log(path, rows, start)
     result = compare(*paths)
     assert result["mean_relative_loss_percent"] == 0.

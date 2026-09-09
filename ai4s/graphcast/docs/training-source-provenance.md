@@ -129,38 +129,84 @@ canonical mesh shape/dtype/digests, DP=1 zero synchronization, two-rank DDP
 accumulation with unused parameters, and bounded peer failure. These are
 primitive/integration checks, not full-model accelerator acceptance.
 
-## Formal training entry integration (Task 3)
+## Canonical training entry integration (2026-09-09, Task 2)
 
-`training_engine.py`, `training_runtime.py`, `scripts/training/run_training.py`
-and `train_official.sh` are slim target-side orchestration composing the pinned
-data/primitives above; the colleague's broad epoch runner is not copied.
-`configs/training/operational_tf32_schedule.json` preserves the source
-`configs/training/published_era5_311k.json` values: 1000 warmup, 299000
-one-step cosine, and 11000 curriculum updates at 3e-7, rollout 2 through 12
-in increments every 1000 updates. Budget overrides are explicit.
+The sole formal engine is the pinned source
+`scripts/training/run_official_epoch_training.py`, with
+`official_epoch_training_file_validation.py`. Public `run_training.py`,
+`train_official.sh` and `train_pipeline.sh` delegate to it. The superseded
+target engine and its execution tests are retired; `training_runtime.py`
+temporarily retains only the legacy diagnostic's state-hashing function.
 
-The variable multipliers are from pinned
-`scripts/training/run_official_parallel_training.py:75–81`: 2m temperature
-1.0, 10m u/v wind, mean sea-level pressure and total precipitation 0.1;
-atmospheric variables retain the imported loss builder's default 1.0.
-The ordinary source epoch policy is preserved: eligibility is fixed by the
-maximum configured rollout, with shorter trajectories extracted by phase.
-The source's special update-indexed replacement sampler is not used.
+Source deviations are limited to:
 
-The target's public model placement API already supports the required four
-stages, so no shared model or inference behavior was changed. Precision and
-strict FlagGems registration reuse the existing target backend. Unknown
-forward/backward coverage and training MFU are explicitly unverified/unavailable.
-Content hashes identify ordered corpus shards and stats; model/task/channel
-configuration, training policy, optimizer, schedule, batch topology, order seed,
-and the next epoch cursor are validated when restoring. Deployment paths and
-unrelated source hashes are not resume identity.
+- Import consumed parallel-runner helpers from `training_support.py`, not its
+  second trainer. Extracted definitions: PER_VARIABLE_WEIGHTS, json_dump,
+  append_jsonl, state_dict_cpu, state_dict_sha256, tensor_components_sha256,
+  differing_component_names, configure_float32_math, synchronize,
+  reset_peak_memory, memory_by_device, profile_config, validate_formal_dataset,
+  validate_metric. Float32 configuration delegates to the existing target
+  backend instead of the source accelerator's separate implementation.
+- Route replacement setup through `training_backend.py`. It uses the target
+  configure_flagos_environment/resolve_runtime_backend and the target training
+  YAML, maps layer_norm to native_layer_norm before registration, checks every
+  selected op, and retains profile/version/registration/exported-function-source
+  metadata inside the existing operator_replacement object. Native imports no
+  FlagGems and sets FLAGOS_REPLACE=0. No source operator allowlist is imported.
+- The source-native runner defaults tensor-core to enabled and peak to zero
+  (unavailable); nonfinite/negative peaks and positive peaks without a source
+  are rejected. No engineering peak is claimed as verified.
+- Model-only initialization also accepts historical nonempty raw tensor
+  state_dict files. Source envelope checks and exact-resume schema/recipe
+  validation remain intact. Raw checkpoints do not qualify as exact resume.
 
-Task 3 evidence includes hand-derived FP32 BPTT and accumulated updates, real
-two-rank CPU Gloo including zero-valid rank participation, collective nonfinite
-aborts, exact model/optimizer/RNG/cursor continuation, and subprocess CLI tests
-that forbid importing accelerator/data payload modules during dry-run. These
-are unit/integration checks, not full-model accelerator or performance evidence.
+The source loop, update-indexed trajectory sampling with replacement, active
+rollout eligibility, weighted BPTT, AdamW, gradient clipping, CPU cache/prefetch,
+MUSA serial backward, checkpoint schema3 and metric segment layout are
+preserved. Source checkpoint hashes validate checkpoint/state integrity;
+the source resume contract records corpus/config/stats paths. It does not
+rehash all input content or permit path relocation like the retired target
+contract, and is documented accordingly. Prefix stops save numbered checkpoints.
+
+`training_platform.py` adapts execution/allocator/visibility policies from
+source `train_pipeline.sh` without its source locks, deploy paths, environment
+activation, default physical-card reservations, source maintenance, operator
+allowlists or engineering peaks. The public default global batch is 16; local
+micro batch 1 is multiplied by DP before forwarding. MP4 defaults to source
+manual sync, MP2 to DDP. DP1/DP2 both launch via torchrun unless already inside
+a rank; the source initializes a process group even at DP1.
+DDP's no_sync encloses forward/backward and no second
+manual averaging occurs. Ascend MP2 uses split8/step/non_reentrant from the
+source README's validated example instead of inheriting MP4 split16/reentrant.
+Explicit public CLI overrides win. Source allocator, Ascend launch blocking,
+MUSA descriptor limit and T-Head process teardown settings are retained.
+Runtime installation remains the caller's responsibility.
+
+`configs/training/official_2_to_12.json` serializes the built-in source recipe:
+1000 warmup, 299000 half-cosine, 11000 curriculum, 2–12 leads with equal budgets.
+Public budget overrides retain these semantics; stopping a prefix does not
+change schedule identity. The superseded operational_tf32_schedule.json is removed.
+The source published_era5_311k, epoch_rehearsal_v1 and hres_adaptation_v1
+manifests are copied unchanged for source-native use. Manifest schedules retain
+the source's epoch semantics; only official_2_to_12 selects replacement sampling.
+
+`hotspot_profiler.py`, `profiled_mfu.py` and `ascend_profile.py` are copied
+verbatim from b7667b4. Profiling stays opt-in; the optional ijson parser has a
+stdlib fallback. Source tests for pretrained initialization, optimizer/recompute
+and MFU/profiling are imported under tests/training_baseline with path-depth
+adaptation; the source-text check for the unported old loss runner is omitted.
+
+New behavioral tests execute public CLI subprocesses, resolve their argv through
+the actual source parser/schedule, verify raw initialization versus exact resume,
+exercise real target YAML/backend routing with a runtime boundary fixture, and
+run the actual source loop with real tiny model/corpus/AdamW/Gloo DDP. Tiny CPU
+fixtures substitute only hardware setup/placement and full-size acceptance
+gates, preserving canonical graph building and the real training loop.
+Six-update tests cross into 2/3-lead BPTT and prove exact model, optimizer,
+cursor and loss continuation with prefetch off/on; changed seed is rejected.
+These are CPU correctness checks, not full-model device, timing or weather-skill
+acceptance. Source-segment paired diagnostic metadata and actual call
+observation remain Task 3.
 
 ## Lightweight training loss diagnostic
 

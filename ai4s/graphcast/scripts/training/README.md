@@ -1,144 +1,118 @@
 # 训练脚本说明
 
-## 正式 TF32 自回归入口
+正式入口 `run_training.py`、`train_official.sh`、`train_pipeline.sh` 均调用同一份
+同事训练引擎 `run_official_epoch_training.py`（源提交 `b7667b4`）。
+训练专用 `training_model.py` 使用 canonical graph；推理模型、图默认值和
+inference FlagGems YAML 保持原样。来源和适配见
+[provenance](../../docs/training-source-provenance.md)。
 
-`run_training.py` / `train_official.sh` 连接真实 ERA5 corpus、可微多 lead
-反馈、加权 loss、AdamW 和优化器边界恢复。默认参数、激活与 loss 使用 FP32，
-通过现有 `configure_float32_math` 请求 TF32（Ascend 为 HF32）；
-`--tensor-core disabled` 请求 IEEE FP32。不使用 autocast 或 BF16。
-旧的短 `train_mp.sh` 等入口继续用于已有算子回归；下文旧脚本的设备历史记录
-不构成此正式入口的显存或性能验收。
+参数、激活和 loss 保持 FP32；公开入口默认请求 TF32/HF32，使用现有 backend
+设置 CUDA、NPU 和 MUSA 的实际开关。`--tensor-core disabled` 请求 strict FP32。
+默认全局 batch 16、每 rank micro batch 1，MP4 / DP1。MP2 可选，DP1/DP2 均可。
+必须满足 global batch 整除 `DP × 每 rank micro batch`；没有不满的最后一个
+micro batch。公开 `--micro-batch-size` 是每 rank，source runner 同名参数是
+global micro batch，adapter 显式乘 DP，dry-run 同时显示两者。
 
-本次证据仅为 CPU 张量/真实小网格数据集成、两进程 CPU Gloo 和 CLI dry-run。
-尚未验证完整模型的四卡显存适配、12 lead TF32 + AdamW、加速器通信、
-训练天气技能或性能。前向/反向 FlagGems coverage 标为 `unverified`，
-training MFU 为 `null`（没有已验证的训练 FLOPs 分子与匹配峰值）。
-
-从 `ai4s/graphcast` 目录执行：
-
-```bash
-# 仅检查参数、阶段预算和逻辑拓扑，不加载数据、权重、torch 或 FlagGems。
-bash scripts/training/train_official.sh --dry-run --dp 1 --devices 0,1,2,3
-python scripts/training/run_training.py --dry-run --dp 2 \
-  --devices 0,1,2,3,4,5,6,7 --global-batch-size 6 --micro-batch-size 2
-
-# 后续完整模型设备验证的调用形式（本次未执行）。
-python scripts/training/run_training.py \
-  --corpus /data/era5/corpus.json --stats /data/stats \
-  --pretrained-checkpoint /data/operational_pytorch.pt \
-  --device-type cuda --backend native --dp 1 --global-batch-size 4 \
-  --micro-batch-size 1 --checkpoint-segments 2 --loss-grid-chunk-size 16384 \
-  --max-updates 2 --checkpoint-every 1 --output-dir /runs/native-tf32
-
-# 一个 DP 进程拥有四个 MP 设备；两进程拥有八个可见逻辑设备。
-torchrun --standalone --nproc-per-node=2 scripts/training/run_training.py \
-  --dp 2 --devices 0,1,2,3,4,5,6,7 --global-batch-size 6 --micro-batch-size 2 \
-  --corpus /data/era5/corpus.json --stats /data/stats \
-  --max-updates 2 --output-dir /runs/native-dp2
-
-# 恢复时保持 config、corpus 内容、stats、种子、拓扑、batch 和阶段预算一致。
-python scripts/training/run_training.py \
-  --corpus /data/era5/corpus.json --stats /data/stats \
-  --resume-checkpoint /runs/native-tf32/update-000000002.pt \
-  --device-type cuda --backend native --dp 1 --global-batch-size 4 \
-  --micro-batch-size 1 --checkpoint-segments 2 --loss-grid-chunk-size 16384 \
-  --max-updates 4 --checkpoint-every 1 --output-dir /runs/native-tf32
-```
-
-`--pretrained-checkpoint` 是已有转换工具生成的 PyTorch state dict，不能与
-`--resume-checkpoint` 同时提供；两者都不提供时从固定种子初始化。
-恢复文件需要同目录 `.sha256` sidecar。`--max-updates` 是绝对停止步数，
-可从 2 改为 4 而不改变 schedule。只有成功完成 optimizer update 后才能保存；
-每个保存包含模型、AdamW、schedule、下一批 cursor 和各 DP rank 的 RNG。
-保存的是内容 SHA256 与训练语义，因此原样搬迁 corpus/stats 路径可恢复，
-同路径改动数据、stats、配置或精度策略会被拒绝。首次正式运行/恢复会读取完整
-shard 文件计算内容哈希，可能增加启动时间。
-
-`--global-batch-size` 是一个 optimizer update 的全局样本槽位数；必须整除 DP。
-`--micro-batch-size` 是每个 rank 一次前向/反向的最多样本数。例：DP=2、
-全局 batch=6、micro=2 时，全局微批次分别为 4 和 2 个样本，累积两次。
-epoch 尾部补齐样本权重为零；每次更新按全局有效样本数归一化，
-loss 缩放为 `DP × 本 rank 当前微批次有效数 / 整次更新全局有效数`。
-全补齐 rank 仍执行可微零 loss 和 collective，全局全补齐微批次一致跳过。
-每次更新仅手动同步一次梯度、clip global norm 到 32、AdamW step 一次，
-没有额外 DDP 包装。rollout lead 数与累积次数、optimizer update 数分开记录。
-
-正式模型固定 MP=4：输入阶段在卡 0，16 个 mesh steps 的前/后八步在卡 1/2，
-输出阶段在卡 3。DP rank r 使用逻辑卡 `4r..4r+3`。`--devices` 只接受从 0
-起连续的完整逻辑序列；通过 CUDA/NPU/MUSA 的可见设备环境变量选择物理卡。
-所有 rank 必须在同一节点看到完整设备列表，不能设置为每个进程仅可见四卡。
-此入口会检查 operational 配置和真实 721×1440 四分之一度全球坐标与 13 层，
-裁剪数据不会被当作完整模型验收。
-
-默认 schedule 位于 `configs/training/operational_tf32_schedule.json`：
-1000 次一步线性 warmup（0→1e-3）、299000 次一步半余弦（1e-3→0），
-11000 次恒定 3e-7 的 curriculum（从 2 到 12 lead，每 1000 次加一）。
-`--warmup-updates`、`--one-step-updates`、`--curriculum-updates` 可覆盖预算，
-0 表示省略阶段；`--curriculum-every-updates` 可改变递增间隔。
-epoch universe 始终取最大配置 rollout 可用的窗口，短阶段只缩短提取 horizon，
-阶段切换不改变 epoch 顺序。每个 epoch 固定种子洗牌、有效窗口各用一次。
-这没有采用同事特殊 recipe 的按 update 有放回采样；短运行不等于复现论文训练。
-
-Native 与 FlagGems 必须在两个新进程分别启动，后者使用 `--backend flaggems`。
-入口显式选择现有 training allowlist，严格要求注册成功；可用
-`--flaggems-config`、`--flaggems-ops`、`--flaggems-variant` 选择现有运行时。
-这些开关不证明反向覆盖；不自动降级到 Native，也不修改已安装运行时或 overlays。
-日志记录请求/解析的 backend 与 precision、拓扑、有效样本、阶段/epoch/rollout、
-loss/分变量 loss、有限性/裁剪前 norm、数据/计算时间、各卡峰值显存与保存状态。
-下一步边界是代码审查后的完整模型 Native TF32 短更新，再取得 FlagGems
-真实前向/反向 trace 与数值对照；七天 ERA5 handoff 不足以支持长期训练结论。
-
-以下保留既有短训练脚本说明，其部署示例以 Docker 容器为主。
-
-## 当前阶段：轻量 loss 诊断
-
-使用项目同事诊断包的 loss 算法，暂不启动 12 案例天气技巧评估：
-
-```
-E = sum(abs(candidate_loss - reference_loss)) / sum(abs(reference_loss)) * 100
-```
-
-默认 **E ≤ 5%**。这不是逐步百分比的平均，也不是天气 ACC 的 `<5%`
-退化门槛。逐步相对误差最大值和均值另行输出，不作为主门槛。
-
-同平台 Native TF32 和 FlagGems TF32 应使用相同初始权重、数据/统计量、
-seed、batch、DP/MP、微批次、loss 权重及 schedule，在两个独立进程运行。
-不要把精度、数据或 rollout 不同的日志直接相比；不要仅比较 LR=0 的区间。
-目前没有该新入口的实机 loss 通过结果，下列路径仅为后续运行示例。
+从 `ai4s/graphcast` 执行：
 
 ```bash
-# 两份日志应完整包含预先指定的 optimizer updates 1–13。
-python scripts/training/diagnose_training_loss.py /runs/flaggems-tf32/updates.jsonl \
-  --baseline /runs/native-tf32/updates.jsonl \
-  --start-step 1 --end-step 13 \
-  --output-json /runs/diagnostics/native-vs-flaggems-loss.json
+# 不加载 Torch、FlagGems、数据或权重，也不创建输出目录。
+python scripts/training/run_training.py --dry-run --device-type npu \
+  --mp 4 --dp 1 --global-batch-size 2 --micro-batch-size 1
+
+# 四种拓扑的 Native/FlagGems 命令；实际运行前替换数据和权重路径。
+# 每个组合都在新进程和独立输出目录运行；DP2 自动启动两个 rank。
+for backend in native flaggems; do
+  for mp in 4 2; do
+    for dp in 1 2; do
+      python scripts/training/run_training.py \
+        --device-type npu --mp "$mp" --dp "$dp" --backend "$backend" \
+        --corpus /data/era5/corpus.json --stats /data/stats \
+        --pretrained-checkpoint /data/operational_pytorch.pt \
+        --global-batch-size 2 --micro-batch-size 1 \
+        --warmup-updates 6 --one-step-updates 10 --curriculum-updates 22 \
+        --max-updates 3 --checkpoint-every 1 \
+        --output-dir "/runs/ascend-${backend}-mp${mp}-dp${dp}"
+    done
+  done
+done
+
+# 保持模型、数据、stats、batch、拓扑、精度、后端和 6/10/22 recipe 不变，
+# 只改变绝对停止步数；从 prefix stop 的 numbered checkpoint 恢复。
+python scripts/training/run_training.py \
+  --device-type npu --mp 4 --dp 1 --backend native \
+  --corpus /data/era5/corpus.json --stats /data/stats \
+  --resume-checkpoint /runs/ascend-native-mp4-dp1/checkpoints/step_00000003.pt \
+  --global-batch-size 2 --micro-batch-size 1 \
+  --warmup-updates 6 --one-step-updates 10 --curriculum-updates 22 \
+  --max-updates 6 --checkpoint-every 1 --output-dir /runs/ascend-native-mp4-dp1
 ```
 
-不硬编码训练步数。`--start-step/--end-step` 是必填的闭区间，缺少其中任何一步
-即拒绝比较；不能仅用 step 交集。重复 step 也拒绝，恢复时应从正确 checkpoint
-继续追加无重叠 updates，不能靠覆盖记录消除失败。
-参考侧必须记录为 Native，且实际解析为 FlagGems 关闭；仅文件名写 Native 不够。
-两侧请求与实际解析的 backend/精度必须一致，TF32/HF32 按相同请求族比较。
-这只验证软件解析记录，不等于已经证明实际矩阵硬件指令或算子覆盖。
+这些是可复制的调用形式，不表示八种组合已通过实机验收。模型维持完整
+721×1440、mesh6、latent512、16 mesh steps、13 层；不得用缩小模型的结果
+代替正式设备验收。本次验证仅含 CLI、真实 tiny CPU 模型/数据、Gloo 和恢复。
 
-新正式入口在 `updates.jsonl` 每次启动写一条 `event=start` 记录，后面是
-`event=update` 记录。start 记录包含本次起始参数/optimizer 指纹、起始 update
-和已有 resume contract；不重复读取训练数据来生成诊断指纹。读取该日志的
-其他工具应按 event 过滤更新行。恢复追加的每个启动记录只绑定其后的更新。
-只有 rank 0 写日志；诊断仍是 CPU 离线工作，不混入训练耗时/MFU。
+`--platform` 可选 `h100/metax/hygon/thead/mthreads/ascend910c`。
+NPU/MUSA 可由 `--device-type` 推断；CUDA 兼容的海光、沐曦、平头哥须显式
+指定 platform，避免被标成 H100。可设置 `GRAPHCAST_PLATFORM`。
+`--devices` 为从 0 连续的逻辑卡号；`--physical-devices` 或厂商 visibility
+变量选择物理卡。Hygon 用 `HIP_VISIBLE_DEVICES`，MUSA 用
+`MUSA_VISIBLE_DEVICES`，Ascend 用 `ASCEND_RT_VISIBLE_DEVICES`；
+所有 rank 必须看到完整卡组。运行环境须已安装匹配的厂商 Torch/工具链；
+launcher 不修改环境安装、不同步源码、不选择部署目录。Shell 支持 `PYTHON_BIN`。
 
-两侧都自动识别 `optimizer_step/loss`；旧 CSV/JSONL 可通过
-`--step-column/--loss-column` 和 `--baseline-step-column/--baseline-loss-column`
-指定字段。不再自动寻找附带的 small-1deg JAX CSV；该数据不是当前 25km 基线。
-若旧日志没有 start 记录，可用 `--candidate-metadata/--baseline-metadata`
-提供从对应原始运行保留的 start-event JSON，不能人为补造缺失证据。
-缺少配置、起始状态或梯度有限性证据时，仍输出数值，但状态是未验证。
+平台内存配置来自 pinned source launcher。MP4 保留 manual gradient sync，
+MP2 默认 DDP；DDP accumulation 把 forward/backward 包在 `no_sync`，
+最后一个 micro batch 才同步，没有第二次手动梯度平均。MUSA 多设备反向
+保留源串行执行；Ascend 默认 `ASCEND_LAUNCH_BLOCKING=1`。
+Ascend MP4 使用 mesh split16、stage checkpoint、reentrant outer checkpoint；
+MP2 使用源 README 验证示例的 split8、step、non_reentrant，并保留显式 CLI
+覆盖。此 MP2 设置复用不代表本次已做 MP2 设备验收。chunk、stage placement、
+prefetch/cache 和 checkpoint 开关见公开 `--help`；完整 source-native 参数见：
 
-退出码：0 为区间完整、配置可比且 loss 指标通过；1 为可比条件下 loss 超阈值；
-2 为缺失/重复/非法记录、不可比配置、无有效学习率或参考等未验证条件。
-JSON 中 `metric_passed` 仅表示数值门槛，最终以 `status=passed` 和退出码 0 为准。
-输出文件必须是新路径；不会覆盖旧诊断或输入日志。所有结果的
-`weather_skill` 均为 `not_evaluated`；梯度/参数更新及恢复测试仍需独立保留。
+```bash
+python scripts/training/run_official_epoch_training.py --help
+```
+
+source-native 入口仍有 manifest schedule/HRES/validation/profiler 选项，调用时
+自行设置 `GRAPHCAST_ACCELERATOR_TYPE`、`GRAPHCAST_BACKEND`、
+`GRAPHCAST_PLATFORM_LABEL` 和设备可见性；DP1/DP2 均需 torchrun 提供进程组环境。
+推荐使用公开 adapter 来应用平台策略。单独运行 source-native runner 默认 Native；
+FlagGems 模式通过 `GRAPHCAST_FLAGOS_MODE=flaggems` 选择，其余仍使用
+target `GRAPHCAST_FLAGGEMS_CONFIG/OPS/VARIANT` 变量和 training YAML。
+
+默认 schedule `configs/training/official_2_to_12.json` 对应
+1000 warmup、299000 half-cosine、11000 curriculum，LR 为 0→1e-3、
+1e-3→0、3e-7。curriculum 在 2–12 lead 各占相等更新预算，覆盖预算必须为正，
+curriculum 必须整除11。`--max-updates` 只停止前缀，不改 schedule digest。
+每次 optimizer update 从当前 rollout 可用 trajectory 中按 seed/update 有放回
+抽样；不沿用旧引擎每 epoch 无放回顺序。完整 BPTT、变量/纬度/气压权重、
+AdamW 和 global norm clip32、CPU prefetch/cache 均保留源实现。
+
+旧 raw tensor state_dict 与 source `model_state/metadata` envelope 均可通过
+`--pretrained-checkpoint` 做模型初始化，优化器和 sampler 从新 run 开始。
+exact resume 需要 source schema3 checkpoint 和 checksum sidecar，保留 source
+recipe/topology/路径 contract 校验；旧引擎 optimizer checkpoint 不作 exact resume。
+源 contract 记录路径，并不对同路径数据/stats 的全部内容重新建立哈希；
+不要把它描述为可移动路径或任意数据改动检测。checkpoint 文件和状态有完整性校验。
+prefix stop 写 `checkpoints/step_XXXXXXXX.pt`；`final_checkpoint.pt` 在完成 recipe
+时写出。日志为 `metrics/segment_XXXXXXXX.jsonl`；恢复创建下一个无重叠 segment，
+最终化会重写该 segment，保留 source 格式。
+
+FlagGems 唯一 op 策略仍是 target training YAML，公开 config/ops/variant 参数
+转发给现有 backend；training bridge 将 `layer_norm` 映射为实际注册名
+`native_layer_norm`，验证所有选中 op 的注册证据，缺失则失败。
+Native 不导入 FlagGems。metadata 保留 runtime profile/versions、注册名和导出函数
+来源；注册和导出来源不等于实际 forward/backward 调用覆盖。调用观察和 loss
+配对 metadata 由后续诊断迁移接入。原 `diagnose_training_loss.py` 仍处理旧
+start/update 契约，当前 canonical segment 单独不能获得 qualified comparison。
+
+性能计时默认不启用 profiler；`--profile-hotspots` 为独立诊断实验。
+线性 FLOPs/recompute 估算沿用源定义，并不是完整算子 FLOPs。
+默认 peak=0（unknown），MFU 为 null；显式正数必须提供 `--peak-tflops-source`，
+来源字符串本身不是峰值已验证的证明。不默认使用 engineering peak，不声称天气技能。
+
+以下保留既有短训练探针说明；它们不属于新的正式 epoch runner 验收路径。
 
 ## 脚本一览
 

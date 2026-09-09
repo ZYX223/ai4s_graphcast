@@ -11,13 +11,16 @@ FlagGems choices are configuration, not separate model copies.
 
 The formal TF32/HF32 autoregressive training entry is
 `scripts/training/run_training.py` (or `train_official.sh`). It keeps FP32
-storage, uses MP=4 per DP process, and supports weighted accumulation,
-rollout schedules and exact optimizer-boundary resume. Start with
+storage and delegates to the pinned colleague `run_official_epoch_training.py`.
+It defaults to MP=4, supports MP=2 and DP=1/2, and preserves update-indexed
+with-replacement sampling, weighted autoregressive accumulation and exact
+optimizer-boundary resume. Start with
 `python scripts/training/run_training.py --dry-run`; see the
 [training guide](scripts/training/README.md) for corpus, DP=2 and restore examples.
-The current lightweight regression gate is `scripts/training/diagnose_training_loss.py`:
-it compares complete, recipe-matched optimizer-step intervals using the project
-team's relative loss metric; it is not trained-checkpoint weather-skill acceptance.
+The lightweight regression metric remains the explicit-reference, full-interval
+ratio-of-sums loss diagnostic. Its legacy start/update metadata adapter is pending
+migration to the canonical runner's `metrics/segment_*.jsonl`; source training
+metrics alone do not yet qualify that comparison.
 Current acceptance is CPU integration and CLI validation only; full-model
 accelerator memory, training accuracy, FlagGems backward coverage and MFU remain
 unverified. The existing quickstart/short training probes remain available.

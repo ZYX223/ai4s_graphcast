@@ -1,5 +1,8 @@
 # GraphCast core dependencies (platform-agnostic)
 # torch / torch_npu / torch_musa are installed per-platform from vendor images
+# Canonical training also uses Torch distributed/checkpoint/profiler from that
+# existing vendor Torch build. No additional mandatory profiling dependency:
+# ijson is optional; the source trace reader has a standard-library fallback.
 numpy>=1.24,<3
 pandas>=1.5,<4
 scipy>=1.10,<2
