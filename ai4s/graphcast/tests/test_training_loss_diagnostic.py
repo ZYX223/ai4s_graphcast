@@ -334,6 +334,11 @@ def source_start(start=0):
         "runtime_by_rank": [{"rank": 0, "mode": "native", "enabled": False,
             "operators": [], "skipped": [], "runtime": {
                 "backend": "nvidia", "device_type": "cuda",
+                "runtime_family": "cuda", "chip": "H100",
+                "versions": {"torch": "2.8.0", "torch_cuda": "12.8",
+                    "torch_hip": "not-available", "torch_npu": "not-installed",
+                    "torch_musa": "not-installed", "torch_metax": "not-installed",
+                    "flag_gems": "not-installed", "flagtree": "not-installed"},
                 "flagos_mode": "off", "flagos_status": "disabled"}}],
         "resume_contract": {"precision": "fp32", "tensor_core_enabled": True,
             "schedule_digest": "f" * 64, "seed": 7,
@@ -344,6 +349,12 @@ def source_start(start=0):
             "gradient_sync": "manual", "activation_checkpoint": True,
             "rollout_checkpoint_segments": 1, "rollout_checkpoint_implementation": "reentrant",
             "single_step_rollout_checkpoint": "enabled", "mesh_checkpoint_granularity": "step",
+            "mesh_split_step": 8, "grid2mesh_stage_device": "primary",
+            "grid2mesh_node_stage_device": "stage", "grid2mesh_stage_checkpoint": "disabled",
+            "mesh2grid_stage_device": "output", "mesh2grid_node_stage_device": "stage",
+            "mesh2grid_decoder_stage_device": "output", "mesh2grid_stage_checkpoint": "disabled",
+            "mesh_edge_chunk_size_override": 0, "edge_chunk_size_override": 0,
+            "grid_node_chunk_size_override": 0,
             "loss_grid_chunk_size": 32, "graph_topology_version": "canonical_v1"}}
 
 
@@ -510,3 +521,71 @@ def test_cli_malformed_source_provenance_is_invalid_input_without_traceback(tmp_
         "--output-json", str(tmp_path / "result.json")], capture_output=True, text=True)
     assert result.returncode == 2, result.stdout + result.stderr
     assert "Traceback" not in result.stderr
+
+
+@pytest.mark.parametrize("location", [
+    *(("resume_contract", key) for key in source_start()["resume_contract"]),
+    *(("execution_policy", key) for key in
+      ("data_prefetch_depth", "split_cache_max_gib", "backward_execution")),
+    *(("runtime_by_rank", 0, "runtime", key) for key in
+      ("backend", "device_type", "runtime_family", "chip", "versions")),
+    *(("runtime_by_rank", 0, "runtime", "versions", key) for key in
+      ("torch", "torch_cuda", "torch_hip", "torch_npu", "torch_musa", "torch_metax")),
+])
+def test_missing_required_source_members_on_both_sides_never_qualify(tmp_path, location):
+    runs = [tmp_path / "candidate", tmp_path / "reference"]
+    for root in runs:
+        start = source_start()
+        container = start
+        for key in location[:-1]:
+            container = container[key]
+        del container[location[-1]]
+        source_segment(root, source_rows([2., 4.]), start)
+    result = compare(*runs)
+    assert result["status"] == "unverified_comparison", result
+    assert any(str(location[-1]) in reason for reason in result["comparison_issues"])
+    completed = subprocess.run([sys.executable, "-I", "-S", str(SCRIPT), str(runs[0]),
+        "--baseline", str(runs[1]), "--start-step", "1", "--end-step", "2",
+        "--output-json", str(tmp_path / "result.json")], capture_output=True, text=True)
+    assert completed.returncode == 2, completed.stdout + completed.stderr
+    assert "Traceback" not in completed.stderr
+
+
+@pytest.mark.parametrize("version", ["torch", "torch_cuda", "torch_hip", "torch_npu", "torch_musa", "torch_metax"])
+def test_different_common_runtime_versions_are_incomparable(tmp_path, version):
+    start = source_start()
+    reference = source_segment(tmp_path / "reference", source_rows([2., 4.]), start)
+    start["runtime_by_rank"][0]["runtime"]["versions"][version] = "different-runtime"
+    candidate = source_segment(tmp_path / "candidate", source_rows([2., 4.]), start)
+    result = compare(candidate, reference)
+    assert result["status"] == "incomparable_training"
+    assert any(version in reason for reason in result["comparison_issues"])
+
+
+def test_flaggems_only_versions_and_rank_observations_may_differ(tmp_path):
+    start = source_start()
+    reference = source_segment(tmp_path / "reference", source_rows([2., 4.]), start)
+    replacement = start["runtime_by_rank"][0]
+    replacement.update(mode="flaggems", enabled=True, operators=["silu"])
+    runtime = replacement["runtime"]
+    runtime.update(flagos_mode="flaggems", flagos_status="enabled_only_enable",
+                   device="cuda:3", flaggems_record_path="/tmp/process_123.log")
+    runtime["versions"].update(flag_gems="5.3.5", flagtree="0.2.3")
+    candidate = source_segment(tmp_path / "candidate", source_rows([2., 4.]), start)
+    # Fixture includes actual zero override/cache/prefetch values and disabled
+    # stage checkpoints. Presence, not truthiness, determines evidence.
+    assert compare(candidate, reference)["status"] == "passed"
+
+
+@pytest.mark.parametrize("versions", [["invalid"], {"torch": ["2.8.0"]}])
+def test_cli_malformed_runtime_versions_return_invalid_input(tmp_path, versions):
+    runs = [tmp_path / "candidate", tmp_path / "reference"]
+    for root in runs:
+        start = source_start()
+        start["runtime_by_rank"][0]["runtime"]["versions"] = versions
+        source_segment(root, source_rows([2., 4.]), start)
+    completed = subprocess.run([sys.executable, "-I", "-S", str(SCRIPT), str(runs[0]),
+        "--baseline", str(runs[1]), "--start-step", "1", "--end-step", "2",
+        "--output-json", str(tmp_path / "result.json")], capture_output=True, text=True)
+    assert completed.returncode == 2, completed.stdout + completed.stderr
+    assert "Traceback" not in completed.stderr

@@ -16,7 +16,7 @@ import sys
 # Bypass package __init__, which intentionally imports model dependencies.
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "src/graphcast_compat"))
 from training_diagnostics import (
-    SEGMENT_SCHEMA, SOURCE_UPDATE_ALIASES, source_context,
+    COMMON_RUNTIME_VERSION_FIELDS, SEGMENT_SCHEMA, SOURCE_UPDATE_ALIASES, source_context,
 )
 
 
@@ -205,7 +205,12 @@ def _validate_source_structure(row, label):
             record_label = f"{label} {name}[{index}]"
             _source_container(record, dict, record_label, missing_allowed=False)
             if name == "runtime_by_rank":
-                _source_container(record.get("runtime"), dict, f"{record_label}.runtime")
+                runtime = _source_container(record.get("runtime"), dict, f"{record_label}.runtime")
+                versions = _source_container(runtime.get("versions"), dict, f"{record_label}.runtime.versions")
+                for field in COMMON_RUNTIME_VERSION_FIELDS:
+                    value = versions.get(field)
+                    if value is not None and not isinstance(value, str):
+                        raise DiagnosticError(f"{record_label}.runtime.versions.{field} must be a JSON string")
                 for field in ("operators", "skipped"):
                     _source_container(record.get(field), list, f"{record_label}.{field}")
     origins = _source_container(row["fields"].get("origins_by_rank"), list,
