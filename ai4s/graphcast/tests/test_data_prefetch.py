@@ -1,37 +1,25 @@
 from __future__ import annotations
 
-import importlib.util
-from pathlib import Path
-import sys
-from types import SimpleNamespace
 import threading
 import time
-import types
 import unittest
+from types import SimpleNamespace
 
-
-ROOT = Path(__file__).resolve().parents[1]
-SOURCE_ROOT = ROOT / "src"
-package = types.ModuleType("graphcast_compat")
-package.__path__ = [str(SOURCE_ROOT / "graphcast_compat")]
-sys.modules["graphcast_compat"] = package
-spec = importlib.util.spec_from_file_location(
-    "graphcast_compat.data_prefetch",
-    SOURCE_ROOT / "graphcast_compat/data_prefetch.py",
+from graphcast_compat.data_prefetch import (
+    DepthOneCpuPrefetcher,
+    OfficialMicrobatchDataRequest,
+    OfficialUpdateCpuProducer,
+    OfficialUpdateDataKey,
+    OfficialUpdateDataRequest,
 )
-assert spec is not None and spec.loader is not None
-module = importlib.util.module_from_spec(spec)
-sys.modules[spec.name] = module
-spec.loader.exec_module(module)
-
-DepthOneCpuPrefetcher = module.DepthOneCpuPrefetcher
-OfficialMicrobatchDataRequest = module.OfficialMicrobatchDataRequest
-OfficialUpdateCpuProducer = module.OfficialUpdateCpuProducer
-OfficialUpdateDataKey = module.OfficialUpdateDataKey
-OfficialUpdateDataRequest = module.OfficialUpdateDataRequest
 
 
 class DepthOneCpuPrefetcherTests(unittest.TestCase):
+    def test_module_loading_preserves_public_package_imports(self):
+        from graphcast_compat import GoogleSmallConfig
+
+        self.assertEqual(GoogleSmallConfig.__name__, "GoogleSmallConfig")
+
     def test_preserves_key_and_rejects_a_second_outstanding_request(self):
         prefetcher = DepthOneCpuPrefetcher(lambda value: value * 2)
         self.addCleanup(prefetcher.close)

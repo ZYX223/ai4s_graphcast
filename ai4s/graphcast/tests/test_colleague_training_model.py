@@ -2,9 +2,12 @@ from __future__ import annotations
 
 from dataclasses import asdict
 
+import pytest
 import torch
 from torch import nn
 
+from graphcast_compat import google_small as inference_definitions
+from graphcast_compat import training_model as training_definitions
 from graphcast_compat.google_small import (
     GoogleSmallCompatibleModel as InferenceModel,
 )
@@ -54,3 +57,49 @@ def test_training_model_selects_precision_linear_without_changing_inference() ->
     assert inference_linears
     assert training_linears
     assert not any(isinstance(module, PrecisionLinear) for module in inference.modules())
+
+
+class _GraphCallObserved(RuntimeError):
+    pass
+
+
+def test_inference_graph_initialization_explicitly_requests_noncanonical(
+    monkeypatch,
+) -> None:
+    observed: dict[str, object] = {}
+
+    def capture_graph_call(**kwargs):
+        observed.update(kwargs)
+        raise _GraphCallObserved
+
+    monkeypatch.setattr(
+        inference_definitions,
+        "build_google_small_graph",
+        capture_graph_call,
+    )
+
+    with pytest.raises(_GraphCallObserved):
+        InferenceModel(_tiny_config()).init_graph()
+
+    assert observed["canonical"] is False
+
+
+def test_training_graph_initialization_explicitly_requests_canonical(
+    monkeypatch,
+) -> None:
+    observed: dict[str, object] = {}
+
+    def capture_graph_call(**kwargs):
+        observed.update(kwargs)
+        raise _GraphCallObserved
+
+    monkeypatch.setattr(
+        training_definitions,
+        "build_google_small_graph",
+        capture_graph_call,
+    )
+
+    with pytest.raises(_GraphCallObserved):
+        TrainingModel(TrainingConfig(**asdict(_tiny_config()))).init_graph()
+
+    assert observed["canonical"] is True
