@@ -1,7 +1,9 @@
 """Differentiable GraphCast autoregressive training in normalized tensor space.
 
-State predictions remain attached while they are shifted into the next
-two-frame input window, preserving full backpropagation through rollout time.
+The model predicts normalized residuals for state variables.  Predictions are
+converted to normalized absolute states, fed into the next two-frame input
+window, and remain connected to the graph for full backpropagation through
+time.  Loss-only outputs such as precipitation never enter the next input.
 """
 
 from __future__ import annotations
@@ -12,7 +14,6 @@ from typing import Any, Mapping
 
 import numpy as np
 import torch
-from torch.utils.checkpoint import checkpoint as torch_checkpoint
 import xarray as xr
 
 from graphcast import losses as deepmind_losses
@@ -20,6 +21,8 @@ from graphcast import losses as deepmind_losses
 
 @dataclass(frozen=True)
 class FeedbackUpdate:
+    """Map one predicted state variable back into its input history."""
+
     name: str
     input_previous: slice
     input_current: slice
@@ -29,6 +32,8 @@ class FeedbackUpdate:
 
 @dataclass(frozen=True)
 class ForcingUpdate:
+    """Shift one known forcing and insert its current target-time value."""
+
     name: str
     input_previous: slice
     input_current: slice
@@ -37,6 +42,8 @@ class ForcingUpdate:
 
 @dataclass(frozen=True)
 class AutoregressiveBatch:
+    """Tensor trajectory and the channel mappings needed to unroll it."""
+
     initial_input_features: torch.Tensor
     forcing_features: torch.Tensor
     target_absolute_features: torch.Tensor
@@ -57,6 +64,8 @@ class AutoregressiveBatch:
 
 @dataclass(frozen=True)
 class AutoregressiveResult:
+    """Loss tensors and final recurrent state from one unrolled trajectory."""
+
     loss: torch.Tensor
     lead_losses: torch.Tensor
     per_variable_lead_losses: Mapping[str, torch.Tensor]
@@ -81,10 +90,13 @@ def _validate_batch(batch: AutoregressiveBatch) -> None:
     if initial.ndim != 3:
         raise ValueError("initial_input_features must be [batch, nodes, channels]")
     if forcing.ndim != 4:
-        raise ValueError("forcing_features must be [rollout, batch, nodes, channels]")
+        raise ValueError(
+            "forcing_features must be [rollout, batch, nodes, channels]"
+        )
     if targets.ndim != 4:
         raise ValueError(
-            "target_absolute_features must be [rollout, batch, nodes, channels]"
+            "target_absolute_features must be "
+            "[rollout, batch, nodes, channels]"
         )
     if targets.shape[:3] != forcing.shape[:3]:
         raise ValueError("target and forcing trajectory dimensions differ")
@@ -103,15 +115,18 @@ def _validate_batch(batch: AutoregressiveBatch) -> None:
         raise ValueError("channel_weights shape is invalid")
     if (
         batch.diagnostic_channel_weights is not None
-        and tuple(batch.diagnostic_channel_weights.shape) != (output_channels,)
+        and tuple(batch.diagnostic_channel_weights.shape)
+        != (output_channels,)
     ):
         raise ValueError("diagnostic_channel_weights shape is invalid")
     if batch.sample_weights is not None:
         if tuple(batch.sample_weights.shape) != (int(initial.shape[0]),):
             raise ValueError("sample_weights shape is invalid")
-        weights = batch.sample_weights.detach()
-        if not bool(torch.isfinite(weights).all()) or bool((weights < 0).any()):
-            raise ValueError("sample_weights must be finite and non-negative")
+        sample_weights = batch.sample_weights.detach()
+        if not bool(torch.isfinite(sample_weights).all()):
+            raise ValueError("sample_weights must be finite")
+        if bool((sample_weights < 0).any()):
+            raise ValueError("sample_weights must be non-negative")
 
     occupied_inputs: set[int] = set()
     feedback_outputs: set[int] = set()
@@ -124,14 +139,23 @@ def _validate_batch(batch: AutoregressiveBatch) -> None:
             update.input_current,
             name=f"{update.name}.input_current",
         )
-        output_count = _slice_length(update.output, name=f"{update.name}.output")
+        output_count = _slice_length(
+            update.output,
+            name=f"{update.name}.output",
+        )
         if previous_count != current_count or current_count != output_count:
-            raise ValueError(f"feedback channel counts differ for {update.name}")
+            raise ValueError(
+                f"feedback channel counts differ for {update.name}"
+            )
         if int(update.residual_to_absolute.numel()) != output_count:
-            raise ValueError(f"feedback scale count differs for {update.name}")
+            raise ValueError(
+                f"feedback scale count differs for {update.name}"
+            )
         scale = update.residual_to_absolute.detach()
         if not bool(torch.isfinite(scale).all()) or bool((scale <= 0).any()):
-            raise ValueError(f"feedback scales must be finite and positive for {update.name}")
+            raise ValueError(
+                f"feedback scales must be finite and positive for {update.name}"
+            )
         input_indices = set(
             range(update.input_previous.start, update.input_previous.stop)
         ) | set(range(update.input_current.start, update.input_current.stop))
@@ -152,9 +176,14 @@ def _validate_batch(batch: AutoregressiveBatch) -> None:
             update.input_current,
             name=f"{update.name}.input_current",
         )
-        forcing_count = _slice_length(update.forcing, name=f"{update.name}.forcing")
+        forcing_count = _slice_length(
+            update.forcing,
+            name=f"{update.name}.forcing",
+        )
         if previous_count != current_count or current_count != forcing_count:
-            raise ValueError(f"forcing channel counts differ for {update.name}")
+            raise ValueError(
+                f"forcing channel counts differ for {update.name}"
+            )
         input_indices = set(
             range(update.input_previous.start, update.input_previous.stop)
         ) | set(range(update.input_current.start, update.input_current.stop))
@@ -162,7 +191,8 @@ def _validate_batch(batch: AutoregressiveBatch) -> None:
             raise ValueError("autoregressive input update slices overlap")
         occupied_inputs.update(input_indices)
 
-    for channel_slice in batch.target_channel_slices.values():
+    for name, channel_slice in batch.target_channel_slices.items():
+        del name
         _slice_length(channel_slice, name="target channel")
         if channel_slice.start < 0 or channel_slice.stop > output_channels:
             raise ValueError("target channel slice is outside model output")
@@ -174,6 +204,7 @@ def _weighted_losses(
     *,
     batch: AutoregressiveBatch,
     grid_chunk_size: int = 0,
+    collect_variable_diagnostics: bool = True,
 ) -> tuple[torch.Tensor, torch.Tensor]:
     if prediction.shape != target.shape:
         raise ValueError(
@@ -200,56 +231,107 @@ def _weighted_losses(
         else channel_weights
     )
     sample_weights = (
-        batch.sample_weights.to(device=prediction.device, dtype=prediction.dtype)
+        batch.sample_weights.to(
+            device=prediction.device,
+            dtype=prediction.dtype,
+        )
         if batch.sample_weights is not None
-        else torch.ones(batch_size, device=prediction.device, dtype=prediction.dtype)
+        else torch.ones(
+            batch_size,
+            device=prediction.device,
+            dtype=prediction.dtype,
+        )
     )
     normalizer = sample_weights.sum().clamp_min(1.0)
-    channel_slices = tuple(batch.target_channel_slices.values())
-
+    channel_slices = (
+        tuple(batch.target_channel_slices.values())
+        if collect_variable_diagnostics else ()
+    )
     if 0 < grid_chunk_size < grid_nodes:
-        latitude_by_node = (
-            latitude_weights.view(batch.lat_count, 1)
-            .expand(batch.lat_count, batch.lon_count)
-            .reshape(grid_nodes)
+        # The mathematical reduction is identical to the full-grid form
+        # below, but only one contiguous grid interval materializes squared
+        # error and latitude-weighted error at a time.  This is an execution
+        # policy for 64 GiB backends; it does not crop the 721x1440 grid or
+        # alter the model, targets, channel weights or sample contribution.
+        prediction_flat = prediction.reshape(
+            batch_size,
+            grid_nodes,
+            output_channels,
         )
+        target_flat = target.reshape(
+            batch_size,
+            grid_nodes,
+            output_channels,
+        )
+        latitude_by_node = latitude_weights.view(
+            batch.lat_count,
+            1,
+        ).expand(
+            batch.lat_count,
+            batch.lon_count,
+        ).reshape(grid_nodes)
         total_chunks: list[torch.Tensor] = []
-        variable_chunks: list[list[torch.Tensor]] = [[] for _ in channel_slices]
+        variable_chunks: list[list[torch.Tensor]] = [
+            [] for _ in channel_slices
+        ]
         for start in range(0, grid_nodes, grid_chunk_size):
             stop = min(start + grid_chunk_size, grid_nodes)
-            squared = (prediction[:, start:stop] - target[:, start:stop]).square()
-            weighted = squared * latitude_by_node[start:stop].view(1, -1, 1)
+            squared = (
+                prediction_flat[:, start:stop]
+                - target_flat[:, start:stop]
+            ).square()
+            weighted = squared * latitude_by_node[
+                start:stop
+            ].view(1, -1, 1)
             total_chunks.append(
-                (weighted * channel_weights.view(1, 1, output_channels)).sum(dim=(1, 2))
+                (
+                    weighted
+                    * channel_weights.view(1, 1, output_channels)
+                ).sum(dim=(1, 2))
             )
             for index, channel_slice in enumerate(channel_slices):
+                # DeepMind diagnostics are the unweighted per-variable
+                # terms.  The published multiplier is applied only when
+                # summing the total optimization loss.
                 variable_chunks[index].append(
                     (
                         weighted[..., channel_slice]
-                        * diagnostic_channel_weights[channel_slice].view(1, 1, -1)
+                        * diagnostic_channel_weights[
+                            channel_slice
+                        ].view(1, 1, -1)
                     ).sum(dim=(1, 2))
                 )
         per_sample_total = torch.stack(total_chunks).sum(dim=0) / grid_nodes
         per_sample_variables = [
-            torch.stack(chunks).sum(dim=0) / grid_nodes for chunks in variable_chunks
+            torch.stack(chunks).sum(dim=0) / grid_nodes
+            for chunks in variable_chunks
         ]
     else:
-        squared = (prediction - target).square().reshape(
+        squared = (prediction - target) ** 2
+        squared = squared.reshape(
             batch_size,
             batch.lat_count,
             batch.lon_count,
             output_channels,
         )
-        weighted = squared * latitude_weights.view(1, batch.lat_count, 1, 1)
+        weighted = squared * latitude_weights.view(
+            1,
+            batch.lat_count,
+            1,
+            1,
+        )
         per_sample_total = (
-            weighted * channel_weights.view(1, 1, 1, output_channels)
+            weighted
+            * channel_weights.view(1, 1, 1, output_channels)
         ).sum(dim=-1).mean(dim=(1, 2))
         per_sample_variables = []
         for channel_slice in channel_slices:
             values = weighted[..., channel_slice]
             weights = diagnostic_channel_weights[channel_slice]
             per_sample_variables.append(
-                (values * weights.view(1, 1, 1, -1)).sum(dim=-1).mean(dim=(1, 2))
+                (
+                    values * weights.view(1, 1, 1, -1)
+                ).sum(dim=-1).mean(dim=(1, 2))
             )
 
     total = (per_sample_total * sample_weights).sum() / normalizer
@@ -257,7 +339,10 @@ def _weighted_losses(
         (per_sample_variable * sample_weights).sum() / normalizer
         for per_sample_variable in per_sample_variables
     ]
-    return total, torch.stack(variable_losses)
+    return total, (
+        torch.stack(variable_losses) if variable_losses
+        else prediction.new_empty((0,))
+    )
 
 
 def _run_lead(
@@ -267,14 +352,14 @@ def _run_lead(
     lead: int,
     *,
     loss_grid_chunk_size: int = 0,
+    collect_variable_diagnostics: bool = True,
 ) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
     forcing = batch.forcing_features[lead].to(
         device=current_input.device,
         dtype=current_input.dtype,
     )
-    prediction = model(torch.cat((current_input, forcing), dim=-1))
-    if not bool(torch.isfinite(prediction.detach()).all()):
-        raise FloatingPointError(f"non-finite GraphCast prediction at rollout lead {lead + 1}")
+    model_features = torch.cat((current_input, forcing), dim=-1)
+    prediction = model(model_features)
     target = batch.target_absolute_features[lead].to(
         device=prediction.device,
         dtype=prediction.dtype,
@@ -287,6 +372,13 @@ def _run_lead(
             and current_absolute_view.device != prediction.device
             and not current_absolute_view.is_contiguous()
         ):
+            # The pinned MUSA runtime does not establish a reliable
+            # cross-device dependency when a strided full-grid feature view
+            # is consumed immediately after ``Tensor.to``.  The complete
+            # 721x1440 probe reproduces corrupted residuals (especially for
+            # geopotential), while materializing the same view first is
+            # bitwise correct.  Keep the workaround MUSA-only so CUDA keeps
+            # the colleague-provided transfer path unchanged.
             current_absolute_view = current_absolute_view.contiguous()
         current_absolute = current_absolute_view.to(
             device=prediction.device,
@@ -299,23 +391,28 @@ def _run_lead(
         target[..., update.output] = (
             target[..., update.output] - current_absolute
         ) / scale
-        predicted_absolute = current_absolute + prediction[..., update.output] * scale
-        next_input[..., update.input_previous] = current_input[..., update.input_current]
+        predicted_absolute = (
+            current_absolute + prediction[..., update.output] * scale
+        )
+        next_input[..., update.input_previous] = current_input[
+            ..., update.input_current
+        ]
         next_input[..., update.input_current] = predicted_absolute.to(
             device=current_input.device,
             dtype=current_input.dtype,
         )
     for update in batch.forcing_updates:
-        next_input[..., update.input_previous] = current_input[..., update.input_current]
+        next_input[..., update.input_previous] = current_input[
+            ..., update.input_current
+        ]
         next_input[..., update.input_current] = forcing[..., update.forcing]
     lead_loss, variable_losses = _weighted_losses(
         prediction,
         target,
         batch=batch,
         grid_chunk_size=loss_grid_chunk_size,
+        collect_variable_diagnostics=collect_variable_diagnostics,
     )
-    if not bool(torch.isfinite(lead_loss.detach())):
-        raise FloatingPointError(f"non-finite GraphCast loss at rollout lead {lead + 1}")
     return next_input, lead_loss, variable_losses
 
 
@@ -326,10 +423,11 @@ def autoregressive_loss(
     checkpoint_segments: int = 0,
     checkpoint_implementation: str = "non_reentrant",
     loss_grid_chunk_size: int = 0,
+    collect_variable_diagnostics: bool = True,
 ) -> AutoregressiveResult:
     """Unroll a trajectory and average its losses without detaching feedback."""
 
-    _validate_batch(batch)
+    # Batch construction validates data and channel mappings before execution.
     if (
         isinstance(checkpoint_segments, bool)
         or not isinstance(checkpoint_segments, int)
@@ -337,31 +435,65 @@ def autoregressive_loss(
     ):
         raise ValueError("checkpoint_segments must be a non-negative integer")
     if checkpoint_implementation not in {"non_reentrant", "reentrant"}:
-        raise ValueError("checkpoint_implementation must be non_reentrant or reentrant")
+        raise ValueError(
+            "checkpoint_implementation must be non_reentrant or reentrant"
+        )
     if (
         isinstance(loss_grid_chunk_size, bool)
         or not isinstance(loss_grid_chunk_size, int)
         or loss_grid_chunk_size < 0
     ):
         raise ValueError("loss_grid_chunk_size must be a non-negative integer")
-
     rollout_steps = batch.rollout_steps
-    segment_count = min(checkpoint_segments, rollout_steps) if checkpoint_segments else 1
+    segment_count = (
+        min(checkpoint_segments, rollout_steps)
+        if checkpoint_segments
+        else 1
+    )
     segment_size = math.ceil(rollout_steps / segment_count)
     current_input = batch.initial_input_features
     all_lead_losses = []
     all_variable_losses = []
 
     def activation_checkpoint(function: Any, value: torch.Tensor):
+        try:
+            from graphcast_compat.recompute_flops import (
+                tracked_checkpoint,
+                tracked_reentrant_checkpoint,
+            )
+        except ImportError:
+            if checkpoint_implementation == "reentrant":
+                anchor = torch.zeros(
+                    (),
+                    device=value.device,
+                    requires_grad=True,
+                )
+                return torch.utils.checkpoint.checkpoint(
+                    lambda active_value, _anchor: function(active_value),
+                    value,
+                    anchor,
+                    use_reentrant=True,
+                )
+            return torch.utils.checkpoint.checkpoint(
+                function,
+                value,
+                use_reentrant=False,
+            )
         if checkpoint_implementation == "reentrant":
-            anchor = torch.zeros((), device=value.device, requires_grad=True)
-            return torch_checkpoint(
+            # Lead 1 starts from data and therefore has no differentiable
+            # input.  The scalar anchor gives reentrant checkpointing the
+            # required grad input without changing any model value or weight.
+            anchor = torch.zeros(
+                (),
+                device=value.device,
+                requires_grad=True,
+            )
+            return tracked_reentrant_checkpoint(
                 lambda active_value, _anchor: function(active_value),
                 value,
                 anchor,
-                use_reentrant=True,
             )
-        return torch_checkpoint(function, value, use_reentrant=False)
+        return tracked_checkpoint(function, value)
 
     for start in range(0, rollout_steps, segment_size):
         stop = min(start + segment_size, rollout_steps)
@@ -382,18 +514,24 @@ def autoregressive_loss(
                     state,
                     lead,
                     loss_grid_chunk_size=loss_grid_chunk_size,
+                    collect_variable_diagnostics=collect_variable_diagnostics,
                 )
                 lead_losses.append(lead_loss)
                 variable_losses.append(per_variable)
-            return state, torch.stack(lead_losses), torch.stack(variable_losses)
+            return (
+                state,
+                torch.stack(lead_losses),
+                torch.stack(variable_losses),
+            )
 
         if checkpoint_segments:
-            current_input, segment_losses, segment_variable_losses = activation_checkpoint(
-                run_segment,
-                current_input,
+            current_input, segment_losses, segment_variable_losses = (
+                activation_checkpoint(run_segment, current_input)
             )
         else:
-            current_input, segment_losses, segment_variable_losses = run_segment(current_input)
+            current_input, segment_losses, segment_variable_losses = (
+                run_segment(current_input)
+            )
         all_lead_losses.append(segment_losses)
         all_variable_losses.append(segment_variable_losses)
 
@@ -401,7 +539,9 @@ def autoregressive_loss(
     variable_matrix = torch.cat(all_variable_losses, dim=0)
     per_variable = {
         name: variable_matrix[:, index]
-        for index, name in enumerate(batch.target_channel_slices)
+        for index, name in enumerate(
+            batch.target_channel_slices if collect_variable_diagnostics else ()
+        )
     }
     return AutoregressiveResult(
         loss=lead_losses.mean(),
@@ -414,12 +554,17 @@ def autoregressive_loss(
 def _to_node_tensor(dataset: Any, *, device: torch.device) -> torch.Tensor:
     from graphcast_compat.data import dataset_to_stacked
 
-    stacked = dataset_to_stacked(dataset).transpose("batch", "lat", "lon", "channels")
+    stacked = dataset_to_stacked(dataset).transpose(
+        "batch",
+        "lat",
+        "lon",
+        "channels",
+    )
     array = np.asarray(stacked.data, dtype=np.float32)
     batch_size, lat_count, lon_count, channels = array.shape
-    return torch.from_numpy(array.reshape(batch_size, lat_count * lon_count, channels)).to(
-        device=device
-    )
+    return torch.from_numpy(
+        array.reshape(batch_size, lat_count * lon_count, channels)
+    ).to(device=device)
 
 
 def _variable_slices(dataset: Any) -> dict[str, slice]:
@@ -452,19 +597,28 @@ def _history_slices(dataset: Any, name: str) -> tuple[slice, slice]:
     ]
     if not channel_dimensions or channel_dimensions[0] != "time":
         raise ValueError(
-            f"autoregressive input {name!r} must have time as its first stacked channel dimension"
+            f"autoregressive input {name!r} must have time as its first "
+            "stacked channel dimension"
         )
     if int(array.sizes["time"]) != 2:
-        raise ValueError(f"autoregressive input {name!r} must have two history frames")
+        raise ValueError(
+            f"autoregressive input {name!r} must have two history frames"
+        )
     channels_per_time = int(
         np.prod(
-            [int(array.sizes[dimension]) for dimension in channel_dimensions[1:]],
+            [
+                int(array.sizes[dimension])
+                for dimension in channel_dimensions[1:]
+            ],
             dtype=np.int64,
         )
     )
     channels_per_time = max(channels_per_time, 1)
     variable_slice = _variable_slices(dataset)[name]
-    previous = slice(variable_slice.start, variable_slice.start + channels_per_time)
+    previous = slice(
+        variable_slice.start,
+        variable_slice.start + channels_per_time,
+    )
     current = slice(previous.stop, previous.stop + channels_per_time)
     if current.stop != variable_slice.stop:
         raise ValueError(f"unexpected history layout for {name!r}")
@@ -474,6 +628,10 @@ def _history_slices(dataset: Any, name: str) -> tuple[slice, slice]:
 def _normalized_latitude_weights(latitudes: np.ndarray) -> np.ndarray:
     """Use WeatherNext's exact weighting on complete supported latitude grids."""
 
+    # Preserve the coordinate dtype supplied by the official ERA5 dataset.
+    # WeatherNext performs its trigonometry in that dtype, so silently
+    # promoting float32 coordinates here changes the final float32 weights by
+    # a few ULPs and is no longer a byte-for-byte use of the upstream formula.
     latitudes = np.asarray(latitudes)
     if len(latitudes) < 2:
         return np.ones_like(latitudes, dtype=np.float32)
@@ -488,10 +646,17 @@ def _normalized_latitude_weights(latitudes: np.ndarray) -> np.ndarray:
             dtype=np.float32,
         )
     except ValueError:
+        # Spatial crops are a bounded smoke/profile extension, not part of the
+        # published full-global-grid recipe. Preserve area weighting for those
+        # explicitly non-formal runs while formal global runs execute the
+        # upstream function above.
         pass
     delta = abs(float(np.diff(latitudes)[0]))
     if np.any(np.isclose(np.abs(latitudes), 90.0)):
-        weights = np.cos(np.deg2rad(latitudes)) * np.sin(np.deg2rad(delta / 2.0))
+        weights = (
+            np.cos(np.deg2rad(latitudes))
+            * np.sin(np.deg2rad(delta / 2.0))
+        )
         pole_value = np.sin(np.deg2rad(delta / 4.0)) ** 2
         weights[np.isclose(np.abs(latitudes), 90.0)] = pole_value
     else:
@@ -523,8 +688,14 @@ def _target_channel_weights(
             )
         values = variable_weight * diagnostic_values
         weights.append(np.asarray(values, dtype=np.float32).reshape(-1))
-        diagnostic_weights.append(np.asarray(diagnostic_values, dtype=np.float32).reshape(-1))
-    return np.concatenate(weights), np.concatenate(diagnostic_weights), slices
+        diagnostic_weights.append(
+            np.asarray(diagnostic_values, dtype=np.float32).reshape(-1)
+        )
+    return (
+        np.concatenate(weights),
+        np.concatenate(diagnostic_weights),
+        slices,
+    )
 
 
 def prepare_autoregressive_batch(
@@ -579,7 +750,10 @@ def prepare_autoregressive_batch(
         scales=stats.stddev_by_level,
         locations=stats.mean_by_level,
     )
-    initial_input_features = _to_node_tensor(norm_inputs, device=input_device)
+    initial_input_features = _to_node_tensor(
+        norm_inputs,
+        device=input_device,
+    )
     target_features = torch.stack(
         [
             _to_node_tensor(
@@ -609,9 +783,17 @@ def prepare_autoregressive_batch(
             continue
         previous, current = _history_slices(norm_inputs, name)
         output = target_slices[name]
-        if name not in stats.stddev_by_level or name not in stats.diffs_stddev_by_level:
-            raise ValueError(f"normalization stats cannot feed back target {name!r}")
-        scale = stats.diffs_stddev_by_level[name] / stats.stddev_by_level[name]
+        if (
+            name not in stats.stddev_by_level
+            or name not in stats.diffs_stddev_by_level
+        ):
+            raise ValueError(
+                f"normalization stats cannot feed back target {name!r}"
+            )
+        scale = (
+            stats.diffs_stddev_by_level[name]
+            / stats.stddev_by_level[name]
+        )
         target_array = one_lead_targets[name]
         selections = {
             dimension: target_array.coords[dimension]
@@ -623,14 +805,17 @@ def prepare_autoregressive_batch(
                 scale = scale.sel(selections)
             except (KeyError, ValueError) as error:
                 raise ValueError(
-                    f"normalization stats do not cover model coordinates for target {name!r}"
+                    f"normalization stats do not cover model coordinates "
+                    f"for target {name!r}"
                 ) from error
         scale_values = np.asarray(scale.values, dtype=np.float32).reshape(-1)
         expected = _slice_length(output, name=name)
         if scale_values.size == 1 and expected > 1:
             scale_values = np.repeat(scale_values, expected)
         if scale_values.size != expected:
-            raise ValueError(f"normalization scale layout differs for target {name!r}")
+            raise ValueError(
+                f"normalization scale layout differs for target {name!r}"
+            )
         feedback_updates.append(
             FeedbackUpdate(
                 name=name,
@@ -644,7 +829,9 @@ def prepare_autoregressive_batch(
     forcing_updates = []
     for name in sorted(selected_forcings.data_vars):
         if name not in selected_inputs:
-            raise ValueError(f"known forcing {name!r} is missing from model inputs")
+            raise ValueError(
+                f"known forcing {name!r} is missing from model inputs"
+            )
         previous, current = _history_slices(norm_inputs, name)
         forcing_updates.append(
             ForcingUpdate(
@@ -654,26 +841,36 @@ def prepare_autoregressive_batch(
                 forcing=forcing_slices[name],
             )
         )
-    channel_weights, diagnostic_channel_weights, target_slices = _target_channel_weights(
+    (
+        channel_weights,
+        diagnostic_channel_weights,
+        target_slices,
+    ) = _target_channel_weights(
         one_lead_targets,
         per_variable_weights=per_variable_weights or {},
     )
     latitudes = np.asarray(inputs.coords["lat"].values, dtype=np.float32)
     longitudes = np.asarray(inputs.coords["lon"].values, dtype=np.float32)
-    resolved_sample_weights = (
-        torch.as_tensor(sample_weights, dtype=torch.float32, device=storage_device)
-        if sample_weights is not None
-        else None
-    )
+    resolved_sample_weights = None
+    if sample_weights is not None:
+        resolved_sample_weights = torch.as_tensor(
+            sample_weights,
+            dtype=torch.float32,
+            device=storage_device,
+        )
     batch = AutoregressiveBatch(
         initial_input_features=initial_input_features,
         forcing_features=forcing_features,
         target_absolute_features=target_features,
         feedback_updates=tuple(feedback_updates),
         forcing_updates=tuple(forcing_updates),
-        latitude_weights=torch.from_numpy(_normalized_latitude_weights(latitudes)),
+        latitude_weights=torch.from_numpy(
+            _normalized_latitude_weights(latitudes)
+        ),
         channel_weights=torch.from_numpy(channel_weights),
-        diagnostic_channel_weights=torch.from_numpy(diagnostic_channel_weights),
+        diagnostic_channel_weights=torch.from_numpy(
+            diagnostic_channel_weights
+        ),
         target_channel_slices=target_slices,
         lat_count=len(latitudes),
         lon_count=len(longitudes),

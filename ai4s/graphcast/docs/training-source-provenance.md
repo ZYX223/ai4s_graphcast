@@ -2,9 +2,9 @@
 
 ## Pinned project source
 
-The real-window training data implementation is reused from the project team's
-`graphcast-multiplatform` repository at commit
-`6c5654c10c32a9a9b018eac88e4653a2b58be13d`.
+The approved colleague training baseline is reused from
+`flagos-adaptation-lab/flagos-graphcast-adaptation` at commit
+`b7667b42da708db86010fe2d962e5fd0363ffa0a`.
 
 The following files are byte-identical to that commit:
 
@@ -62,55 +62,72 @@ Torch-compatible NumPy adapter above. Consequently, importing `data_utils`,
 No HRES conversion, deployment, dataset, checkpoint, or runtime-launch code is
 included in this integration.
 
-## Differentiable training primitives
+## Colleague training model and primitives
 
-The following Task 2 modules are derived from the same pinned project-team
-commit `6c5654c10c32a9a9b018eac88e4653a2b58be13d`:
+The following Task 1 modules are byte-identical in Python AST to the pinned
+colleague source:
 
 - `src/graphcast_compat/autoregressive_training.py`
+- `src/graphcast_compat/data_prefetch.py`
+- `src/graphcast_compat/distributed_training.py`
+- `src/graphcast_compat/epoch_plan.py`
 - `src/graphcast_compat/gradient_accumulation.py`
+- `src/graphcast_compat/recompute_flops.py`
 - `src/graphcast_compat/training_recipe.py`
 - `src/graphcast_compat/training_schedule.py`
 - `src/graphcast_compat/training_state.py`
-- `src/graphcast_compat/distributed_training.py`
+
+`src/graphcast_compat/training_model.py` is the pinned colleague implementation
+with one target-required call-site adaptation: its graph initialization passes
+`canonical=True` explicitly because the shared target graph builder defaults
+to the unchanged inference behavior.
 
 The imported behavior retains differentiable normalized-residual feedback,
+optional per-variable diagnostics, update-indexed with-replacement sampling,
 official WeatherNext latitude and pressure-level weighting, sample-masked
-losses, unequal-microbatch scaling, the published AdamW parameter grouping and
-gradient clip, update-indexed learning-rate/rollout schedules, rank-local RNG
-state, semantic optimizer-boundary checkpoints, and checksum-protected atomic
-checkpoint I/O.
+losses, unequal-microbatch scaling, AdamW grouping and gradient clipping,
+rank-local RNG state, checksum-protected checkpoints, depth-one CPU prefetch,
+real DDP wrapping with unused-parameter support, source manual-synchronization
+APIs, and exact activation-recompute FLOP counters.
 
 Local integration adaptations are deliberately narrow:
 
-- Autoregressive batch construction imports the target's existing
-  `graphcast_compat.data` and `normalization` functions. Reentrant and
-  non-reentrant rollout checkpointing use PyTorch's built-in checkpoint
-  implementation when the colleague profiling package is absent; no broad
-  profiling module was imported.
-- `training_accelerator.py` contains only device discovery/context, collective
-  backend selection, synchronization, and accelerator RNG calls needed by
-  training state and distributed context. Vendor imports are delegated to the
-  existing target backend. It does not contain precision, FlagGems, memory,
-  environment-repair, or runtime-routing policy.
-- Distributed execution is DP-over-MP: each process owns a disjoint contiguous
-  model-parallel device group, and gradients are synchronized once per update
-  in deterministic parameter-name order. The colleague's unused DDP wrapper
-  and profiler-result merge functions are intentionally omitted so the target
-  engine cannot accidentally apply a second gradient average or inherit broad
-  profiling code.
-- Resume identity is expressed by caller-supplied semantic fields in
-  `metadata.resume_contract`; deployment paths and unrelated source hashes are
-  not required. The historical `cuda_device_indices` checkpoint field name is
-  retained for compatibility while its `accelerator_type` distinguishes CUDA,
-  MUSA, and NPU state.
+- `google_small.py` adds only source factory hooks. Its defaults remain
+  `linear_type = torch.nn.Linear` and
+  `graphnet_type = GoogleSmallGraphNet`; the training subclasses select
+  `PrecisionLinear` without changing inference parameter names, shapes,
+  initialization order, or values.
+- `graph.py` adds the colleague canonical mesh/topology helpers and keeps the
+  target `src/graphcast_compat/build_mesh.py` loader. The optional
+  `canonical` argument defaults to `False`, inference passes `False`, and
+  training passes `True`. The imported
+  `assets/google_mesh6_vertices.npy` has shape `(40962, 3)`, dtype
+  `float32`, and SHA256
+  `aa2462b34f8811cf11006eea1462ed558652cc7c4ce9b3f62ca4786c8814e40a`.
+- `accelerator.py` retains the source runner's public device, memory,
+  synchronization, RNG, and environment APIs. Its
+  `configure_float32_math` resolves the accelerator and delegates directly to
+  the target `backend.configure_float32_math`, preserving the target's MUSA
+  matmul and platform policy rather than copying the source policy.
+- `precision.py` retains the runner-used `PrecisionLinear` and
+  `configure_model_precision(model, precision, fp8_backend=...)` call shape,
+  but exposes only approved FP32 training. The source's BF16/FP16/FP8 training
+  implementation is intentionally omitted and non-FP32 requests fail closed.
+- `official_training_data.py` and `official_training_corpus.py` retain the
+  target numeric-time, corpus metadata-bootstrap, and delegated-close fixes
+  described above. All other named primitive modules remain source-equivalent.
+- DDP callers perform accumulation inside `no_sync` and rely on the DDP
+  reducer exactly once; the separate manual synchronization method remains for
+  its source-compatible non-DDP path and returns zero without collectives for
+  DP=1.
 
-The focused pytest ports use hand-derived tensor values and real CPU Gloo
-collectives. They cover two-lead full BPTT, checkpointed/uncheckpointed
-loss-gradient equality, upstream weighting, zero sample padding, unequal
-microbatch updates, schedule boundaries, restored next-update equivalence, and
-valid-sample DP scaling. No source-text assertion or accelerator acceptance
-claim is included.
+Focused tests use seeded hand-derived tensors and real CPU Gloo subprocesses.
+They cover inference/training parameter identity, training-only
+`PrecisionLinear`, optional diagnostics, two-lead checkpointed gradient
+equality, deterministic replacement sampling, prefetch ordering/failure,
+canonical mesh shape/dtype/digests, DP=1 zero synchronization, two-rank DDP
+accumulation with unused parameters, and bounded peer failure. These are
+primitive/integration checks, not full-model accelerator acceptance.
 
 ## Formal training entry integration (Task 3)
 

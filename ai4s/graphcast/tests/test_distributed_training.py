@@ -63,6 +63,32 @@ def test_valid_sample_scale_turns_replica_average_into_global_mean():
         loss_scale_for_valid_samples(local_valid_count=0, global_valid_count=0, replicas=2)
 
 
+def test_single_rank_manual_sync_reports_zero_without_collectives(monkeypatch):
+    import torch
+
+    context = DistributedContext(
+        rank=0,
+        local_rank=0,
+        world_size=1,
+        dp_replicas=1,
+        mp_devices_per_replica=4,
+        device_indices=(0, 1, 2, 3),
+        backend="gloo",
+        initialized=True,
+    )
+    model = torch.nn.Linear(2, 1)
+    model(torch.ones(1, 2)).sum().backward()
+    before = [parameter.grad.clone() for parameter in model.parameters()]
+    monkeypatch.setattr(
+        "graphcast_compat.distributed_training.dist.all_reduce",
+        lambda *args, **kwargs: pytest.fail("single-rank sync used a collective"),
+    )
+
+    assert context.synchronize_gradients(model) == 0
+    for parameter, expected in zip(model.parameters(), before, strict=True):
+        torch.testing.assert_close(parameter.grad, expected, rtol=0, atol=0)
+
+
 @pytest.mark.skipif(shutil.which("torchrun") is None, reason="torchrun is unavailable")
 def test_two_gloo_ranks_apply_exact_valid_sample_scaling_and_one_manual_sync(tmp_path):
     output = tmp_path / "result.json"
@@ -159,3 +185,57 @@ finally:
     assert all(row["weight"] == pytest.approx(expected_weight) for row in rows)
     assert {row["zero_rank_synchronized"] for row in rows} == {1}
     assert all(row["zero_rank_weight"] == pytest.approx(0.8) for row in rows)
+
+
+@pytest.mark.skipif(shutil.which("torchrun") is None, reason="torchrun is unavailable")
+def test_cpu_ddp_accumulation_unused_parameters_and_checkpointing_match_serial():
+    environment = dict(os.environ)
+    environment["PYTHONPATH"] = (
+        str(SOURCE_ROOT) + os.pathsep + environment.get("PYTHONPATH", "")
+    )
+
+    result = subprocess.run(
+        [
+            shutil.which("torchrun") or "torchrun",
+            "--standalone",
+            "--nproc-per-node=2",
+            str(ROOT / "tests/ddp_accumulation_worker.py"),
+        ],
+        cwd=ROOT,
+        env=environment,
+        text=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
+        timeout=180,
+        check=False,
+    )
+
+    assert result.returncode == 0, result.stdout
+    assert "PASS: DDP accumulation" in result.stdout
+
+
+@pytest.mark.skipif(shutil.which("torchrun") is None, reason="torchrun is unavailable")
+def test_cpu_gloo_peer_failure_exits_without_collective_deadlock():
+    environment = dict(os.environ)
+    environment["PYTHONPATH"] = (
+        str(SOURCE_ROOT) + os.pathsep + environment.get("PYTHONPATH", "")
+    )
+
+    result = subprocess.run(
+        [
+            shutil.which("torchrun") or "torchrun",
+            "--standalone",
+            "--nproc-per-node=2",
+            str(ROOT / "tests/distributed_failure_worker.py"),
+        ],
+        cwd=ROOT,
+        env=environment,
+        text=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
+        timeout=60,
+        check=False,
+    )
+
+    assert result.returncode != 0
+    assert "injected worker failure before collective" in result.stdout

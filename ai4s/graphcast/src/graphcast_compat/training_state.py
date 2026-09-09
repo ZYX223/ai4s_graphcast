@@ -34,9 +34,18 @@ class TrainingCursor:
 
     def __post_init__(self) -> None:
         _non_negative_integer(self.epoch, name="epoch")
-        _non_negative_integer(self.next_batch_index, name="next_batch_index")
-        _non_negative_integer(self.global_optimizer_step, name="global_optimizer_step")
-        if not isinstance(self.epoch_plan_digest, str) or len(self.epoch_plan_digest) != 64:
+        _non_negative_integer(
+            self.next_batch_index,
+            name="next_batch_index",
+        )
+        _non_negative_integer(
+            self.global_optimizer_step,
+            name="global_optimizer_step",
+        )
+        if (
+            not isinstance(self.epoch_plan_digest, str)
+            or len(self.epoch_plan_digest) != 64
+        ):
             raise ValueError("epoch_plan_digest must be a SHA256 string")
 
     @classmethod
@@ -60,8 +69,9 @@ class CheckpointRecord:
 
 
 def sha256_file(path: str | Path) -> str:
+    resolved = Path(path)
     digest = hashlib.sha256()
-    with Path(path).open("rb") as stream:
+    with resolved.open("rb") as stream:
         for block in iter(lambda: stream.read(8 * 1024 * 1024), b""):
             digest.update(block)
     return digest.hexdigest()
@@ -91,14 +101,19 @@ def state_object_sha256(value: Any) -> str:
             digest.update(b"mapping{")
             for key in sorted(
                 item,
-                key=lambda candidate: (type(candidate).__name__, repr(candidate)),
+                key=lambda candidate: (
+                    type(candidate).__name__,
+                    repr(candidate),
+                ),
             ):
                 update(key)
                 update(item[key])
             digest.update(b"}")
             return
         if isinstance(item, (tuple, list)):
-            digest.update(b"tuple[" if isinstance(item, tuple) else b"list[")
+            digest.update(
+                b"tuple[" if isinstance(item, tuple) else b"list["
+            )
             for child in item:
                 update(child)
             digest.update(b"]")
@@ -137,14 +152,19 @@ def capture_rng_state(
     cuda_device_indices: Sequence[int],
     accelerator_type: str | None = None,
 ) -> dict[str, Any]:
-    """Capture Python, NumPy, Torch CPU and selected accelerator RNG state."""
+    """Capture Python, NumPy, Torch CPU and selected accelerator RNG state.
+
+    ``cuda_device_indices`` remains the public argument and checkpoint key so
+    existing H100 checkpoints stay loadable.  ``accelerator_type`` records
+    whether those logical indices belong to CUDA or MUSA.
+    """
 
     indices = tuple(int(index) for index in cuda_device_indices)
     if len(set(indices)) != len(indices) or any(index < 0 for index in indices):
         raise ValueError("cuda_device_indices must be unique and non-negative")
     resolved_accelerator = accelerator_type or "cuda"
     if indices:
-        from graphcast_compat.training_accelerator import (
+        from graphcast_compat.accelerator import (
             accelerator_is_available,
             get_rng_state,
             resolve_accelerator_type,
@@ -153,20 +173,19 @@ def capture_rng_state(
         resolved_accelerator = resolve_accelerator_type(accelerator_type)
         if not accelerator_is_available(resolved_accelerator):
             raise RuntimeError(
-                f"{resolved_accelerator.upper()} RNG state requested without an available accelerator"
+                f"{resolved_accelerator.upper()} RNG state requested "
+                "without an available accelerator"
             )
     return {
         "python": random.getstate(),
         "numpy": np.random.get_state(),
         "torch_cpu": torch.get_rng_state().cpu(),
         "accelerator_type": resolved_accelerator,
-        # This public name is retained for colleague checkpoint compatibility.
         "cuda_device_indices": indices,
-        "torch_cuda": (
-            {str(index): get_rng_state(index, resolved_accelerator) for index in indices}
-            if indices
-            else {}
-        ),
+        "torch_cuda": {
+            str(index): get_rng_state(index, resolved_accelerator)
+            for index in indices
+        } if indices else {},
     }
 
 
@@ -181,26 +200,34 @@ def restore_rng_state(
     indices = tuple(int(index) for index in cuda_device_indices)
     recorded = tuple(int(index) for index in state["cuda_device_indices"])
     if recorded != indices:
-        raise ValueError("checkpoint CUDA RNG device indices disagree with topology")
+        raise ValueError(
+            "checkpoint CUDA RNG device indices disagree with topology"
+        )
     random.setstate(state["python"])
     np.random.set_state(state["numpy"])
     torch.set_rng_state(state["torch_cpu"].cpu())
     cuda_states = state["torch_cuda"]
-    recorded_accelerator = str(state.get("accelerator_type", "cuda")).lower()
-    requested_accelerator = (accelerator_type or recorded_accelerator).lower()
+    recorded_accelerator = str(
+        state.get("accelerator_type", "cuda")
+    ).lower()
+    requested_accelerator = (
+        accelerator_type or recorded_accelerator
+    ).lower()
     if recorded_accelerator != requested_accelerator:
         raise ValueError(
             "checkpoint accelerator type disagrees with runtime: "
             f"{recorded_accelerator} != {requested_accelerator}"
         )
     if indices:
-        from graphcast_compat.training_accelerator import (
+        from graphcast_compat.accelerator import (
             accelerator_is_available,
             resolve_accelerator_type,
             set_rng_state,
         )
 
-        requested_accelerator = resolve_accelerator_type(requested_accelerator)
+        requested_accelerator = resolve_accelerator_type(
+            requested_accelerator
+        )
         if not accelerator_is_available(requested_accelerator):
             raise RuntimeError(
                 "cannot restore accelerator RNG state without "
@@ -210,7 +237,11 @@ def restore_rng_state(
         key = str(index)
         if key not in cuda_states:
             raise ValueError(f"checkpoint is missing CUDA RNG state {key}")
-        set_rng_state(cuda_states[key], index, requested_accelerator)
+        set_rng_state(
+            cuda_states[key],
+            index,
+            requested_accelerator,
+        )
 
 
 def build_training_checkpoint(
@@ -266,7 +297,9 @@ def atomic_save_checkpoint(
 
     resolved = Path(path).expanduser().resolve()
     if int(payload.get("schema_version", -1)) != SCHEMA_VERSION:
-        raise ValueError(f"checkpoint schema_version must be {SCHEMA_VERSION}")
+        raise ValueError(
+            f"checkpoint schema_version must be {SCHEMA_VERSION}"
+        )
     cursor = TrainingCursor.from_dict(payload["cursor"])
     resolved.parent.mkdir(parents=True, exist_ok=True)
     temporary = resolved.with_name(f"{resolved.name}.tmp-{os.getpid()}")
@@ -286,7 +319,9 @@ def atomic_save_checkpoint(
                 {
                     "checkpoint": str(resolved),
                     "epoch": cursor.epoch,
-                    "global_optimizer_step": cursor.global_optimizer_step,
+                    "global_optimizer_step": (
+                        cursor.global_optimizer_step
+                    ),
                     "next_batch_index": cursor.next_batch_index,
                     "sha256": digest,
                 },
@@ -295,7 +330,11 @@ def atomic_save_checkpoint(
             )
             + "\n",
         )
-    return CheckpointRecord(path=resolved, sha256=digest, sidecar=sidecar)
+    return CheckpointRecord(
+        path=resolved,
+        sha256=digest,
+        sidecar=sidecar,
+    )
 
 
 def load_training_checkpoint(
@@ -315,9 +354,18 @@ def load_training_checkpoint(
             raise ValueError("training checkpoint SHA256 sidecar is invalid")
         if sha256_file(resolved) != fields[0]:
             raise ValueError("training checkpoint SHA256 verification failed")
-    payload = torch.load(resolved, map_location="cpu", weights_only=False)
-    if not isinstance(payload, dict) or int(payload.get("schema_version", -1)) != SCHEMA_VERSION:
-        raise ValueError(f"training checkpoint must use schema version {SCHEMA_VERSION}")
+    payload = torch.load(
+        resolved,
+        map_location="cpu",
+        weights_only=False,
+    )
+    if (
+        not isinstance(payload, dict)
+        or int(payload.get("schema_version", -1)) != SCHEMA_VERSION
+    ):
+        raise ValueError(
+            f"training checkpoint must use schema version {SCHEMA_VERSION}"
+        )
     for field in (
         "model_state",
         "optimizer_state",
@@ -332,7 +380,10 @@ def load_training_checkpoint(
     return payload
 
 
-def validate_resume_contract(payload: Mapping[str, Any], expected: Mapping[str, Any]) -> None:
+def validate_resume_contract(
+    payload: Mapping[str, Any],
+    expected: Mapping[str, Any],
+) -> None:
     metadata = payload.get("metadata")
     if not isinstance(metadata, Mapping):
         raise ValueError("training checkpoint metadata is invalid")
@@ -343,5 +394,6 @@ def validate_resume_contract(payload: Mapping[str, Any], expected: Mapping[str, 
         if actual.get(name) != expected_value:
             raise ValueError(
                 f"resume contract mismatch for {name}: "
-                f"checkpoint={actual.get(name)!r}, expected={expected_value!r}"
+                f"checkpoint={actual.get(name)!r}, "
+                f"expected={expected_value!r}"
             )

@@ -52,8 +52,13 @@ def build_graphcast_adamw(model: nn.Module, *, lr: float) -> torch.optim.AdamW:
     """Build the paper's AdamW recipe with decay only on weight matrices."""
 
     learning_rate = float(lr)
+    # The published linear warmup starts at exactly zero. AdamW accepts a
+    # zero learning rate, which still runs forward/backward and optimizer-state
+    # bookkeeping without changing parameters on that boundary update.
     if not math.isfinite(learning_rate) or learning_rate < 0:
-        raise ValueError("GraphCast AdamW learning rate must be finite and non-negative")
+        raise ValueError(
+            "GraphCast AdamW learning rate must be finite and non-negative"
+        )
     matrix_parameters = []
     other_parameters = []
     for parameter in model.parameters():
@@ -67,7 +72,12 @@ def build_graphcast_adamw(model: nn.Module, *, lr: float) -> torch.optim.AdamW:
         raise ValueError("GraphCast optimizer received no trainable parameters")
     groups = []
     if matrix_parameters:
-        groups.append({"params": matrix_parameters, "weight_decay": MATRIX_WEIGHT_DECAY})
+        groups.append(
+            {
+                "params": matrix_parameters,
+                "weight_decay": MATRIX_WEIGHT_DECAY,
+            }
+        )
     if other_parameters:
         groups.append({"params": other_parameters, "weight_decay": 0.0})
     return torch.optim.AdamW(
@@ -87,7 +97,7 @@ def clip_graphcast_gradients(model: nn.Module) -> float:
         if parameter.requires_grad and parameter.grad is not None
     ]
     if not parameters:
-        return 0.0
+        raise FloatingPointError("GraphCast update has no gradients")
     total_norm = torch.nn.utils.clip_grad_norm_(
         parameters,
         max_norm=GRAD_CLIP_MAX_NORM,

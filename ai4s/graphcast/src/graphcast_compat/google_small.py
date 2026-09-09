@@ -157,14 +157,15 @@ class HaikuStyleMLP(nn.Module):
         *,
         hidden_features: int,
         hidden_layers: int,
+        linear_type: type[nn.Linear] = nn.Linear,
     ) -> None:
         super().__init__()
         if hidden_layers != 1:
             raise ValueError("Google GraphCast_small uses hidden_layers=1.")
 
-        self.linear_0 = nn.Linear(in_features, hidden_features)
+        self.linear_0 = linear_type(in_features, hidden_features)
         self.activation = nn.SiLU()
-        self.linear_1 = nn.Linear(hidden_features, out_features)
+        self.linear_1 = linear_type(hidden_features, out_features)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         return self.linear_1(self.activation(self.linear_0(x)))
@@ -173,9 +174,15 @@ class HaikuStyleMLP(nn.Module):
 class HaikuStyleFinalLinearHead(nn.Module):
     """Final-only output head matching a checkpoint with just ``linear_1``."""
 
-    def __init__(self, in_features: int, out_features: int) -> None:
+    def __init__(
+        self,
+        in_features: int,
+        out_features: int,
+        *,
+        linear_type: type[nn.Linear] = nn.Linear,
+    ) -> None:
         super().__init__()
-        self.linear_1 = nn.Linear(in_features, out_features)
+        self.linear_1 = linear_type(in_features, out_features)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         return self.linear_1(x)
@@ -203,6 +210,7 @@ class MLPWithLayerNorm:
                 out_features,
                 hidden_features=hidden_features,
                 hidden_layers=hidden_layers,
+                linear_type=getattr(parent, "linear_type", nn.Linear),
             ),
         )
         parent.add_module(self.layer_norm_name, nn.LayerNorm(out_features))
@@ -210,6 +218,8 @@ class MLPWithLayerNorm:
 
 class GoogleSmallGraphNet(nn.Module):
     """A minimal PyTorch DeepTypedGraphNet-compatible module."""
+
+    linear_type = nn.Linear
 
     def __init__(
         self,
@@ -314,6 +324,7 @@ class GoogleSmallGraphNet(nn.Module):
                         output_dim,
                         hidden_features=config.latent_size,
                         hidden_layers=config.hidden_layers,
+                        linear_type=self.linear_type,
                     ),
                 )
 
@@ -321,7 +332,11 @@ class GoogleSmallGraphNet(nn.Module):
             for node_type, output_dim in extra_final_node_output_dims.items():
                 self.add_module(
                     f"decoder_nodes_{node_type}_mlp",
-                    HaikuStyleFinalLinearHead(config.latent_size, output_dim),
+                    HaikuStyleFinalLinearHead(
+                        config.latent_size,
+                        output_dim,
+                        linear_type=self.linear_type,
+                    ),
                 )
 
     def forward(
@@ -863,6 +878,8 @@ def move_edge_indices(
 class GoogleSmallCompatibleModel(nn.Module):
     """PyTorch model matching Google GraphCast_small params and tensor flow."""
 
+    graphnet_type = GoogleSmallGraphNet
+
     def __init__(
         self,
         config: GoogleSmallConfig | None = None,
@@ -889,7 +906,7 @@ class GoogleSmallCompatibleModel(nn.Module):
         node_input = self.config.node_input_dim
         edge_input = self.config.edge_input_dim
 
-        self.grid2mesh_gnn = GoogleSmallGraphNet(
+        self.grid2mesh_gnn = self.graphnet_type(
             edge_types=("grid2mesh",),
             edge_node_sets={"grid2mesh": ("grid_nodes", "mesh_nodes")},
             node_types=("grid_nodes", "mesh_nodes"),
@@ -924,7 +941,7 @@ class GoogleSmallCompatibleModel(nn.Module):
             index_add_execution=index_add_execution,
         )
 
-        self.mesh_gnn = GoogleSmallGraphNet(
+        self.mesh_gnn = self.graphnet_type(
             edge_types=("mesh",),
             edge_node_sets={"mesh": ("mesh_nodes", "mesh_nodes")},
             node_types=("mesh_nodes",),
@@ -945,7 +962,7 @@ class GoogleSmallCompatibleModel(nn.Module):
             index_add_execution=index_add_execution,
         )
 
-        self.mesh2grid_gnn = GoogleSmallGraphNet(
+        self.mesh2grid_gnn = self.graphnet_type(
             edge_types=("mesh2grid",),
             edge_node_sets={"mesh2grid": ("mesh_nodes", "grid_nodes")},
             node_types=("grid_nodes", "mesh_nodes"),
@@ -1027,6 +1044,7 @@ class GoogleSmallCompatibleModel(nn.Module):
             mesh2grid_edge_normalization_factor=(self.config.mesh2grid_edge_normalization_factor),
             latitudes=latitudes,
             longitudes=longitudes,
+            canonical=False,
         )
         for name in (
             "mesh_node_latitudes",

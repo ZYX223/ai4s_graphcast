@@ -78,8 +78,14 @@ class TrainingSchedule:
                     {
                         "name": "constant",
                         "updates": None,
-                        "learning_rate": {"kind": "constant", "value": learning_rate},
-                        "rollout": {"kind": "constant", "value": rollout_steps},
+                        "learning_rate": {
+                            "kind": "constant",
+                            "value": learning_rate,
+                        },
+                        "rollout": {
+                            "kind": "constant",
+                            "value": rollout_steps,
+                        },
                     }
                 ],
             }
@@ -90,12 +96,19 @@ class TrainingSchedule:
         resolved = Path(path).expanduser().resolve()
         if not resolved.is_file():
             raise FileNotFoundError(f"training schedule is missing: {resolved}")
-        return cls.from_dict(json.loads(resolved.read_text(encoding="utf-8")))
+        return cls.from_dict(
+            json.loads(resolved.read_text(encoding="utf-8"))
+        )
 
     @classmethod
-    def from_dict(cls, value: Mapping[str, Any]) -> "TrainingSchedule":
+    def from_dict(
+        cls,
+        value: Mapping[str, Any],
+    ) -> "TrainingSchedule":
         if int(value.get("schema_version", -1)) != SCHEMA_VERSION:
-            raise ValueError(f"training schedule schema_version must be {SCHEMA_VERSION}")
+            raise ValueError(
+                f"training schedule schema_version must be {SCHEMA_VERSION}"
+            )
         name = str(value.get("name", "")).strip()
         if not name:
             raise ValueError("training schedule name must be non-empty")
@@ -119,7 +132,10 @@ class TrainingSchedule:
             )
             if updates is None and phase_index != len(raw_phases) - 1:
                 raise ValueError("an unbounded phase must be final")
-            learning_rate = cls._validate_learning_rate(raw_phase.get("learning_rate"))
+
+            learning_rate = cls._validate_learning_rate(
+                raw_phase.get("learning_rate")
+            )
             rollout = cls._validate_rollout(raw_phase.get("rollout"))
             phases.append(
                 _Phase(
@@ -142,7 +158,11 @@ class TrainingSchedule:
             "name": name,
             "phases": canonical_phases,
         }
-        serialized = json.dumps(canonical, sort_keys=True, separators=(",", ":"))
+        serialized = json.dumps(
+            canonical,
+            sort_keys=True,
+            separators=(",", ":"),
+        )
         return cls(
             name=name,
             phases=tuple(phases),
@@ -156,12 +176,21 @@ class TrainingSchedule:
             raise ValueError("learning_rate must be an object")
         kind = str(value.get("kind", ""))
         if kind == "constant":
-            return {"kind": kind, "value": _rate(value.get("value"), name="learning rate")}
+            return {
+                "kind": kind,
+                "value": _rate(value.get("value"), name="learning rate"),
+            }
         if kind in {"linear", "half_cosine"}:
             return {
                 "kind": kind,
-                "start": _rate(value.get("start"), name="learning rate start"),
-                "end": _rate(value.get("end"), name="learning rate end"),
+                "start": _rate(
+                    value.get("start"),
+                    name="learning rate start",
+                ),
+                "end": _rate(
+                    value.get("end"),
+                    name="learning rate end",
+                ),
             }
         raise ValueError(f"unsupported learning_rate kind: {kind}")
 
@@ -173,11 +202,20 @@ class TrainingSchedule:
         if kind == "constant":
             return {
                 "kind": kind,
-                "value": _positive_integer(value.get("value"), name="rollout value"),
+                "value": _positive_integer(
+                    value.get("value"),
+                    name="rollout value",
+                ),
             }
         if kind == "increment":
-            start = _positive_integer(value.get("start"), name="rollout start")
-            maximum = _positive_integer(value.get("maximum"), name="rollout maximum")
+            start = _positive_integer(
+                value.get("start"),
+                name="rollout start",
+            )
+            maximum = _positive_integer(
+                value.get("maximum"),
+                name="rollout maximum",
+            )
             if maximum < start:
                 raise ValueError("rollout maximum must be at least start")
             return {
@@ -195,10 +233,17 @@ class TrainingSchedule:
     def total_updates(self) -> int | None:
         if any(phase.updates is None for phase in self.phases):
             return None
-        return sum(int(phase.updates) for phase in self.phases if phase.updates is not None)
+        return sum(
+            int(phase.updates)
+            for phase in self.phases
+            if phase.updates is not None
+        )
 
     def value_for_update(self, update_index: int) -> ScheduleValue:
-        update_index = _non_negative_integer(update_index, name="update_index")
+        update_index = _non_negative_integer(
+            update_index,
+            name="update_index",
+        )
         remaining = update_index
         for phase_index, phase in enumerate(self.phases):
             if phase.updates is None or remaining < phase.updates:
@@ -228,7 +273,12 @@ class TrainingSchedule:
         return phase_update_index / (phase.updates - 1)
 
     @classmethod
-    def _learning_rate(cls, phase: _Phase, *, phase_update_index: int) -> float:
+    def _learning_rate(
+        cls,
+        phase: _Phase,
+        *,
+        phase_update_index: int,
+    ) -> float:
         spec = phase.learning_rate
         kind = spec["kind"]
         if kind == "constant":
@@ -242,13 +292,18 @@ class TrainingSchedule:
         return end + (start - end) * cosine
 
     @staticmethod
-    def _rollout_steps(phase: _Phase, *, phase_update_index: int) -> int:
+    def _rollout_steps(
+        phase: _Phase,
+        *,
+        phase_update_index: int,
+    ) -> int:
         spec = phase.rollout
         if spec["kind"] == "constant":
             return int(spec["value"])
         return min(
             int(spec["maximum"]),
-            int(spec["start"]) + phase_update_index // int(spec["every_updates"]),
+            int(spec["start"])
+            + phase_update_index // int(spec["every_updates"]),
         )
 
     def to_dict(self) -> dict[str, Any]:

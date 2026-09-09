@@ -65,6 +65,39 @@ def test_two_lead_feedback_keeps_full_bptt_graph():
 
 
 @pytest.mark.parametrize("implementation", ["non_reentrant", "reentrant"])
+@pytest.mark.parametrize("segments", [0, 2])
+def test_optional_variable_diagnostics_preserve_loss_and_gradient(
+    implementation: str,
+    segments: int,
+):
+    reference_model = ScalarResidualModel(0.25)
+    candidate_model = ScalarResidualModel(0.25)
+    kwargs = {
+        "checkpoint_segments": segments,
+        "checkpoint_implementation": implementation,
+    }
+
+    expected = training.autoregressive_loss(reference_model, _scalar_batch(), **kwargs)
+    actual = training.autoregressive_loss(
+        candidate_model,
+        _scalar_batch(),
+        collect_variable_diagnostics=False,
+        **kwargs,
+    )
+    expected.loss.backward()
+    actual.loss.backward()
+
+    assert actual.per_variable_lead_losses == {}
+    torch.testing.assert_close(actual.loss, expected.loss, rtol=0, atol=0)
+    torch.testing.assert_close(
+        candidate_model.residual.grad,
+        reference_model.residual.grad,
+        rtol=0,
+        atol=0,
+    )
+
+
+@pytest.mark.parametrize("implementation", ["non_reentrant", "reentrant"])
 def test_segment_checkpoint_matches_uncheckpointed_loss_gradient_and_state(implementation):
     ordinary_model = ScalarResidualModel(0.5)
     checkpointed_model = ScalarResidualModel(0.5)

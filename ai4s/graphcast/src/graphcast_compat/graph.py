@@ -2,20 +2,35 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
 import importlib.util
+from collections.abc import Mapping
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
 import numpy as np
 import scipy.spatial
-from scipy.spatial import transform
 import torch
 import trimesh
-
+from scipy.spatial import transform
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 BUILD_MESH_PATH = REPO_ROOT / "src/graphcast_compat/build_mesh.py"
+CANONICAL_MESH6_VERTICES_PATH = (
+    Path(__file__).resolve().parent / "assets" / "google_mesh6_vertices.npy"
+)
+CANONICAL_MESH6_VERTEX_COUNT = 40962
+CANONICAL_GRAPH_TOPOLOGY_VERSION = "google_mesh6_h100_v1"
+CANONICAL_OPERATIONAL_GRAPH_CONTRACT = {
+    "resolution_degrees": 0.25,
+    "mesh_size": 6,
+    "mesh_message_passing_steps": 16,
+    "grid_nodes": 1038240,
+    "mesh_nodes": 40962,
+    "grid2mesh_edges": 1618745,
+    "mesh_edges": 327660,
+    "mesh2grid_edges": 3114720,
+}
 
 
 def _load_build_mesh() -> Any:
@@ -28,6 +43,55 @@ def _load_build_mesh() -> Any:
 
 
 build_mesh = _load_build_mesh()
+
+
+def canonical_mesh_hierarchy(mesh_size: int) -> list[Any]:
+    """Return the pinned mesh hierarchy without host-BLAS vertex drift.
+
+    DeepMind's mesh refinement normalizes each new float32 midpoint with
+    ``np.linalg.norm``.  Different BLAS reduction orders can change a vertex by
+    one ULP and can consequently change the radius-query edge set.  The mesh-6
+    hierarchy is part of the model contract, so use the H100-baseline vertices
+    and retain the pinned implementation's face/index construction.
+    """
+
+    if not 0 <= mesh_size <= 6:
+        raise ValueError("canonical GraphCast mesh_size must be in [0, 6]")
+    canonical_vertices = np.load(
+        CANONICAL_MESH6_VERTICES_PATH,
+        allow_pickle=False,
+    )
+    if canonical_vertices.shape != (CANONICAL_MESH6_VERTEX_COUNT, 3):
+        raise RuntimeError(f"canonical mesh asset has unexpected shape {canonical_vertices.shape}")
+    if canonical_vertices.dtype != np.float32:
+        raise RuntimeError(
+            f"canonical mesh asset must have float32 dtype, got {canonical_vertices.dtype}"
+        )
+
+    generated = build_mesh.get_hierarchy_of_triangular_meshes_for_sphere(mesh_size)
+    return [
+        build_mesh.TriangularMesh(
+            vertices=canonical_vertices[: mesh.vertices.shape[0]],
+            faces=mesh.faces,
+        )
+        for mesh in generated
+    ]
+
+
+def validate_canonical_operational_graph_contract(
+    contract: Mapping[str, Any],
+) -> None:
+    """Fail closed when a formal operational graph changes structure."""
+
+    mismatches = {
+        key: {"expected": expected, "actual": contract.get(key)}
+        for key, expected in CANONICAL_OPERATIONAL_GRAPH_CONTRACT.items()
+        if contract.get(key) != expected
+    }
+    if mismatches:
+        raise ValueError(
+            f"operational GraphCast topology disagrees with the H100 baseline: {mismatches}"
+        )
 
 
 @dataclass(frozen=True)
@@ -141,16 +205,20 @@ def radius_query_indices(
     grid_longitude: np.ndarray,
     mesh: Any,
     radius: float,
+    sort_neighbors: bool = True,
 ) -> tuple[np.ndarray, np.ndarray]:
-    grid_positions = grid_lat_lon_to_coordinates(grid_latitude, grid_longitude).reshape(
-        [-1, 3]
-    )
+    grid_positions = grid_lat_lon_to_coordinates(grid_latitude, grid_longitude).reshape([-1, 3])
     kd_tree = scipy.spatial.cKDTree(mesh.vertices)
     query_indices = kd_tree.query_ball_point(x=grid_positions, r=radius)
 
     grid_edge_indices = []
     mesh_edge_indices = []
     for grid_index, mesh_neighbors in enumerate(query_indices):
+        # cKDTree does not promise the same neighbor ordering across SciPy
+        # versions.  Aggregation order is part of the floating-point execution
+        # contract, so canonicalize it even when the membership is identical.
+        if sort_neighbors:
+            mesh_neighbors = np.sort(np.asarray(mesh_neighbors, dtype=np.int64))
         grid_edge_indices.append(np.repeat(grid_index, len(mesh_neighbors)))
         mesh_edge_indices.append(mesh_neighbors)
 
@@ -166,13 +234,9 @@ def in_mesh_triangle_indices(
     grid_longitude: np.ndarray,
     mesh: Any,
 ) -> tuple[np.ndarray, np.ndarray]:
-    grid_positions = grid_lat_lon_to_coordinates(grid_latitude, grid_longitude).reshape(
-        [-1, 3]
-    )
+    grid_positions = grid_lat_lon_to_coordinates(grid_latitude, grid_longitude).reshape([-1, 3])
     mesh_trimesh = trimesh.Trimesh(vertices=mesh.vertices, faces=mesh.faces)
-    _, _, query_face_indices = trimesh.proximity.closest_point(
-        mesh_trimesh, grid_positions
-    )
+    _, _, query_face_indices = trimesh.proximity.closest_point(mesh_trimesh, grid_positions)
 
     mesh_edge_indices = mesh.faces[query_face_indices]
     grid_indices = np.arange(grid_positions.shape[0])
@@ -240,9 +304,7 @@ def relative_position_in_receiver_local_coordinates(
     senders: np.ndarray,
     receivers: np.ndarray,
 ) -> np.ndarray:
-    sender_pos = np.stack(
-        spherical_to_cartesian(senders_node_phi, senders_node_theta), axis=-1
-    )
+    sender_pos = np.stack(spherical_to_cartesian(senders_node_phi, senders_node_theta), axis=-1)
     receiver_pos = np.stack(
         spherical_to_cartesian(receivers_node_phi, receivers_node_theta), axis=-1
     )
@@ -254,9 +316,7 @@ def relative_position_in_receiver_local_coordinates(
         rotate_longitude=True,
     )
     edge_rotation_matrices = receiver_rotation_matrices[receivers]
-    receiver_pos_local = rotate_with_matrices(
-        edge_rotation_matrices, receiver_pos[receivers]
-    )
+    receiver_pos_local = rotate_with_matrices(edge_rotation_matrices, receiver_pos[receivers])
     sender_pos_local = rotate_with_matrices(edge_rotation_matrices, sender_pos[senders])
     return sender_pos_local - receiver_pos_local
 
@@ -271,9 +331,7 @@ def edge_features_for_bipartite_graph(
     receivers: np.ndarray,
     edge_normalization_factor: float | None,
 ) -> np.ndarray:
-    senders_phi, senders_theta = lat_lon_deg_to_spherical(
-        senders_node_lat, senders_node_lon
-    )
+    senders_phi, senders_theta = lat_lon_deg_to_spherical(senders_node_lat, senders_node_lon)
     receivers_phi, receivers_theta = lat_lon_deg_to_spherical(
         receivers_node_lat, receivers_node_lon
     )
@@ -305,15 +363,24 @@ def build_google_small_graph(
     mesh2grid_edge_normalization_factor: float,
     latitudes: np.ndarray | None = None,
     longitudes: np.ndarray | None = None,
+    canonical: bool = False,
 ) -> GoogleSmallGraph:
     latitudes = (
-        default_latitudes(resolution) if latitudes is None else np.asarray(latitudes, dtype=np.float32)
+        default_latitudes(resolution)
+        if latitudes is None
+        else np.asarray(latitudes, dtype=np.float32)
     )
     longitudes = (
-        default_longitudes(resolution) if longitudes is None else np.asarray(longitudes, dtype=np.float32)
+        default_longitudes(resolution)
+        if longitudes is None
+        else np.asarray(longitudes, dtype=np.float32)
     )
 
-    meshes = build_mesh.get_hierarchy_of_triangular_meshes_for_sphere(mesh_size)
+    meshes = (
+        canonical_mesh_hierarchy(mesh_size)
+        if canonical
+        else build_mesh.get_hierarchy_of_triangular_meshes_for_sphere(mesh_size)
+    )
     finest_mesh = meshes[-1]
     mesh_phi, mesh_theta = cartesian_to_spherical(
         finest_mesh.vertices[:, 0],
@@ -334,6 +401,7 @@ def build_google_small_graph(
         grid_longitude=longitudes,
         mesh=finest_mesh,
         radius=query_radius,
+        sort_neighbors=canonical,
     )
     grid2mesh_edge_features = edge_features_for_bipartite_graph(
         senders_node_lat=grid_node_latitudes,
