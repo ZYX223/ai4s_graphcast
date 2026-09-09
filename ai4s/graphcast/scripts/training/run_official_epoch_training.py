@@ -2154,6 +2154,29 @@ def train(argv: list[str] | None = None) -> int:
                 f"metric segment already exists: {metrics_path}"
             )
         context.barrier()
+        # Segment-specific evidence must survive metric-list rewrites at
+        # profiling/finalization. Hash real state/data outside update timing.
+        from graphcast_compat.training_diagnostics import initial_state, segment_start_record
+        states_by_rank = context.gather_objects(initial_state(model, optimizer, context.rank))
+        runtime_by_rank = context.gather_objects({"rank": context.rank, **operator_replacement})
+        if context.is_primary:
+            write_immutable_json(
+                metrics_path.with_suffix(".start.json"),
+                segment_start_record(
+                    start_optimizer_step=cursor.global_optimizer_step,
+                    states_by_rank=states_by_rank, runtime_by_rank=runtime_by_rank,
+                    resume_contract=resume_contract, resolved_precision=math_mode,
+                    manifest=manifest,
+                    optimizer=graphcast_optimizer_metadata(lr=next_schedule_value.learning_rate),
+                    per_variable_weights=PER_VARIABLE_WEIGHTS,
+                    execution_policy={
+                        "data_prefetch_depth": args.data_prefetch_depth,
+                        "split_cache_max_gib": args.split_cache_max_gib,
+                        "backward_execution": "serial_musa" if serial_musa_backward else "runtime_default",
+                    },
+                ),
+            )
+        context.barrier()
         profiler_run_dir = (
             run_dir / "processes" / f"from_{segment_start_step:08d}"
         )

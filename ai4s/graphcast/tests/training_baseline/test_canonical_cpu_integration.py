@@ -193,3 +193,32 @@ def test_source_native_validation_computes_per_variable_lead_losses(cpu_runner, 
     variables = report["steps"][0]["per_variable_lead_losses"]
     assert set(variables) == set(yaml.safe_load(paths[0].read_text())["task_config"]["target_variables"])
     assert all(len(values) == 12 and np.isfinite(values).all() for values in variables.values())
+
+
+def test_final_canonical_artifacts_qualify_and_resume_sidecars_keep_actual_state(cpu_runner, tmp_path):
+    import diagnose_training_loss as diagnostic
+    from graphcast_compat.training_diagnostics import file_sha256
+    from graphcast_compat.training_state import state_object_sha256
+    paths = inputs(tmp_path)
+    first, second = tmp_path / "first", tmp_path / "second"
+    for run in (first, second):
+        assert cpu_runner.train(command(paths, run, stop=2)) == 0
+    result = diagnostic.compare_losses(first, second, start_step=1, end_step=2)
+    assert result["status"] == "passed", result["comparison_issues"]
+    initial_sidecar = first / "metrics/segment_00000001.start.json"
+    before = initial_sidecar.read_bytes()
+    metadata = json.loads(before)
+    assert metadata["data_sha256"] == [file_sha256(tmp_path / "source.nc")]
+    assert metadata["config_sha256"] == file_sha256(paths[0])
+    assert metadata["stats_sha256"]["mean_by_level.nc"] == file_sha256(paths[2] / "mean_by_level.nc")
+    checkpoint = torch.load(first / "checkpoints/step_00000002.pt", weights_only=False)
+    assert cpu_runner.train(command(paths, first, stop=3,
+        resume=first / "checkpoints/step_00000002.pt")) == 0
+    assert initial_sidecar.read_bytes() == before
+    resumed = json.loads((first / "metrics/segment_00000003.start.json").read_text())
+    assert resumed["start_optimizer_step"] == 2
+    # AdamW's LR is set for the resumed next update before evidence is emitted.
+    for group in checkpoint["optimizer_state"]["param_groups"]:
+        group["lr"] = cpu_runner.resolve_training_schedule(cpu_runner.parse_args(command(paths, first, stop=3)))[0].value_for_update(2).learning_rate
+    assert resumed["states_by_rank"][0]["optimizer_sha256"] == state_object_sha256(checkpoint["optimizer_state"])
+    assert resumed["states_by_rank"][0]["parameters_sha256"] != metadata["states_by_rank"][0]["parameters_sha256"]

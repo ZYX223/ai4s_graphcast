@@ -109,14 +109,66 @@ FlagGems 唯一 op 策略仍是 target training YAML，公开 config/ops/variant
 转发给现有 backend；training bridge 将 `layer_norm` 映射为实际注册名
 `native_layer_norm`，验证所有选中 op 的注册证据，缺失则失败。
 Native 不导入 FlagGems。metadata 保留 runtime profile/versions、注册名和导出函数
-来源；注册和导出来源不等于实际 forward/backward 调用覆盖。调用观察和 loss
-配对 metadata 由后续诊断迁移接入。原 `diagnose_training_loss.py` 仍处理旧
-start/update 契约，当前 canonical segment 单独不能获得 qualified comparison。
+来源；注册和导出来源不等于实际 forward/backward 调用覆盖。
+
+每次训练在 update 计时之前保存 `metrics/segment_XXXXXXXX.start.json`，
+与同名 JSONL 绑定。它记录实际每 rank 参数/优化器指纹、数据 shard 的有序
+内容哈希、三份 stats 和模型 config 哈希、source resume contract、变量权重、
+内存/缓存策略及实际后端和精度。哈希会增加启动 I/O；不要在配对运行期间
+修改数据。元数据不参与 source checkpoint 的 immutable resume identity。
+恢复使用新 sidecar，旧段不会被覆盖；source 收尾重写 JSONL 不会丢失元数据。
+
+```bash
+python scripts/training/diagnose_training_loss.py /runs/flaggems \
+  --baseline /runs/native --start-step 1 --end-step 3 \
+  --output-json /runs/paired-loss.json
+```
+
+输入可以是 run 目录、metrics 目录或单个 segment JSONL；单文件自动读取
+同名 `.start.json`。旧 start/update JSONL 和显式 metadata CSV 仍可读。
+独立 reader 仅需 Python 标准库。必须提供完整区间，不能只比较历史交集；
+每 update 的有放回 global/local 样本顺序、权重和时间来源必须一致。
+使用 `sum(abs(candidate-reference))/sum(abs(reference))*100`，默认包含 5%
+边界；只在该边界容许最多 8 个 binary64 ULP（约 7.1e-15 个百分点）舍入差。
+例如 reference `[2,4]`、candidate `[2.1,4.2]` 为 5% 通过，`[2.2,4.4]`
+为 10% 失败。退出码 0=合格，1=合格配方但 loss 超阈值，2=不可比/证据缺失/
+无效输入。Native reference 必须有禁用替换的实际 runtime 证据。
+配对恢复段也必须有相同实际起始参数/优化器；分别演化后存在微小状态差异的
+Native/FlagGems 恢复轨迹会保守拒绝，不推断共同 lineage 来放宽该条件。
+
+调用观察是单独的实验，不能用于性能计时。先用公开入口 `--dry-run` 获取
+完全相同的平台 environment 和 engine_argv，再在独立目录下替换启动目标：
+
+```bash
+# 导出 dry-run 中的 environment，包括训练 YAML/variant 与设备可见性。
+# 以下值举例对应 Ascend；其他平台使用其实际 dry-run 值。
+export GRAPHCAST_FLAGOS_MODE=flaggems GRAPHCAST_BACKEND=ascend
+export GRAPHCAST_ACCELERATOR_TYPE=npu
+python -m torch.distributed.run --standalone --nproc-per-node 1 \
+  scripts/validation/trace_training_flaggems.py --trace-dir /runs/calls -- \
+  <dry-run 的 engine_argv；使用新的 run-dir/save-checkpoint>
+```
+
+wrapper 通过 runpy 执行唯一 canonical runner，不建立新训练循环。
+`FLAGOS_REPLACE=1` 单独设置不够；缺少 target FlagGems/backend 环境会失败。
+`rank_R.jsonl` 按真实 AdamW update 保存 logger/function/device/source 路径和
+logged function calls；启动调用标为 initialization 且 update=null，
+forward、backward、checkpoint recompute、optimizer、unscoped 分开。
+仅统计发出 GEMS 日志的函数，既不是 kernel 数，也不是全算子覆盖证明。
+未完成的 optimizer update 不会产生已完成 update 证据。
+
+loss 比较始终返回 `weather_skill=not_evaluated`。评估 trained checkpoint 的
+天气能力，需要另行固定验证数据、lead、变量和统计口径，比较该 checkpoint
+对应的输出；固定 pretrained 权重的推理参考不能直接当成已训练权重的数值
+等价目标。历史 small-1deg JAX CSV 不作为默认 reference。本次不执行长天气评估。
 
 性能计时默认不启用 profiler；`--profile-hotspots` 为独立诊断实验。
 线性 FLOPs/recompute 估算沿用源定义，并不是完整算子 FLOPs。
 默认 peak=0（unknown），MFU 为 null；显式正数必须提供 `--peak-tflops-source`，
 来源字符串本身不是峰值已验证的证明。不默认使用 engineering peak，不声称天气技能。
+`mfu_sys` 分母是明确给定的设备总峰值乘 compute wall time；`mfu_e2e` 使用
+包含数据处理的端到端时间，`hfu_sys` 分子还计入估算的 recompute FLOPs。
+profiler 的 kernel-busy 分母仅供另一次观测实验，不能与无 profiler 的计时混用。
 
 以下保留既有短训练探针说明；它们不属于新的正式 epoch runner 验收路径。
 

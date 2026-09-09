@@ -206,7 +206,7 @@ def test_context_is_associated_with_each_resume_segment(tmp_path):
 
 def test_state_hash_record_feeds_legacy_diagnostic_without_training_loop(tmp_path):
     sys.path.insert(0, str(ROOT / "src"))
-    from graphcast_compat.training_runtime import training_start_record
+    from graphcast_compat.training_diagnostics import training_start_record
     from graphcast_compat.training_recipe import build_graphcast_adamw
     import torch
     from types import SimpleNamespace
@@ -317,6 +317,129 @@ def test_hf32_and_tf32_are_compatible_requests_not_equal_vendor_strings(tmp_path
     start = start_record(); start["resolved_precision"] = "hf32"
     write_log(candidate, updates(), start)
     assert compare(candidate, reference)["status"] == "passed"
+
+
+def source_start(start=0):
+    return {"schema": "graphcast.training_segment_comparison.v1",
+        "start_optimizer_step": start,
+        "states_by_rank": [{"rank": 0, "parameters_sha256": "a" * 64,
+                            "optimizer_sha256": "b" * 64}],
+        "data_sha256": ["c" * 64], "stats_sha256": {"mean.nc": "d" * 64},
+        "config_sha256": "e" * 64, "resolved_precision": "tf32",
+        "optimizer": {"name": "AdamW", "betas": [.9, .95]},
+        "per_variable_weights": {"2m_temperature": 1.},
+        "execution_policy": {"data_prefetch_depth": 0, "split_cache_max_gib": 0.,
+                             "backward_execution": "runtime_default"},
+        "normalization": "inputs_and_residuals_v1",
+        "runtime_by_rank": [{"rank": 0, "mode": "native", "enabled": False,
+            "operators": [], "skipped": [], "runtime": {
+                "backend": "nvidia", "device_type": "cuda",
+                "flagos_mode": "off", "flagos_status": "disabled"}}],
+        "resume_contract": {"precision": "fp32", "tensor_core_enabled": True,
+            "schedule_digest": "f" * 64, "seed": 7,
+            "training_sampling": "trajectory_with_replacement_per_optimizer_update",
+            "global_batch_size": 2, "global_micro_batch_size": 1,
+            "local_micro_batch_size": 1, "gradient_accumulation_steps": 2,
+            "data_parallel_replicas": 1, "mp_devices_per_replica": 4,
+            "gradient_sync": "manual", "activation_checkpoint": True,
+            "rollout_checkpoint_segments": 1, "rollout_checkpoint_implementation": "reentrant",
+            "single_step_rollout_checkpoint": "enabled", "mesh_checkpoint_granularity": "step",
+            "loss_grid_chunk_size": 32, "graph_topology_version": "canonical_v1"}}
+
+
+def source_rows(losses):
+    return [{"step": i, "optimizer_step": i, "loss": loss, "epoch": 0,
+        "epoch_batch_index": i - 1, "rollout_steps": 2, "schedule_phase": "warmup",
+        "learning_rate": .001, "valid_sample_count": 2,
+        "gradient_accumulation_steps": 2, "grad_ok": True, "grad_norm_before_clip": 1.,
+        "training_sampling": "trajectory_with_replacement_per_optimizer_update",
+        "origins_by_rank": [{"rank": 0, "global_window_indices": [4, 4],
+            "local_window_indices": [4, 4], "sample_weights": [1., 1.],
+            "global_sample_weights": [1., 1.], "reference_datetimes": ["t4", "t4"],
+            "target_datetimes_by_sample": [["t5", "t6"], ["t5", "t6"]]}]}
+        for i, loss in enumerate(losses, 1)]
+
+
+def source_segment(root, rows, metadata):
+    metrics = root / "metrics"
+    metrics.mkdir(parents=True, exist_ok=True)
+    path = metrics / f"segment_{metadata['start_optimizer_step'] + 1:08d}.jsonl"
+    write_log(path, rows)
+    path.with_suffix(".start.json").write_text(json.dumps(metadata))
+    return path
+
+
+@pytest.mark.parametrize("losses,want", [([2., 4.], "passed"),
+    ([2.1, 4.2], "passed"), ([2.2, 4.4], "failed_loss"),
+    ([2.1000000001, 4.2000000002], "failed_loss")])
+def test_source_final_metrics_and_sidecar_support_hand_derived_gate(tmp_path, losses, want):
+    candidate, reference = tmp_path / "candidate", tmp_path / "reference"
+    path = source_segment(candidate, source_rows(losses), source_start())
+    source_segment(reference, source_rows([2., 4.]), source_start())
+    # Source finalization rewrites only metric rows; start evidence survives.
+    write_log(path, source_rows(losses))
+    assert compare(candidate, reference)["status"] == want
+    assert compare(path, reference)["status"] == want
+
+
+@pytest.mark.parametrize("change", ["order", "precision", "parameters", "optimizer", "native_replaced", "memory", "backend", "weights", "cache"])
+def test_source_evidence_mismatches_cannot_qualify(tmp_path, change):
+    candidate, reference = tmp_path / "candidate", tmp_path / "reference"
+    start, rows = source_start(), source_rows([2., 4.])
+    source_segment(reference, rows, start)
+    if change == "order": rows[0]["origins_by_rank"][0]["global_window_indices"] = [4, 5]
+    if change == "precision": start["resolved_precision"] = "ieee_fp32"
+    if change in ("parameters", "optimizer"): start["states_by_rank"][0][change + "_sha256"] = "9" * 64
+    if change == "native_replaced": start["runtime_by_rank"][0]["enabled"] = True
+    if change == "memory": start["resume_contract"]["loss_grid_chunk_size"] = 64
+    if change == "backend": start["runtime_by_rank"][0]["runtime"]["backend"] = "hygon"
+    if change == "weights": start["per_variable_weights"] = {"2m_temperature": 2.}
+    if change == "cache": start["execution_policy"]["split_cache_max_gib"] = 8.
+    source_segment(candidate, rows, start)
+    assert compare(candidate, reference)["status"] == "incomparable_training"
+
+
+def test_source_native_and_actual_enabled_flaggems_are_comparable(tmp_path):
+    start = source_start()
+    reference = source_segment(tmp_path / "reference", source_rows([2., 4.]), start)
+    runtime = start["runtime_by_rank"][0]
+    runtime.update(mode="flaggems", enabled=True, operators=["silu"])
+    runtime["runtime"].update(flagos_mode="flaggems", flagos_status="enabled_only_enable")
+    candidate = source_segment(tmp_path / "candidate", source_rows([2.1, 4.2]), start)
+    assert compare(candidate, reference)["status"] == "passed"
+
+
+@pytest.mark.parametrize("missing", ["step", "sidecar", "origins", "state", "runtime"])
+def test_source_missing_evidence_never_becomes_verified(tmp_path, missing):
+    candidate, reference = tmp_path / "candidate", tmp_path / "reference"
+    rows, start = source_rows([2., 4.]), source_start()
+    source_segment(reference, rows, start)
+    if missing == "step": rows.pop()
+    if missing == "origins": rows[0].pop("origins_by_rank")
+    if missing == "state": start["states_by_rank"][0].pop("optimizer_sha256")
+    if missing == "runtime": start["runtime_by_rank"] = []
+    path = source_segment(candidate, rows, start)
+    if missing == "sidecar": path.with_suffix(".start.json").unlink()
+    if missing == "step":
+        with pytest.raises(diagnostic().DiagnosticError, match="missing"):
+            compare(candidate, reference)
+    else:
+        assert compare(candidate, reference)["status"] == "unverified_comparison"
+
+
+def test_source_resume_binds_each_segment_state_and_cli_is_stdlib_only(tmp_path):
+    candidate, reference = tmp_path / "candidate", tmp_path / "reference"
+    for root in (candidate, reference):
+        source_segment(root, source_rows([2., 4.])[:1], source_start())
+        source_segment(root, source_rows([2., 4.])[1:], source_start(1))
+    command = [sys.executable, "-I", "-S", str(SCRIPT), str(candidate),
+        "--baseline", str(reference), "--start-step", "1", "--end-step", "2",
+        "--output-json", str(tmp_path / "result.json")]
+    result = subprocess.run(command, text=True, capture_output=True)
+    assert result.returncode == 0, result.stderr
+    start = source_start(1); start["states_by_rank"][0]["parameters_sha256"] = "9" * 64
+    source_segment(candidate, source_rows([2., 4.])[1:], start)
+    assert compare(candidate, reference)["status"] == "incomparable_training"
 
 
 @pytest.mark.parametrize("losses,metadata,want", [((32., 180.), True, 1), ((24., 180.), False, 2)])

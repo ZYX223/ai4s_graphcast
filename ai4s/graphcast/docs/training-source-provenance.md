@@ -135,8 +135,9 @@ The sole formal engine is the pinned source
 `scripts/training/run_official_epoch_training.py`, with
 `official_epoch_training_file_validation.py`. Public `run_training.py`,
 `train_official.sh` and `train_pipeline.sh` delegate to it. The superseded
-target engine and its execution tests are retired; `training_runtime.py`
-temporarily retains only the legacy diagnostic's state-hashing function.
+target engine and its execution tests are retired. Task 3 moves the remaining
+legacy start-record helper to `training_diagnostics.py` and removes
+`training_runtime.py`; no alternate loop is retained.
 
 Source deviations are limited to:
 
@@ -217,7 +218,7 @@ Six-update tests cross into 2/3-lead BPTT and prove exact model, optimizer,
 cursor and loss continuation with prefetch off/on; changed seed is rejected.
 These are CPU correctness checks, not full-model device, timing or weather-skill
 acceptance. Source-segment paired diagnostic metadata and actual call
-observation remain Task 3.
+observation are described below.
 
 ## Lightweight training loss diagnostic
 
@@ -240,13 +241,20 @@ explanatory metrics, not replacements for that ratio of sums. Adaptations are:
   learning rate and effective samples. A numerically small loss error without
   comparison metadata is measured but unverified, never a formal pass. An
   all-zero-reference or all-zero-learning-rate interval is not acceptance.
-- Serialize a small start event in `updates.jsonl` per training invocation,
-  reusing the existing resume contract and hashing initial parameters/optimizer
-  once outside update timing. Static graph buffers are not hashed. Metadata is
-  associated with each invocation, including appended resume segments; it does
-  not add a new checkpoint schema or change training numerical behavior.
+- Retain reading old start events; the canonical source now writes a sibling
+  `metrics/segment_XXXXXXXX.start.json` per invocation. This survives every
+  in-memory metric-list rewrite. Gather real parameters/optimizer fingerprints
+  on every rank after initialization/resume and before update timing; rank zero
+  hashes ordered corpus shard bytes, three consumed stats files and model YAML.
+  Static graph buffers are not hashed. This adds startup I/O, not an optimizer
+  update or a checkpoint schema/immutable-resume identity change.
 - Compare semantic recipe fields rather than the entire resume contract:
-  Native/FlagGems backend names and vendor/version details can differ. Current
+  Native/FlagGems replacement choices can differ. Source-format comparisons
+  require equal resolved platform backend/device type, actual initial state,
+  content hashes, full non-replacement source recipe, optimizer/variable weights,
+  prefetch/cache/backward execution policy and per-rank sample provenance. Paths
+  for corpus/config/stats/schedule source are replaced by content/recipe evidence;
+  volatile rank device/PID/cache durations remain observations. Current
   controlled comparisons require the same DP/MP and microbatch layout as well
   as global batch; alternative layouts need a separate comparison protocol.
   The reference must separately identify as Native with FlagGems disabled;
@@ -258,3 +266,36 @@ explanatory metrics, not replacements for that ratio of sums. Adaptations are:
 The standalone diagnostic imports only the Python standard library. It does
 not run training, load checkpoints or allocate accelerator memory, and it does
 not compute weather ACC or declare trained-checkpoint weather acceptance.
+
+The inclusive 5% boundary allows only 8 binary64 ULPs around 5 (about 7.1e-15
+percentage points) to avoid rejecting hand-derived `[2,4]` versus `[2.1,4.2]`.
+The ratio-of-sums definition is unchanged; genuine excess still fails.
+
+### Opt-in call observer (Task 3)
+
+`scripts/validation/trace_training_flaggems.py` is adapted from the identically
+named pinned colleague file (SHA256
+`778f456afa029da52a78859bed87f3509a8ef3b1d0bed210185855726f0f40af`).
+It retains logging handlers for FlagGems and the selected vendor hierarchy,
+stack-based tensor device/source discovery, source recompute markers and a
+torchrun/runpy invocation of the canonical runner. Deliberate deviations:
+
+- Require the target `GRAPHCAST_FLAGOS_MODE=flaggems`, backend and accelerator
+  environment, rather than trusting stale `FLAGOS_REPLACE=1`.
+- Count startup as initialization (no optimizer update), scope forward to the
+  canonical EpochAutoregressiveModule boundary, preserve backward/recompute,
+  and label AdamW.step calls optimizer before flushing actual state steps.
+- Include rank, canonical trainer path, logged-function count kind and explicit
+  observed-only coverage. Refuse to append another invocation to an existing
+  rank file and restore Torch functions/logger settings on normal Python exit
+  or exception. The source's deliberate MUSA process-exit bypass remains intact;
+  each completed update is already flushed before that path.
+- Normal training never imports the observer. No operator implementation,
+  installed FlagGems file, inference default, YAML, sampler or training algorithm
+  changes are introduced by Task 3.
+
+Tests exercise real tiny canonical CPU training/finalization/resume plus real
+Torch autograd/AdamW call-phase behavior. They do not prove full-model device
+correctness, logged coverage on an installed vendor runtime, performance or
+trained-checkpoint weather skill. The controller owns the separately frozen
+public-entry Native/FlagGems device pair and source/package evidence.

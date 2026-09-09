@@ -13,6 +13,12 @@ import math
 from pathlib import Path
 import sys
 
+# Bypass package __init__, which intentionally imports model dependencies.
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "src/graphcast_compat"))
+from training_diagnostics import (
+    SEGMENT_SCHEMA, SOURCE_UPDATE_ALIASES, source_context,
+)
+
 
 STEP_COLUMNS = ("optimizer_step", "step", "global_step", "iteration", "iter")
 LOSS_COLUMNS = ("loss", "pytorch_loss", "train_loss", "training_loss", "input_loss",
@@ -77,6 +83,9 @@ def _load_rows(path, objects, step_column, loss_column, metadata):
             continue
         if obj.get("event") not in (None, "update"):
             raise DiagnosticError(f"{path}:{line_number} unsupported event: {obj.get('event')!r}")
+        if "training_sampling" in obj:
+            obj = {**obj, **{target: obj[source] for target, source in SOURCE_UPDATE_ALIASES.items()
+                            if source in obj}}
         step_name = pick_column(list(obj), STEP_COLUMNS, step_column, "step")
         loss_name = pick_column(list(obj), LOSS_COLUMNS, loss_column, "loss")
         step = as_int(obj.get(step_name), "step")
@@ -95,6 +104,21 @@ def _load_rows(path, objects, step_column, loss_column, metadata):
 
 def load_loss_file(path, step_column=None, loss_column=None, metadata=None):
     path = Path(path)
+    if path.is_dir():
+        if metadata is not None:
+            raise DiagnosticError("directory comparisons require per-segment sidecars")
+        directory = path / "metrics" if (path / "metrics").is_dir() else path
+        rows = {}
+        for segment in sorted(directory.glob("segment_*.jsonl")):
+            chunk = load_loss_file(segment, step_column, loss_column)
+            if rows.keys() & chunk.keys():
+                raise DiagnosticError("duplicate step across metric segments")
+            rows.update(chunk)
+        if not rows:
+            raise DiagnosticError(f"{path}: no loss records")
+        return rows
+    if metadata is None and path.name.startswith("segment_") and path.with_suffix(".start.json").exists():
+        metadata = path.with_suffix(".start.json")
     supplied = _read_json(metadata) if metadata is not None else None
     try:
         with path.open("r", encoding="utf-8", newline="") as handle:
@@ -117,6 +141,8 @@ def _get(mapping, *keys):
 
 
 def _comparison_context(row):
+    if "training_sampling" in row["fields"]:
+        return source_context(row["run"])
     comparison = _get(row["run"], "loss_comparison")
     context = {name: _get(comparison, name) for name in (
         "start_optimizer_step", "starting_parameters_sha256", "starting_optimizer_sha256")}
@@ -128,6 +154,9 @@ def _comparison_context(row):
 
 def _check_runtime(row, label, missing, mismatches):
     run = row["run"]
+    if "training_sampling" in row["fields"]:
+        _check_source_runtime(row, label, missing, mismatches)
+        return
     requested = _get(run, "requested_backend")
     policy_backend = _get(run, "loss_comparison", "resume_contract", "policy", "backend")
     mode = _get(run, "resolved_backend", "flagos_mode")
@@ -155,6 +184,55 @@ def _check_runtime(row, label, missing, mismatches):
             mismatches.add(f"{label}: resolved_precision disagrees with tensor_core request")
 
 
+def _check_source_runtime(row, label, missing, mismatches):
+    run = row["run"] or {}
+    if run.get("schema") != SEGMENT_SCHEMA:
+        missing.add(f"{label}: missing source segment comparison schema")
+    contract = run.get("resume_contract") or {}
+    runtimes = run.get("runtime_by_rank") or []
+    states = run.get("states_by_rank") or []
+    expected_ranks = list(range(as_int(contract.get("data_parallel_replicas", 0), "replicas")))
+    for name, records in (("runtime", runtimes), ("state", states)):
+        if not records or [r.get("rank") for r in records] != expected_ranks:
+            missing.add(f"{label}: missing complete rank {name} evidence")
+    for replacement in runtimes:
+        runtime = replacement.get("runtime") or {}
+        requested = replacement.get("mode")
+        if requested == "torch_native":
+            requested = "native"
+        if requested not in ("native", "flaggems"):
+            missing.add(f"{label}: missing requested runtime mode")
+            continue
+        if label == "reference" and requested != "native":
+            mismatches.add("reference: expected Native runtime")
+        expected = ("off", "disabled", False) if requested == "native" else ("flaggems", "enabled_only_enable", True)
+        observed = (runtime.get("flagos_mode"), runtime.get("flagos_status"), replacement.get("enabled"))
+        if any(v is None for v in observed):
+            missing.add(f"{label}: missing resolved backend evidence")
+        elif observed != expected:
+            mismatches.add(f"{label}: resolved backend disagrees with requested runtime")
+        if requested == "native" and replacement.get("operators"):
+            mismatches.add(f"{label}: Native runtime has replacements")
+        if requested == "flaggems" and not replacement.get("operators"):
+            missing.add(f"{label}: missing replacement operator evidence")
+    precision = run.get("resolved_precision")
+    enabled = contract.get("tensor_core_enabled")
+    if precision is None or enabled is None:
+        missing.add(f"{label}: missing resolved precision")
+    elif precision not in (("tf32", "hf32") if enabled else ("ieee_fp32",)):
+        mismatches.add(f"{label}: resolved precision disagrees with tensor_core_enabled")
+    if contract.get("precision") not in (None, "fp32"):
+        mismatches.add(f"{label}: expected FP32 storage")
+    origins = row["fields"].get("origins_by_rank") or []
+    if not origins or [r.get("rank") for r in origins] != expected_ranks:
+        missing.add(f"{label}: missing complete sample origins_by_rank")
+    for origin in origins:
+        for name in ("global_window_indices", "local_window_indices", "sample_weights",
+                     "global_sample_weights", "reference_datetimes", "target_datetimes_by_sample"):
+            if not origin.get(name):
+                missing.add(f"{label}: missing sample provenance {name}")
+
+
 def _comparability(candidate, reference, steps):
     missing, mismatches = set(), set()
     positive_lr = False
@@ -163,15 +241,15 @@ def _comparability(candidate, reference, steps):
         _check_runtime(cand, "candidate", missing, mismatches)
         _check_runtime(ref, "reference", missing, mismatches)
         contexts = (_comparison_context(cand), _comparison_context(ref))
-        for name in contexts[0]:
-            a, b = contexts[0][name], contexts[1][name]
+        for name in contexts[0].keys() | contexts[1].keys():
+            a, b = contexts[0].get(name), contexts[1].get(name)
             if any(value is None or value == "" or isinstance(value, (list, dict)) and not value
                    for value in (a, b)):
                 missing.add(f"missing run metadata: {name}")
             elif a != b:
                 mismatches.add(f"run metadata differs: {name}")
         for label, context in zip(("candidate", "reference"), contexts):
-            start = context["start_optimizer_step"]
+            start = context.get("start_optimizer_step")
             if start is not None and as_int(start, "start_optimizer_step") >= step:
                 mismatches.add(f"{label} step {step} is not after its run start")
         for name in UPDATE_FIELDS:
@@ -191,6 +269,11 @@ def _comparability(candidate, reference, steps):
         for row in (cand, ref):
             if "finite" not in row["fields"] or "gradient_norm" not in row["fields"]:
                 missing.add("missing finite/gradient evidence")
+        if "training_sampling" in cand["fields"] or "training_sampling" in ref["fields"]:
+            for name in ("training_sampling", "origins_by_rank"):
+                a, b = cand["fields"].get(name), ref["fields"].get(name)
+                if a is not None and b is not None and a != b:
+                    mismatches.add(f"step {step} differs: {name}")
     if not positive_lr:
         missing.add("no paired positive-learning-rate update in the requested interval")
     status = "incomparable_training" if mismatches else "unverified_comparison" if missing else "verified"
@@ -240,7 +323,9 @@ def compare_losses(candidate, baseline, *, start_step, end_step, threshold=5.,
     mean_relative = ((0. if sum_abs_diff == 0. else math.inf) if sum_abs_ref == 0.
                      else sum_abs_diff / sum_abs_ref * 100.)
     comparison_status, issues = _comparability(candidate_rows, baseline_rows, steps)
-    metric_passed = mean_relative <= threshold
+    # Only roundoff at the agreed inclusive 5% boundary is tolerated (8 ULPs).
+    boundary_roundoff = threshold == 5. and abs(mean_relative - 5.) <= 8 * math.ulp(5.)
+    metric_passed = mean_relative <= threshold or boundary_roundoff
     status = "passed" if metric_passed else "failed_loss"
     if comparison_status != "verified":
         status = comparison_status
@@ -272,7 +357,7 @@ def _json_safe(value):
 
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("candidate", type=Path, help="candidate updates.jsonl or CSV")
+    parser.add_argument("candidate", type=Path, help="candidate run/metrics directory, segment JSONL, legacy updates.jsonl or CSV")
     parser.add_argument("--baseline", type=Path, required=True, help="same-recipe Native reference log; no implicit JAX baseline")
     parser.add_argument("--start-step", type=int, required=True, help="first required optimizer step (inclusive)")
     parser.add_argument("--end-step", type=int, required=True, help="last required optimizer step (inclusive)")
