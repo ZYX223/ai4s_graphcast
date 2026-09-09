@@ -451,3 +451,62 @@ def test_cli_loss_failure_and_missing_context_return_distinct_nonzero_codes(tmp_
         "--baseline", str(reference), "--start-step", "1", "--end-step", "2",
         "--output-json", str(tmp_path / "result.json")], capture_output=True, text=True)
     assert result.returncode == want, result.stdout + result.stderr
+
+
+@pytest.mark.parametrize("location,value", [
+    ((), ["invalid"]),
+    (("resume_contract",), ["invalid"]),
+    (("runtime_by_rank",), {"rank": 0}),
+    (("runtime_by_rank", 0), None),
+    (("runtime_by_rank", 0, "runtime"), ["invalid"]),
+    (("states_by_rank",), 42),
+    (("states_by_rank", 0), None),
+    (("stats_sha256",), ["invalid"]),
+    (("data_sha256",), {"invalid": "hash"}),
+    (("optimizer",), "invalid"),
+    (("per_variable_weights",), []),
+    (("execution_policy",), []),
+])
+def test_cli_malformed_source_sidecars_are_invalid_input_without_traceback(tmp_path, location, value):
+    # Equal malformed structures on both sides must not qualify by equality;
+    # malformed rank members must not escape as AttributeError / exit 1.
+    runs = [tmp_path / "candidate", tmp_path / "reference"]
+    for root in runs:
+        start = source_start()
+        segment = source_segment(root, source_rows([2., 4.]), start)
+        if location:
+            container = start
+            for key in location[:-1]:
+                container = container[key]
+            container[location[-1]] = value
+        else:
+            start = value
+        segment.with_suffix(".start.json").write_text(json.dumps(start))
+    result = subprocess.run([sys.executable, "-I", "-S", str(SCRIPT), str(runs[0]),
+        "--baseline", str(runs[1]), "--start-step", "1", "--end-step", "2",
+        "--output-json", str(tmp_path / "result.json")], capture_output=True, text=True)
+    assert result.returncode == 2, result.stdout + result.stderr
+    assert "Traceback" not in result.stderr
+
+
+@pytest.mark.parametrize("location,value", [
+    (("origins_by_rank",), {"rank": 0}),
+    (("origins_by_rank", 0), None),
+    (("origins_by_rank", 0, "global_window_indices"), "4,4"),
+    (("origins_by_rank", 0, "sample_weights"), {"0": 1.}),
+    (("origins_by_rank", 0, "target_datetimes_by_sample"), [None]),
+])
+def test_cli_malformed_source_provenance_is_invalid_input_without_traceback(tmp_path, location, value):
+    runs = [tmp_path / "candidate", tmp_path / "reference"]
+    for root in runs:
+        rows = source_rows([2., 4.])
+        container = rows[0]
+        for key in location[:-1]:
+            container = container[key]
+        container[location[-1]] = value
+        source_segment(root, rows, source_start())
+    result = subprocess.run([sys.executable, "-I", "-S", str(SCRIPT), str(runs[0]),
+        "--baseline", str(runs[1]), "--start-step", "1", "--end-step", "2",
+        "--output-json", str(tmp_path / "result.json")], capture_output=True, text=True)
+    assert result.returncode == 2, result.stdout + result.stderr
+    assert "Traceback" not in result.stderr

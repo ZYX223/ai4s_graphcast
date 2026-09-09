@@ -184,7 +184,46 @@ def _check_runtime(row, label, missing, mismatches):
             mismatches.add(f"{label}: resolved_precision disagrees with tensor_core request")
 
 
+def _source_container(value, kind, label, *, missing_allowed=True):
+    """Check artifact structure before traversal; missing evidence stays missing."""
+    if value is None and missing_allowed:
+        return kind()
+    if not isinstance(value, kind):
+        expected = "object" if kind is dict else "array"
+        raise DiagnosticError(f"{label} must be a JSON {expected}")
+    return value
+
+
+def _validate_source_structure(row, label):
+    run = _source_container(row["run"], dict, f"{label} segment metadata")
+    for name in ("resume_contract", "stats_sha256", "optimizer", "per_variable_weights", "execution_policy"):
+        _source_container(run.get(name), dict, f"{label} {name}")
+    _source_container(run.get("data_sha256"), list, f"{label} data_sha256")
+    for name in ("runtime_by_rank", "states_by_rank"):
+        records = _source_container(run.get(name), list, f"{label} {name}")
+        for index, record in enumerate(records):
+            record_label = f"{label} {name}[{index}]"
+            _source_container(record, dict, record_label, missing_allowed=False)
+            if name == "runtime_by_rank":
+                _source_container(record.get("runtime"), dict, f"{record_label}.runtime")
+                for field in ("operators", "skipped"):
+                    _source_container(record.get(field), list, f"{record_label}.{field}")
+    origins = _source_container(row["fields"].get("origins_by_rank"), list,
+                                f"{label} origins_by_rank")
+    for index, origin in enumerate(origins):
+        origin_label = f"{label} origins_by_rank[{index}]"
+        _source_container(origin, dict, origin_label, missing_allowed=False)
+        for name in ("global_window_indices", "local_window_indices", "sample_weights",
+                     "global_sample_weights", "reference_datetimes", "target_datetimes_by_sample"):
+            values = _source_container(origin.get(name), list, f"{origin_label}.{name}")
+            if name == "target_datetimes_by_sample":
+                for sample_index, times in enumerate(values):
+                    _source_container(times, list, f"{origin_label}.{name}[{sample_index}]",
+                                      missing_allowed=False)
+
+
 def _check_source_runtime(row, label, missing, mismatches):
+    _validate_source_structure(row, label)
     run = row["run"] or {}
     if run.get("schema") != SEGMENT_SCHEMA:
         missing.add(f"{label}: missing source segment comparison schema")
