@@ -159,6 +159,17 @@ Source deviations are limited to:
 - Model-only initialization also accepts historical nonempty raw tensor
   state_dict files. Source envelope checks and exact-resume schema/recipe
   validation remain intact. Raw checkpoints do not qualify as exact resume.
+- Resume equality uses stable backend/operator/version policy, excluding rank
+  device, recording path and registration/export observations. Complete runtime
+  evidence and measured cache status are retained per invocation and rank at
+  `processes/from_XXXXXXXX/rank_R/runtime.json`, outside update timing. Immutable
+  run_config records the cache budget rather than changing preload/validation
+  durations. These corrections make fresh-process and cache-enabled resumes usable.
+- Source-native validation explicitly requests the existing per-variable loss
+  diagnostics from EpochAutoregressiveModule. Training leaves that option off.
+  This corrects the source's zero-column validation indexing bug without changing
+  the loss/update algorithm. CPU tests verify unchanged training loss/gradients
+  and a real source-native validation report covering all variables and 12 leads.
 
 The source loop, update-indexed trajectory sampling with replacement, active
 rollout eligibility, weighted BPTT, AdamW, gradient clipping, CPU cache/prefetch,

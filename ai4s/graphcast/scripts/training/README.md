@@ -99,6 +99,12 @@ prefix stop 写 `checkpoints/step_XXXXXXXX.pt`；`final_checkpoint.pt` 在完成
 时写出。日志为 `metrics/segment_XXXXXXXX.jsonl`；恢复创建下一个无重叠 segment，
 最终化会重写该 segment，保留 source 格式。
 
+恢复的 replacement identity 只包含稳定的 backend/op/version 策略，不包含
+rank 卡号或进程录制路径。完整运行时证据和 cache 实测状态保存在
+`processes/from_XXXXXXXX/rank_R/runtime.json`；immutable run_config 仅记录
+cache 预算，重开数据产生的新预加载/校验耗时不会阻断恢复。
+source-native validation 请求分变量/逐 lead loss；普通训练仍关闭这些诊断。
+
 FlagGems 唯一 op 策略仍是 target training YAML，公开 config/ops/variant 参数
 转发给现有 backend；training bridge 将 `layer_norm` 映射为实际注册名
 `native_layer_norm`，验证所有选中 op 的注册证据，缺失则失败。

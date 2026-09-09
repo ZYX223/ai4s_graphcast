@@ -79,6 +79,7 @@ from graphcast_compat.data_prefetch import (  # noqa: E402
 from graphcast_compat.epoch_plan import EpochPlan  # noqa: E402
 from graphcast_compat.training_backend import (  # noqa: E402
     enable_network_replacements_from_env,
+    replacement_resume_policy,
 )
 from graphcast_compat.gradient_accumulation import (  # noqa: E402
     MicrobatchPlan,
@@ -930,6 +931,8 @@ class EpochAutoregressiveModule(torch.nn.Module):
     def forward(
         self,
         batch: Any,
+        *,
+        collect_variable_diagnostics: bool = False,
     ) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
         active_checkpoint_segments = (
             self.checkpoint_segments
@@ -942,11 +945,15 @@ class EpochAutoregressiveModule(torch.nn.Module):
             checkpoint_segments=active_checkpoint_segments,
             checkpoint_implementation=self.checkpoint_implementation,
             loss_grid_chunk_size=self.loss_grid_chunk_size,
-            collect_variable_diagnostics=False,
+            collect_variable_diagnostics=collect_variable_diagnostics,
         )
         # Per-variable diagnostics are available through autoregressive_loss,
         # but are not needed for the optimizer's weighted scalar loss.
-        per_variable = result.lead_losses.new_empty((batch.rollout_steps, 0))
+        per_variable = (
+            torch.stack(tuple(result.per_variable_lead_losses.values()), dim=1)
+            if result.per_variable_lead_losses
+            else result.lead_losses.new_empty((batch.rollout_steps, 0))
+        )
         return result.loss, result.lead_losses, per_variable
 
 
@@ -1101,7 +1108,9 @@ def evaluate_validation(
                     variable_names = tuple(batch.target_channel_slices)
                 synchronize(context.device_indices)
                 started = time.perf_counter()
-                loss, lead_tensor, variable_tensor = wrapped_unroll(batch)
+                loss, lead_tensor, variable_tensor = wrapped_unroll(
+                    batch, collect_variable_diagnostics=True
+                )
                 synchronize(context.device_indices)
                 seconds = context.global_max_seconds(
                     time.perf_counter() - started
@@ -1784,7 +1793,7 @@ def train(argv: list[str] | None = None) -> int:
             "data_parallel_replicas": context.dp_replicas,
             "mp_devices_per_replica": context.mp_devices_per_replica,
             "gradient_sync": args.gradient_sync,
-            "operator_replacement": operator_replacement,
+            "operator_replacement": replacement_resume_policy(operator_replacement),
             "rollout_steps": args.rollout_steps,
             "rollout_checkpoint_segments": (
                 args.rollout_checkpoint_segments
@@ -1862,7 +1871,9 @@ def train(argv: list[str] | None = None) -> int:
                         "flagos_torch_distributed_glue",
                     ],
                     "data_pipeline": {
-                        "split_cache": dataset.split_cache_status,
+                        # Measurements change on every reopen; full status is
+                        # preserved in the per-rank invocation observations.
+                        "split_cache": {"max_gib": args.split_cache_max_gib},
                         "data_prefetch": {
                             "depth": args.data_prefetch_depth,
                             "producer_count": (
@@ -2145,6 +2156,16 @@ def train(argv: list[str] | None = None) -> int:
         context.barrier()
         profiler_run_dir = (
             run_dir / "processes" / f"from_{segment_start_step:08d}"
+        )
+        _atomic_json_dump(
+            profiler_run_dir / f"rank_{context.rank}" / "runtime.json",
+            {
+                "schema_version": 1,
+                "rank": context.rank,
+                "segment_start_optimizer_step": segment_start_step,
+                "operator_replacement": operator_replacement,
+                "split_cache": dataset.split_cache_status,
+            },
         )
         if context.is_primary:
             _atomic_json_dump(

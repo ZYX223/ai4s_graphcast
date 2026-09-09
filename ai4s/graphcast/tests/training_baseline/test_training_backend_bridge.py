@@ -1,7 +1,10 @@
 import importlib
+import copy
+import json
 import os
 from pathlib import Path
 import sys
+import subprocess
 import types
 
 import pytest
@@ -71,3 +74,57 @@ def test_target_yaml_alias_routes_to_actual_registration_and_fails_closed(monkey
         assert result.metadata["flaggems_registered_ops"] == ["native_layer_norm", "silu"]
         assert result.metadata["operator_sources"]["layer_norm"]["registered_name"] == "native_layer_norm"
         assert result.metadata["operator_sources"]["silu"]["file"] == __file__
+
+
+def test_fresh_process_recording_and_rank_devices_do_not_change_resume_policy(tmp_path):
+    from graphcast_compat.training_state import validate_resume_contract
+    program = '''
+import json, os, sys, types
+import torch
+from graphcast_compat import backend
+from graphcast_compat.training_backend import enable_network_replacements_from_env, replacement_resume_policy
+fake = types.ModuleType("flag_gems")
+fake.__file__ = "/fixture/flag_gems/__init__.py"
+registered = []
+def only_enable(*, include, **kwargs):
+    registered[:] = include
+fake.only_enable = only_enable
+fake.all_registered_ops = lambda: registered
+fake.all_registered_keys = lambda: []
+sys.modules["flag_gems"] = fake
+backend._resolve_device = lambda profile, requested: torch.device(requested)
+runtime = enable_network_replacements_from_env(device=torch.device(sys.argv[1]))
+replacement = dict(mode="flaggems", enabled=runtime.enabled, operators=list(runtime.operators), skipped=[], runtime=runtime.metadata)
+print(json.dumps(dict(evidence=runtime.metadata, policy=replacement_resume_policy(replacement))))
+'''
+    env = {key: value for key, value in os.environ.items() if not key.startswith("GRAPHCAST_")}
+    env.update(PYTHONPATH=str(ROOT / "src"), GRAPHCAST_BACKEND="nvidia",
+        GRAPHCAST_FLAGOS_MODE="flaggems", GRAPHCAST_FLAGGEMS_VARIANT="installed",
+        GRAPHCAST_FLAGGEMS_OPS="silu", GRAPHCAST_FLAGGEMS_RECORD="1")
+    def resolve(device):
+        result = subprocess.run([sys.executable, "-c", program, device], cwd=tmp_path,
+                                env=env, text=True, capture_output=True)
+        assert result.returncode == 0, result.stderr
+        return json.loads(result.stdout)
+    rank0, rank1 = resolve("cuda:0"), resolve("cuda:2")
+    assert rank0["evidence"]["device"] == "cuda:0"
+    assert rank1["evidence"]["device"] == "cuda:2"
+    assert rank0["evidence"]["flaggems_record_path"] != rank1["evidence"]["flaggems_record_path"]
+    payload = {"metadata": {"resume_contract": {"operator_replacement": rank0["policy"]}}}
+    validate_resume_contract(payload, {"operator_replacement": rank1["policy"]})
+    from graphcast_compat.training_backend import replacement_resume_policy
+    fresh_evidence = copy.deepcopy(rank1["evidence"])
+    fresh_evidence.update(flaggems_registered_ops=["silu.Tensor", "silu"],
+        operator_sources={"silu": {"file": "/tmp/process-local/export.py"}})
+    observed_policy = replacement_resume_policy(dict(mode="flaggems", enabled=True,
+        operators=["silu"], skipped=[], runtime=fresh_evidence))
+    validate_resume_contract(payload, {"operator_replacement": observed_policy})
+    # Keep failures closed for real backend, operator and version changes.
+    for field, changed_value in (("backend", "hygon"), ("flaggems_ops", ["add"]),
+                                 ("versions", {"torch": "different-runtime"})):
+        changed = copy.deepcopy(rank1["evidence"])
+        changed[field] = changed_value
+        policy = replacement_resume_policy(dict(mode="flaggems", enabled=True,
+            operators=["silu"], skipped=[], runtime=changed))
+        with pytest.raises(ValueError, match="operator_replacement"):
+            validate_resume_contract(payload, {"operator_replacement": policy})

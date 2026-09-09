@@ -19,6 +19,28 @@ class ReplacementRuntime:
     metadata: dict[str, Any]
 
 
+def replacement_resume_policy(replacement: dict[str, Any]) -> dict[str, Any]:
+    """Keep stable policy/version identity separate from process observations.
+
+    Rank-local devices, PID-derived recording paths, registration/export
+    observations and incidental warnings stay in the complete evidence,
+    never in an exact-resume equality check.
+    """
+    runtime = replacement["runtime"]
+    stable_fields = (
+        "backend", "device_type", "runtime_family", "chip",
+        "flagos_mode", "flagos_status", "flagos_strict", "flaggems_variant",
+        "flaggems_ops", "flaggems_ops_config", "flaggems_vendor",
+        "flaggems_source_root", "flaggems_module_origin", "bishengir_opt_dir",
+        "hygon_amdgcn_use_buffer_ops", "gather_backend", "flaggems_patched_ops",
+        "versions",
+    )
+    return {
+        **{name: replacement[name] for name in ("mode", "enabled", "operators", "skipped")},
+        "runtime": {name: runtime.get(name) for name in stable_fields},
+    }
+
+
 def enable_network_replacements_from_env(*, device):
     mode = backend._flagos_mode()
     if mode not in ("off", "flaggems"):

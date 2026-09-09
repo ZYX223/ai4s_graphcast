@@ -7,6 +7,7 @@ import torch
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "scripts/training"))
+sys.path.insert(0, str(ROOT / "tests"))
 
 
 def runner():
@@ -48,3 +49,22 @@ def test_unknown_peak_keeps_mfu_unavailable():
     enrich_step_metrics(rows, profiled_steps={}, device_count=4, peak_tflops_per_device=0.)
     assert rows[0]["mfu_sys"] is None
     assert rows[0]["mfu_busy"] is None
+
+
+def test_validation_diagnostics_do_not_change_default_training_loss_or_gradients():
+    from test_autoregressive_training import ScalarResidualModel, _scalar_batch
+    module = runner()
+    models = [ScalarResidualModel(.5), ScalarResidualModel(.5)]
+    wrappers = [module.EpochAutoregressiveModule(model,
+        checkpoint_segments=0, checkpoint_single_step=False) for model in models]
+    plain_loss, plain_leads, plain_variables = wrappers[0](_scalar_batch())
+    diagnostic_loss, diagnostic_leads, diagnostic_variables = wrappers[1](
+        _scalar_batch(), collect_variable_diagnostics=True)
+    plain_loss.backward()
+    diagnostic_loss.backward()
+    assert plain_variables.shape == (2, 0)
+    assert diagnostic_variables.shape == (2, 1)
+    torch.testing.assert_close(plain_loss, diagnostic_loss, rtol=0, atol=0)
+    torch.testing.assert_close(plain_leads, diagnostic_leads, rtol=0, atol=0)
+    torch.testing.assert_close(diagnostic_variables[:, 0], plain_leads, rtol=0, atol=0)
+    torch.testing.assert_close(models[0].residual.grad, models[1].residual.grad, rtol=0, atol=0)
