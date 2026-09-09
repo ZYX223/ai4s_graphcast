@@ -50,7 +50,19 @@ python scripts/training/run_training.py \
 
 这些是可复制的调用形式，不表示八种组合已通过实机验收。模型维持完整
 721×1440、mesh6、latent512、16 mesh steps、13 层；不得用缩小模型的结果
-代替正式设备验收。本次验证仅含 CLI、真实 tiny CPU 模型/数据、Gloo 和恢复。
+代替正式设备验收。CLI、真实 tiny CPU 模型/数据、Gloo 和恢复已有回归覆盖。
+
+2026-09-09 在冻结源码 `ffd34d532cf27d3319e18b1a93b0418167b15d25` 上完成
+910C 四逻辑设备 MP4/DP1 短测：完整模型、FP32 storage/HF32 请求、global
+batch2/micro1、seed27、6/10/22 schedule 停在第3次更新。Native/FlagGems
+均正常完成并保存 checkpoint，梯度有限、无 OOM；单设备最大分配显存分别
+47.3426/52.5519 GiB。完整区间 loss 比值差异0.0010006925%，配方/起始状态/
+数据/运行库证据可比，低于5%门槛。第三步两组 loss 均上升至约12.217，
+因此这只是配对流程正确性短测，不是收敛、12-lead、MP2/DP2、多平台或天气
+技能验收；未计算正式 MFU，也未把注册数当作实际调用覆盖。
+训练 YAML 的6个选中接口注册成功且无跳过；本次未另跑调用观察器。
+独立证据目录标识为 `gct9-0lraxY`，含冻结清单、原始 metrics/start sidecar、
+checkpoint checksum、进程退出记录和 `diagnosis/loss.json`；数据和权重不入库。
 
 `--platform` 可选 `h100/metax/hygon/thead/mthreads/ascend910c`。
 NPU/MUSA 可由 `--device-type` 推断；CUDA 兼容的海光、沐曦、平头哥须显式
