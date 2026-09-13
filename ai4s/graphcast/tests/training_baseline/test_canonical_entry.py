@@ -34,7 +34,7 @@ def test_topology_maps_local_microbatch_to_canonical_global_batch(mp, dp):
     assert row["environment"]["GRAPHCAST_PLATFORM_LABEL"] == "Ascend 910C"
     assert row["environment"]["ASCEND_LAUNCH_BLOCKING"] == "1"
     argv = row["engine_argv"]
-    assert argv[argv.index("--micro-batch-size") + 1] == str(dp)
+    assert argv[argv.index("--global-micro-batch-size") + 1] == str(dp)
     assert "--formal" in argv
     assert "--activation-checkpoint" in argv
     # Source initializes a process group even for DP1; torchrun supplies env://.
@@ -48,6 +48,9 @@ def test_topology_maps_local_microbatch_to_canonical_global_batch(mp, dp):
     else:
         assert row["execution"]["mesh_split_step"] == 16
         assert row["execution"]["rollout_checkpoint_implementation"] == "reentrant"
+        if dp == 1:
+            # Bound mesh replay to one message step on the four-device recipe.
+            assert argv[argv.index("--mesh-checkpoint-granularity") + 1] == "step"
 
 
 @pytest.mark.parametrize("args", [
@@ -77,6 +80,16 @@ def test_explicit_execution_precision_and_backend_policy_are_forwarded():
     assert row["environment"]["GRAPHCAST_FLAGGEMS_OPS"] == "layer_norm,silu"
     assert row["environment"]["GRAPHCAST_FLAGGEMS_VARIANT"] == "official"
     assert row["environment"]["FLAGOS_REPLACE"] == "1"
+
+
+def test_mesh_projection_experiment_is_opt_in_and_forwarded_to_engine():
+    baseline = run("--device-type", "npu")
+    assert baseline.returncode == 0, baseline.stderr
+    assert json.loads(baseline.stdout)["execution"].get("mesh_edge_input_projection", "concatenated") == "concatenated"
+    experiment = run("--device-type", "npu", "--mesh-edge-input-projection", "factorized")
+    assert experiment.returncode == 0, experiment.stderr
+    argv = json.loads(experiment.stdout)["engine_argv"]
+    assert argv[argv.index("--mesh-edge-input-projection") + 1] == "factorized"
 
 
 @pytest.mark.parametrize("platform,label,backend", [
@@ -126,3 +139,131 @@ def test_shell_entry_preserves_python_platform_contract():
     row = json.loads(result.stdout)
     assert row["environment"]["GRAPHCAST_PLATFORM_LABEL"] == "Ascend 910C"
     assert row["execution"]["gradient_sync"] == "ddp"
+
+
+def test_top_level_help_exposes_formal_training_not_legacy_sgd():
+    result = subprocess.run(
+        ["bash", str(ROOT / "scripts/train.sh"), "--help"],
+        env={**os.environ, "PYTHON_BIN": sys.executable},
+        capture_output=True, text=True, timeout=20,
+    )
+    assert result.returncode == 0, result.stderr
+    assert "--global-batch-size" in result.stdout
+    assert "--corpus" in result.stdout
+
+
+@pytest.mark.parametrize("entry", [
+    "scripts/train.sh", "scripts/training/train_official.sh", "scripts/training/train_pipeline.sh",
+])
+def test_formal_shell_entries_preserve_batch_and_paths_from_external_cwd(entry, tmp_path):
+    output = tmp_path / "output with spaces"
+    result = subprocess.run(
+        ["bash", str(ROOT / entry), "--dry-run", "--device-type", "npu",
+         "--mp", "4", "--dp", "2", "--global-batch-size", "16",
+         "--micro-batch-size-per-rank", "2", "--output-dir", str(output)],
+        env={**os.environ, "PYTHON_BIN": sys.executable},
+        cwd=tmp_path, capture_output=True, text=True, timeout=20,
+    )
+    assert result.returncode == 0, result.stderr
+    row = json.loads(result.stdout)
+    assert row["global_micro_batch_size"] == 4
+    assert row["gradient_accumulation_steps"] == 4
+    argv = row["engine_argv"]
+    assert argv[argv.index("--run-dir") + 1] == str(output)
+    assert not output.exists()
+
+
+@pytest.mark.parametrize("script", ["train_mp.sh", "train_ddp.sh", "train_25km_single.sh", "train_100km_single.sh"])
+def test_legacy_shell_aliases_keep_original_help_and_show_migration(script, tmp_path):
+    env = {**os.environ, "STEPS": "3"}
+    original = subprocess.run(
+        ["bash", str(ROOT / "scripts/training" / script), "--help"],
+        cwd=tmp_path, env=env, capture_output=True, text=True, timeout=20,
+    )
+    relocated = subprocess.run(
+        ["bash", str(ROOT / "scripts/training/legacy" / script), "--help"],
+        cwd=tmp_path, env=env, capture_output=True, text=True, timeout=20,
+    )
+    assert original.returncode == relocated.returncode == 0
+    assert original.stdout == relocated.stdout
+    assert "Deprecated probe path" in original.stderr
+
+
+@pytest.mark.parametrize("variable,value", [("STEPS", "3"), ("LR", "0.001"), ("DEVICES", "npu:0,npu:1")])
+def test_top_level_entry_rejects_legacy_environment_instead_of_changing_recipe(variable, value):
+    result = subprocess.run(
+        ["bash", str(ROOT / "scripts/train.sh"), "--help"],
+        env={**os.environ, "PYTHON_BIN": sys.executable, variable: value},
+        capture_output=True, text=True, timeout=20,
+    )
+    assert result.returncode == 2
+    assert variable in result.stderr
+    assert "legacy" in result.stderr.lower()
+
+
+@pytest.mark.parametrize("variable", ["FLAGGEMS_RUNTIME_DEST", "GRAPHCAST_FLAGGEMS_SOURCE_ROOT"])
+def test_formal_entry_keeps_prepared_flaggems_source_paths(variable, tmp_path):
+    result = subprocess.run(
+        ["bash", str(ROOT / "scripts/train.sh"), "--dry-run", "--platform", "ascend910c",
+         "--backend", "flaggems", "--flaggems-variant", "official"],
+        env={**os.environ, "PYTHON_BIN": sys.executable, variable: str(tmp_path / "runtime")},
+        capture_output=True, text=True, timeout=20,
+    )
+    assert result.returncode == 0, result.stderr
+    row = json.loads(result.stdout)
+    assert row["environment"]["GRAPHCAST_FLAGOS_MODE"] == "flaggems"
+    assert row["environment"]["GRAPHCAST_FLAGGEMS_VARIANT"] == "official"
+    # The inherited source paths must not be reset by the formal adapter.
+    assert variable not in row["environment"]
+
+
+@pytest.mark.parametrize("dp,local_micro,global_micro,accumulation", [(1, 1, 1, 16), (1, 2, 2, 8), (2, 1, 2, 8), (2, 2, 4, 4)])
+def test_explicit_per_rank_microbatch_preserves_effective_batch(dp, local_micro, global_micro, accumulation):
+    result = run("--device-type", "npu", "--dp", str(dp),
+                 "--global-batch-size", "16", "--micro-batch-size-per-rank", str(local_micro))
+    assert result.returncode == 0, result.stderr
+    row = json.loads(result.stdout)
+    assert row["global_batch_size"] == 16
+    assert row["micro_batch_size_per_rank"] == local_micro
+    assert row["global_micro_batch_size"] == global_micro
+    assert row["gradient_accumulation_steps"] == accumulation
+    # Preserve existing dry-run consumers while giving the units explicit names.
+    assert row["canonical_micro_batch_size"] == global_micro
+    assert row["accumulation_steps"] == accumulation
+    argv = row["engine_argv"]
+    assert argv[argv.index("--global-micro-batch-size") + 1] == str(global_micro)
+    assert "--micro-batch-size" not in argv
+
+
+def test_public_microbatch_aliases_cannot_silently_override_each_other():
+    result = run("--micro-batch-size-per-rank", "1", "--micro-batch-size", "2")
+    assert result.returncode == 2
+    assert "not allowed with argument" in result.stderr
+
+
+@pytest.mark.parametrize("script", ["train_mp.sh", "train_ddp.sh", "train_25km_single.sh", "train_100km_single.sh"])
+def test_relocated_probe_help_is_available_without_training(script, tmp_path):
+    result = subprocess.run(
+        ["bash", str(ROOT / "scripts/training/legacy" / script), "--help"],
+        cwd=tmp_path, capture_output=True, text=True, timeout=20,
+    )
+    assert result.returncode == 0, result.stderr
+    assert "STEPS" in result.stdout
+
+
+@pytest.mark.parametrize("script", ["train_mp.py", "train_ddp.py", "train_single.py"])
+def test_relocated_python_probe_finds_project_assets_without_pythonpath(script, tmp_path):
+    env = {key: value for key, value in os.environ.items() if key != "PYTHONPATH"}
+    code = """
+import json, runpy, sys
+ns = runpy.run_path(sys.argv[1])
+print(json.dumps({'root': str(ns['REPO_ROOT']), 'config': str(ns['DEFAULT_CONFIG'])}))
+"""
+    result = subprocess.run(
+        [sys.executable, "-c", code, str(ROOT / "scripts/training/legacy/lib" / script)],
+        env=env, cwd=tmp_path, capture_output=True, text=True, timeout=30,
+    )
+    assert result.returncode == 0, result.stderr
+    row = json.loads(result.stdout)
+    assert Path(row["root"]) == ROOT
+    assert Path(row["config"]).is_file()

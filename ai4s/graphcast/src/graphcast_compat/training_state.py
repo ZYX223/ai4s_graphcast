@@ -390,7 +390,15 @@ def validate_resume_contract(
     actual = metadata.get("resume_contract")
     if not isinstance(actual, Mapping):
         raise ValueError("training checkpoint resume_contract is invalid")
+    # Old checkpoints predate the optional Mesh algebra change. Missing means
+    # concatenated on either side; a factorized checkpoint cannot silently
+    # resume with the default path (or vice versa).
+    projection_key = "mesh_edge_input_projection"
+    if actual.get(projection_key, "concatenated") != expected.get(projection_key, "concatenated"):
+        raise ValueError(f"resume contract mismatch for {projection_key}")
     for name, expected_value in expected.items():
+        if name == projection_key:  # Already compared with the legacy default.
+            continue
         if actual.get(name) != expected_value:
             raise ValueError(
                 f"resume contract mismatch for {name}: "

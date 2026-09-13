@@ -28,6 +28,37 @@ def test_public_contract_is_accepted_by_actual_source_parser():
             assert schedule.value_for_update(300000).rollout_steps == 2
 
 
+def test_source_batch_aliases_keep_global_units_and_schedule_identity():
+    module = runner()
+    import run_training
+    contract = run_training.resolve_contract(run_training.parser().parse_args([
+        "--device-type", "npu", "--dp", "2", "--global-batch-size", "16", "--micro-batch-size", "2",
+    ]))
+    # Strip either spelling so this test runs against both old and new adapters.
+    batch_flags = {"--batch-size", "--micro-batch-size", "--global-batch-size", "--global-micro-batch-size"}
+    arguments = iter(contract["engine_argv"])
+    common = []
+    for value in arguments:
+        if value in batch_flags:
+            next(arguments)
+        else:
+            common.append(value)
+    legacy = module.parse_args(common + ["--batch-size", "16", "--micro-batch-size", "4"])
+    explicit = module.parse_args(common + ["--global-batch-size", "16", "--global-micro-batch-size", "4"])
+    assert vars(explicit) == vars(legacy)
+    assert explicit.global_batch_size == 16
+    assert explicit.global_micro_batch_size == 4
+    assert module.resolve_training_schedule(explicit)[0].digest == contract["schedule_digest"]
+
+
+def test_source_microbatch_aliases_reject_conflicting_units(capsys):
+    module = runner()
+    with pytest.raises(SystemExit) as exc:
+        module.parse_args(["--global-micro-batch-size", "4", "--micro-batch-size", "2"])
+    assert exc.value.code == 2
+    assert "not allowed with argument" in capsys.readouterr().err
+
+
 def test_model_only_initialization_accepts_raw_weights_but_resume_rejects_them(tmp_path):
     runner()
     from official_epoch_training_file_validation import load_model_only_checkpoint, load_resume_checkpoint

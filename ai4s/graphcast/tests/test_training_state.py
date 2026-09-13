@@ -16,6 +16,23 @@ sys.path.insert(0, str(ROOT / "src"))
 from graphcast_compat import training_state
 
 
+@pytest.mark.parametrize("saved,expected,compatible", [
+    ({}, {}, True),
+    ({}, {"mesh_edge_input_projection": "concatenated"}, True),
+    ({"mesh_edge_input_projection": "concatenated"}, {}, True),
+    ({"mesh_edge_input_projection": "factorized"}, {}, False),
+    ({}, {"mesh_edge_input_projection": "factorized"}, False),
+    ({"mesh_edge_input_projection": "factorized"}, {"mesh_edge_input_projection": "factorized"}, True),
+])
+def test_resume_projection_normalizes_legacy_default_without_allowing_mode_switch(saved, expected, compatible):
+    payload = {"metadata": {"resume_contract": saved}}
+    if compatible:
+        training_state.validate_resume_contract(payload, expected)
+    else:
+        with pytest.raises(ValueError, match="mesh_edge_input_projection"):
+            training_state.validate_resume_contract(payload, expected)
+
+
 def _run_update(model, optimizer, features, targets):
     optimizer.zero_grad(set_to_none=True)
     torch.nn.functional.mse_loss(model(features), targets).backward()

@@ -10,20 +10,22 @@ workflows use the same implementation under `src/graphcast_compat`; platform and
 FlagGems choices are configuration, not separate model copies.
 
 The formal TF32/HF32 autoregressive training entry is
-`scripts/training/run_training.py` (or `train_official.sh`). It keeps FP32
+`scripts/train.sh` (or `scripts/training/run_training.py`). It keeps FP32
 storage and delegates to the pinned colleague `run_official_epoch_training.py`.
-It defaults to MP=4, supports MP=2 and DP=1/2, and preserves update-indexed
+It defaults to MP=4, supports MP=2 with DP=1/2 and single-device MP=1/DP=1,
+and preserves update-indexed
 with-replacement sampling, weighted autoregressive accumulation and exact
 optimizer-boundary resume. Start with
 `python scripts/training/run_training.py --dry-run`; see the
 [training guide](scripts/training/README.md) for corpus, DP=2 and restore examples.
-The lightweight regression metric remains the explicit-reference, full-interval
-ratio-of-sums loss diagnostic. Its legacy start/update metadata adapter is pending
-migration to the canonical runner's `metrics/segment_*.jsonl`; source training
-metrics alone do not yet qualify that comparison.
-Current acceptance is CPU integration and CLI validation only; full-model
-accelerator memory, training accuracy, FlagGems backward coverage and MFU remain
-unverified. The existing quickstart/short training probes remain available.
+The lightweight regression metric is the explicit-reference, full-interval
+ratio-of-sums loss diagnostic. It consumes `metrics/segment_*.jsonl` together with
+their immutable `.start.json` evidence; metrics alone do not qualify a comparison.
+MP=1 uses the same checkpoint/chunk recipe on all six platforms; only 910C
+has completed the paired single-device short run so far.
+See the training guide for the limited 910C paired short-run evidence;
+this is not all-platform, long-run, backward-coverage or MFU acceptance.
+Legacy quickstart/short probes remain separate from formal training.
 
 ## Quick Start
 
@@ -33,8 +35,8 @@ unverified. The existing quickstart/short training probes remain available.
 
 # Or explicitly:
 ./quickstart infer          # inference (default, ~30 sec)
-./quickstart train          # 4-GPU training, 3 steps
-./quickstart all            # train then infer
+./quickstart train          # legacy 4-GPU SGD probe, 3 steps; not formal training
+./quickstart all            # inference and legacy training probe
 ```
 
 The first run downloads data (~1 GB) from GitHub Releases automatically if `data/` is missing.
@@ -44,11 +46,12 @@ If Docker is available, quickstart auto-detects your GPU/NPU platform and starts
 
 | Workflow | Entry point | Purpose |
 |----------|-------------|---------|
-| Quick start | `./quickstart infer` or `./quickstart train` | Auto-detect platform and container |
+| Quick start | `./quickstart infer` | Auto-detect platform and container |
 | Inference | `bash scripts/infer.sh` | Operational 25 km inference |
-| Training | `bash scripts/train.sh` | Operational 25 km model-parallel training |
+| Formal training | `bash scripts/train.sh --help` | Autoregressive AdamW; explicit corpus and stats |
+| Legacy probe | `./quickstart train` | Historical short SGD probe, not formal measurements |
 
-Future GraphCast measurements should start from these entry points. Temporary model
+Formal training measurements must use the formal entry, not the legacy probe. Temporary model
 copies and machine-local runner forks are not supported sources of record.
 
 ## quickstart Usage
@@ -63,8 +66,8 @@ copies and machine-local runner forks are not supported sources of record.
 |---------|--------|--------|-------------|
 | `./quickstart` | **Inference** (default) | Auto | ~30 sec |
 | `./quickstart infer` | Inference only | Auto | ~30 sec |
-| `./quickstart train` | Training (4-GPU, 3 steps) | Auto | ~1-10 min |
-| `./quickstart all` | Train then infer | Auto | ~2-15 min |
+| `./quickstart train` | Legacy SGD probe (4-GPU, 3 steps) | Auto | ~1-10 min |
+| `./quickstart all` | Inference and legacy SGD probe | Auto | ~2-15 min |
 | `./quickstart container-only` | Start container, nothing else | Auto | ~5 sec |
 
 ### Options
@@ -74,7 +77,7 @@ copies and machine-local runner forks are not supported sources of record.
 | `--rm` | off | Remove Docker container after execution |
 | `--image IMAGE` | platform default | Custom Docker image |
 | `--devices a,b,c,d` | auto-detect | Comma-separated GPU/NPU IDs (e.g. `0,1,2,3`) |
-| `--steps N` | 3 | Training steps |
+| `--steps N` | 3 | Legacy probe steps, not formal optimizer updates |
 | `--flagos-mode MODE` | `off` | `flaggems` to enable FlagGems |
 | `--flaggems-ops OPS` | platform profile | Optional comma-separated override |
 | `--flaggems-config PATH` | inference/training profile | Operator profile override |
@@ -149,14 +152,14 @@ ai4s/graphcast/
 ├── README.md
 ├── requirements.txt
 ├── configs/
-│   ├── training/           # 25km and 100km training YAML
+│   ├── training/           # formal schedules and legacy model YAML
 │   ├── inference/          # operational 25km inference YAML
 │   └── flaggems/           # separate inference/training operator profiles
 ├── src/graphcast_compat/   # model, backend, data loading, normalization
 ├── scripts/
-│   ├── train.sh            # training entry → training/train_mp.sh
+│   ├── train.sh            # formal entry → training/run_training.py
 │   ├── infer.sh            # inference entry → inference/run_25km_inference.sh
-│   ├── training/           # model parallel, DDP, single-GPU
+│   ├── training/           # formal training; historical probes under legacy/
 │   └── inference/          # inference scripts
 ├── tools/                  # official/internal FlagGems runtime preparation
 ├── tests/                  # routing, runtime, and model integration tests
@@ -166,14 +169,25 @@ ai4s/graphcast/
 ## Manual Training
 
 ```bash
-# Native (baseline B)
-bash scripts/train.sh
+# CPU-safe contract preview; does not allocate accelerator memory.
+bash scripts/train.sh --dry-run --platform ascend910c \
+  --global-batch-size 16 --micro-batch-size-per-rank 1
 
-# FlagGems (baseline C); operators come from the training profile
-GRAPHCAST_BACKEND=ptg \
-GRAPHCAST_FLAGOS_MODE=flaggems \
-  bash scripts/train.sh
+# Native reference; replace paths with a corpus manifest, stats and converted weights.
+bash scripts/train.sh --platform ascend910c --backend native \
+  --corpus /data/era5/corpus.json --stats /data/stats \
+  --pretrained-checkpoint /data/operational_pytorch.pt \
+  --mp 4 --dp 1 --global-batch-size 16 --micro-batch-size-per-rank 1 \
+  --max-updates 3 --output-dir /runs/native
+
+# For the paired FlagGems run, keep the recipe/data/initial state unchanged,
+# select --backend flaggems and use a separate --output-dir.
 ```
+
+The quickstart data bundle is a probe case, not a formal training corpus.
+Unset legacy `STEPS/LR/DEVICES/GRAPHCAST_FLAGOS_MODE` and related shell options
+before using the top-level formal entry; it rejects those options to avoid a
+silent recipe change. See the [migration guide](scripts/training/README.md).
 
 ## Manual Inference
 

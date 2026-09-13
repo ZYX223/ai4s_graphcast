@@ -3,6 +3,7 @@
 This fixture is not full-model or multi-device acceptance. No second loop exists.
 """
 import json
+import os
 from pathlib import Path
 import sys
 
@@ -19,6 +20,9 @@ sys.path.insert(0, str(ROOT / "tests"))
 
 @pytest.fixture
 def cpu_runner(monkeypatch, tmp_path):
+    # The real backend writes resolved policy variables as well as the requested mode.
+    # Keep all of those runtime observations local to this CPU integration test.
+    monkeypatch.setattr(os, "environ", os.environ.copy())
     import run_official_epoch_training as runner
     import official_epoch_training_file_validation as validation
     from graphcast_compat.distributed_training import DistributedContext
@@ -78,14 +82,16 @@ def inputs(tmp_path):
     return config, manifest, stats_dir
 
 
-def command(paths, run_dir, *, stop, resume=None, prefetch=0, cache=0.):
+def command(paths, run_dir, *, stop, resume=None, prefetch=0, cache=0., explicit_batch=False):
     config, manifest, stats = paths
     argv = ["--config", str(config), "--corpus-manifest", str(manifest), "--stats-dir", str(stats),
         "--dataset-kind", "era5", "--training-stage", "era5_pretrain",
         "--run-dir", str(run_dir), "--save-checkpoint", str(run_dir / "final.pt"),
         "--init-mode", "random", "--tensor-core", "disabled", "--schedule-recipe", "official_2_to_12",
         "--warmup-updates", "2", "--training-updates", "2", "--updates", "11",
-        "--batch-size", "2", "--micro-batch-size", "1", "--mp-devices-per-replica", "2",
+        "--global-batch-size" if explicit_batch else "--batch-size", "2",
+        "--global-micro-batch-size" if explicit_batch else "--micro-batch-size", "1",
+        "--mp-devices-per-replica", "2",
         "--mesh-split-step", "1", "--gradient-sync", "ddp", "--activation-checkpoint",
         "--rollout-checkpoint-segments", "12", "--checkpoint-every-steps", "1",
         "--stop-after-global-step", str(stop), "--data-prefetch-depth", str(prefetch),
@@ -100,9 +106,10 @@ def test_actual_epoch_loop_replays_model_optimizer_samples_and_metrics(cpu_runne
     from graphcast_compat.training_state import state_object_sha256
     paths = inputs(tmp_path)
     whole, resumed = tmp_path / "whole", tmp_path / "resumed"
-    assert cpu_runner.train(command(paths, whole, stop=6, prefetch=prefetch)) == 0
+    assert cpu_runner.train(command(paths, whole, stop=6, prefetch=prefetch, explicit_batch=True)) == 0
     assert cpu_runner.train(command(paths, resumed, stop=1, prefetch=prefetch)) == 0
-    assert cpu_runner.train(command(paths, resumed, stop=6, prefetch=prefetch,
+    # Resume a legacy-argument prefix with explicit units: schema/state must not change.
+    assert cpu_runner.train(command(paths, resumed, stop=6, prefetch=prefetch, explicit_batch=True,
         resume=resumed / "checkpoints/step_00000001.pt")) == 0
     expected = torch.load(whole / "checkpoints/step_00000006.pt", weights_only=False)
     actual = torch.load(resumed / "checkpoints/step_00000006.pt", weights_only=False)
@@ -142,6 +149,28 @@ def test_exact_resume_accepts_rank_device_and_record_path_changes(cpu_runner, tm
                     for step in (1, 2)]
     assert [row["operator_replacement"]["runtime"]["device"] for row in observations] == ["cuda:0", "cuda:2"]
     assert observations[0]["operator_replacement"]["runtime"]["flaggems_record_path"] == "/records/process_101.log"
+
+
+def test_mesh_projection_reaches_only_mesh_and_is_bound_to_exact_resume(cpu_runner, tmp_path, monkeypatch):
+    observed = []
+    original = cpu_runner.GoogleSmallCompatibleModel.forward
+
+    def forward(model, *args, **kwargs):
+        observed.append(tuple(net.edge_input_projection_mode for net in (
+            model.grid2mesh_gnn, model.mesh_gnn, model.mesh2grid_gnn)))
+        return original(model, *args, **kwargs)
+
+    monkeypatch.setattr(cpu_runner.GoogleSmallCompatibleModel, "forward", forward)
+    paths = inputs(tmp_path)
+    run_dir = tmp_path / "factorized"
+    argv = command(paths, run_dir, stop=1) + ["--mesh-edge-input-projection", "factorized"]
+    assert cpu_runner.train(argv) == 0
+    assert observed and set(observed) == {("concatenated", "factorized", "concatenated")}
+    recorded = json.loads((run_dir / "metrics/segment_00000001.start.json").read_text())
+    assert recorded["resume_contract"]["mesh_edge_input_projection"] == "factorized"
+    with pytest.raises(ValueError, match="mesh_edge_input_projection"):
+        cpu_runner.train(command(paths, tmp_path / "changed-projection", stop=2,
+            resume=run_dir / "checkpoints/step_00000001.pt"))
 
 
 @pytest.mark.parametrize("prefetch", [0, 1])

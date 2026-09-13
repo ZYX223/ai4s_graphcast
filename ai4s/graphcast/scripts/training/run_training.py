@@ -30,7 +30,12 @@ def parser():
     p.add_argument("--mp", type=int, default=4)
     p.add_argument("--dp", type=int, default=1)
     p.add_argument("--global-batch-size", type=int, default=16)
-    p.add_argument("--micro-batch-size", type=int, default=1, help="Maximum samples per DP rank per forward/backward")
+    microbatch = p.add_mutually_exclusive_group()
+    microbatch.add_argument("--micro-batch-size-per-rank", type=int, default=1,
+                           help="Samples per DP rank per forward/backward")
+    microbatch.add_argument("--micro-batch-size", dest="micro_batch_size_per_rank", type=int,
+                           default=argparse.SUPPRESS,
+                           help="Compatibility alias for --micro-batch-size-per-rank")
     p.add_argument("--precision", choices=("fp32",), default="fp32", help="Parameter/activation/loss storage")
     p.add_argument("--tensor-core", choices=("enabled", "disabled"), default="enabled")
     p.add_argument("--backend", choices=("native", "flaggems"), default="native")
@@ -49,6 +54,8 @@ def parser():
     p.add_argument("--data-prefetch-depth", type=int, choices=(0, 1))
     p.add_argument("--gradient-sync", choices=("manual", "ddp"))
     p.add_argument("--mesh-checkpoint-granularity", choices=("auto", "stage", "step"))
+    p.add_argument("--mesh-edge-input-projection", choices=("concatenated", "factorized"),
+                   help="Opt-in Mesh-only first-layer projection experiment")
     p.add_argument("--rollout-checkpoint-implementation", choices=("non_reentrant", "reentrant"))
     for name in ("grid2mesh-stage-device", "grid2mesh-node-stage-device", "mesh2grid-stage-device", "mesh2grid-node-stage-device", "mesh2grid-decoder-stage-device"):
         choices = ("primary", "mesh_first", "mesh_second", "output")
@@ -68,16 +75,17 @@ def parser():
 
 
 def resolve_contract(args):
-    if args.mp not in (2, 4) or args.dp not in (1, 2):
-        raise ValueError("formal training supports MP=2 or 4 and DP=1 or 2")
-    for name in ("global_batch_size", "micro_batch_size", "warmup_updates", "one_step_updates", "curriculum_updates", "checkpoint_every"):
+    if (args.mp, args.dp) not in {(1, 1), (2, 1), (2, 2), (4, 1), (4, 2)}:
+        raise ValueError("formal training supports MP=1/DP=1, or MP=2 or 4 with DP=1 or 2")
+    for name in ("global_batch_size", "micro_batch_size_per_rank", "warmup_updates", "one_step_updates", "curriculum_updates", "checkpoint_every"):
         if getattr(args, name) <= 0:
             raise ValueError(name + " must be positive")
     if args.seed < 0 or (args.max_updates is not None and args.max_updates <= 0):
         raise ValueError("seed must be non-negative and max-updates positive")
-    micro = args.micro_batch_size * args.dp
-    if args.global_batch_size % micro:
+    global_micro_batch_size = args.micro_batch_size_per_rank * args.dp
+    if args.global_batch_size % global_micro_batch_size:
         raise ValueError("global batch size must be divisible by DP * local micro-batch size")
+    gradient_accumulation_steps = args.global_batch_size // global_micro_batch_size
     if args.curriculum_updates % 11:
         raise ValueError("curriculum-updates must be divisible by 11")
     if not math.isfinite(args.peak_tflops_per_device) or args.peak_tflops_per_device < 0:
@@ -107,8 +115,8 @@ def resolve_contract(args):
     raw["phases"][2]["rollout"]["every_updates"] = args.curriculum_updates // 11
     schedule = module.TrainingSchedule.from_dict(raw)
     values = dict(config=args.config, stats_dir=args.stats or "<stats>", corpus_manifest=args.corpus or "<corpus>",
-        dataset_kind="era5", training_stage="era5_pretrain", batch_size=args.global_batch_size,
-        micro_batch_size=micro, data_parallel_replicas=args.dp, mp_devices_per_replica=args.mp,
+        dataset_kind="era5", training_stage="era5_pretrain", global_batch_size=args.global_batch_size,
+        global_micro_batch_size=global_micro_batch_size, data_parallel_replicas=args.dp, mp_devices_per_replica=args.mp,
         rollout_steps=12, rollout_checkpoint_segments=12, tensor_core=args.tensor_core, precision="fp32",
         init_mode="checkpoint" if args.pretrained_checkpoint else "random", schedule_recipe="official_2_to_12",
         warmup_updates=args.warmup_updates, training_updates=args.one_step_updates, updates=args.curriculum_updates,
@@ -131,8 +139,12 @@ def resolve_contract(args):
     command += [str(Path(__file__).with_name("run_official_epoch_training.py"))] + argv
     return dict(mp=args.mp, dp=args.dp, rank_device_groups=[devices[r * args.mp:(r + 1) * args.mp] for r in range(args.dp)],
         global_batch_size=args.global_batch_size, local_batch_size=args.global_batch_size // args.dp,
-        micro_batch_size_per_rank=args.micro_batch_size, canonical_micro_batch_size=micro,
-        accumulation_steps=args.global_batch_size // micro, storage_dtype="float32",
+        micro_batch_size_per_rank=args.micro_batch_size_per_rank,
+        global_micro_batch_size=global_micro_batch_size,
+        gradient_accumulation_steps=gradient_accumulation_steps,
+        # Preserve existing dry-run consumers; checkpoint field names are unchanged.
+        canonical_micro_batch_size=global_micro_batch_size,
+        accumulation_steps=gradient_accumulation_steps, storage_dtype="float32",
         requested_precision="tf32_hf32" if args.tensor_core == "enabled" else "ieee_fp32",
         resolved_precision="unverified", requested_backend=args.backend, resolved_backend="unverified",
         forward_backward_coverage="unverified", training_mfu=None, schedule=schedule.to_dict(), schedule_digest=schedule.digest,

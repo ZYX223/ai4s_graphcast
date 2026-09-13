@@ -5,6 +5,7 @@ from __future__ import annotations
 import os
 from contextlib import nullcontext
 from dataclasses import dataclass, replace
+from functools import partial
 from pathlib import Path
 from typing import Any
 
@@ -28,7 +29,7 @@ from .graph import (
     build_google_small_graph,
 )
 from .precision import PrecisionLinear
-from .recompute_flops import tracked_checkpoint
+from .recompute_flops import record_linear_recompute, tracked_checkpoint
 
 DEFAULT_CONFIG = Path("configs/inference/google_graphcast_small.yaml")
 
@@ -451,6 +452,16 @@ class GoogleSmallGraphNet(BaseGraphNet):
             if src_edge is None:
                 continue
             edge_count = int(src_edge.shape[1])
+            factorized = self.edge_input_projection_mode == "factorized"
+            sender_values = previous_nodes[sender_type]
+            receiver_values = previous_nodes[receiver_type]
+            if factorized:
+                # Step-local differentiable projections; never cache across
+                # message steps or optimizer updates. Outer step checkpointing
+                # replays these along with the rest of the message step.
+                sender_values, receiver_values = self._project_edge_nodes(
+                    step, edge_type, sender_values, receiver_values,
+                )
             if chunk_size is not None and chunk_size > 0 and edge_count > chunk_size:
                 # A multi-step Mesh GraphNet needs the residual edge state as
                 # input to its next message-passing step.  One-step
@@ -473,69 +484,36 @@ class GoogleSmallGraphNet(BaseGraphNet):
                     chunk_end = min(start + chunk_size, edge_count)
                     chunk_senders = senders[start:chunk_end]
                     chunk_receivers = receivers[start:chunk_end]
-                    # Encode raw edges inline if available
-                    if raw_edges is not None and raw_edges.get(edge_type) is not None:
-                        raw_chunk = raw_edges[edge_type][:, start:chunk_end, :]
-                        encoded_chunk = self._apply_mlp_with_layer_norm(
-                            f"encoder_edges_{edge_type}", raw_chunk
-                        )
+                    # Save raw/previous edge views and shared node tensors, not
+                    # the much larger encoded/gathered/concatenated features.
+                    # Bind metadata now: checkpoint replays after this loop.
+                    compute_chunk = partial(
+                        self._edge_chunk,
+                        step=step,
+                        edge_type=edge_type,
+                        encode_raw=raw_edges.get(edge_type) is not None,
+                        preserve_edge_state=preserve_edge_state,
+                        factorized=factorized,
+                    )
+                    chunk_args = (
+                        src_edge[:, start:chunk_end, :],
+                        sender_values,
+                        receiver_values,
+                        chunk_senders,
+                        chunk_receivers,
+                    )
+                    if checkpoint_chunks and torch.is_grad_enabled():
+                        edge_delta, residual_chunk = tracked_checkpoint(compute_chunk, *chunk_args)
                     else:
-                        encoded_chunk = previous_edges[edge_type][:, start:chunk_end, :]
-                    edge_device = encoded_chunk.device
-                    sender_indices = chunk_senders
-                    sender_nodes = previous_nodes[sender_type]
-                    if sender_indices.device != sender_nodes.device:
-                        sender_indices = _pipeline_device_transfer(
-                            sender_indices,
-                            sender_nodes.device,
-                        )
-                    with _operator_device_guard(sender_nodes.device):
-                        sender_chunk = _gather_pipeline_nodes(sender_nodes, sender_indices)
-                    receiver_indices = chunk_receivers
-                    receiver_nodes = previous_nodes[receiver_type]
-                    if receiver_indices.device != receiver_nodes.device:
-                        receiver_indices = _pipeline_device_transfer(
-                            receiver_indices,
-                            receiver_nodes.device,
-                        )
-                    with _operator_device_guard(receiver_nodes.device):
-                        receiver_chunk = _gather_pipeline_nodes(receiver_nodes, receiver_indices)
-                    if sender_chunk.device != edge_device:
-                        sender_chunk = _pipeline_device_copy(
-                            sender_chunk,
-                            edge_device,
-                        )
-                    if receiver_chunk.device != edge_device:
-                        receiver_chunk = _pipeline_device_copy(
-                            receiver_chunk,
-                            edge_device,
-                        )
-                    if (
-                        sender_chunk.device != sender_nodes.device
-                        or receiver_chunk.device != receiver_nodes.device
-                    ):
-                        _synchronize_vendor_pipeline_device(edge_device)
-                    edge_inputs = torch.cat(
-                        [
-                            encoded_chunk,
-                            sender_chunk,
-                            receiver_chunk,
-                        ],
-                        dim=-1,
-                    )
-                    edge_delta = self._apply_checkpointed_mlp(
-                        f"processor_edges_{step}_{edge_type}",
-                        edge_inputs,
-                        checkpoint_chunks,
-                    )
+                        edge_delta, residual_chunk = compute_chunk(*chunk_args)
                     if preserve_edge_state:
                         if updated_edge is None:
-                            updated_edge = encoded_chunk.new_empty(
-                                encoded_chunk.shape[0],
+                            updated_edge = edge_delta.new_empty(
+                                edge_delta.shape[0],
                                 edge_count,
-                                encoded_chunk.shape[-1],
+                                edge_delta.shape[-1],
                             )
-                        updated_edge[:, start:chunk_end] = encoded_chunk + edge_delta
+                        updated_edge[:, start:chunk_end] = residual_chunk
                     aggregate_delta = edge_delta
                     if aggregate_delta.device != aggregate_device:
                         # When a full-grid node processor is assigned to a
@@ -567,6 +545,13 @@ class GoogleSmallGraphNet(BaseGraphNet):
                 received_by_node_type[receiver_type].append(aggregated)
                 continue
 
+            if factorized:
+                edge_updates[edge_type], _ = self._edge_chunk(
+                    previous_edges[edge_type], sender_values, receiver_values,
+                    senders, receivers, step=step, edge_type=edge_type,
+                    encode_raw=False, preserve_edge_state=False, factorized=True,
+                )
+                continue
             edge_inputs = torch.cat(
                 [
                     previous_edges[edge_type],
@@ -679,6 +664,78 @@ class GoogleSmallGraphNet(BaseGraphNet):
                 else previous_edges[edge_type] + edge_delta
             )
         return updated_nodes, updated_edges
+
+    def _project_edge_nodes(self, step, edge_type, sender_nodes, receiver_nodes):
+        linear = getattr(self, f"processor_edges_{step}_{edge_type}_mlp").linear_0
+        sender_width, receiver_width = sender_nodes.shape[-1], receiver_nodes.shape[-1]
+        edge_width = linear.in_features - sender_width - receiver_width
+        _, sender_weight, receiver_weight = linear.weight.split(
+            (edge_width, sender_width, receiver_width), dim=1,
+        )
+        # This experiment projects colocated Mesh nodes, not full-grid inputs
+        # on a different pipeline stage. Do not silently transfer a full grid.
+        if sender_nodes.device != linear.weight.device or receiver_nodes.device != linear.weight.device:
+            raise ValueError("factorized edge projection requires colocated nodes and weights")
+        with _operator_device_guard(linear.weight.device):
+            zero_bias = linear.weight.new_zeros(linear.out_features)
+            record_linear_recompute(sender_nodes, sender_weight)
+            sender_projection = nn.functional.linear(sender_nodes, sender_weight, zero_bias)
+            record_linear_recompute(receiver_nodes, receiver_weight)
+            receiver_projection = nn.functional.linear(receiver_nodes, receiver_weight, zero_bias)
+        return sender_projection, receiver_projection
+
+    def _edge_chunk(
+        self,
+        edge_chunk: torch.Tensor,
+        sender_nodes: torch.Tensor,
+        receiver_nodes: torch.Tensor,
+        sender_indices: torch.Tensor,
+        receiver_indices: torch.Tensor,
+        *,
+        step: int,
+        edge_type: str,
+        encode_raw: bool,
+        preserve_edge_state: bool,
+        factorized: bool = False,
+    ) -> tuple[torch.Tensor, torch.Tensor | None]:
+        """Pure chunk replay; accumulation into the shared buffer stays outside."""
+        edge_device = edge_chunk.device
+        with _operator_device_guard(edge_device):
+            encoded_chunk = (
+                self._apply_mlp_with_layer_norm(f"encoder_edges_{edge_type}", edge_chunk)
+                if encode_raw else edge_chunk
+            )
+        if sender_indices.device != sender_nodes.device:
+            sender_indices = _pipeline_device_transfer(sender_indices, sender_nodes.device)
+        with _operator_device_guard(sender_nodes.device):
+            sender_chunk = _gather_pipeline_nodes(sender_nodes, sender_indices)
+        if receiver_indices.device != receiver_nodes.device:
+            receiver_indices = _pipeline_device_transfer(receiver_indices, receiver_nodes.device)
+        with _operator_device_guard(receiver_nodes.device):
+            receiver_chunk = _gather_pipeline_nodes(receiver_nodes, receiver_indices)
+        if sender_chunk.device != edge_device:
+            sender_chunk = _pipeline_device_copy(sender_chunk, edge_device)
+        if receiver_chunk.device != edge_device:
+            receiver_chunk = _pipeline_device_copy(receiver_chunk, edge_device)
+        if sender_nodes.device != edge_device or receiver_nodes.device != edge_device:
+            _synchronize_vendor_pipeline_device(edge_device)
+        with _operator_device_guard(edge_device):
+            base_name = f"processor_edges_{step}_{edge_type}"
+            if factorized:
+                mlp = getattr(self, f"{base_name}_mlp")
+                edge_weight = mlp.linear_0.weight[:, :encoded_chunk.shape[-1]]
+                record_linear_recompute(encoded_chunk, edge_weight)
+                hidden = nn.functional.linear(encoded_chunk, edge_weight, mlp.linear_0.bias)
+                hidden = hidden + sender_chunk
+                hidden = hidden + receiver_chunk
+                edge_delta = getattr(self, f"{base_name}_layer_norm")(
+                    mlp.linear_1(mlp.activation(hidden))
+                )
+            else:
+                edge_inputs = torch.cat([encoded_chunk, sender_chunk, receiver_chunk], dim=-1)
+                edge_delta = self._apply_mlp_with_layer_norm(base_name, edge_inputs)
+            residual_chunk = encoded_chunk + edge_delta if preserve_edge_state else None
+        return edge_delta, residual_chunk
 
     def _apply_checkpointed_mlp(
         self, base_name: str, x: torch.Tensor, enabled: bool
@@ -842,10 +899,10 @@ class GoogleSmallCompatibleModel(BaseModel):
         mesh2grid_decoder_stage_device: str = "output",
         checkpoint_mesh2grid_stage: bool = False,
     ) -> None:
-        """Place four logical stages on two or four physical devices."""
+        """Place four logical stages on one, two or four physical devices."""
 
-        if len({primary, mesh_first, mesh_second, output}) not in {2, 4}:
-            raise ValueError("pipeline placement requires two or four physical devices")
+        if len({primary, mesh_first, mesh_second, output}) not in {1, 2, 4}:
+            raise ValueError("pipeline placement requires one, two or four physical devices")
         if not 0 < split_step <= self.config.gnn_msg_steps:
             raise ValueError(
                 f"invalid split step {split_step} for {self.config.gnn_msg_steps} message steps"
@@ -1148,6 +1205,15 @@ class GoogleSmallCompatibleModel(BaseModel):
                         getattr(graphnet, f"processor_edges_{step}_{edge_type}_mlp"),
                         edge_rows[edge_type],
                     )
+                    if graphnet.edge_input_projection_mode == "factorized":
+                        sender, receiver = graphnet.edge_node_sets[edge_type]
+                        linear = getattr(graphnet, f"processor_edges_{step}_{edge_type}_mlp").linear_0
+                        # Sender/receiver are encoded latent node states. Their
+                        # first-layer projections now run per node, not per edge.
+                        width = self.config.latent_size
+                        total -= 2 * batch_size * linear.out_features * width * (
+                            2 * edge_rows[edge_type] - node_rows[sender] - node_rows[receiver]
+                        )
                 for node_type in graphnet.node_types:
                     total += mlp_flops(
                         getattr(graphnet, f"processor_nodes_{step}_{node_type}_mlp"),

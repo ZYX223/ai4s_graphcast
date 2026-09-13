@@ -518,7 +518,7 @@ def main() -> None:
     parser.add_argument(
         "--devices", type=str, default=None, help="Comma-separated GPU/NPU IDs (e.g. 0,1,2,3)"
     )
-    parser.add_argument("--steps", type=int, default=3, help="Training steps (default: 3)")
+    parser.add_argument("--steps", type=int, default=3, help="Legacy SGD probe steps (default: 3; not formal training)")
     parser.add_argument(
         "--flagos-mode",
         choices=("off", "flaggems"),
@@ -616,7 +616,8 @@ def main() -> None:
         print(green("Inference done."))
 
     if args.mode in ("train", "all"):
-        print(bold("=== Training ==="))
+        print(bold("=== Legacy SGD training probe (not formal training) ==="))
+        print("For autoregressive AdamW training, use scripts/train.sh with a corpus manifest.")
         train_env = build_flagos_environment(
             platform=platform,
             mode=args.flagos_mode,
@@ -629,7 +630,7 @@ def main() -> None:
         device_list = ",".join(f"{device_type}:{i}" for i in range(len(devices)))
         train_cmd = (
             f"{_shell_environment(train_env)} "
-            f"python3 -u scripts/training/lib/train_mp.py"
+            f"python3 -u scripts/training/legacy/lib/train_mp.py"
             f" --steps {args.steps}"
             f" --devices {device_list}"
             f" --mesh2grid-grid-partitions 8"

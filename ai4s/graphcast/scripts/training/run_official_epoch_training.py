@@ -205,8 +205,9 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
             "the required epoch count from its update budgets"
         ),
     )
-    parser.add_argument(
-        "--batch-size",
+    global_batch = parser.add_mutually_exclusive_group()
+    global_batch.add_argument(
+        "--global-batch-size",
         type=int,
         default=DEFAULT_EFFECTIVE_GLOBAL_BATCH_SIZE,
         help=(
@@ -215,8 +216,16 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
             "is 32"
         ),
     )
-    parser.add_argument(
-        "--micro-batch-size",
+    global_batch.add_argument(
+        "--batch-size",
+        dest="global_batch_size",
+        type=int,
+        default=argparse.SUPPRESS,
+        help="Compatibility alias for --global-batch-size",
+    )
+    global_micro_batch = parser.add_mutually_exclusive_group()
+    global_micro_batch.add_argument(
+        "--global-micro-batch-size",
         type=int,
         default=1,
         help=(
@@ -224,6 +233,13 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
             "it must be divisible by DP so each replica receives the same "
             "number of full-grid samples"
         ),
+    )
+    global_micro_batch.add_argument(
+        "--micro-batch-size",
+        dest="global_micro_batch_size",
+        type=int,
+        default=argparse.SUPPRESS,
+        help="Compatibility alias for --global-micro-batch-size (all DP ranks, not per rank)",
     )
     parser.add_argument(
         "--rollout-steps",
@@ -266,6 +282,8 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         ),
     )
     parser.add_argument("--mesh-split-step", type=int, default=8)
+    parser.add_argument("--mesh-edge-input-projection", choices=("concatenated", "factorized"),
+                        default="concatenated")
     parser.add_argument(
         "--mesh-checkpoint-granularity",
         choices=("auto", "stage", "step"),
@@ -498,10 +516,10 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
 
 
 def validate_args(args: argparse.Namespace) -> None:
-    # Each DP replica owns one complete model on two or four devices.
+    # Each DP replica owns one complete model on one, two or four devices.
     # The global micro-batch may contain one or more samples per replica; the
     # launcher validates divisibility and derives gradient accumulation.
-    allowed_topologies = {(1, 2), (2, 2), (1, 4), (2, 4)}
+    allowed_topologies = {(1, 1), (1, 2), (2, 2), (1, 4), (2, 4)}
     selected_topology = (
         args.data_parallel_replicas,
         args.mp_devices_per_replica,
@@ -512,8 +530,8 @@ def validate_args(args: argparse.Namespace) -> None:
     )
     for name in (
         "epochs",
-        "batch_size",
-        "micro_batch_size",
+        "global_batch_size",
+        "global_micro_batch_size",
         "rollout_steps",
         "data_parallel_replicas",
         "mp_devices_per_replica",
@@ -562,13 +580,13 @@ def validate_args(args: argparse.Namespace) -> None:
             "--mesh2grid-stage-checkpoint=enabled requires "
             "--activation-checkpoint"
         )
-    if args.batch_size % args.data_parallel_replicas:
+    if args.global_batch_size % args.data_parallel_replicas:
         raise ValueError("global batch size must be divisible by DP replicas")
-    if args.micro_batch_size % args.data_parallel_replicas:
+    if args.global_micro_batch_size % args.data_parallel_replicas:
         raise ValueError(
             "global micro-batch size must be divisible by DP replicas"
         )
-    if args.batch_size % args.micro_batch_size:
+    if args.global_batch_size % args.global_micro_batch_size:
         raise ValueError(
             "effective global batch size must be divisible by micro-batch size"
         )
@@ -580,10 +598,10 @@ def validate_args(args: argparse.Namespace) -> None:
                 "--schedule-manifest is required when "
                 "--schedule-recipe=manifest"
             )
-        if args.micro_batch_size != args.batch_size:
+        if args.global_micro_batch_size != args.global_batch_size:
             raise ValueError(
                 "manifest epoch schedules currently require "
-                "--micro-batch-size to equal --batch-size"
+                "--global-micro-batch-size to equal --global-batch-size"
             )
     elif args.schedule_manifest:
         raise ValueError(
@@ -680,7 +698,7 @@ def validate_args(args: argparse.Namespace) -> None:
     if args.formal:
         if args.epochs < 1:
             raise ValueError("formal training requires a positive data cycle")
-        if args.micro_batch_size < args.data_parallel_replicas:
+        if args.global_micro_batch_size < args.data_parallel_replicas:
             raise ValueError(
                 "formal training requires at least one sample per DP replica"
             )
@@ -1073,7 +1091,7 @@ def evaluate_validation(
         # Evaluation has no optimizer update and therefore does not need to
         # materialize the training effective global batch. Reuse the bounded
         # global micro-batch so the complete model/grid remains unchanged.
-        global_batch_size=args.micro_batch_size,
+        global_batch_size=args.global_micro_batch_size,
         shuffle=False,
     )
     step_count = (
@@ -1188,8 +1206,8 @@ def evaluate_validation(
         "data_role": "validation",
         "mode": args.validation_mode,
         "batching": "bounded_global_micro_batch_without_gradient",
-        "global_batch_size": args.micro_batch_size,
-        "training_effective_global_batch_size": args.batch_size,
+        "global_batch_size": args.global_micro_batch_size,
+        "training_effective_global_batch_size": args.global_batch_size,
         "optimizer_updates": 0,
         "gradient_enabled": False,
         "steps": rows,
@@ -1557,10 +1575,10 @@ def train(argv: list[str] | None = None) -> int:
         )
         mesh_first_device = input_device
         secondary_device = accelerator_device(
-            context.device_indices[1],
+            context.device_indices[0 if args.mp_devices_per_replica == 1 else 1],
             context.accelerator_type,
         )
-        # MP=2 aliases the four logical stages onto two physical devices.
+        # MP=1/2 aliases the four logical stages onto one/two physical devices.
         output_device = secondary_device
         if args.mp_devices_per_replica == 4:
             mesh_first_device = accelerator_device(
@@ -1668,8 +1686,8 @@ def train(argv: list[str] | None = None) -> int:
             for rollout in range(1, args.rollout_steps + 1)
         }
         microbatch_plan = MicrobatchPlan.create(
-            global_batch_size=args.batch_size,
-            micro_batch_size=args.micro_batch_size,
+            global_batch_size=args.global_batch_size,
+            micro_batch_size=args.global_micro_batch_size,
         )
         local_batch_size = context.local_batch_size(
             global_batch_size=microbatch_plan.micro_batch_size
@@ -1678,7 +1696,7 @@ def train(argv: list[str] | None = None) -> int:
             dataset.window_indices,
             epoch=0,
             seed=args.seed,
-            global_batch_size=args.batch_size,
+            global_batch_size=args.global_batch_size,
             shuffle=True,
         )
         target_optimizer_updates = (
@@ -1723,7 +1741,7 @@ def train(argv: list[str] | None = None) -> int:
                 if target_optimizer_updates is not None
                 else "without_replacement_epoch"
             ),
-            global_batch_size=args.batch_size,
+            global_batch_size=args.global_batch_size,
             global_micro_batch_size=microbatch_plan.micro_batch_size,
             local_micro_batch_size=local_batch_size,
             gradient_accumulation_steps=(
@@ -1779,7 +1797,7 @@ def train(argv: list[str] | None = None) -> int:
             },
             "precision": "fp32",
             "tensor_core_enabled": tensor_core_enabled,
-            "global_batch_size": args.batch_size,
+            "global_batch_size": args.global_batch_size,
             "global_micro_batch_size": microbatch_plan.micro_batch_size,
             "local_micro_batch_size": local_batch_size,
             "gradient_accumulation_steps": (
@@ -1853,6 +1871,10 @@ def train(argv: list[str] | None = None) -> int:
             "validation_mode": args.validation_mode,
             "validation_steps": args.validation_steps,
         }
+        # Keep existing concatenated checkpoints resumable. The opt-in algebra
+        # change must still be recorded and must not silently cross exact resume.
+        if args.mesh_edge_input_projection != "concatenated":
+            resume_contract["mesh_edge_input_projection"] = args.mesh_edge_input_projection
         if context.is_primary:
             write_immutable_json(
                 run_dir / "run_config.json",
@@ -1923,7 +1945,7 @@ def train(argv: list[str] | None = None) -> int:
                 dataset.window_indices,
                 epoch=cursor.epoch,
                 seed=args.seed,
-                global_batch_size=args.batch_size,
+                global_batch_size=args.global_batch_size,
                 shuffle=True,
             )
             resume_plan.validate_cursor(cursor.next_batch_index)
@@ -1999,6 +2021,7 @@ def train(argv: list[str] | None = None) -> int:
             validate_full_operational_model_config(config)
         stats = load_normalization_stats(args.stats_dir)
         model = GoogleSmallCompatibleModel(config)
+        model.mesh_gnn.edge_input_projection_mode = args.mesh_edge_input_projection
         if init_state is not None:
             model.load_state_dict(init_state, strict=True)
         model.init_graph(
@@ -2264,7 +2287,7 @@ def train(argv: list[str] | None = None) -> int:
                     dataset.window_indices,
                     epoch=epoch,
                     seed=args.seed,
-                    global_batch_size=args.batch_size,
+                    global_batch_size=args.global_batch_size,
                     shuffle=True,
                 )
                 batch_start = (
@@ -2327,11 +2350,11 @@ def train(argv: list[str] | None = None) -> int:
                     if target_optimizer_updates is not None:
                         global_positions = dataset.replacement_indices(
                             update_index=cursor.global_optimizer_step,
-                            batch_size=args.batch_size,
+                            batch_size=args.global_batch_size,
                             seed=args.seed,
                             target_rollout_steps=active_rollout_steps,
                         )
-                        global_sample_weights = (1.0,) * args.batch_size
+                        global_sample_weights = (1.0,) * args.global_batch_size
                         allow_replacement = True
                     else:
                         planned = plan.batches[batch_index]
@@ -2446,7 +2469,7 @@ def train(argv: list[str] | None = None) -> int:
                                 dataset=dataset,
                                 schedule=schedule,
                                 seed=args.seed,
-                                global_batch_size=args.batch_size,
+                                global_batch_size=args.global_batch_size,
                                 microbatch_plan=microbatch_plan,
                                 rank=context.rank,
                                 replicas=context.dp_replicas,
@@ -2605,7 +2628,7 @@ def train(argv: list[str] | None = None) -> int:
                                 )
                                 accumulation_scale = (
                                     sample_global_valid_count
-                                    / args.batch_size
+                                    / args.global_batch_size
                                     if target_optimizer_updates is not None
                                     else 1.0
                                 )
@@ -2702,7 +2725,7 @@ def train(argv: list[str] | None = None) -> int:
                         )
                     if (
                         target_optimizer_updates is not None
-                        and global_valid != args.batch_size
+                        and global_valid != args.global_batch_size
                     ):
                         raise RuntimeError(
                             "official with-replacement update did not "
@@ -2899,7 +2922,7 @@ def train(argv: list[str] | None = None) -> int:
                     useful_training_flops = (
                         active_training_flops
                         * global_valid
-                        / args.batch_size
+                        / args.global_batch_size
                     )
                     if context.is_primary:
                         metric = {
@@ -3043,7 +3066,7 @@ def train(argv: list[str] | None = None) -> int:
                             ),
                             "recompute_flops": recompute_flops,
                             "inference_only": False,
-                            "global_batch_size": args.batch_size,
+                            "global_batch_size": args.global_batch_size,
                             "global_micro_batch_size": (
                                 microbatch_plan.micro_batch_size
                             ),
@@ -3053,7 +3076,7 @@ def train(argv: list[str] | None = None) -> int:
                             ),
                             "valid_sample_count": global_valid,
                             "padded_sample_count": (
-                                args.batch_size - global_valid
+                                args.global_batch_size - global_valid
                             ),
                             "data_parallel_replicas": (
                                 context.dp_replicas
@@ -3131,7 +3154,7 @@ def train(argv: list[str] | None = None) -> int:
                             f"{phase_update_total_text} "
                             f"rollout={active_rollout_steps} "
                             f"lr={schedule_value.learning_rate:.8e} "
-                            f"global_batch={args.batch_size} "
+                            f"global_batch={args.global_batch_size} "
                             f"micro_batch="
                             f"{microbatch_plan.micro_batch_size} "
                             f"accumulation="
@@ -3498,7 +3521,7 @@ def train(argv: list[str] | None = None) -> int:
                     available_windows_by_rollout=(
                         available_windows_by_rollout
                     ),
-                    global_batch_size=args.batch_size,
+                    global_batch_size=args.global_batch_size,
                     target_optimizer_updates=target_optimizer_updates,
                 )
                 coverage_accepted = coverage["sampling_self_check"]
@@ -3524,7 +3547,7 @@ def train(argv: list[str] | None = None) -> int:
                         dataset.window_indices,
                         epoch=epoch,
                         seed=args.seed,
-                        global_batch_size=args.batch_size,
+                        global_batch_size=args.global_batch_size,
                         shuffle=True,
                     ).optimizer_steps
                     for epoch in range(training_epoch_limit)
@@ -3636,7 +3659,7 @@ def train(argv: list[str] | None = None) -> int:
                 "completed_optimizer_steps": (
                     cursor.global_optimizer_step
                 ),
-                "global_batch_size": args.batch_size,
+                "global_batch_size": args.global_batch_size,
                 "global_micro_batch_size": (
                     microbatch_plan.micro_batch_size
                 ),

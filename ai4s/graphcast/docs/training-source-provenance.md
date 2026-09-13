@@ -299,3 +299,40 @@ Torch autograd/AdamW call-phase behavior. They do not prove full-model device
 correctness, logged coverage on an installed vendor runtime, performance or
 trained-checkpoint weather skill. The controller owns the separately frozen
 public-entry Native/FlagGems device pair and source/package evidence.
+
+## Training checkpoint memory boundaries (2026-09-10)
+
+Allocator snapshots of the full 25km, MP4/DP1 Ascend recipe identified retained
+edge concatenations and raw-edge encoder activations, rather than parameters,
+as the largest allocations. The following execution-only adaptations are local
+to this project, not changes to the pinned colleague source or FlagGems:
+
+- Select the existing per-message-step mesh checkpoint for Ascend MP4/DP1.
+  Keep mesh split16, placement, outer reentrant checkpoint, chunk sizes and
+  explicit CLI overrides. Other platform/DP defaults are unchanged.
+- Move raw-edge encoding, gather, transfers, cat, edge MLP and the optional
+  mesh residual into one pure edge-chunk checkpoint. Share this boundary across
+  all chunked training graph stages. Keep shared-buffer aggregation outside
+  replay, so backward recomputation cannot accumulate the same edge twice.
+
+No projection factorization, model parameter/schema, precision, optimizer,
+sampler, inference or operator-library changes accompany these adaptations.
+CPU regression tests cover gradients and nested checkpoints; the full-model
+three-update Native ablations and final Native/FlagGems pair are recorded in
+`scripts/training/README.md`. They are not long-rollout convergence, reduced-card,
+weather-skill or formal performance acceptance.
+
+## Opt-in training Mesh edge projection (2026-09-10)
+
+The subsequent `--mesh-edge-input-projection factorized` experiment adapts the
+shared inference implementation's exact first-layer partition to training Mesh
+only. It uses views of the existing weights, step-local differentiable node
+projections, pipeline device guards and the existing pure chunk replay boundary.
+It does not modify the colleague baseline, inference execution or FlagGems.
+Projection linears participate in recompute accounting, and the useful forward
+linear estimate removes repeated node projections. Parameter keys are unchanged;
+exact resume binds the opt-in choice, with absent old metadata meaning
+concatenated. Default training behaviour remains concatenated. CPU tests cover
+edge activation materialization, repeated optimizer updates, gradients, chunk
+tails, nested checkpointing and canonical runner/resume integration. Device
+evidence is isolated in `training-mesh-factorized-20260910-QGE0NH`.

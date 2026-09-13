@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Summarize a GraphCast training metrics.jsonl file."""
+"""Summarize legacy GraphCast probe metrics (not formal training segments)."""
 
 from __future__ import annotations
 

@@ -29,6 +29,9 @@ PTG_INFERENCE_OPS = tuple(op for op in INFERENCE_OPS if op != "addmm")
 
 @pytest.fixture
 def backend_module(monkeypatch: pytest.MonkeyPatch):
+    # Runtime helpers write environment keys directly; isolate those side effects
+    # as well as the keys explicitly changed through monkeypatch in each test.
+    monkeypatch.setattr(os, "environ", os.environ.copy())
     torch_stub = types.ModuleType("torch")
     torch_stub.__version__ = "test"
     torch_stub.version = types.SimpleNamespace(cuda=None, hip=None)
@@ -634,3 +637,27 @@ def test_quickstart_propagates_container_command_failure(
 
     assert exc_info.value.code == 1
     assert "Inference failed." in capsys.readouterr().out
+
+
+def test_quickstart_training_keeps_explicit_legacy_recipe(quickstart_module, monkeypatch, capsys):
+    import shlex
+
+    monkeypatch.setattr(quickstart_module, "detect_platform", lambda: "nvidia")
+    monkeypatch.setattr(quickstart_module, "find_free_gpus", lambda *a, **kw: [0, 1, 2, 3])
+    monkeypatch.setattr(quickstart_module, "ensure_data", lambda: True)
+    monkeypatch.setattr(quickstart_module, "start_container", lambda *a, **kw: True)
+    calls = []
+
+    def capture_container_command(command, **kwargs):
+        calls.append(command)
+        return types.SimpleNamespace(returncode=0)
+
+    monkeypatch.setattr(quickstart_module, "run", capture_container_command)
+    monkeypatch.setattr(sys, "argv", [str(QUICKSTART_PATH), "train", "--steps", "2"])
+    quickstart_module.main()
+    assert len(calls) == 1
+    command = shlex.split(calls[0][-1])
+    assert "scripts/training/legacy/lib/train_mp.py" in command
+    assert command[command.index("--optimizer") + 1] == "sgd"
+    assert command[command.index("--steps") + 1] == "2"
+    assert "legacy" in capsys.readouterr().out.lower()

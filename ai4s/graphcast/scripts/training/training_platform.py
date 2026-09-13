@@ -26,8 +26,9 @@ def platform_policy(args):
         if len(cards) != args.mp * args.dp or len(set(cards)) != len(cards):
             raise ValueError("--physical-devices must select exactly MP * DP distinct cards")
         env[visibility] = args.physical_devices
-    values = dict(gradient_sync="manual" if args.mp == 4 else "ddp",
+    values = dict(gradient_sync="manual" if args.mp in (1, 4) else "ddp",
         mesh_split_step=8, mesh_checkpoint_granularity="auto",
+        mesh_edge_input_projection="concatenated",
         edge_chunk_size=131072, grid_node_chunk_size=131072,
         mesh_edge_chunk_size=0, loss_grid_chunk_size=0,
         grid2mesh_stage_device="primary", grid2mesh_node_stage_device="stage",
@@ -48,12 +49,15 @@ def platform_policy(args):
             mesh2grid_node_stage_device="mesh_second", mesh2grid_decoder_stage_device="mesh_second",
             mesh2grid_stage_checkpoint="enabled")
         if args.mp == 4 and args.dp == 1:
-            values.update(edge_chunk_size=131072, grid_node_chunk_size=65536, mesh_edge_chunk_size=32768)
+            # Limit mesh replay to one message step instead of keeping all
+            # sixteen steps' chunk activations live on mesh_first.
+            values.update(edge_chunk_size=131072, grid_node_chunk_size=65536,
+                mesh_edge_chunk_size=32768, mesh_checkpoint_granularity="step")
     if platform == "thead":
         env.update(GRAPHCAST_SKIP_PROCESS_GROUP_TEARDOWN="1", GRAPHCAST_BYPASS_STATIC_DESTRUCTORS_ON_SUCCESS="1")
         values.update(single_step_rollout_checkpoint="enabled",
                       mesh2grid_stage_device="mesh_second", mesh2grid_stage_checkpoint="enabled")
-    if args.mp == 2:
+    if args.mp in (1, 2):
         values.update(edge_chunk_size=8192, grid_node_chunk_size=4096,
             mesh_edge_chunk_size=8192, loss_grid_chunk_size=65536,
             mesh_split_step=8, mesh_checkpoint_granularity="step",
@@ -62,6 +66,10 @@ def platform_policy(args):
             mesh2grid_stage_device="output", mesh2grid_node_stage_device="primary",
             mesh2grid_decoder_stage_device="primary", mesh2grid_stage_checkpoint="enabled",
             single_step_rollout_checkpoint="enabled")
+        if args.mp == 1:
+            # Share the same single-device recipe across all accelerator backends.
+            values.update(mesh_split_step=16,
+                rollout_checkpoint_implementation="reentrant")
     for key in values:
         override = getattr(args, key, None)
         if override is not None:

@@ -16,7 +16,7 @@ from typing import Any
 
 import torch
 
-REPO_ROOT = Path(__file__).resolve().parents[3]
+REPO_ROOT = Path(__file__).resolve().parents[4]
 SRC_ROOT = REPO_ROOT / "src"
 LIB_ROOT = Path(__file__).resolve().parent
 for path in (SRC_ROOT, LIB_ROOT):

@@ -1,6 +1,6 @@
 # 训练脚本说明
 
-正式入口 `run_training.py`、`train_official.sh`、`train_pipeline.sh` 均调用同一份
+正式入口 `scripts/train.sh`、`run_training.py`、`train_official.sh`、`train_pipeline.sh` 均调用同一份
 同事训练引擎 `run_official_epoch_training.py`（源提交 `b7667b4`）。
 训练专用 `training_model.py` 使用 canonical graph；推理模型、图默认值和
 inference FlagGems YAML 保持原样。来源和适配见
@@ -8,17 +8,52 @@ inference FlagGems YAML 保持原样。来源和适配见
 
 参数、激活和 loss 保持 FP32；公开入口默认请求 TF32/HF32，使用现有 backend
 设置 CUDA、NPU 和 MUSA 的实际开关。`--tensor-core disabled` 请求 strict FP32。
-默认全局 batch 16、每 rank micro batch 1，MP4 / DP1。MP2 可选，DP1/DP2 均可。
+默认全局 batch 16、每 rank micro batch 1，MP4 / DP1。MP2/MP4 支持 DP1/DP2；
+单卡使用 MP1/DP1，不启用 MP1/DP2。
 必须满足 global batch 整除 `DP × 每 rank micro batch`；没有不满的最后一个
-micro batch。公开 `--micro-batch-size` 是每 rank，source runner 同名参数是
-global micro batch，adapter 显式乘 DP，dry-run 同时显示两者。
+micro batch。推荐使用明确单位的参数：
+
+| 含义 | 公开入口 | 底层 runner |
+|---|---|---|
+| 每次参数更新的全局样本数 | `--global-batch-size` | `--global-batch-size` |
+| 每个 rank 一次前反向的样本数 | `--micro-batch-size-per-rank` | 全局 micro batch 除以 DP |
+| 一次前反向所有 rank 的样本总数 | 每 rank micro batch 乘 DP | `--global-micro-batch-size` |
+
+梯度累积次数 = global batch / (DP × 每 rank micro batch)，MP 不参与样本数计算。
+默认 16/1/DP1 累积16次；16/1/DP2 每 rank 累积8次。
+公开入口旧 `--micro-batch-size` 仍表示每 rank；底层旧 `--micro-batch-size`
+仍表示全局，旧 `--batch-size` 仍表示一次更新的全局 batch。新旧别名不能同时传入，
+不会采用后一个参数静默覆盖前一个。adapter 只向底层发送明确的全局参数。
+dry-run 新增 `global_micro_batch_size/gradient_accumulation_steps`，保留
+`canonical_micro_batch_size/accumulation_steps` 兼容字段；checkpoint schema 和字段不变。
+
+## 顶层入口迁移
+
+`scripts/train.sh` 现在进入正式训练，不再默认运行三步 SGD。
+该顶层入口会拒绝旧 `STEPS/LR/OPTIMIZER/DEVICES/TRAIN_SCOPE`、旧 chunk/输出变量，
+以及旧后端和 FlagGems 来源选择变量，防止旧环境被忽略后误跑新配方。
+先清除这些旧变量，再使用明确的 CLI：
+
+- `STEPS`：正式入口用 `--max-updates` 限制绝对 optimizer step；不等同于旧 SGD 配方。
+- `DEVICES=npu:0,...`：改用 `--device-type npu --mp 4 --dp 1`；
+  `--devices` 只接受从0连续的逻辑序号，物理卡选择用 `--physical-devices`。
+- FlagGems：用 `--platform/--backend/--flaggems-config/--flaggems-ops/--flaggems-variant`，
+  不再通过顶层旧入口的 `GRAPHCAST_BACKEND/GRAPHCAST_FLAGOS_MODE` 等变量选择。
+- `LR/OPTIMIZER/TRAIN_SCOPE`：不自动迁移；正式配方为完整模型、调度学习率和 AdamW。
+  需要原行为时显式运行 `scripts/training/legacy/train_mp.sh`。
+
+`PYTHON_BIN`、`GRAPHCAST_PLATFORM` 和厂商设备可见性变量继续支持。
+`FLAGGEMS_RUNTIME_DEST` 和 `GRAPHCAST_FLAGGEMS_SOURCE_ROOT` 也继续传递：
+前者选择 official/internal 的已准备运行库目录；后者显式选择源码，沿用现有 backend
+优先于 variant 的规则，并在实际运行时记录为 custom。两者不是旧训练配方选项。
+直接调用公开 Python 入口也应使用 CLI 选择配方和后端；不要沿用旧 Shell 配置。
 
 从 `ai4s/graphcast` 执行：
 
 ```bash
 # 不加载 Torch、FlagGems、数据或权重，也不创建输出目录。
 python scripts/training/run_training.py --dry-run --device-type npu \
-  --mp 4 --dp 1 --global-batch-size 2 --micro-batch-size 1
+  --mp 4 --dp 1 --global-batch-size 2 --micro-batch-size-per-rank 1
 
 # 四种拓扑的 Native/FlagGems 命令；实际运行前替换数据和权重路径。
 # 每个组合都在新进程和独立输出目录运行；DP2 自动启动两个 rank。
@@ -29,7 +64,7 @@ for backend in native flaggems; do
         --device-type npu --mp "$mp" --dp "$dp" --backend "$backend" \
         --corpus /data/era5/corpus.json --stats /data/stats \
         --pretrained-checkpoint /data/operational_pytorch.pt \
-        --global-batch-size 2 --micro-batch-size 1 \
+        --global-batch-size 2 --micro-batch-size-per-rank 1 \
         --warmup-updates 6 --one-step-updates 10 --curriculum-updates 22 \
         --max-updates 3 --checkpoint-every 1 \
         --output-dir "/runs/ascend-${backend}-mp${mp}-dp${dp}"
@@ -43,7 +78,7 @@ python scripts/training/run_training.py \
   --device-type npu --mp 4 --dp 1 --backend native \
   --corpus /data/era5/corpus.json --stats /data/stats \
   --resume-checkpoint /runs/ascend-native-mp4-dp1/checkpoints/step_00000003.pt \
-  --global-batch-size 2 --micro-batch-size 1 \
+  --global-batch-size 2 --micro-batch-size-per-rank 1 \
   --warmup-updates 6 --one-step-updates 10 --curriculum-updates 22 \
   --max-updates 6 --checkpoint-every 1 --output-dir /runs/ascend-native-mp4-dp1
 ```
@@ -73,11 +108,12 @@ NPU/MUSA 可由 `--device-type` 推断；CUDA 兼容的海光、沐曦、平头�
 所有 rank 必须看到完整卡组。运行环境须已安装匹配的厂商 Torch/工具链；
 launcher 不修改环境安装、不同步源码、不选择部署目录。Shell 支持 `PYTHON_BIN`。
 
-平台内存配置来自 pinned source launcher。MP4 保留 manual gradient sync，
+平台内存配置以 pinned source launcher 为基础。MP4 保留 manual gradient sync，
 MP2 默认 DDP；DDP accumulation 把 forward/backward 包在 `no_sync`，
 最后一个 micro batch 才同步，没有第二次手动梯度平均。MUSA 多设备反向
 保留源串行执行；Ascend 默认 `ASCEND_LAUNCH_BLOCKING=1`。
-Ascend MP4 使用 mesh split16、stage checkpoint、reentrant outer checkpoint；
+Ascend MP4/DP1 使用 mesh split16、逐消息步 checkpoint、reentrant outer checkpoint；
+不再在反向重算时同时保留16步的 chunk 输入。MP4/DP2 保留原 stage 策略。
 MP2 使用源 README 验证示例的 split8、step、non_reentrant，并保留显式 CLI
 覆盖。此 MP2 设置复用不代表本次已做 MP2 设备验收。chunk、stage placement、
 prefetch/cache 和 checkpoint 开关见公开 `--help`；完整 source-native 参数见：
@@ -85,6 +121,73 @@ prefetch/cache 和 checkpoint 开关见公开 `--help`；完整 source-native �
 ```bash
 python scripts/training/run_official_epoch_training.py --help
 ```
+
+### 六平台统一单卡配置
+
+`--mp 1 --dp 1` 在 H100、910C、BW3000、S5000、C550、810E 使用同一份
+训练配置，不复制模型或训练主循环；已有 MP2/MP4 默认行为不变。
+
+- 外层 rollout checkpoint：`reentrant`，单步预测也启用。
+- Mesh：16 个消息步均在同一设备，逐消息步 checkpoint。
+- 完整 Grid→Mesh / Mesh→Grid stage checkpoint 均启用；内部 chunk 的
+  checkpoint 仍为 `non_reentrant`，不是把所有 checkpoint 都改成 reentrant。
+- edge / mesh edge chunk 均为 8192，grid node chunk 为 4096，loss chunk 为 65536。
+- `gradient_sync=manual`；DP1 无跨 rank 梯度平均，仍按 global/micro batch 累积。
+- 保持 FP32 storage 和 TF32/HF32 请求，默认拼接投影；不启用 BF16 或推理投影分解。
+
+先检查 H100 Native 单卡短测配置（不启动训练）：
+
+```bash
+python scripts/training/run_training.py --dry-run \
+  --platform h100 --backend native --mp 1 --dp 1 \
+  --global-batch-size 2 --micro-batch-size-per-rank 1 --seed 27 \
+  --warmup-updates 6 --one-step-updates 10 --curriculum-updates 22 \
+  --max-updates 3 --checkpoint-every 1
+```
+
+其它平台只需将 `--platform` 换为 `ascend910c/hygon/mthreads/metax/thead`。
+实际运行时去掉 `--dry-run` 并提供 corpus、stats、checkpoint 和独立输出目录；
+选择物理卡用 `--physical-devices`。`--backend flaggems` 仍使用既有训练 YAML，
+不意味着训练算子已全部接管。显式 CLI 覆盖仍优先，例如
+`--rollout-checkpoint-implementation non_reentrant`；当前项目拒绝
+`--gradient-sync ddp` 与 `reentrant` 外层组合，不会静默更改 checkpoint 策略。
+
+此配置来自冻结实验 `training-mp1-20260913-A9I4Ie`：910C 单逻辑 NPU、完整
+25km 模型、global2/micro1、单步预测、3 次更新（其中2次非零学习率）。
+Native/FlagGems 峰值已分配显存分别为 38.2293/42.5583 GiB，配对完整区间
+loss 比值差异为 0.0049423%，通过现有 5% 短测门槛。冻结实验源码和证据保持原样；
+本次只是将同一单卡策略接入六平台入口，其它五平台尚未做单卡设备验收。
+不能据此宣称 global16、12-lead、收敛或训练后天气技能已经通过。
+
+训练 edge chunk 的 checkpoint 包含原始边编码（首步）、节点 gather、跨设备
+拷贝、cat 和 edge MLP；保存的是原始/上一消息步的边视图与共享节点引用，
+不再保存大 cat 输入。该边界统一用于 chunked Grid→Mesh、Mesh 和 Mesh→Grid。
+共享聚合 buffer 的 `index_add_` 留在 checkpoint 外，重算不会重复累加；多步
+Mesh 的残差边状态仍保留。参数、FP32 storage、TF32/HF32 开关、FlagGems
+调用路径和推理模型不变。`--mesh-checkpoint-granularity stage` 只覆盖 Mesh
+的分组策略，不关闭上述 chunk 边界；此次未加入投影分解或其它模型优化。
+
+2026-09-10 显存对照：910C、完整25km模型、FP32 storage/HF32请求、MP4/DP1、
+global batch2/micro1、seed27，同一6/10/22 schedule停在第3次更新。
+以下是每个逻辑设备的峰值已分配显存（GiB）；各设备峰值不一定同时发生，不能相加
+推算单卡所需显存。分配历史无截断，重建峰值与四设备运行时计数逐一吻合。
+
+| 方案 | 设备0 | 设备1 | 设备2 | 设备3 |
+|---|---:|---:|---:|---:|
+| Native 旧边界 | 3.5042 | 46.6715 | 21.6843 | 47.3426 |
+| Native 仅逐消息步 checkpoint | 3.5042 | 15.1122 | 21.6843 | 47.3078 |
+| Native 仅完整 edge chunk checkpoint | 3.5042 | 25.3305 | 21.6843 | 22.2530 |
+| Native 两项组合 | 3.5042 | 13.6122 | 21.6843 | 22.2530 |
+| FlagGems 两项组合 | 3.5042 | 13.7552 | 21.8067 | 25.7471 |
+
+Native最高峰减少53.00%；FlagGems对比9月9日原配置52.5519 GiB减少51.01%。
+同配置的完整chunk边界对照loss诊断差异0.00071094%，逐消息步配置下边界对照
+差异0.00947797%；最终FlagGems/Native配对为0.00696260%，均通过现有5%门槛。
+FlagGems源码树摘要与先前冻结版本一致，原6个接口注册、无跳过；未另采集调用覆盖，
+不能把注册数等同于前/反向实际接管数。证据标识为
+`training-memory-attribution-20260910-gMfZ3v`，含原始分配快照、阶段计数、冻结源码、
+训练metrics和诊断JSON。此轮是显存/正确性短测，包含冷编译和观察器开销，不报正式
+性能/MFU；尚未验收global batch16、12-lead、MP2、其它平台或训练后天气技能。
 
 source-native 入口仍有 manifest schedule/HRES/validation/profiler 选项，调用时
 自行设置 `GRAPHCAST_ACCELERATOR_TYPE`、`GRAPHCAST_BACKEND`、
@@ -182,188 +285,39 @@ loss 比较始终返回 `weather_skill=not_evaluated`。评估 trained checkpoin
 包含数据处理的端到端时间，`hfu_sys` 分子还计入估算的 recompute FLOPs。
 profiler 的 kernel-busy 分母仅供另一次观测实验，不能与无 profiler 的计时混用。
 
-以下保留既有短训练探针说明；它们不属于新的正式 epoch runner 验收路径。
+## Mesh 投影分解实验（默认关闭）
 
-## 脚本一览
+`--mesh-edge-input-projection factorized --mesh-checkpoint-granularity step`
+只改变 Mesh 边 MLP 的第一层：原权重按 edge/sender/receiver 切片，节点先投影，
+各 edge chunk gather 后与边投影相加，bias 只加一次，再执行原 SiLU/Linear/LayerNorm。
+Grid→Mesh、Mesh→Grid、参数键、优化器和 FlagGems 库不变；不是低秩近似。
+节点投影仅在当前消息步内复用，不跨步或 optimizer update 缓存。chunk/stage
+checkpoint 保留；推荐逐消息步 checkpoint，否则整段重算可能同时保留多步投影。
+分解会改变浮点累加顺序，需要重新比较梯度和训练 loss，不能保证逐位一致。
+forward/recompute 线性 FLOPs 按分解后的执行计算，仍不是完整算子 FLOPs。
+启用状态写入恢复契约，exact resume 禁止切换；旧 checkpoint 未记录该字段时
+视为 concatenated。需要切换实验时用同一 pretrained 权重重新初始化配对训练。
 
-| 脚本 | 用途 | 卡数 | 模型并行 | Grid 分区 | 适用场景 |
-|------|------|:---:|:---:|:---:|------|
-| `train_25km_single.sh` | 25km 单卡训练 | 1 | - | - | smoke test / 轻量训练 |
-| `train_100km_single.sh` | 100km 单卡训练 | 1 | - | - | 快速验证 / JAX 基线对比 |
-| `train_ddp.sh` | 多卡 DDP 训练 | N | - | - | 数据并行训练 |
-| `train_mp.sh` | 模型并行训练 | 4 | ✅ | ✅ | **25km 全尺度训练** |
+四卡 Native/FlagGems 显存、同数据 loss 对照及无观察器计时证据保存在
+`training-mesh-factorized-20260910-QGE0NH` 实验目录；不据单块 cat 的容量推算
+整卡峰值下降，不据此宣称两卡或单卡训练已经可用。
 
-## 运行前必读
+910C MP4/DP1、global=2/micro=1、单 lead 三次更新的 allocator 对照：
+Native Mesh 卡峰值从 13.6122 增至 13.9247 GiB（约 +320 MiB），四卡中最高单卡
+均为 22.2530 GiB。分解新增的节点投影/反向中间量未带来峰值收益，因此不默认启用。
+Native 分解/拼接受控 A/B 的 loss 比值为 0.004218%；项目严格配方比较器仍返回
+incomparable_training，仅有 source_recipe 的投影开关不同，实验另行审计了其余
+起始状态、数据、采样/更新契约相同，没有修改诊断门槛或原始元数据。
+同为分解路径的 FlagGems/Native 正式 loss 配对通过，差异 0.005933%，仍不代表
+长训练收敛或天气技巧验收。
+另外各跑五次无观察器更新，排除第一次后，Native compute 均值为
+16.6429 → 16.1176 s/update（耗时 -3.16%），含数据处理的 E2E 为
+16.6766 → 16.1512 s/update；两版最高单卡仍为 22.2530 GiB。
+这是各一次运行、四个稳态样本的初步结果，不是多轮正式性能验收。
+五次更新的受控 loss A/B 差异为 0.012074%。
 
-### 1. 检查 NPU/GPU 占用
+## 历史探针
 
-在提交任务前，**必须**检查目标设备是否空闲。以 Ascend 为例：
-
-```bash
-# 查看 HBM 占用（不能只看进程列表！）
-npu-smi info 2>&1 | grep -E "^\| [0-9]+\s+[0-9]+\s+"
-
-# HBM > 10 GB 表示有任务占用，不可使用
-# 选择 HBM < 5 GB 且进程列表显示 "No running processes" 的 NPU
-```
-
-### 2. 通用环境变量
-
-所有脚本支持以下环境变量：
-
-| 变量 | 默认值 | 说明 |
-|------|--------|------|
-| `GRAPHCAST_BACKEND` | `auto` | 后端选择：`ascend`（Ascend）、`ptg`（PPU）、`auto`（自动检测） |
-| `DEVICE` | `auto` | 设备类型：`npu`、`cuda`、`cpu`、`auto` |
-| `GRAPHCAST_FLAGOS_MODE` | `off` | FlagOS 模式：`off` 或 `flaggems` |
-| `GRAPHCAST_FLAGGEMS_CONFIG` | `configs/flaggems/graphcast_training.yaml` | 按平台选择已验证的训练前向算子 |
-| `GRAPHCAST_FLAGGEMS_OPS` | 空 | 可选覆盖项；非空时替代 YAML 算子列表 |
-| `GRAPHCAST_FLAGGEMS_VARIANT` | `installed` | `installed`、`official` 或 `internal` |
-
-训练 profile 只描述 forward 接管范围，不代表 backward 已验证。需要对比
-同基线 official/internal 时，先运行 `bash tools/prepare_flaggems_runtime.sh`。
-
-### 3. Docker 运行
-
-所有脚本需在 Docker 容器内运行。以 Ascend 为例：
-
-```bash
-# 先检查 NPU 占用！
-docker run --rm --runtime=ascend --privileged --security-opt label=disable \
-  --device=/dev/davinci8 --device=/dev/davinci9 \
-  --device=/dev/davinci10 --device=/dev/davinci11 \
-  --device=/dev/davinci_manager --device=/dev/devmm_svm --device=/dev/hisi_hdc \
-  -v /usr/local/Ascend/driver:/usr/local/Ascend/driver:ro \
-  -v /usr/local/dcmi:/usr/local/dcmi:ro \
-  -v /usr/local/bin/npu-smi:/usr/local/bin/npu-smi:ro \
-  -v /etc/ascend_install.info:/etc/ascend_install.info:ro \
-  -v /path/to/repo:/ws -w /ws \
-  -e ASCEND_RT_VISIBLE_DEVICES=8,9,10,11 \
-  -e "PYTORCH_NPU_ALLOC_CONF=max_split_size_mb:256" \
-  quay.io/ascend/vllm-ascend:v0.20.2rc1-a3 bash -c "
-pip install xarray netCDF4 scipy trimesh rtree PyYAML h5py pandas
-bash scripts/training/train_mp.sh
-"
-```
-
----
-
-## train_25km_single.sh — 25km 单卡训练
-
-**调用**：`lib/train_single.py`
-
-**适用**：快速 smoke test（小步数、decoder-grid 模式）
-
-```bash
-STEPS=10 TRAIN_SCOPE=decoder-grid bash scripts/training/train_25km_single.sh
-```
-
-**常见错误**：
-
-| 错误 | 原因 | 解决 |
-|------|------|------|
-| OOM（全尺度训练） | 25km 全尺度需要 >64 GiB | 改用 `train_mp.sh`（模型并行），或设置 `TRAIN_SCOPE=decoder-grid` |
-| `missing required file` | cases / weights / stats 不存在 | 确认 `cases/`、`outputs/checkpoints/`、`data/raw/` 目录完整 |
-
----
-
-## train_100km_single.sh — 100km 单卡训练
-
-**调用**：`lib/train_single.py`
-
-**适用**：快速验证训练流程，100km（1°网格）显存需求 ~20-30 GiB，单卡即可全尺度训练。
-
-```bash
-STEPS=10 bash scripts/training/train_100km_single.sh
-```
-
-**常见错误**：
-
-| 错误 | 原因 | 解决 |
-|------|------|------|
-| `missing required file` | 100km 配置文件或权重缺失 | 确认 `configs/training/google_graphcast_100km.yaml` 和权重文件存在 |
-| `PytorchStreamReader failed` | 权重文件损坏 | 重新从可靠源拷贝权重文件 |
-
----
-
-## train_ddp.sh — 多卡 DDP 训练
-
-**调用**：`lib/train_single.py`（通过 `torch.distributed.run`）
-
-**适用**：数据并行多卡训练，每张卡处理完整模型，数据分片
-
-```bash
-NPROC_PER_NODE=4 DEVICE=npu DISTRIBUTED_BACKEND=hccl \
-  STEPS=10 bash scripts/training/train_ddp.sh
-```
-
-**常见错误**：
-
-| 错误 | 原因 | 解决 |
-|------|------|------|
-| `libcublas.so not found` | CUDA 驱动库未加载 | Ascend 使用 `hccl` 后端，PPU 使用 `nccl` |
-| `torch.distributed not initialized` | 通信后端不可用 | 确认 `DISTRIBUTED_BACKEND` 与平台匹配 |
-| 25km DDP OOM | 单卡无法放下全模型 | DDP 不做模型切分，25km 需用 `train_mp.sh` |
-
----
-
-## train_mp.sh — 模型并行训练
-
-**调用**：`lib/train_mp.py`
-
-**适用**：25km 全尺度训练。将模型三个 GNN 分布到 4 张 NPU，并通过 grid 分区减少反向传播显存。
-
-**核心参数**：
-
-| 参数 | 默认值 | 说明 |
-|------|--------|------|
-| `MESH2GRID_GRID_PARTITIONS` | 8 | grid 分区数，增大可减少反向传播显存 |
-| `ACTIVATION_CHECKPOINTING` | 1 | 激活检查点，以时间换空间 |
-| `GRID2MESH_NODE_CHUNK_SIZE` | 8192 | grid2mesh 节点分块大小 |
-| `MESH2GRID_EDGE_CHUNK_SIZE` | 2048 | mesh2grid 边分块大小 |
-| `TRAIN_SCOPE` | all | `all`=全参数，`decoder-grid`=仅训练输出头 |
-| `STEPS` | 3 | 训练步数 |
-
-**运行示例**：
-
-```bash
-ASCEND_RT_VISIBLE_DEVICES=8,9,10,11 \
-MESH2GRID_GRID_PARTITIONS=8 \
-STEPS=3 \
-bash scripts/training/train_mp.sh
-```
-
-**常见错误**：
-
-| 错误 | 原因 | 解决 |
-|------|------|------|
-| OOM（grid2mesh forward） | 25km grid2mesh 边过多 | 减小 `GRID2MESH_NODE_CHUNK_SIZE`（如 4096） |
-| OOM（backward 碎片化） | PyTorch 内存碎片 | 设置 `PYTORCH_NPU_ALLOC_CONF=max_split_size_mb:256` |
-| `No running processes` 但 OOM | 其他容器挂载了设备，预占了 HBM | 换用真正空闲的 NPU |
-| `Failed to start the device` | NPU 被其他进程占用 | 重新检查 `npu-smi info`，换空闲 NPU |
-| `libcublas.so not found` | Docker 镜像不匹配 | Ascend 用 `vllm-ascend` 镜像，PPU 用 `inference-xpu-pytorch` |
-
-### 模型并行原理
-
-```
-grid2mesh GNN  →  NPU 0（编码器+1步处理器+解码器）
-mesh GNN       →  NPU 0→1→2→3（16步处理器均匀分布）
-mesh2grid GNN  →  NPU 3（编码器+1步处理器，按 grid 分区逐段反向）
-```
-
-### Grid 分区原理
-
-将 1,038,240 个 grid 节点切为 N 个连续分区。每个分区只处理相关的 mesh2grid 边，前向和反向独立完成，大幅减少单卡峰值显存。
-
----
-
-## lib/ 目录
-
-存放训练相关的 Python 模块，供 Shell 脚本调用：
-
-| 文件 | 功能 |
-|------|------|
-| `train_single.py` | 单卡训练 loss 计算（Google 风格归一化加权 MSE） |
-| `train_ddp.py` | DDP 辅助函数（数据加载、训练范围设置等） |
-| `train_mp.py` | 模型并行训练（多平台，支持 Ascend/PPU/CUDA） |
-| `summarize.py` | 训练指标汇总（mean loss、step time 等） |
+旧单卡、DDP、MP 测试及其环境变量说明已移至 [legacy/README.md](legacy/README.md)。
+它们不属于正式训练验收路径；旧 Shell 路径仅作带提示的兼容转发。
+`quickstart train` 仍执行旧 SGD 探针，不会自动转换成正式 AdamW 配方。
