@@ -33,6 +33,34 @@ def test_resume_projection_normalizes_legacy_default_without_allowing_mode_switc
             training_state.validate_resume_contract(payload, expected)
 
 
+@pytest.mark.parametrize("key,default,enabled", [
+    ("edge_gather_group_size", 1, 4),
+    ("resident_training_inputs", "disabled", "enabled"),
+])
+@pytest.mark.parametrize("saved_mode,expected_mode,compatible", [
+    (None, None, True),
+    (None, "default", True),
+    ("default", None, True),
+    (None, "enabled", False),
+    ("enabled", None, False),
+    ("enabled", "default", False),
+    ("default", "enabled", False),
+    ("enabled", "enabled", True),
+])
+def test_resume_execution_policy_is_symmetric(
+    key, default, enabled, saved_mode, expected_mode, compatible,
+):
+    values = {"default": default, "enabled": enabled}
+    saved = {} if saved_mode is None else {key: values[saved_mode]}
+    expected = {} if expected_mode is None else {key: values[expected_mode]}
+    payload = {"metadata": {"resume_contract": saved}}
+    if compatible:
+        training_state.validate_resume_contract(payload, expected)
+    else:
+        with pytest.raises(ValueError, match=key):
+            training_state.validate_resume_contract(payload, expected)
+
+
 def _run_update(model, optimizer, features, targets):
     optimizer.zero_grad(set_to_none=True)
     torch.nn.functional.mse_loss(model(features), targets).backward()

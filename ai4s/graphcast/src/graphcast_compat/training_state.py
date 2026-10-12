@@ -390,14 +390,18 @@ def validate_resume_contract(
     actual = metadata.get("resume_contract")
     if not isinstance(actual, Mapping):
         raise ValueError("training checkpoint resume_contract is invalid")
-    # Old checkpoints predate the optional Mesh algebra change. Missing means
-    # concatenated on either side; a factorized checkpoint cannot silently
-    # resume with the default path (or vice versa).
-    projection_key = "mesh_edge_input_projection"
-    if actual.get(projection_key, "concatenated") != expected.get(projection_key, "concatenated"):
-        raise ValueError(f"resume contract mismatch for {projection_key}")
+    # Missing optional execution policies mean their legacy defaults on both
+    # sides. Never silently enable OR disable a policy during exact resume.
+    legacy_defaults = {
+        "mesh_edge_input_projection": "concatenated",
+        "edge_gather_group_size": 1,
+        "resident_training_inputs": "disabled",
+    }
+    for name, default in legacy_defaults.items():
+        if actual.get(name, default) != expected.get(name, default):
+            raise ValueError(f"resume contract mismatch for {name}")
     for name, expected_value in expected.items():
-        if name == projection_key:  # Already compared with the legacy default.
+        if name in legacy_defaults:  # Already compared with the legacy default.
             continue
         if actual.get(name) != expected_value:
             raise ValueError(

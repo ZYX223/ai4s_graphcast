@@ -35,11 +35,9 @@ DEFAULT_CONFIG = Path("configs/inference/google_graphcast_small.yaml")
 
 
 def _gather_pipeline_nodes(features: torch.Tensor, indices: torch.Tensor) -> torch.Tensor:
-    # Ascend's general indexing of a middle axis dominates pipeline training.
-    # Reuse the leading-node-axis gather already used by ZYX inference.
-    if features.device.type == "npu":
-        return gather_node_features(features, indices)
-    return features[:, indices, :]
+    # Share inference's leading-node-axis index path on every backend. Middle
+    # axis indexing adds full-source SliceBackward buffers for each edge chunk.
+    return gather_node_features(features, indices)
 
 
 def _synchronize_vendor_pipeline_device(device: torch.device | None) -> None:
@@ -230,6 +228,7 @@ class GoogleSmallGraphNet(BaseGraphNet):
         kwargs.setdefault("decoder_node_chunk_sizes", None)
         super().__init__(edge_update_chunk_sizes=None, **kwargs)
         self.edge_update_chunk_sizes = dict(edge_update_chunk_sizes or {})
+        self.edge_gather_group_size = 1
         self._decoder_device = None
         self._node_processor_devices = {}
 
@@ -381,36 +380,29 @@ class GoogleSmallGraphNet(BaseGraphNet):
                 decoder_device = self._decoder_device or decoder_inputs.device
                 cross_device = decoder_inputs.device != decoder_device
                 if chunk_sz and node_count > chunk_sz and hasattr(decoder, "linear_1"):
-                    out_dim = decoder.linear_1.out_features
-                    output = decoder_inputs.new_empty(
-                        decoder_inputs.shape[0],
-                        node_count,
-                        out_dim,
-                        device=decoder_device,
-                    )
                     # A full 0.25-degree latent has 1,038,240 x 512 FP32
                     # values (about 1.98 GiB).  When processor and decoder
                     # occupy different PP stages, stream the already-defined
                     # node chunks instead of first materializing that complete
                     # latent on the decoder stage.  Tensor values, decoder
                     # parameters and operation order are unchanged.
+                    # FlagGems keeps the current NPU stage selected.  Ascend's
+                    # AsStrided kernel also consults that current stage, so
+                    # create the views under the source tensor's guard before
+                    # transferring the chunks.
+                    with _operator_device_guard(decoder_inputs.device):
+                        decoder_chunks = decoder_inputs.split(chunk_sz, dim=1)
+                    output_chunks = []
                     with _operator_device_guard(decoder_device):
-                        for start in range(0, node_count, chunk_sz):
-                            chunk_end = min(start + chunk_sz, node_count)
-                            # FlagGems keeps the current NPU stage selected.
-                            # Ascend's AsStrided kernel also consults that
-                            # current stage, so create a view under the source
-                            # tensor's guard before transferring the chunk.
-                            with _operator_device_guard(decoder_inputs.device):
-                                decoder_chunk = decoder_inputs[:, start:chunk_end]
+                        for decoder_chunk in decoder_chunks:
                             if cross_device:
                                 decoder_chunk = _pipeline_device_copy(
                                     decoder_chunk,
                                     decoder_device,
                                 )
                                 _synchronize_vendor_pipeline_device(decoder_device)
-                            output[:, start:chunk_end] = decoder(decoder_chunk)
-                    nodes[node_type] = output
+                            output_chunks.append(decoder(decoder_chunk))
+                        nodes[node_type] = torch.cat(output_chunks, dim=1)
                 else:
                     if cross_device:
                         decoder_inputs = _pipeline_device_transfer(
@@ -469,7 +461,7 @@ class GoogleSmallGraphNet(BaseGraphNet):
                 # output, so retain their established allocation-saving
                 # behaviour.
                 preserve_edge_state = self.message_passing_steps > 1
-                updated_edge: torch.Tensor | None = None
+                residual_chunks = []
                 aggregate_device = self._node_processor_devices.get(
                     receiver_type,
                     previous_nodes[receiver_type].device,
@@ -480,15 +472,22 @@ class GoogleSmallGraphNet(BaseGraphNet):
                     previous_nodes[receiver_type].shape[-1],
                     device=aggregate_device,
                 )
-                for start in range(0, edge_count, chunk_size):
-                    chunk_end = min(start + chunk_size, edge_count)
-                    chunk_senders = senders[start:chunk_end]
-                    chunk_receivers = receivers[start:chunk_end]
+                # Split once so backward assembles one source gradient, not a
+                # source-wide slice gradient for every chunk.
+                group_size = chunk_size * self.edge_gather_group_size
+                with _operator_device_guard(src_edge.device):
+                    edge_chunks = src_edge.split(group_size, dim=1)
+                for group_index, edge_chunk in enumerate(edge_chunks):
+                    group_start = group_index * group_size
+                    group_end = min(group_start + group_size, edge_count)
+                    group_senders = senders[group_start:group_end]
+                    group_receivers = receivers[group_start:group_end]
                     # Save raw/previous edge views and shared node tensors, not
                     # the much larger encoded/gathered/concatenated features.
                     # Bind metadata now: checkpoint replays after this loop.
                     compute_chunk = partial(
-                        self._edge_chunk,
+                        self._edge_group,
+                        chunk_size=chunk_size,
                         step=step,
                         edge_type=edge_type,
                         encode_raw=raw_edges.get(edge_type) is not None,
@@ -496,52 +495,39 @@ class GoogleSmallGraphNet(BaseGraphNet):
                         factorized=factorized,
                     )
                     chunk_args = (
-                        src_edge[:, start:chunk_end, :],
+                        edge_chunk,
                         sender_values,
                         receiver_values,
-                        chunk_senders,
-                        chunk_receivers,
+                        group_senders,
+                        group_receivers,
                     )
                     if checkpoint_chunks and torch.is_grad_enabled():
-                        edge_delta, residual_chunk = tracked_checkpoint(compute_chunk, *chunk_args)
+                        group_results = tracked_checkpoint(compute_chunk, *chunk_args)
                     else:
-                        edge_delta, residual_chunk = compute_chunk(*chunk_args)
-                    if preserve_edge_state:
-                        if updated_edge is None:
-                            updated_edge = edge_delta.new_empty(
-                                edge_delta.shape[0],
-                                edge_count,
-                                edge_delta.shape[-1],
-                            )
-                        updated_edge[:, start:chunk_end] = residual_chunk
-                    aggregate_delta = edge_delta
-                    if aggregate_delta.device != aggregate_device:
-                        # When a full-grid node processor is assigned to a
-                        # different PP stage, accumulate each already-defined
-                        # edge chunk directly on that stage.  This avoids
-                        # materializing a second 1,038,240 x 512 FP32 tensor on
-                        # the edge stage only to transfer it immediately.  The
-                        # same edge deltas, receiver indices and chunk order are
-                        # retained, so this changes placement, not GraphNet
-                        # mathematics or model size.
-                        aggregate_delta = _pipeline_device_transfer(
-                            aggregate_delta,
-                            aggregate_device,
-                        )
-                        chunk_receivers = _pipeline_device_transfer(
-                            chunk_receivers,
-                            aggregate_device,
-                        )
-                        _synchronize_vendor_pipeline_device(aggregate_device)
-                    with _operator_device_guard(aggregate_device):
-                        aggregated.index_add_(
-                            1,
-                            chunk_receivers,
-                            aggregate_delta,
-                        )
+                        group_results = compute_chunk(*chunk_args)
+                    for offset in range(0, len(group_results), 2):
+                        edge_delta, residual_chunk = group_results[offset:offset + 2]
+                        start = (offset // 2) * chunk_size
+                        chunk_receivers = group_receivers[start:start + edge_delta.shape[1]]
+                        if preserve_edge_state:
+                            residual_chunks.append(residual_chunk)
+                        aggregate_delta = edge_delta
+                        if aggregate_delta.device != aggregate_device:
+                            # Preserve the original per-chunk reduction order and
+                            # transfer only edge deltas, never the full node state.
+                            aggregate_delta = _pipeline_device_transfer(aggregate_delta, aggregate_device)
+                            chunk_receivers = _pipeline_device_transfer(chunk_receivers, aggregate_device)
+                            _synchronize_vendor_pipeline_device(aggregate_device)
+                        with _operator_device_guard(aggregate_device):
+                            aggregated.index_add_(1, chunk_receivers, aggregate_delta)
+                    del group_results
                 edge_updates[edge_type] = None
-                if updated_edge is not None:
-                    chunked_edge_outputs[edge_type] = updated_edge
+                if preserve_edge_state:
+                    with _operator_device_guard(src_edge.device):
+                        chunked_edge_outputs[edge_type] = torch.cat(residual_chunks, dim=1)
+                    # CatBackward needs sizes, not chunk values. Release the
+                    # duplicate edge state before the node processors run.
+                    del residual_chunks, residual_chunk
                 received_by_node_type[receiver_type].append(aggregated)
                 continue
 
@@ -587,33 +573,25 @@ class GoogleSmallGraphNet(BaseGraphNet):
             )
             cross_device = previous_nodes[node_type].device != node_device
             if chunk_size and node_count > chunk_size:
-                output = previous_nodes[node_type].new_empty(
-                    previous_nodes[node_type].shape,
-                    device=node_device,
-                )
+                chunk_groups = []
+                for values in [previous_nodes[node_type]] + received_features:
+                    with _operator_device_guard(values.device):
+                        chunk_groups.append(values.split(chunk_size, dim=1))
+                output_chunks = []
                 with _operator_device_guard(node_device):
-                    for start in range(0, node_count, chunk_size):
-                        chunk_end = min(start + chunk_size, node_count)
-                        previous_node_values = previous_nodes[node_type]
-                        with _operator_device_guard(previous_node_values.device):
-                            previous_chunk = previous_node_values[:, start:chunk_end]
-                        received_chunks = []
-                        for item in received_features:
-                            with _operator_device_guard(item.device):
-                                received_chunks.append(item[:, start:chunk_end])
+                    for previous_chunk, *received_chunks in zip(
+                        *chunk_groups,
+                        strict=True,
+                    ):
                         if cross_device:
                             previous_chunk = _pipeline_device_copy(
                                 previous_chunk,
                                 node_device,
                             )
-                            transferred_received = []
-                            for item in received_chunks:
-                                transferred = _pipeline_device_copy(
-                                    item,
-                                    node_device,
-                                )
-                                transferred_received.append(transferred)
-                            received_chunks = transferred_received
+                            received_chunks = [
+                                _pipeline_device_copy(item, node_device)
+                                for item in received_chunks
+                            ]
                             _synchronize_vendor_pipeline_device(node_device)
                         chunk_inputs = torch.cat(
                             [previous_chunk] + received_chunks,
@@ -624,8 +602,8 @@ class GoogleSmallGraphNet(BaseGraphNet):
                             chunk_inputs,
                             checkpoint_chunks,
                         )
-                        output[:, start:chunk_end] = previous_chunk + chunk_delta
-                updated_nodes[node_type] = output
+                        output_chunks.append(previous_chunk + chunk_delta)
+                    updated_nodes[node_type] = torch.cat(output_chunks, dim=1)
             else:
                 previous_values = previous_nodes[node_type]
                 received_values = received_features
@@ -684,6 +662,28 @@ class GoogleSmallGraphNet(BaseGraphNet):
             receiver_projection = nn.functional.linear(receiver_nodes, receiver_weight, zero_bias)
         return sender_projection, receiver_projection
 
+    def _edge_group(self, edges, sender_nodes, receiver_nodes, senders, receivers, *, chunk_size, **kwargs):
+        """Checkpoint a bounded group; scatter node gradients once per group.
+
+        Gather remains inside replay so no whole-graph edge features are saved.
+        MLP chunk boundaries and subsequent aggregation order stay unchanged.
+        """
+        if edges.shape[1] <= chunk_size:
+            return self._edge_chunk(edges, sender_nodes, receiver_nodes, senders, receivers, **kwargs)
+        with _operator_device_guard(sender_nodes.device):
+            senders = _pipeline_device_transfer(senders, sender_nodes.device)
+            sender_features = _gather_pipeline_nodes(sender_nodes, senders)
+        with _operator_device_guard(receiver_nodes.device):
+            receivers = _pipeline_device_transfer(receivers, receiver_nodes.device)
+            receiver_features = _gather_pipeline_nodes(receiver_nodes, receivers)
+        parts = (edges.split(chunk_size, dim=1), sender_features.split(chunk_size, dim=1),
+                 receiver_features.split(chunk_size, dim=1))
+        outputs = []
+        for edge_part, sender_part, receiver_part in zip(*parts, strict=True):
+            outputs.extend(self._edge_chunk(edge_part, sender_part, receiver_part, None, None,
+                                            nodes_gathered=True, **kwargs))
+        return tuple(outputs)
+
     def _edge_chunk(
         self,
         edge_chunk: torch.Tensor,
@@ -697,6 +697,7 @@ class GoogleSmallGraphNet(BaseGraphNet):
         encode_raw: bool,
         preserve_edge_state: bool,
         factorized: bool = False,
+        nodes_gathered: bool = False,
     ) -> tuple[torch.Tensor, torch.Tensor | None]:
         """Pure chunk replay; accumulation into the shared buffer stays outside."""
         edge_device = edge_chunk.device
@@ -705,14 +706,17 @@ class GoogleSmallGraphNet(BaseGraphNet):
                 self._apply_mlp_with_layer_norm(f"encoder_edges_{edge_type}", edge_chunk)
                 if encode_raw else edge_chunk
             )
-        if sender_indices.device != sender_nodes.device:
-            sender_indices = _pipeline_device_transfer(sender_indices, sender_nodes.device)
-        with _operator_device_guard(sender_nodes.device):
-            sender_chunk = _gather_pipeline_nodes(sender_nodes, sender_indices)
-        if receiver_indices.device != receiver_nodes.device:
-            receiver_indices = _pipeline_device_transfer(receiver_indices, receiver_nodes.device)
-        with _operator_device_guard(receiver_nodes.device):
-            receiver_chunk = _gather_pipeline_nodes(receiver_nodes, receiver_indices)
+        if nodes_gathered:
+            sender_chunk, receiver_chunk = sender_nodes, receiver_nodes
+        else:
+            if sender_indices.device != sender_nodes.device:
+                sender_indices = _pipeline_device_transfer(sender_indices, sender_nodes.device)
+            with _operator_device_guard(sender_nodes.device):
+                sender_chunk = _gather_pipeline_nodes(sender_nodes, sender_indices)
+            if receiver_indices.device != receiver_nodes.device:
+                receiver_indices = _pipeline_device_transfer(receiver_indices, receiver_nodes.device)
+            with _operator_device_guard(receiver_nodes.device):
+                receiver_chunk = _gather_pipeline_nodes(receiver_nodes, receiver_indices)
         if sender_chunk.device != edge_device:
             sender_chunk = _pipeline_device_copy(sender_chunk, edge_device)
         if receiver_chunk.device != edge_device:
@@ -1168,6 +1172,23 @@ class GoogleSmallCompatibleModel(BaseModel):
         self._num_grid_nodes = graph.num_grid_nodes
         self._num_mesh_nodes = graph.num_mesh_nodes
         return graph
+
+    def stage_static_graph(self, device: torch.device) -> None:
+        """Keep immutable topology on the sole model device across replay.
+
+        Only nonpersistent top-level graph buffers move. Parameters, optimizer
+        state, persistent weights and checkpoint serialization are unchanged.
+        init_graph replaces these buffers if the grid itself changes.
+        """
+        placements = (self._primary_device, self._secondary_device, self._output_device,
+                      self._grid2mesh_device, self._mesh_first_device, self._mesh2grid_device,
+                      self._mesh2grid_node_device)
+        if any(value is not None and value != device for value in placements):
+            raise ValueError("resident graph staging requires a single model device")
+        for name in self._non_persistent_buffers_set:
+            value = self._buffers.get(name)
+            if value is not None and value.device != device:
+                self._buffers[name] = _pipeline_device_transfer(value, device)
 
     def estimate_forward_linear_flops(self, batch_size: int) -> int:
         """Count useful forward FLOPs from Linear layers on the initialized graph."""

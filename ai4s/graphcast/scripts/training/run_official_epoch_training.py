@@ -55,6 +55,7 @@ for import_root in (SRC_ROOT, SCRIPT_ROOT):
         sys.path.insert(0, str(import_root))
 
 from graphcast_compat.autoregressive_training import (  # noqa: E402
+    stage_autoregressive_batch,
     autoregressive_loss,
     prepare_autoregressive_batch,
 )
@@ -415,6 +416,9 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
             "single full-grid reduction"
         ),
     )
+    parser.add_argument("--edge-gather-group-size", type=int, default=1)
+    parser.add_argument("--resident-training-inputs", choices=("enabled", "disabled"), default="disabled",
+                        help="Opt-in single-device immutable batch/graph staging before checkpoint replay")
     parser.add_argument("--activation-checkpoint", action="store_true")
     parser.add_argument("--precision", choices=("fp32",), default="fp32")
     parser.add_argument(
@@ -516,6 +520,10 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
 
 
 def validate_args(args: argparse.Namespace) -> None:
+    if args.edge_gather_group_size < 1:
+        raise ValueError("edge_gather_group_size must be positive")
+    if args.resident_training_inputs == "enabled" and args.mp_devices_per_replica != 1:
+        raise ValueError("resident training graph staging currently requires MP=1")
     # Each DP replica owns one complete model on one, two or four devices.
     # The global micro-batch may contain one or more samples per replica; the
     # launcher validates divisibility and derives gradient accumulation.
@@ -938,6 +946,7 @@ class EpochAutoregressiveModule(torch.nn.Module):
         checkpoint_single_step: bool,
         checkpoint_implementation: str = "non_reentrant",
         loss_grid_chunk_size: int = 0,
+        resident_training_inputs: bool = False,
     ):
         super().__init__()
         self.model = model
@@ -945,6 +954,7 @@ class EpochAutoregressiveModule(torch.nn.Module):
         self.checkpoint_single_step = checkpoint_single_step
         self.checkpoint_implementation = checkpoint_implementation
         self.loss_grid_chunk_size = loss_grid_chunk_size
+        self.resident_training_inputs = resident_training_inputs
 
     def forward(
         self,
@@ -952,6 +962,15 @@ class EpochAutoregressiveModule(torch.nn.Module):
         *,
         collect_variable_diagnostics: bool = False,
     ) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
+        if self.resident_training_inputs:
+            device = batch.initial_input_features.device
+            # This forward is inside update timing: staging is not hidden in setup.
+            if isinstance(self.model, GoogleSmallCompatibleModel):
+                self.model.stage_static_graph(device)
+            batch = stage_autoregressive_batch(
+                batch, input_device=device, output_device=device,
+                dtype=batch.initial_input_features.dtype,
+            )
         active_checkpoint_segments = (
             self.checkpoint_segments
             if self.checkpoint_single_step or batch.rollout_steps != 1
@@ -1875,6 +1894,12 @@ def train(argv: list[str] | None = None) -> int:
         # change must still be recorded and must not silently cross exact resume.
         if args.mesh_edge_input_projection != "concatenated":
             resume_contract["mesh_edge_input_projection"] = args.mesh_edge_input_projection
+        # Optional execution policies are part of exact resume identity; do not
+        # retrofit their metadata into pre-existing checkpoints.
+        if args.edge_gather_group_size != 1:
+            resume_contract["edge_gather_group_size"] = args.edge_gather_group_size
+        if args.resident_training_inputs != "disabled":
+            resume_contract["resident_training_inputs"] = args.resident_training_inputs
         if context.is_primary:
             write_immutable_json(
                 run_dir / "run_config.json",
@@ -2022,6 +2047,8 @@ def train(argv: list[str] | None = None) -> int:
         stats = load_normalization_stats(args.stats_dir)
         model = GoogleSmallCompatibleModel(config)
         model.mesh_gnn.edge_input_projection_mode = args.mesh_edge_input_projection
+        for graphnet in (model.grid2mesh_gnn, model.mesh_gnn, model.mesh2grid_gnn):
+            graphnet.edge_gather_group_size = args.edge_gather_group_size
         if init_state is not None:
             model.load_state_dict(init_state, strict=True)
         model.init_graph(
@@ -2068,6 +2095,7 @@ def train(argv: list[str] | None = None) -> int:
                 args.rollout_checkpoint_implementation
             ),
             loss_grid_chunk_size=args.loss_grid_chunk_size,
+            resident_training_inputs=args.resident_training_inputs == "enabled",
         )
         wrapped_unroll = (
             context.wrap_ddp(unroll)

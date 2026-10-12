@@ -8,7 +8,7 @@ time.  Loss-only outputs such as precipitation never enter the next input.
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 import math
 from typing import Any, Mapping
 
@@ -70,6 +70,31 @@ class AutoregressiveResult:
     lead_losses: torch.Tensor
     per_variable_lead_losses: Mapping[str, torch.Tensor]
     final_input_features: torch.Tensor
+
+
+def stage_autoregressive_batch(
+    batch: AutoregressiveBatch, *, input_device: torch.device,
+    output_device: torch.device, dtype: torch.dtype,
+) -> AutoregressiveBatch:
+    """Upload one microbatch's immutable data before activation checkpointing.
+
+    The caller owns this batch through backward; nothing is cached across samples.
+    _run_lead still clones raw targets and forms state-dependent residuals afresh.
+    Upload time remains part of the training update's E2E window.
+    """
+    def output(value):
+        return value.to(device=output_device, dtype=dtype) if value is not None else None
+    return replace(
+        batch,
+        forcing_features=batch.forcing_features.to(device=input_device, dtype=dtype),
+        target_absolute_features=output(batch.target_absolute_features),
+        feedback_updates=tuple(replace(update, residual_to_absolute=output(update.residual_to_absolute))
+                               for update in batch.feedback_updates),
+        latitude_weights=output(batch.latitude_weights),
+        channel_weights=output(batch.channel_weights),
+        diagnostic_channel_weights=output(batch.diagnostic_channel_weights),
+        sample_weights=output(batch.sample_weights),
+    )
 
 
 def _slice_length(value: slice, *, name: str) -> int:

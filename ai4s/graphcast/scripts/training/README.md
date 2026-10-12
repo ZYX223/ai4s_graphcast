@@ -1,5 +1,11 @@
 # 训练脚本说明
 
+已测 H100 Native eager TF32 优化快照、完整复现参数及源码哈希见
+[固定训练 baseline（2026-10-12）](../../docs/training-native-baseline-20261012.md)。
+最新三轮 MFU 中位数9.0133%，历史同源码10.0121%；两者不能混写。
+新增 grouped gather / microbatch 数据驻留均需显式启用，不修改下面的默认配方。
+不包含后续“两样本一起上传 GPU”或 CPU buffer 复用实验。
+
 正式入口 `scripts/train.sh`、`run_training.py`、`train_official.sh`、`train_pipeline.sh` 均调用同一份
 同事训练引擎 `run_official_epoch_training.py`（源提交 `b7667b4`）。
 训练专用 `training_model.py` 使用 canonical graph；推理模型、图默认值和

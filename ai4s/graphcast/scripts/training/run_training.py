@@ -51,6 +51,8 @@ def parser():
     for name in ("mesh-split-step", "edge-chunk-size", "grid-node-chunk-size", "mesh-edge-chunk-size", "loss-grid-chunk-size"):
         p.add_argument("--" + name, type=int)
     p.add_argument("--split-cache-max-gib", type=float)
+    p.add_argument("--edge-gather-group-size", type=int, default=1)
+    p.add_argument("--resident-training-inputs", choices=("enabled", "disabled"), default="disabled")
     p.add_argument("--data-prefetch-depth", type=int, choices=(0, 1))
     p.add_argument("--gradient-sync", choices=("manual", "ddp"))
     p.add_argument("--mesh-checkpoint-granularity", choices=("auto", "stage", "step"))
@@ -75,6 +77,10 @@ def parser():
 
 
 def resolve_contract(args):
+    if args.edge_gather_group_size < 1:
+        raise ValueError("edge_gather_group_size must be positive")
+    if args.resident_training_inputs == "enabled" and args.mp != 1:
+        raise ValueError("resident training graph staging currently requires MP=1")
     if (args.mp, args.dp) not in {(1, 1), (2, 1), (2, 2), (4, 1), (4, 2)}:
         raise ValueError("formal training supports MP=1/DP=1, or MP=2 or 4 with DP=1 or 2")
     for name in ("global_batch_size", "micro_batch_size_per_rank", "warmup_updates", "one_step_updates", "curriculum_updates", "checkpoint_every"):
@@ -124,7 +130,8 @@ def resolve_contract(args):
         checkpoint_every_steps=args.checkpoint_every, stop_after_global_step=args.max_updates or 0,
         seed=args.seed, peak_tflops_per_device=args.peak_tflops_per_device,
         peak_tflops_source=args.peak_tflops_source, training_start=args.training_start, training_end=args.training_end,
-        **execution)
+        edge_gather_group_size=args.edge_gather_group_size,
+        resident_training_inputs=args.resident_training_inputs, **execution)
     argv = [item for key, value in values.items() for item in ("--" + key.replace("_", "-"), str(value))]
     argv += ["--formal", "--activation-checkpoint"]
     if args.pretrained_checkpoint:
