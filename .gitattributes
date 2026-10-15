@@ -1,0 +1,2 @@
+# Keep generated CSV evidence byte-identical to its recorded SHA256.
+projects/sugon/evidence/**/*.csv -text whitespace=cr-at-eol

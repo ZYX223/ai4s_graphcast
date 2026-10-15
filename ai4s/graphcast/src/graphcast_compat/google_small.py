@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import os
-from collections.abc import Iterable
+from collections.abc import Callable, Iterable
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -18,10 +18,38 @@ from .graph import GoogleSmallGraph, build_google_small_graph
 
 DEFAULT_CONFIG = Path("configs/inference/google_graphcast_small.yaml")
 INDEX_ADD_EXECUTIONS = frozenset({"inline", "prevalidated-static"})
+ADDMM_SILU_MIN_ROWS = 65536
+PACKED_MLP_MIN_ROWS = 40962
+FACTORIZED_GATHER_FUSION_MIN_ROWS = 262144
 
 
 def _environment_flag(name: str) -> bool:
     return os.environ.get(name, "").strip().lower() in {"1", "true", "yes", "on"}
+
+
+def _packed_mlp_scope_enabled(scope: str) -> bool:
+    selected = os.environ.get(
+        "GRAPHCAST_PACKED_MLP_SCOPE", "factorized"
+    ).strip().lower()
+    return selected in {"all", scope}
+
+
+def _packed_mlp_rows_eligible(rows: int) -> bool:
+    return rows >= PACKED_MLP_MIN_ROWS
+
+
+def require_post_layer_norm_residual() -> Callable[..., torch.Tensor]:
+    """Resolve the selected public API without running any model computation."""
+    try:
+        import flag_gems
+    except ImportError as exc:
+        raise RuntimeError("post_layer_norm_residual fusion requires FlagGems") from exc
+    fused_op = getattr(flag_gems, "post_layer_norm_residual", None)
+    if not callable(fused_op):
+        raise RuntimeError(
+            "the selected FlagGems runtime does not provide callable post_layer_norm_residual"
+        )
+    return fused_op
 
 
 @dataclass(frozen=True)
@@ -158,6 +186,8 @@ class HaikuStyleMLP(nn.Module):
         hidden_features: int,
         hidden_layers: int,
         linear_type: type[nn.Linear] = nn.Linear,
+        fuse_addmm_silu: bool | None = None,
+        fuse_packed_mlp: bool | None = None,
     ) -> None:
         super().__init__()
         if hidden_layers != 1:
@@ -166,19 +196,62 @@ class HaikuStyleMLP(nn.Module):
         self.linear_0 = linear_type(in_features, hidden_features)
         self.activation = nn.SiLU()
         self.linear_1 = linear_type(hidden_features, out_features)
+        if fuse_addmm_silu is None:
+            fuse_addmm_silu = _environment_flag("GRAPHCAST_FUSE_ADDMM_SILU")
+        if fuse_packed_mlp is None:
+            fuse_packed_mlp = _environment_flag("GRAPHCAST_FUSE_PACKED_MLP")
+        self.fuse_addmm_silu = fuse_addmm_silu
+        self.fuse_packed_mlp = fuse_packed_mlp
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
-        return self.linear_1(self.activation(self.linear_0(x)))
+        can_fuse = (
+            not torch.is_grad_enabled()
+            and x.ndim >= 2
+            and x.is_contiguous()
+            and self.linear_0.bias is not None
+            and self.linear_1.bias is not None
+            and x.shape[-1] > 0
+        )
+        rows = x.numel() // x.shape[-1] if can_fuse else 0
+        if (
+            self.fuse_packed_mlp
+            and _packed_mlp_scope_enabled("standard")
+            and can_fuse
+            and _packed_mlp_rows_eligible(rows)
+        ):
+            import flag_gems
+
+            hidden = self.linear_0(x)
+            hidden_matrix = hidden.reshape(-1, hidden.shape[-1])
+            output_matrix = flag_gems.silu_addmm(
+                hidden_matrix,
+                self.linear_1.bias,
+                self.linear_1.weight.t(),
+            )
+            return output_matrix.reshape(*x.shape[:-1], self.linear_1.out_features)
+
+        if self.fuse_addmm_silu and can_fuse and rows >= ADDMM_SILU_MIN_ROWS:
+            import flag_gems
+
+            matrix = x.reshape(-1, x.shape[-1])
+            hidden_matrix = flag_gems.addmm_silu(
+                self.linear_0.bias,
+                matrix,
+                self.linear_0.weight.t(),
+            )
+            hidden = hidden_matrix.reshape(
+                *x.shape[:-1], self.linear_0.out_features
+            )
+        else:
+            hidden = self.activation(self.linear_0(x))
+        return self.linear_1(hidden)
 
 
 class HaikuStyleFinalLinearHead(nn.Module):
     """Final-only output head matching a checkpoint with just ``linear_1``."""
 
     def __init__(
-        self,
-        in_features: int,
-        out_features: int,
-        *,
+        self, in_features: int, out_features: int, *,
         linear_type: type[nn.Linear] = nn.Linear,
     ) -> None:
         super().__init__()
@@ -240,6 +313,9 @@ class GoogleSmallGraphNet(nn.Module):
         config: GoogleSmallConfig,
         activation_checkpointing: bool = False,
         fuse_post_layer_norm_residual: bool = False,
+        fuse_factorized_add_add_silu: bool = False,
+        fuse_packed_mlp: bool = False,
+        post_layer_norm_residual_observer: Callable[..., Any] | None = None,
         edge_input_projection_mode: str = "concatenated",
         index_add_execution: str = "inline",
     ) -> None:
@@ -264,6 +340,10 @@ class GoogleSmallGraphNet(nn.Module):
         self.decoder_node_chunk_sizes = dict(decoder_node_chunk_sizes or {})
         self.activation_checkpointing = activation_checkpointing
         self.fuse_post_layer_norm_residual = fuse_post_layer_norm_residual
+        self.fuse_factorized_add_add_silu = fuse_factorized_add_add_silu
+        self.fuse_packed_mlp = fuse_packed_mlp
+        self.post_layer_norm_residual_calls = 0
+        self.post_layer_norm_residual_observer = post_layer_norm_residual_observer
         self.edge_input_projection_mode = edge_input_projection_mode
         self.index_add_execution = index_add_execution
         self.encoder_device: torch.device | None = None
@@ -333,9 +413,7 @@ class GoogleSmallGraphNet(nn.Module):
                 self.add_module(
                     f"decoder_nodes_{node_type}_mlp",
                     HaikuStyleFinalLinearHead(
-                        config.latent_size,
-                        output_dim,
-                        linear_type=self.linear_type,
+                        config.latent_size, output_dim, linear_type=self.linear_type,
                     ),
                 )
 
@@ -704,9 +782,81 @@ class GoogleSmallGraphNet(nn.Module):
             )
         mlp = getattr(self, f"{base_name}_mlp")
         hidden = torch.nn.functional.linear(edge_features, edge_weight, mlp.linear_0.bias)
-        hidden = hidden + gather_node_features(sender_projection, senders)
-        hidden = hidden + gather_node_features(receiver_projection, receivers)
-        output = mlp.linear_1(mlp.activation(hidden))
+
+        hidden_features = hidden.shape[-1]
+        row_count = hidden.numel() // hidden_features if hidden_features > 0 else 0
+        packed_candidate = (
+            self.fuse_packed_mlp
+            and _packed_mlp_scope_enabled("factorized")
+            and not torch.is_grad_enabled()
+            and hidden.is_contiguous()
+            and hidden_features > 0
+            and _packed_mlp_rows_eligible(row_count)
+            and mlp.linear_1.bias is not None
+        )
+        gather_fused_op = None
+        if (
+            self.fuse_factorized_add_add_silu
+            and not packed_candidate
+            and not torch.is_grad_enabled()
+            and hidden.dtype == torch.float32
+            and hidden.is_contiguous()
+            and sender_projection.is_contiguous()
+            and receiver_projection.is_contiguous()
+            and row_count >= FACTORIZED_GATHER_FUSION_MIN_ROWS
+        ):
+            import flag_gems
+
+            candidate = getattr(flag_gems, "gather_gather_add_silu", None)
+            if callable(candidate):
+                gather_fused_op = candidate
+
+        if gather_fused_op is not None:
+            activated = gather_fused_op(
+                hidden,
+                sender_projection,
+                senders,
+                receiver_projection,
+                receivers,
+            )
+            output = mlp.linear_1(activated)
+            return getattr(self, f"{base_name}_layer_norm")(output)
+
+        sender_residual = gather_node_features(sender_projection, senders)
+        receiver_residual = gather_node_features(receiver_projection, receivers)
+        can_pack = (
+            packed_candidate
+            and sender_residual.is_contiguous()
+            and receiver_residual.is_contiguous()
+        )
+        if can_pack:
+            import flag_gems
+
+            matrix_shape = (-1, hidden.shape[-1])
+            output_matrix = flag_gems.add_add_silu_addmm(
+                hidden.reshape(matrix_shape),
+                sender_residual.reshape(matrix_shape),
+                receiver_residual.reshape(matrix_shape),
+                mlp.linear_1.bias,
+                mlp.linear_1.weight.t(),
+            )
+            output = output_matrix.reshape(
+                *hidden.shape[:-1], mlp.linear_1.out_features
+            )
+        elif self.fuse_factorized_add_add_silu and not torch.is_grad_enabled():
+            import flag_gems
+
+            activated = flag_gems.add_add_silu(
+                hidden,
+                sender_residual,
+                receiver_residual,
+            )
+        else:
+            hidden = hidden + sender_residual
+            hidden = hidden + receiver_residual
+            activated = mlp.activation(hidden)
+        if not can_pack:
+            output = mlp.linear_1(activated)
         return getattr(self, f"{base_name}_layer_norm")(output)
 
     def _apply_mlp_with_layer_norm(self, base_name: str, x: torch.Tensor) -> torch.Tensor:
@@ -722,20 +872,21 @@ class GoogleSmallGraphNet(nn.Module):
         x = getattr(self, f"{base_name}_mlp")(x)
         layer_norm = getattr(self, f"{base_name}_layer_norm")
         if not self.fuse_post_layer_norm_residual:
+            if self.post_layer_norm_residual_observer is not None:
+                with self.post_layer_norm_residual_observer(
+                    x,
+                    residual,
+                    layer_norm.normalized_shape,
+                    layer_norm.weight,
+                    layer_norm.bias,
+                    layer_norm.eps,
+                ):
+                    return layer_norm(x) + residual
             return layer_norm(x) + residual
 
         # Node deltas have one residual consumer. Edge deltas are intentionally
         # excluded because they are also consumed by the message aggregation.
-        try:
-            import flag_gems
-        except ImportError as exc:
-            raise RuntimeError("post_layer_norm_residual fusion requires FlagGems") from exc
-        fused_op = getattr(flag_gems, "post_layer_norm_residual", None)
-        if fused_op is None:
-            raise RuntimeError(
-                "the selected FlagGems runtime does not provide post_layer_norm_residual"
-            )
-        return fused_op(
+        output = require_post_layer_norm_residual()(
             x,
             residual,
             layer_norm.normalized_shape,
@@ -743,6 +894,10 @@ class GoogleSmallGraphNet(nn.Module):
             layer_norm.bias,
             layer_norm.eps,
         )
+        # Host-only evidence of completed public API calls (including fallback),
+        # separate from the seven component operators' dispatch log.
+        self.post_layer_norm_residual_calls += 1
+        return output
 
     def _apply_decoder_node_output(
         self,
@@ -886,6 +1041,8 @@ class GoogleSmallCompatibleModel(nn.Module):
         *,
         activation_checkpointing: bool = False,
         fuse_post_layer_norm_residual: bool | None = None,
+        fuse_factorized_add_add_silu: bool | None = None,
+        fuse_packed_mlp: bool | None = None,
         edge_input_projection_mode: str = "concatenated",
         mesh2grid_full_grid_fast_path: bool = False,
         index_add_execution: str = "inline",
@@ -895,9 +1052,17 @@ class GoogleSmallCompatibleModel(nn.Module):
             fuse_post_layer_norm_residual = _environment_flag(
                 "GRAPHCAST_FUSE_POST_LAYER_NORM_RESIDUAL"
             )
+        if fuse_factorized_add_add_silu is None:
+            fuse_factorized_add_add_silu = _environment_flag(
+                "GRAPHCAST_FUSE_FACTORIZED_ADD_ADD_SILU"
+            )
+        if fuse_packed_mlp is None:
+            fuse_packed_mlp = _environment_flag("GRAPHCAST_FUSE_PACKED_MLP")
         self.config = config or GoogleSmallConfig()
         self.activation_checkpointing = activation_checkpointing
         self.fuse_post_layer_norm_residual = fuse_post_layer_norm_residual
+        self.fuse_factorized_add_add_silu = fuse_factorized_add_add_silu
+        self.fuse_packed_mlp = fuse_packed_mlp
         self.edge_input_projection_mode = edge_input_projection_mode
         self.mesh2grid_full_grid_fast_path = mesh2grid_full_grid_fast_path
         self.index_add_execution = index_add_execution
@@ -937,6 +1102,8 @@ class GoogleSmallCompatibleModel(nn.Module):
             config=self.config,
             activation_checkpointing=activation_checkpointing,
             fuse_post_layer_norm_residual=fuse_post_layer_norm_residual,
+            fuse_factorized_add_add_silu=fuse_factorized_add_add_silu,
+            fuse_packed_mlp=fuse_packed_mlp,
             edge_input_projection_mode=edge_input_projection_mode,
             index_add_execution=index_add_execution,
         )
@@ -958,6 +1125,8 @@ class GoogleSmallCompatibleModel(nn.Module):
             config=self.config,
             activation_checkpointing=activation_checkpointing,
             fuse_post_layer_norm_residual=fuse_post_layer_norm_residual,
+            fuse_factorized_add_add_silu=fuse_factorized_add_add_silu,
+            fuse_packed_mlp=fuse_packed_mlp,
             edge_input_projection_mode=edge_input_projection_mode,
             index_add_execution=index_add_execution,
         )
@@ -994,6 +1163,8 @@ class GoogleSmallCompatibleModel(nn.Module):
             config=self.config,
             activation_checkpointing=activation_checkpointing,
             fuse_post_layer_norm_residual=fuse_post_layer_norm_residual,
+            fuse_factorized_add_add_silu=fuse_factorized_add_add_silu,
+            fuse_packed_mlp=fuse_packed_mlp,
             edge_input_projection_mode=edge_input_projection_mode,
             index_add_execution=index_add_execution,
         )

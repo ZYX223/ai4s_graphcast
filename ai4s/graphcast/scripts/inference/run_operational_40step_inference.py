@@ -5,9 +5,11 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+import inspect
 import json
 import math
 import os
+import subprocess
 import sys
 import tempfile
 import time
@@ -46,6 +48,13 @@ from graphcast_compat.backend import (  # noqa: E402
 )
 from graphcast_compat.backend import (  # noqa: E402
     synchronize as synchronize_runtime,
+)
+from graphcast_compat.fusion_candidate_profile import (  # noqa: E402
+    PostLayerNormResidualRecorder,
+)
+from graphcast_compat.google_small import (  # noqa: E402
+    _environment_flag,
+    require_post_layer_norm_residual,
 )
 from graphcast_compat.inference_precision import (  # noqa: E402
     InferencePrecisionPolicy,
@@ -108,9 +117,7 @@ class TrajectoryNetCDFWriter:
         if valid_times is None:
             raise ValueError("diagnostic trajectories require forcing valid times")
         time_dimensions = [
-            dimension
-            for dimension in ("time", "lead_time")
-            if dimension in valid_times.dims
+            dimension for dimension in ("time", "lead_time") if dimension in valid_times.dims
         ]
         if len(time_dimensions) != 1 or valid_times.sizes[time_dimensions[0]] != steps:
             raise ValueError("valid times must contain exactly one value per trajectory lead")
@@ -118,9 +125,7 @@ class TrajectoryNetCDFWriter:
             raise ValueError("valid times must use a datetime64 dtype")
         self._valid_time_dimension = time_dimensions[0]
         reference_dimensions = tuple(
-            dimension
-            for dimension in valid_times.dims
-            if dimension != self._valid_time_dimension
+            dimension for dimension in valid_times.dims if dimension != self._valid_time_dimension
         )
         if reference_dimensions not in ((), ("batch",)):
             raise ValueError("valid times may vary only over batch and lead")
@@ -129,9 +134,7 @@ class TrajectoryNetCDFWriter:
             valid_times.dims.index(self._valid_time_dimension),
             -1,
         )
-        lead_offsets = (
-            np.arange(1, steps + 1, dtype=np.int64) * np.timedelta64(step_hours, "h")
-        )
+        lead_offsets = np.arange(1, steps + 1, dtype=np.int64) * np.timedelta64(step_hours, "h")
         references = ordered_valid_times - lead_offsets
         if not np.all(references == references[..., :1]):
             raise ValueError(
@@ -224,9 +227,7 @@ class TrajectoryNetCDFWriter:
         forecast_reference_time = dataset.createVariable(
             "forecast_reference_time", "i8", ("batch",)
         )
-        forecast_reference_time[:] = reference_values.astype("datetime64[s]").astype(
-            np.int64
-        )
+        forecast_reference_time[:] = reference_values.astype("datetime64[s]").astype(np.int64)
         forecast_reference_time.setncatts(
             {
                 "units": "seconds since 1970-01-01 00:00:00",
@@ -234,9 +235,7 @@ class TrajectoryNetCDFWriter:
                 "standard_name": "forecast_reference_time",
             }
         )
-        valid_time = dataset.createVariable(
-            "valid_time", "i8", ("batch", "lead_time")
-        )
+        valid_time = dataset.createVariable("valid_time", "i8", ("batch", "lead_time"))
         valid_time[:] = valid_time_values.astype("datetime64[s]").astype(np.int64)
         valid_time.setncatts(
             {
@@ -395,16 +394,19 @@ def resolve_model_execution_profile(platform: str, name: str) -> ModelExecutionP
             index_add_execution="inline",
         )
     if platform in DOMESTIC_PLATFORMS and name == "domestic-v1":
+        edge_chunk_size = 524288 if platform == "bw3000" else 131072
         return ModelExecutionProfile(
             name=name,
             platform=platform,
             runtime_backend=PLATFORM_RUNTIME_BACKENDS[platform],
             edge_input_projection="factorized",
-            grid2mesh_edge_chunk_size=131072,
-            mesh2grid_edge_chunk_size=131072,
+            grid2mesh_edge_chunk_size=edge_chunk_size,
+            mesh2grid_edge_chunk_size=edge_chunk_size,
             mesh2grid_full_grid_fast_path=True,
             index_add_execution=(
-                "prevalidated-static" if platform == "s5000" else "inline"
+                "prevalidated-static"
+                if platform in {"bw3000", "s5000"}
+                else "inline"
             ),
         )
     raise ValueError(f"model execution profile {name!r} is not valid for platform {platform!r}")
@@ -446,8 +448,7 @@ def calculate_throughput(
 
 def dataset_is_finite(dataset: xr.Dataset) -> bool:
     return bool(dataset.data_vars) and all(
-        np.isfinite(np.asarray(variable.values)).all()
-        for variable in dataset.data_vars.values()
+        np.isfinite(np.asarray(variable.values)).all() for variable in dataset.data_vars.values()
     )
 
 
@@ -459,9 +460,7 @@ def validate_normalization_stats(
     target_template: xr.Dataset,
 ) -> None:
     standard_variables = (
-        set(inputs.data_vars)
-        | set(forcings.data_vars)
-        | set(target_template.data_vars)
+        set(inputs.data_vars) | set(forcings.data_vars) | set(target_template.data_vars)
     )
     residual_variables = set(inputs.data_vars) & set(target_template.data_vars)
     required_variables = {
@@ -572,9 +571,7 @@ def run_tensor_resident_rollout(
             )
             if normalized_output is not None and trajectory_callback is not None:
                 finite = finite and bool(torch.isfinite(normalized_output).all().item())
-                captured = normalized_output.detach().to(
-                    device="cpu", dtype=torch.float32
-                )
+                captured = normalized_output.detach().to(device="cpu", dtype=torch.float32)
                 trajectory_callback(step_index, captured)
                 if final_step:
                     final_output = captured
@@ -673,7 +670,11 @@ def stamp_final_prediction_time(
     if steps <= 0 or step_hours <= 0 or prediction.sizes.get("time") != 1:
         raise ValueError("final prediction requires one frame and a positive rollout horizon")
     result = prediction.drop_vars(
-        [name for name in ("datetime", "valid_time", "forecast_reference_time") if name in prediction]
+        [
+            name
+            for name in ("datetime", "valid_time", "forecast_reference_time")
+            if name in prediction
+        ]
     ).assign_coords(time=[np.timedelta64(steps * step_hours, "h")])
     if valid_times is None:
         # Missing initialization evidence must remain missing, never copied from the template.
@@ -686,8 +687,11 @@ def stamp_final_prediction_time(
         values = np.asarray(valid_times.transpose("batch", "time"))
     else:
         raise ValueError("forcing valid times require time and optional batch dimensions")
-    if (values.shape[0] != prediction.sizes.get("batch")
-            or not np.issubdtype(values.dtype, np.datetime64) or np.isnat(values).any()):
+    if (
+        values.shape[0] != prediction.sizes.get("batch")
+        or not np.issubdtype(values.dtype, np.datetime64)
+        or np.isnat(values).any()
+    ):
         raise ValueError("forcing valid-time batch or dtype is invalid")
     leads = np.arange(1, steps + 1) * np.timedelta64(step_hours, "h")
     initializations = values - leads
@@ -707,9 +711,7 @@ def _stage_json(path: Path, payload: dict[str, Any]) -> Path:
     temporary = Path(temporary_name)
     try:
         with os.fdopen(descriptor, "w", encoding="utf-8") as handle:
-            handle.write(
-                json.dumps(payload, allow_nan=False, indent=2, sort_keys=True) + "\n"
-            )
+            handle.write(json.dumps(payload, allow_nan=False, indent=2, sort_keys=True) + "\n")
             handle.flush()
             os.fsync(handle.fileno())
     except BaseException:
@@ -784,13 +786,64 @@ def build_model_for_run(
     edge_input_projection: str,
     mesh2grid_full_grid_fast_path: bool = False,
     index_add_execution: str = "inline",
+    fuse_post_layer_norm_residual: bool | None = None,
 ) -> GoogleSmallCompatibleModel:
     return GoogleSmallCompatibleModel(
         config,
         edge_input_projection_mode=edge_input_projection,
         mesh2grid_full_grid_fast_path=mesh2grid_full_grid_fast_path,
         index_add_execution=index_add_execution,
+        fuse_post_layer_norm_residual=fuse_post_layer_norm_residual,
     )
+
+
+def post_layer_norm_residual_source_audit(
+    requested: bool,
+    *,
+    flagos_mode: str,
+) -> dict[str, Any]:
+    """Validate the public fusion source before inference; never touch tensors."""
+    audit = {"requested": requested, "effective": False}
+    if not requested and flagos_mode != "flaggems":
+        return audit
+    if flagos_mode != "flaggems":
+        raise RuntimeError("post_layer_norm_residual fusion requires flaggems mode")
+    fused_op = require_post_layer_norm_residual() if requested else None
+    import flag_gems
+
+    package_file = Path(flag_gems.__file__).resolve()
+    symbol_file = Path(inspect.getfile(fused_op)).resolve() if requested else None
+    selected_root = os.environ.get("GRAPHCAST_FLAGGEMS_SOURCE_ROOT", "").strip()
+    package_parent = package_file.parent.parent
+    root = (
+        Path(selected_root).expanduser().resolve()
+        if selected_root
+        else package_parent.parent
+        if package_parent.name == "src"
+        else package_parent
+    )
+    for path in (package_file, symbol_file):
+        if path is not None and not path.is_relative_to(root):
+            raise RuntimeError(f"fusion source outside selected FlagGems tree: {path}")
+    revision = None
+    # An archive/site install has no verifiable Git revision. Do not mistake a
+    # surrounding repository's HEAD for the selected FlagGems source revision.
+    if (root / ".git").exists():
+        revision = subprocess.check_output(
+            ["git", "-C", str(root), "rev-parse", "HEAD"],
+            text=True,
+        ).strip()
+    return {
+        **audit,
+        "effective": requested,
+        "module": fused_op.__module__ if requested else None,
+        "file": str(symbol_file) if symbol_file else None,
+        "sha256": _sha256(symbol_file) if symbol_file else None,
+        "flaggems_module_file": str(package_file),
+        "flaggems_source_root": str(root),
+        "flaggems_revision": revision,
+        "revision_status": "git_head" if revision else "unavailable_no_git_metadata",
+    }
 
 
 def apply_edge_chunk_overrides(
@@ -868,6 +921,18 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         type=Path,
         help="Diagnostic-only NetCDF containing every autoregressive lead",
     )
+    parser.add_argument(
+        "--post-layernorm-residual-profile",
+        action="store_true",
+        help="Record post-LayerNorm residual candidate metadata and event timings",
+    )
+    parser.add_argument("--post-layernorm-residual-profile-path", type=Path)
+    parser.add_argument(
+        "--fuse-post-layer-norm-residual",
+        action=argparse.BooleanOptionalAction,
+        default=_environment_flag("GRAPHCAST_FUSE_POST_LAYER_NORM_RESIDUAL"),
+        help="Use the FlagGems public fusion API for single-consumer node updates",
+    )
     parser.add_argument("--step-hours", type=int, default=6)
     parser.add_argument("--overwrite", action="store_true")
     args = parser.parse_args(argv)
@@ -877,6 +942,17 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         )
     except ValueError as error:
         parser.error(str(error))
+    if (
+        args.post_layernorm_residual_profile_path is not None
+        and not args.post_layernorm_residual_profile
+    ):
+        parser.error(
+            "--post-layernorm-residual-profile-path requires --post-layernorm-residual-profile"
+        )
+    if args.post_layernorm_residual_profile and args.post_layernorm_residual_profile_path is None:
+        args.post_layernorm_residual_profile_path = args.report.with_name(
+            f"{args.report.stem}.post-layernorm-residual-profile.json"
+        )
     return args
 
 
@@ -889,32 +965,54 @@ def main(argv: list[str] | None = None) -> int:
     outputs = [args.output, args.report]
     if args.trajectory_output is not None:
         outputs.append(args.trajectory_output)
+    if args.post_layernorm_residual_profile:
+        outputs.append(args.post_layernorm_residual_profile_path)
     input_paths = {
         "config": args.config,
         "weights": args.weights,
         "inputs": args.inputs,
         "rollout_forcings": args.rollout_forcings,
         "target_template": args.target_template,
-        **{
-            f"stats/{name}": args.stats_dir / name
-            for name in REQUIRED_STATS_FILES
-        },
+        **{f"stats/{name}": args.stats_dir / name for name in REQUIRED_STATS_FILES},
     }
     output_paths = {"prediction": args.output, "report": args.report}
     if args.trajectory_output is not None:
         output_paths["trajectory"] = args.trajectory_output
+    if args.post_layernorm_residual_profile:
+        output_paths["post_layernorm_residual_profile"] = args.post_layernorm_residual_profile_path
     _require_distinct_paths({**input_paths, **output_paths})
     if args.output.exists() and not args.overwrite:
         raise FileExistsError(f"output already exists: {args.output}")
     if args.report.exists() and not args.overwrite:
         raise FileExistsError(f"report already exists: {args.report}")
     if (
+        args.post_layernorm_residual_profile
+        and args.post_layernorm_residual_profile_path.exists()
+        and not args.overwrite
+    ):
+        raise FileExistsError(
+            "post-LayerNorm residual profile already exists: "
+            f"{args.post_layernorm_residual_profile_path}"
+        )
+    if (
         args.trajectory_output is not None
         and args.trajectory_output.exists()
         and not args.overwrite
     ):
-        raise FileExistsError(
-            f"trajectory output already exists: {args.trajectory_output}"
+        raise FileExistsError(f"trajectory output already exists: {args.trajectory_output}")
+    model_execution_profile = args.model_execution_profile
+    runtime = None
+    if args.fuse_post_layer_norm_residual:
+        # Reject an unusable fusion source before opening large model assets.
+        # Unfused runs retain their existing asset-first validation order.
+        runtime = resolve_runtime_backend(
+            args.device,
+            expected_profile=model_execution_profile.runtime_backend,
+        )
+        validate_runtime_platform(args.platform, runtime.profile.name)
+        fusion_source_audit = post_layer_norm_residual_source_audit(
+            args.fuse_post_layer_norm_residual,
+            flagos_mode=runtime.flagos.mode,
         )
     for path in input_paths.values():
         if not path.is_file():
@@ -924,12 +1022,16 @@ def main(argv: list[str] | None = None) -> int:
         for name, path in input_paths.items()
     }
 
-    model_execution_profile = args.model_execution_profile
-    runtime = resolve_runtime_backend(
-        args.device,
-        expected_profile=model_execution_profile.runtime_backend,
-    )
-    validate_runtime_platform(args.platform, runtime.profile.name)
+    if runtime is None:
+        runtime = resolve_runtime_backend(
+            args.device,
+            expected_profile=model_execution_profile.runtime_backend,
+        )
+        validate_runtime_platform(args.platform, runtime.profile.name)
+        fusion_source_audit = post_layer_norm_residual_source_audit(
+            args.fuse_post_layer_norm_residual,
+            flagos_mode=runtime.flagos.mode,
+        )
     precision_policy = resolve_inference_precision(args.precision)
     float32_math_mode = configure_float32_math(
         precision_policy.fast_float32_math,
@@ -954,10 +1056,9 @@ def main(argv: list[str] | None = None) -> int:
     model = build_model_for_run(
         config,
         edge_input_projection=model_execution_profile.edge_input_projection,
-        mesh2grid_full_grid_fast_path=(
-            model_execution_profile.mesh2grid_full_grid_fast_path
-        ),
+        mesh2grid_full_grid_fast_path=(model_execution_profile.mesh2grid_full_grid_fast_path),
         index_add_execution=model_execution_profile.index_add_execution,
+        fuse_post_layer_norm_residual=args.fuse_post_layer_norm_residual,
     )
     model.load_state_dict(
         _select_state_dict(torch.load(args.weights, map_location="cpu")),
@@ -998,12 +1099,8 @@ def main(argv: list[str] | None = None) -> int:
     def capture_trajectory(step_index: int, normalized_output: torch.Tensor) -> None:
         nonlocal trajectory_physical_finite
         assert trajectory_writer is not None
-        prediction = normalized_output_to_prediction(
-            normalized_output, target_template, stats
-        )
-        trajectory_physical_finite = (
-            trajectory_physical_finite and dataset_is_finite(prediction)
-        )
+        prediction = normalized_output_to_prediction(normalized_output, target_template, stats)
+        trajectory_physical_finite = trajectory_physical_finite and dataset_is_finite(prediction)
         trajectory_writer.append(
             step_index,
             prediction,
@@ -1011,9 +1108,23 @@ def main(argv: list[str] | None = None) -> int:
 
     staged_prediction: Path | None = None
     staged_report: Path | None = None
+    staged_candidate_profile: Path | None = None
     publication_started = False
     output_backups: dict[Path, Path] = {}
     try:
+        if args.post_layernorm_residual_profile:
+            args.post_layernorm_residual_profile_path.parent.mkdir(parents=True, exist_ok=True)
+            descriptor, staged_profile_name = tempfile.mkstemp(
+                prefix=f".{args.post_layernorm_residual_profile_path.name}.",
+                suffix=".tmp.json",
+                dir=args.post_layernorm_residual_profile_path.parent,
+            )
+            os.close(descriptor)
+            staged_candidate_profile = Path(staged_profile_name)
+        candidate_recorder = PostLayerNormResidualRecorder(staged_candidate_profile)
+        if candidate_recorder.enabled:
+            for graph_net in (model.grid2mesh_gnn, model.mesh_gnn, model.mesh2grid_gnn):
+                graph_net.post_layer_norm_residual_observer = candidate_recorder.region
         trajectory_callback = capture_trajectory if trajectory_writer is not None else None
         if static_index_add_contract is None:
             measurement = run_tensor_resident_rollout(
@@ -1046,14 +1157,38 @@ def main(argv: list[str] | None = None) -> int:
             model.verify_static_index_add(static_index_add_contract)
             static_runtime_evidence = runtime_evidence
 
+        candidate_profile = candidate_recorder.stop(
+            metadata={
+                "platform": args.platform,
+                "runtime_backend": runtime.profile.name,
+                "model_execution_profile": model_execution_profile.name,
+                "steps": args.steps,
+                "warmup_calls": args.warmup_calls,
+            }
+        )
+
         dispatch_audit = require_complete_flaggems_dispatch(runtime)
+        if (
+            post_layer_norm_residual_source_audit(
+                args.fuse_post_layer_norm_residual,
+                flagos_mode=runtime.flagos.mode,
+            )
+            != fusion_source_audit
+        ):
+            raise RuntimeError("post_layer_norm_residual source changed during inference")
+        fused_calls = {
+            name: getattr(model, name).post_layer_norm_residual_calls
+            for name in ("grid2mesh_gnn", "mesh_gnn", "mesh2grid_gnn")
+        }
         prediction = normalized_output_to_prediction(
             measurement.final_output,
             target_template,
             stats,
         )
         prediction = stamp_final_prediction_time(
-            prediction, steps=args.steps, step_hours=args.step_hours,
+            prediction,
+            steps=args.steps,
+            step_hours=args.step_hours,
             valid_times=forcings.coords.get("datetime"),
         )
         physical_finite = dataset_is_finite(prediction) and trajectory_physical_finite
@@ -1072,29 +1207,34 @@ def main(argv: list[str] | None = None) -> int:
             device_count=args.device_count,
         )
         passed = measurement.finite and physical_finite
-        performance_eligible = trajectory_writer is None and passed
+        performance_eligible = (
+            trajectory_writer is None and not candidate_recorder.enabled and passed
+        )
         report = {
             "schema": "graphcast.operational_rollout.v2",
             "status": "passed" if passed else "failed_nonfinite",
             "source": {
+                "post_layer_norm_residual_fusion": fusion_source_audit,
                 "config": source_identities["config"]["path"],
                 "config_sha256": source_identities["config"]["sha256"],
                 "weights": source_identities["weights"]["path"],
                 "weights_sha256": source_identities["weights"]["sha256"],
                 "inputs_sha256": source_identities["inputs"]["sha256"],
-                "rollout_forcings_sha256": source_identities["rollout_forcings"][
-                    "sha256"
-                ],
-                "target_template_sha256": source_identities["target_template"][
-                    "sha256"
-                ],
+                "rollout_forcings_sha256": source_identities["rollout_forcings"]["sha256"],
+                "target_template_sha256": source_identities["target_template"]["sha256"],
                 "normalization_stats": {
-                    name: source_identities[f"stats/{name}"]
-                    for name in REQUIRED_STATS_FILES
+                    name: source_identities[f"stats/{name}"] for name in REQUIRED_STATS_FILES
                 },
             },
             "runtime": {
                 **runtime.to_metadata(),
+                "post_layer_norm_residual_dispatch": {
+                    "api_calls": sum(fused_calls.values()),
+                    "api_calls_by_graph_net": fused_calls,
+                    "scope": "warmup_and_measured_rollout",
+                    "evidence": "public_api_returned_including_possible_fallback",
+                    "synchronizes": False,
+                },
                 "flaggems_dispatch": (
                     dispatch_audit.to_metadata()
                     if dispatch_audit is not None
@@ -1124,6 +1264,14 @@ def main(argv: list[str] | None = None) -> int:
                     if static_index_add_contract is not None
                     else {"status": "not_requested"}
                 ),
+                "post_layernorm_residual_profile": {
+                    "enabled": candidate_recorder.enabled,
+                    "path": (
+                        str(args.post_layernorm_residual_profile_path.resolve())
+                        if candidate_recorder.enabled
+                        else None
+                    ),
+                },
             },
             "measurement": {
                 "e2e_seconds": measurement.e2e_seconds,
@@ -1159,6 +1307,15 @@ def main(argv: list[str] | None = None) -> int:
                     if staged_trajectory is not None
                     else None
                 ),
+                "post_layernorm_residual_profile": (
+                    {
+                        "path": str(args.post_layernorm_residual_profile_path.resolve()),
+                        "sha256": _sha256(staged_candidate_profile),
+                        "groups": len(candidate_profile["groups"]),
+                    }
+                    if candidate_profile is not None
+                    else None
+                ),
             },
             "output": str(args.output.resolve()),
         }
@@ -1170,6 +1327,9 @@ def main(argv: list[str] | None = None) -> int:
         staged_prediction = None
         if trajectory_writer is not None:
             trajectory_writer.publish()
+        if staged_candidate_profile is not None:
+            os.replace(staged_candidate_profile, args.post_layernorm_residual_profile_path)
+            staged_candidate_profile = None
         os.replace(staged_report, args.report)
         staged_report = None
         obsolete_backups = tuple(output_backups.values())
@@ -1184,6 +1344,8 @@ def main(argv: list[str] | None = None) -> int:
             staged_prediction.unlink(missing_ok=True)
         if staged_report is not None:
             staged_report.unlink(missing_ok=True)
+        if staged_candidate_profile is not None:
+            staged_candidate_profile.unlink(missing_ok=True)
         if trajectory_writer is not None:
             trajectory_writer.abort()
         if publication_started:

@@ -1,7 +1,11 @@
 from __future__ import annotations
 
+import hashlib
+import importlib.util
 import json
+import subprocess
 import sys
+from contextlib import nullcontext
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -42,13 +46,13 @@ def test_final_prediction_uses_actual_rollout_time_not_template_time(steps):
     times = xr.DataArray((init + leads)[None, :], dims=("batch", "time"))
     prediction = xr.Dataset(
         {"temperature": (("batch", "time", "lat", "lon"), np.ones((1, 1, 1, 1)))},
-        coords={"batch": [0], "time": [np.timedelta64(6, "h")], "lat": [0.], "lon": [0.]},
+        coords={"batch": [0], "time": [np.timedelta64(6, "h")], "lat": [0.0], "lon": [0.0]},
     )
     actual = stamp(prediction, steps=steps, step_hours=6, valid_times=times)
     assert actual.time.values[0] == np.timedelta64(steps * 6, "h")
     assert actual.datetime.values[0, 0] == init + np.timedelta64(steps * 6, "h")
     assert actual.forecast_reference_time.values[0] == init
-    assert actual.temperature.values.tolist() == [[[[1.]]]]
+    assert actual.temperature.values.tolist() == [[[[1.0]]]]
     assert prediction.time.values[0] == np.timedelta64(6, "h")
 
 
@@ -56,7 +60,10 @@ def test_final_prediction_rejects_irregular_forcing_times():
     stamp = getattr(operational_runner, "stamp_final_prediction_time", None)
     assert callable(stamp), "final prediction time stamping is missing"
     prediction = xr.Dataset(coords={"batch": [0], "time": [np.timedelta64(6, "h")]})
-    times = xr.DataArray(np.asarray([["2021-01-01T06", "2021-01-01T18"]], dtype="datetime64[h]"), dims=("batch", "time"))
+    times = xr.DataArray(
+        np.asarray([["2021-01-01T06", "2021-01-01T18"]], dtype="datetime64[h]"),
+        dims=("batch", "time"),
+    )
     with pytest.raises(ValueError):
         stamp(prediction, steps=2, step_hours=6, valid_times=times)
 
@@ -114,6 +121,246 @@ def _profile_resolver():
     return resolver
 
 
+def _fake_fusion_package(monkeypatch, tmp_path):
+    root = tmp_path / "flaggems"
+    package = root / "src" / "flag_gems"
+    package.mkdir(parents=True)
+    module_file = package / "__init__.py"
+    module_file.write_text(
+        "import torch\n"
+        "def post_layer_norm_residual(x, residual, shape, weight, bias, eps):\n"
+        "    return torch.layer_norm(x, shape, weight, bias, eps) + residual\n"
+    )
+    for command in (
+        ["init", "-q"],
+        ["add", "."],
+        [
+            "-c",
+            "user.name=Test",
+            "-c",
+            "user.email=test@example.invalid",
+            "commit",
+            "-qm",
+            "fixture",
+        ],
+    ):
+        subprocess.run(["git", "-C", str(root), *command], check=True)
+    revision = subprocess.check_output(
+        ["git", "-C", str(root), "rev-parse", "HEAD"], text=True
+    ).strip()
+    spec = importlib.util.spec_from_file_location("flag_gems", module_file)
+    module = importlib.util.module_from_spec(spec)
+    monkeypatch.setitem(sys.modules, "flag_gems", module)
+    spec.loader.exec_module(module)
+    monkeypatch.setenv("GRAPHCAST_FLAGGEMS_SOURCE_ROOT", str(root))
+    return root, module_file, revision
+
+
+def test_fusion_cli_defaults_off_and_preserves_environment_override(monkeypatch):
+    monkeypatch.delenv("GRAPHCAST_FUSE_POST_LAYER_NORM_RESIDUAL", raising=False)
+    assert parse_args(_profiled_cli_args()).fuse_post_layer_norm_residual is False
+    assert (
+        parse_args(
+            [*_profiled_cli_args(), "--fuse-post-layer-norm-residual"]
+        ).fuse_post_layer_norm_residual
+        is True
+    )
+    monkeypatch.setenv("GRAPHCAST_FUSE_POST_LAYER_NORM_RESIDUAL", "1")
+    assert parse_args(_profiled_cli_args()).fuse_post_layer_norm_residual is True
+    assert (
+        parse_args(
+            [*_profiled_cli_args(), "--no-fuse-post-layer-norm-residual"]
+        ).fuse_post_layer_norm_residual
+        is False
+    )
+
+
+@pytest.mark.parametrize("symbol", [None, 42])
+def test_fusion_preflight_rejects_missing_or_noncallable_public_api(monkeypatch, symbol):
+    monkeypatch.setitem(sys.modules, "flag_gems", SimpleNamespace(post_layer_norm_residual=symbol))
+    with pytest.raises(RuntimeError, match="post_layer_norm_residual"):
+        operational_runner.post_layer_norm_residual_source_audit(True, flagos_mode="flaggems")
+
+
+@pytest.mark.parametrize("failure", ["missing", "noncallable", "wrong_root"])
+@pytest.mark.parametrize("asset_state", ["missing", "unreadable"])
+def test_fusion_preflight_precedes_all_asset_reads_and_model_work(
+    monkeypatch,
+    tmp_path,
+    failure,
+    asset_state,
+):
+    _fake_fusion_package(monkeypatch, tmp_path)
+    if failure == "missing":
+        del sys.modules["flag_gems"].post_layer_norm_residual
+    elif failure == "noncallable":
+        sys.modules["flag_gems"].post_layer_norm_residual = 42
+    else:
+        monkeypatch.setenv("GRAPHCAST_FLAGGEMS_SOURCE_ROOT", str(tmp_path / "other"))
+
+    arguments = _required_cli_args()
+    for index in range(1, len(arguments), 2):
+        arguments[index] = str(tmp_path / arguments[index])
+    if asset_state == "unreadable":
+        for name in ("config.yaml", "weights.pt", "inputs.nc", "forcings.nc", "target.nc"):
+            (tmp_path / name).write_bytes(b"fixture")
+        (tmp_path / "stats").mkdir()
+        for name in operational_runner.REQUIRED_STATS_FILES:
+            (tmp_path / "stats" / name).write_bytes(b"fixture")
+
+    calls = []
+
+    def resolve_runtime(device, *, expected_profile):
+        calls.append("runtime")
+        assert expected_profile == "ascend"
+        return SimpleNamespace(
+            profile=SimpleNamespace(name="ascend", device_type="npu"),
+            flagos=SimpleNamespace(mode="flaggems"),
+        )
+
+    def asset_hash(path):
+        calls.append("asset_hash")
+        raise PermissionError("asset content is unreadable")
+
+    def forbidden_work(*args, **kwargs):
+        calls.append("model_or_device_work")
+        raise AssertionError("model or device work preceded fusion preflight")
+
+    monkeypatch.setattr(operational_runner, "resolve_runtime_backend", resolve_runtime)
+    monkeypatch.setattr(operational_runner, "_sha256", asset_hash)
+    monkeypatch.setattr(operational_runner.xr, "open_dataset", forbidden_work)
+    monkeypatch.setattr(operational_runner.torch, "load", forbidden_work)
+    monkeypatch.setattr(GoogleSmallConfig, "from_yaml", forbidden_work)
+    for name in (
+        "build_model_for_run",
+        "load_normalization_stats",
+        "configure_float32_math",
+        "prepare_device_rollout",
+        "reset_peak_memory",
+        "run_tensor_resident_rollout",
+        "synchronize_runtime",
+    ):
+        monkeypatch.setattr(operational_runner, name, forbidden_work)
+
+    message = "outside selected FlagGems" if failure == "wrong_root" else "post_layer_norm_residual"
+    with pytest.raises(RuntimeError, match=message):
+        operational_runner.main(
+            [
+                *arguments,
+                "--platform",
+                "910c",
+                "--model-execution-profile",
+                "domestic-v1",
+                "--fuse-post-layer-norm-residual",
+            ]
+        )
+    assert calls == ["runtime"]
+
+
+def test_unfused_missing_assets_still_fail_before_runtime_resolution(monkeypatch, tmp_path):
+    monkeypatch.chdir(tmp_path)
+
+    def unexpected_runtime(*args, **kwargs):
+        pytest.fail("unfused missing assets should fail before runtime resolution")
+
+    monkeypatch.setattr(operational_runner, "resolve_runtime_backend", unexpected_runtime)
+    with pytest.raises(FileNotFoundError):
+        operational_runner.main([*_profiled_cli_args(), "--no-fuse-post-layer-norm-residual"])
+
+
+@pytest.mark.parametrize("flag,value", [("--step-hours", "0"), ("--peak-tflops-per-device", "-1")])
+def test_fusion_preflight_preserves_ordinary_argument_validation(monkeypatch, flag, value):
+    def unexpected_runtime(*args, **kwargs):
+        pytest.fail("argument validation should fail before runtime resolution")
+
+    monkeypatch.setattr(operational_runner, "resolve_runtime_backend", unexpected_runtime)
+    with pytest.raises(ValueError):
+        operational_runner.main(
+            [
+                *_profiled_cli_args(),
+                "--fuse-post-layer-norm-residual",
+                flag,
+                value,
+            ]
+        )
+
+
+def test_fusion_source_audit_binds_loaded_symbol_to_selected_git_tree(monkeypatch, tmp_path):
+    root, module_file, revision = _fake_fusion_package(monkeypatch, tmp_path)
+    audit = operational_runner.post_layer_norm_residual_source_audit(True, flagos_mode="flaggems")
+    assert audit["requested"] is True
+    assert audit["effective"] is True
+    assert audit["module"] == "flag_gems"
+    assert audit["file"] == str(module_file)
+    assert audit["sha256"] == hashlib.sha256(module_file.read_bytes()).hexdigest()
+    assert audit["flaggems_source_root"] == str(root)
+    assert audit["flaggems_revision"] == revision
+    monkeypatch.setenv("GRAPHCAST_FLAGGEMS_SOURCE_ROOT", str(tmp_path / "other"))
+    with pytest.raises(RuntimeError, match="outside selected FlagGems"):
+        operational_runner.post_layer_norm_residual_source_audit(True, flagos_mode="flaggems")
+
+
+def test_unfused_flaggems_run_audits_source_without_requiring_fused_api(monkeypatch, tmp_path):
+    root, _, revision = _fake_fusion_package(monkeypatch, tmp_path)
+    del sys.modules["flag_gems"].post_layer_norm_residual
+    audit = operational_runner.post_layer_norm_residual_source_audit(False, flagos_mode="flaggems")
+    assert audit["effective"] is False
+    assert audit["flaggems_source_root"] == str(root)
+    assert audit["flaggems_revision"] == revision
+
+
+def test_fused_dispatch_evidence_does_not_count_as_component_coverage(tmp_path):
+    from graphcast_compat.backend import audit_flaggems_dispatch
+
+    record = tmp_path / "dispatch.log"
+    record.write_text("GEMS ASCEND POST LAYERNORM RESIDUAL\n")
+    ops = ("addmm", "cat", "native_layer_norm", "index_add_", "silu", "index", "add")
+    audit = audit_flaggems_dispatch(record, ops)
+    assert audit.to_metadata()["active_coverage"] == "0/7"
+    record.write_text(
+        record.read_text()
+        + "\n".join(
+            [
+                "GEMS ADDMM",
+                "GEMS CAT",
+                "GEMS NATIVE_LAYER_NORM",
+                "GEMS INDEX_ADD",
+                "GEMS SILU FORWARD",
+                "GEMS INDEX",
+                "GEMS ADD",
+            ]
+        )
+    )
+    audit = audit_flaggems_dispatch(record, ops)
+    assert audit.to_metadata()["active_coverage"] == "7/7"
+    assert set(audit.counts.values()) == {1}
+
+
+def test_fusion_requires_flaggems_mode():
+    with pytest.raises(RuntimeError, match="requires.*flaggems"):
+        operational_runner.post_layer_norm_residual_source_audit(True, flagos_mode="off")
+
+
+def test_operational_builder_activates_fusion_for_all_node_update_stages():
+    model = operational_runner.build_model_for_run(
+        GoogleSmallConfig(
+            latent_size=4,
+            hidden_layers=1,
+            gnn_msg_steps=1,
+            node_input_dim=4,
+            edge_input_dim=1,
+            output_dim=1,
+        ),
+        edge_input_projection="factorized",
+        fuse_post_layer_norm_residual=True,
+    )
+    assert model.fuse_post_layer_norm_residual is True
+    assert all(
+        net.fuse_post_layer_norm_residual
+        for net in (model.grid2mesh_gnn, model.mesh_gnn, model.mesh2grid_gnn)
+    )
+
+
 def _runtime_platform_validator():
     validator = getattr(operational_runner, "validate_runtime_platform", None)
     assert callable(validator), "runtime platform validator is missing"
@@ -138,7 +385,7 @@ def test_h100_baseline_expands_to_the_conservative_reference_path() -> None:
 
 
 @pytest.mark.parametrize("platform", ("c550", "bw3000", "s5000", "910c", "810e"))
-def test_domestic_v1_selects_only_the_s5000_trusted_index_path(platform: str) -> None:
+def test_domestic_v1_selects_validated_platform_configuration(platform: str) -> None:
     profile = _profile_resolver()(platform, "domestic-v1")
 
     assert profile.to_metadata() == {
@@ -147,12 +394,10 @@ def test_domestic_v1_selects_only_the_s5000_trusted_index_path(platform: str) ->
         "runtime_backend": operational_runner.PLATFORM_RUNTIME_BACKENDS[platform],
         "configuration_overrides": {
             "edge_input_projection": "factorized",
-            "grid2mesh_edge_chunk_size": 131072,
-            "mesh2grid_edge_chunk_size": 131072,
+            "grid2mesh_edge_chunk_size": 524288 if platform == "bw3000" else 131072,
+            "mesh2grid_edge_chunk_size": 524288 if platform == "bw3000" else 131072,
             "mesh2grid_full_grid_fast_path": True,
-            "index_add_execution": (
-                "prevalidated-static" if platform == "s5000" else "inline"
-            ),
+            "index_add_execution": ("prevalidated-static" if platform in {"s5000", "bw3000"} else "inline"),
         },
     }
 
@@ -168,9 +413,7 @@ def test_domestic_v1_selects_only_the_s5000_trusted_index_path(platform: str) ->
         ("810e", "baseline"),
     ),
 )
-def test_model_execution_profile_rejects_cross_platform_use(
-    platform: str, profile: str
-) -> None:
+def test_model_execution_profile_rejects_cross_platform_use(platform: str, profile: str) -> None:
     with pytest.raises(ValueError, match="not valid"):
         _profile_resolver()(platform, profile)
 
@@ -190,9 +433,7 @@ def test_model_execution_profile_rejects_cross_platform_use(
 def test_formal_cli_applies_profile_independently_of_precision(
     platform: str, profile: str, precision: str
 ) -> None:
-    args = parse_args(
-        _profiled_cli_args(platform=platform, profile=profile, precision=precision)
-    )
+    args = parse_args(_profiled_cli_args(platform=platform, profile=profile, precision=precision))
 
     assert args.precision == precision
     assert args.model_execution_profile.name == profile
@@ -234,9 +475,7 @@ def test_runtime_platform_validator_accepts_only_the_bound_backend(
     ("platform", "backend"),
     (("h100", "metax"), ("c550", "nvidia"), ("910c", "ptg"), ("810e", "ascend")),
 )
-def test_runtime_platform_validator_rejects_swapped_backends(
-    platform: str, backend: str
-) -> None:
+def test_runtime_platform_validator_rejects_swapped_backends(platform: str, backend: str) -> None:
     with pytest.raises(RuntimeError, match="requires runtime backend"):
         _runtime_platform_validator()(platform, backend)
 
@@ -398,9 +637,7 @@ def test_trajectory_writer_publishes_one_atomic_multilead_netcdf(tmp_path: Path)
     with xr.open_dataset(output) as trajectory:
         assert trajectory.attrs["schema"] == "graphcast.inference_trajectory.v1"
         assert trajectory.attrs["performance_eligible"] == 0
-        assert (
-            trajectory["lead_time"].values / np.timedelta64(1, "h")
-        ).tolist() == [6.0, 12.0]
+        assert (trajectory["lead_time"].values / np.timedelta64(1, "h")).tolist() == [6.0, 12.0]
         assert trajectory["temperature"].dims == ("batch", "lead_time", "lat", "lon")
         assert "valid_time" in trajectory.coords
         assert trajectory["valid_time"].dims == ("batch", "lead_time")
@@ -477,9 +714,7 @@ def test_formal_cli_accepts_optional_diagnostic_trajectory_output() -> None:
 
 def test_main_rejects_nonfinite_peak_before_loading_assets() -> None:
     with pytest.raises(ValueError, match="finite and nonnegative"):
-        operational_runner.main(
-            [*_profiled_cli_args(), "--peak-tflops-per-device", "nan"]
-        )
+        operational_runner.main([*_profiled_cli_args(), "--peak-tflops-per-device", "nan"])
 
 
 def test_runner_outputs_cannot_alias_normalization_stats(tmp_path: Path) -> None:
@@ -497,16 +732,26 @@ def test_runner_outputs_cannot_alias_normalization_stats(tmp_path: Path) -> None
     with pytest.raises(ValueError, match="must be distinct"):
         operational_runner.main(
             [
-                "--config", str(assets["config.yaml"]),
-                "--weights", str(assets["weights.pt"]),
-                "--inputs", str(assets["inputs.nc"]),
-                "--rollout-forcings", str(assets["forcings.nc"]),
-                "--target-template", str(assets["target.nc"]),
-                "--stats-dir", str(stats_dir),
-                "--output", str(stats_dir / "stddev_by_level.nc"),
-                "--report", str(tmp_path / "report.json"),
-                "--platform", "h100",
-                "--model-execution-profile", "baseline",
+                "--config",
+                str(assets["config.yaml"]),
+                "--weights",
+                str(assets["weights.pt"]),
+                "--inputs",
+                str(assets["inputs.nc"]),
+                "--rollout-forcings",
+                str(assets["forcings.nc"]),
+                "--target-template",
+                str(assets["target.nc"]),
+                "--stats-dir",
+                str(stats_dir),
+                "--output",
+                str(stats_dir / "stddev_by_level.nc"),
+                "--report",
+                str(tmp_path / "report.json"),
+                "--platform",
+                "h100",
+                "--model-execution-profile",
+                "baseline",
             ]
         )
 
@@ -783,11 +1028,17 @@ def test_baseline_report_separates_profile_overrides_from_effective_chunks() -> 
     ("physical_finite", "expected_exit", "expected_status"),
     ((True, 0, "passed"), (False, 1, "failed_nonfinite")),
 )
+@pytest.mark.parametrize("fusion_enabled", [False, True, "missing_api"])
+@pytest.mark.parametrize(
+    ("candidate_profile_enabled", "force_rollout_failure"),
+    ((False, False), (True, False), (True, True)),
+)
 @pytest.mark.parametrize(
     ("platform", "backend", "device_type", "index_mode"),
     (
         ("c550", "metax", "cuda", "inline"),
         ("s5000", "mthreads", "musa", "prevalidated-static"),
+        ("910c", "ascend", "npu", "inline"),
     ),
 )
 def test_main_binds_runtime_builder_and_report_to_one_domestic_profile(
@@ -800,7 +1051,14 @@ def test_main_binds_runtime_builder_and_report_to_one_domestic_profile(
     backend: str,
     device_type: str,
     index_mode: str,
+    candidate_profile_enabled: bool,
+    force_rollout_failure: bool,
+    fusion_enabled: bool | str,
 ) -> None:
+    if fusion_enabled:
+        fusion_root, fusion_file, fusion_revision = _fake_fusion_package(monkeypatch, tmp_path)
+        if fusion_enabled == "missing_api":
+            del sys.modules["flag_gems"].post_layer_norm_residual
     assets = {
         name: tmp_path / name
         for name in ("config.yaml", "weights.pt", "inputs.nc", "forcings.nc", "target.nc")
@@ -812,8 +1070,8 @@ def test_main_binds_runtime_builder_and_report_to_one_domestic_profile(
     for name in operational_runner.REQUIRED_STATS_FILES:
         (stats_dir / name).write_bytes(b"stats")
     output = tmp_path / "prediction.nc"
-    trajectory_output = tmp_path / "trajectory.nc"
     report_path = tmp_path / "report.json"
+    candidate_profile_path = tmp_path / "fresh" / "profiles" / "candidate-profile.json"
     events: list[str] = []
     captured: dict[str, object] = {}
 
@@ -836,7 +1094,7 @@ def test_main_binds_runtime_builder_and_report_to_one_domestic_profile(
     class FakeRuntime:
         profile = SimpleNamespace(name=backend, device_type=device_type)
         device = torch.device("cpu")
-        flagos = SimpleNamespace(mode="off", strict=False)
+        flagos = SimpleNamespace(mode="flaggems" if fusion_enabled else "off", strict=False)
 
         def to_metadata(self):
             return {"backend": backend}
@@ -845,10 +1103,18 @@ def test_main_binds_runtime_builder_and_report_to_one_domestic_profile(
         def __init__(self, config, **settings) -> None:
             self.config = config
             self.edge_input_projection_mode = settings["edge_input_projection"]
-            self.mesh2grid_full_grid_fast_path = settings[
-                "mesh2grid_full_grid_fast_path"
-            ]
+            self.mesh2grid_full_grid_fast_path = settings["mesh2grid_full_grid_fast_path"]
             self.index_add_execution = settings["index_add_execution"]
+            self.fuse_post_layer_norm_residual = settings["fuse_post_layer_norm_residual"]
+            self.grid2mesh_gnn = SimpleNamespace(
+                post_layer_norm_residual_observer=None, post_layer_norm_residual_calls=0
+            )
+            self.mesh_gnn = SimpleNamespace(
+                post_layer_norm_residual_observer=None, post_layer_norm_residual_calls=0
+            )
+            self.mesh2grid_gnn = SimpleNamespace(
+                post_layer_norm_residual_observer=None, post_layer_norm_residual_calls=0
+            )
 
         def load_state_dict(self, state_dict, strict=True) -> None:
             assert strict
@@ -927,10 +1193,11 @@ def test_main_binds_runtime_builder_and_report_to_one_domestic_profile(
 
     def fake_rollout(*args, **kwargs):
         assert kwargs["steps"] == 3
-        callback = kwargs.get("trajectory_callback")
-        assert callable(callback)
-        for step in range(3):
-            callback(step, torch.full((1,), float(step)))
+        assert kwargs.get("trajectory_callback") is None
+        if force_rollout_failure:
+            raise RuntimeError("rollout failed after profile staging")
+        if fusion_enabled:
+            args[0].mesh_gnn.post_layer_norm_residual_calls += 3
         return RolloutMeasurement(
             steps=3,
             warmup_calls=1,
@@ -952,7 +1219,7 @@ def test_main_binds_runtime_builder_and_report_to_one_domestic_profile(
         "normalized_output_to_prediction",
         lambda *args, **kwargs: xr.Dataset(
             {"temperature": (("batch", "time", "lat", "lon"), np.ones((1, 1, 1, 1)))},
-            coords={"batch": [0], "time": [np.timedelta64(6, "h")], "lat": [0.], "lon": [0.]},
+            coords={"batch": [0], "time": [np.timedelta64(6, "h")], "lat": [0.0], "lon": [0.0]},
         ),
     )
     monkeypatch.setattr(
@@ -962,50 +1229,65 @@ def test_main_binds_runtime_builder_and_report_to_one_domestic_profile(
     )
     monkeypatch.setattr(operational_runner, "precision_metadata", lambda *args, **kwargs: {})
     monkeypatch.setattr(operational_runner, "memory_text", lambda runtime: {})
-
-    class FakeTrajectoryWriter:
-        def __init__(self, path, *, steps, step_hours, valid_times=None) -> None:
-            assert valid_times.sizes["time"] == 3
-            captured["trajectory_writer"] = (path, steps, step_hours)
-
-        def append(self, step, prediction) -> None:
-            captured.setdefault("trajectory_appends", []).append(
-                (step, type(prediction).__name__)
-            )
-
-        def seal(self) -> Path:
-            captured["trajectory_sealed"] = True
-            staged = tmp_path / "staged-trajectory.nc"
-            staged.write_bytes(b"trajectory")
-            return staged
-
-        def publish(self) -> None:
-            captured["trajectory_published"] = True
-            trajectory_output.write_bytes(b"trajectory")
-
-        def abort(self) -> None:
-            captured["trajectory_aborted"] = True
-
-    monkeypatch.setattr(operational_runner, "TrajectoryNetCDFWriter", FakeTrajectoryWriter)
-
-    result = operational_runner.main(
-        [
-            "--config", str(assets["config.yaml"]),
-            "--weights", str(assets["weights.pt"]),
-            "--inputs", str(assets["inputs.nc"]),
-            "--rollout-forcings", str(assets["forcings.nc"]),
-            "--target-template", str(assets["target.nc"]),
-            "--stats-dir", str(stats_dir),
-            "--output", str(output),
-            "--trajectory-output", str(trajectory_output),
-            "--report", str(report_path),
-            "--platform", platform,
-            "--model-execution-profile", "domestic-v1",
-            "--precision", "tf32",
-            "--steps", "3",
-            "--step-hours", "12",
-        ]
+    monkeypatch.setattr(
+        operational_runner,
+        "use_prevalidated_flaggems_index_add",
+        lambda runtime: nullcontext({"status": "validated"}),
     )
+
+    arguments = [
+        "--config",
+        str(assets["config.yaml"]),
+        "--weights",
+        str(assets["weights.pt"]),
+        "--inputs",
+        str(assets["inputs.nc"]),
+        "--rollout-forcings",
+        str(assets["forcings.nc"]),
+        "--target-template",
+        str(assets["target.nc"]),
+        "--stats-dir",
+        str(stats_dir),
+        "--output",
+        str(output),
+        "--report",
+        str(report_path),
+        "--platform",
+        platform,
+        "--model-execution-profile",
+        "domestic-v1",
+        "--precision",
+        "tf32",
+        "--steps",
+        "3",
+        "--step-hours",
+        "12",
+    ]
+    if candidate_profile_enabled:
+        arguments.extend(
+            [
+                "--post-layernorm-residual-profile",
+                "--post-layernorm-residual-profile-path",
+                str(candidate_profile_path),
+            ]
+        )
+    if fusion_enabled:
+        arguments.append("--fuse-post-layer-norm-residual")
+    if fusion_enabled == "missing_api":
+        with pytest.raises(RuntimeError, match="post_layer_norm_residual"):
+            operational_runner.main(arguments)
+        assert events == ["runtime"]
+        assert not output.exists()
+        assert not report_path.exists()
+        return
+    if force_rollout_failure:
+        with pytest.raises(RuntimeError, match="rollout failed after profile staging"):
+            operational_runner.main(arguments)
+        assert candidate_profile_path.parent.is_dir()
+        assert list(candidate_profile_path.parent.glob(".*.tmp.json")) == []
+        return
+
+    result = operational_runner.main(arguments)
 
     assert result == expected_exit
     expected_events = ["runtime", "model"]
@@ -1018,6 +1300,7 @@ def test_main_binds_runtime_builder_and_report_to_one_domestic_profile(
         "edge_input_projection": "factorized",
         "mesh2grid_full_grid_fast_path": True,
         "index_add_execution": index_mode,
+        "fuse_post_layer_norm_residual": fusion_enabled,
     }
     effective_config = captured["effective_config"]
     assert effective_config.grid2mesh_edge_chunk_size == 131072
@@ -1025,10 +1308,25 @@ def test_main_binds_runtime_builder_and_report_to_one_domestic_profile(
     report = json.loads(report_path.read_text(encoding="utf-8"))
     assert report["status"] == expected_status
     assert report["measurement"]["physical_output_finite"] is physical_finite
+    assert report["measurement"]["performance_eligible"] is (
+        physical_finite and not candidate_profile_enabled
+    )
     assert report["runtime"]["backend"] == backend
+    fusion_audit = report["source"]["post_layer_norm_residual_fusion"]
+    assert fusion_audit["requested"] is fusion_enabled
+    assert fusion_audit["effective"] is fusion_enabled
+    if fusion_enabled:
+        assert fusion_audit["file"] == str(fusion_file)
+        assert fusion_audit["flaggems_source_root"] == str(fusion_root)
+        assert fusion_audit["flaggems_revision"] == fusion_revision
+        assert fusion_audit["sha256"] == hashlib.sha256(fusion_file.read_bytes()).hexdigest()
+    assert report["runtime"]["post_layer_norm_residual_dispatch"]["api_calls"] == (
+        3 if fusion_enabled else 0
+    )
+    assert report["runtime"]["flaggems_dispatch"] == {"status": "not_requested"}
     if platform == "s5000":
         assert report["workload"]["static_index_add"]["runtime_trusted_scope"] == {
-            "status": "not_applicable_native"
+            "status": "validated" if fusion_enabled else "not_applicable_native"
         }
     assert set(report["source"]["normalization_stats"]) == set(
         operational_runner.REQUIRED_STATS_FILES
@@ -1040,23 +1338,22 @@ def test_main_binds_runtime_builder_and_report_to_one_domestic_profile(
     assert report["schema"] == "graphcast.operational_rollout.v2"
     assert report["workload"]["steps"] == 3
     assert report["workload"]["step_hours"] == 12
-    assert captured["trajectory_writer"] == (trajectory_output, 3, 12)
-    assert captured["trajectory_appends"] == [
-        (0, "Dataset"),
-        (1, "Dataset"),
-        (2, "Dataset"),
-    ]
-    assert captured["trajectory_sealed"] is True
-    assert captured["trajectory_published"] is True
-    assert "trajectory_aborted" not in captured
     assert report["artifacts"]["publication"] == "report_terminal_last"
     assert report["artifacts"]["prediction"]["sha256"]
-    assert report["artifacts"]["trajectory"]["sha256"]
+    assert report["artifacts"]["trajectory"] is None
     assert report["diagnostics"] == {
-        "trajectory": str(trajectory_output.resolve()),
-        "all_leads_captured": True,
-        "performance_eligible": False,
+        "trajectory": None,
+        "all_leads_captured": False,
+        "performance_eligible": physical_finite and not candidate_profile_enabled,
     }
+    assert report["workload"]["post_layernorm_residual_profile"] == {
+        "enabled": candidate_profile_enabled,
+        "path": str(candidate_profile_path.resolve()) if candidate_profile_enabled else None,
+    }
+    if candidate_profile_enabled:
+        assert json.loads(candidate_profile_path.read_text(encoding="utf-8"))["groups"] == []
+    else:
+        assert report["artifacts"]["post_layernorm_residual_profile"] is None
 
 
 def test_operational_report_metadata_uses_effective_edge_projection_mode() -> None:

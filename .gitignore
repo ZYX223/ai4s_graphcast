@@ -35,3 +35,9 @@ ai4s/graphcast/results/
 .DS_Store
 .idea/
 .vscode/
+
+# Sugon local artifacts; publish only explicit evidence summaries.
+/outputs/
+*.nc
+*.npz
+*.tar.zst

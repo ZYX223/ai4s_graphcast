@@ -31,7 +31,9 @@ def parser():
     p.add_argument("--dp", type=int, default=1)
     p.add_argument("--global-batch-size", type=int, default=16)
     microbatch = p.add_mutually_exclusive_group()
-    microbatch.add_argument("--micro-batch-size-per-rank", type=int, default=1,
+    # argparse checks explicit values against the default by identity on Python
+    # 3.10. A string default keeps an explicitly supplied integer 1 detectable.
+    microbatch.add_argument("--micro-batch-size-per-rank", type=int, default="1",
                            help="Samples per DP rank per forward/backward")
     microbatch.add_argument("--micro-batch-size", dest="micro_batch_size_per_rank", type=int,
                            default=argparse.SUPPRESS,

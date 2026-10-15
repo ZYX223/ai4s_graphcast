@@ -79,6 +79,47 @@ def test_node_update_uses_post_layer_norm_residual_once(
 
     torch.testing.assert_close(actual["node"], expected["node"])
     assert calls == [(torch.Size([1, 3, 4]), torch.Size([1, 3, 4]), (4,), 1e-5)]
+    assert graph_net.post_layer_norm_residual_calls == 1
+
+
+@pytest.mark.parametrize("edge_chunk_size", [None, 2])
+@pytest.mark.parametrize("projection", ["concatenated", "factorized"])
+@pytest.mark.parametrize("node_chunk_size, expected_rows", [(None, [4, 3]), (2, [4, 2, 1])])
+def test_fusion_counts_only_node_updates_and_preserves_edge_deltas(
+    monkeypatch, edge_chunk_size, projection, node_chunk_size, expected_rows
+):
+    torch.manual_seed(17)
+    graph_net = _single_edge_graph_net(
+        edge_chunk_size=edge_chunk_size,
+        edge_input_projection_mode=projection,
+        receiver_node_chunk_size=node_chunk_size,
+    )
+    nodes, edges, indices = _edge_graph_inputs()
+    expected_nodes, expected_edges = graph_net(nodes, edges, indices)
+    rows = []
+
+    def fused(x, residual, shape, weight, bias, eps):
+        rows.append(x.shape[1])
+        return torch.layer_norm(x, shape, weight, bias, eps) + residual
+
+    monkeypatch.setitem(
+        sys.modules, "flag_gems", types.SimpleNamespace(post_layer_norm_residual=fused)
+    )
+    graph_net.fuse_post_layer_norm_residual = True
+    actual_nodes, actual_edges = graph_net(nodes, edges, indices)
+    assert rows == expected_rows
+    assert graph_net.post_layer_norm_residual_calls == len(expected_rows)
+    for name in expected_nodes:
+        torch.testing.assert_close(actual_nodes[name], expected_nodes[name])
+    for name in expected_edges:
+        torch.testing.assert_close(actual_edges[name], expected_edges[name])
+
+
+def test_disabled_fusion_never_loads_public_api(monkeypatch):
+    graph_net = _single_node_graph_net(fuse_post_layer_norm_residual=False)
+    monkeypatch.setitem(sys.modules, "flag_gems", None)
+    graph_net({"node": torch.randn(1, 3, 4)}, {}, {})
+    assert graph_net.post_layer_norm_residual_calls == 0
 
 
 def test_requested_fusion_requires_public_flaggems_operator(
