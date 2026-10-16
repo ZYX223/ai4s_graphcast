@@ -1,0 +1,36 @@
+{
+  "runtime_image": "localhost/graphcast-jax-hygon:20261015",
+  "runtime_image_id": "sha256:919cf075fadd5fab21b2ea5978374be00caf1db7d6f02fc90846633c4c4bd546",
+  "vendor_wheels": [
+    {
+      "filename": "jax-0.6.0+das.opt1.dtk2604-py3-none-any.whl",
+      "url": "https://pypi.sourcefind.cn/das_release/dtk2604-dcc2602-0317/+f/33e/b8cbce97b2a9b/jax-0.6.0+das.opt1.dtk2604-py3-none-any.whl",
+      "sha256": "33eb8cbce97b2a9b21b531cbe63b2b7832636b0a7658697b7f5074382f801cd9"
+    },
+    {
+      "filename": "jaxlib-0.6.0+das.opt1.dtk2604-cp310-cp310-manylinux2014_x86_64.whl",
+      "url": "https://pypi.sourcefind.cn/das_release/dtk2604-dcc2602-0317/+f/6e3/daeb1f5909fd1/jaxlib-0.6.0+das.opt1.dtk2604-cp310-cp310-manylinux2014_x86_64.whl",
+      "sha256": "6e3daeb1f5909fd1b3293771aceecd776b20f3e928782f40b4c06fa24fd95313"
+    },
+    {
+      "filename": "jax_rocm60_plugin-0.6.0+das.opt1.dtk2604-cp310-cp310-manylinux2014_x86_64.whl",
+      "url": "https://pypi.sourcefind.cn/das_release/dtk2604-dcc2602-0317/+f/292/bd662cb17b42f/jax_rocm60_plugin-0.6.0+das.opt1.dtk2604-cp310-cp310-manylinux2014_x86_64.whl",
+      "sha256": "292bd662cb17b42ffc360cb692359db8db1f2ad82cca2dcbbf3148b6004d10c8"
+    },
+    {
+      "filename": "jax_rocm60_pjrt-0.6.0+das.opt1.dtk2604-py3-none-manylinux2014_x86_64.whl",
+      "url": "https://pypi.sourcefind.cn/das_release/dtk2604-dcc2602-0317/+f/59e/6f10bf666f78b/jax_rocm60_pjrt-0.6.0+das.opt1.dtk2604-py3-none-manylinux2014_x86_64.whl",
+      "sha256": "59e6f10bf666f78bc2f518ce57b3f66e8aba3a782ea9524c5121595f88fffee6"
+    }
+  ],
+  "python": "3.10.12",
+  "dtk": "DTK-26.04-DCC2602-0317",
+  "jax_distribution": "0.6.0+das.opt1.dtk2604",
+  "xarray": "2025.1.2",
+  "haiku": "0.0.14",
+  "numpy": "1.26.4",
+  "required_preload": [
+    "/opt/mpi/lib/libmpi.so",
+    "/usr/lib/x86_64-linux-gnu/libsqlite3.so.0"
+  ]
+}

@@ -1,43 +1,21 @@
-# Python
 __pycache__/
 *.py[cod]
-*.egg-info/
-.eggs/
-build/
-dist/
-.venv/
-venv/
-env/
-
-# Tooling caches
-.ruff_cache/
 .pytest_cache/
-.mypy_cache/
-
-# Model weights & datasets — keep these out of git (see ai4s/README.md).
-checkpoints/
-*.ckpt
-*.pt
-*.pth
-*.safetensors
-*.onnx
-data/
-!**/data/.gitkeep
-ai4s/graphcast/third_party/
-ai4s/graphcast/outputs/
-ai4s/graphcast/results/
-
-# Logs & local env
-*.log
+.ruff_cache/
+.venv/
 .env
-
-# OS / editor
-.DS_Store
-.idea/
-.vscode/
-
-# Sugon local artifacts; publish only explicit evidence summaries.
+/data/
 /outputs/
+/build/
 *.nc
 *.npz
-*.tar.zst
+*.npy
+*.so
+*.o
+*.whl
+*.tar*
+*.zst
+*.nsys-rep
+*.sqlite
+*.log
+.DS_Store

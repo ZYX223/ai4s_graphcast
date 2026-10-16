@@ -1,0 +1,130 @@
+{
+  "status": "passed",
+  "conversion": [
+    {
+      "rows": 100227,
+      "cols": 1,
+      "ld": 100227,
+      "passed": true
+    },
+    {
+      "rows": 37,
+      "cols": 53,
+      "ld": 41,
+      "passed": true
+    }
+  ],
+  "checks": [
+    {
+      "policy": "fp32",
+      "matrix": 0,
+      "mae_vs_fp64": 6.421893211325523e-06
+    },
+    {
+      "policy": "fp32",
+      "matrix": 1,
+      "mae_vs_fp64": 6.4509835499103225e-06
+    },
+    {
+      "policy": "fp32",
+      "matrix": 2,
+      "mae_vs_fp64": 6.449339081677459e-06
+    },
+    {
+      "policy": "xf32",
+      "matrix": 0,
+      "mae_vs_fp64": 0.013889502433420414
+    },
+    {
+      "policy": "xf32",
+      "matrix": 1,
+      "mae_vs_fp64": 0.013907565580156551
+    },
+    {
+      "policy": "xf32",
+      "matrix": 2,
+      "mae_vs_fp64": 0.013922076800261323
+    },
+    {
+      "policy": "rne",
+      "matrix": 0,
+      "mae_vs_fp64": 0.005299221767343625
+    },
+    {
+      "policy": "rne",
+      "matrix": 1,
+      "mae_vs_fp64": 0.005309291358672616
+    },
+    {
+      "policy": "rne",
+      "matrix": 2,
+      "mae_vs_fp64": 0.005298380606517176
+    },
+    {
+      "policy": "explicit_rne_xf32",
+      "matrix": 0,
+      "mae_vs_fp64": 0.005299221767343625
+    },
+    {
+      "policy": "explicit_rne_xf32",
+      "matrix": 1,
+      "mae_vs_fp64": 0.005309291358672616
+    },
+    {
+      "policy": "explicit_rne_xf32",
+      "matrix": 2,
+      "mae_vs_fp64": 0.005298380606517176
+    },
+    {
+      "policy": "mixed",
+      "matrix": 0,
+      "mae_vs_fp64": 0.013889502433420414
+    },
+    {
+      "policy": "mixed",
+      "matrix": 1,
+      "mae_vs_fp64": 0.005309291358672616
+    },
+    {
+      "policy": "mixed",
+      "matrix": 2,
+      "mae_vs_fp64": 0.013922076800261323
+    },
+    {
+      "policy": "fp32_repeat",
+      "matrix": 0,
+      "mae_vs_fp64": 6.421893211325523e-06
+    },
+    {
+      "policy": "fp32_repeat",
+      "matrix": 1,
+      "mae_vs_fp64": 6.4509835499103225e-06
+    },
+    {
+      "policy": "fp32_repeat",
+      "matrix": 2,
+      "mae_vs_fp64": 6.449339081677459e-06
+    },
+    {
+      "policy": "rne_repeat",
+      "matrix": 0,
+      "mae_vs_fp64": 0.005299221767343625
+    },
+    {
+      "policy": "rne_repeat",
+      "matrix": 1,
+      "mae_vs_fp64": 0.005309291358672616
+    },
+    {
+      "policy": "rne_repeat",
+      "matrix": 2,
+      "mae_vs_fp64": 0.005298380606517176
+    }
+  ],
+  "calls": 21,
+  "pre_rounded_native_xf32_match_bitwise": true,
+  "inputs_unchanged": true,
+  "fp32_restoration_bitwise": true,
+  "pci": "0000:88:00.0",
+  "router_sha256": "d2725c734d8949d3d6377d405353ad2661d1a2821e3a4150290b682119440d41"
+}

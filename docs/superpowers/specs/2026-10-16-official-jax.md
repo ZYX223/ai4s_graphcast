@@ -1,0 +1,9 @@
+# Official JAX GraphCast project
+
+The user requests that zyx/sugon-graphcast contain the official JAX implementation and the H100/Hygon experiments reported for 2026-10-12–16. Remove the previous implementation, dependencies, platform machinery and training claims from this branch's current tree. Preserve Git history and existing experimental artifacts.
+
+Vendor the unmodified inference import closure at upstream commit 08cf73625c9d12bd9aaa038868bcb2fe488f2a22, including license and exact file digests. Keep the tested HIP rounding/interposition source unchanged. Extract only the original JAX checkpoint, frozen input/forcings/template/statistics and official strict-FP32 reference into a new portable data directory. No dataset, weights, image, binary library or complete prediction enters Git.
+
+Provide one launcher with explicit platform, device, data and output paths. H100 uses TF32; Hygon supports FP32, original XF32 and RNE+XF32 with the same per-call routing and accounting as the measured implementation. Default performance contract is three repeats, five warmup steps then forty synchronized autoregressive steps, graphs disabled, loading/compilation/checking/saving excluded. Hygon three-mode runs retain balanced order. Preserve final-step 78-layer relative MAE, separate Z500 and RMSE definitions. Repeated outputs need not match bitwise.
+
+Publish the original weekly measurements as historical evidence, clearly distinct from verification runs after this reorganization. A CPU-only suite checks metrics, alignment, invalid/nonfinite data and asset integrity. Real-device probes plus one full 40-step rollout on each primary platform validate the extracted code. Include runtime locks, build commands, exact data preparation and model/precision explanations. Full training remains future work.

@@ -1,0 +1,43 @@
+{
+  "rounding": "nearest ties to even to 10 explicit fraction bits, both native GEMM inputs",
+  "scope": "One fixed GraphCast operational 0.25 degree, 13-level case; independent 40 x 6h autoregression. Only 84 runtime native SGEMMs are routed; constant-folded operations and non-GEMM operations are unchanged.",
+  "sensitive_scope": "Mesh2Grid processor_nodes_0_grid_nodes_mlp. Single-step errors are final model output errors when only the selected layer(s) use XF32, not intermediate tensor errors.",
+  "metric": "Equal mean of 78 per-variable/per-pressure-layer MAE/mean(abs(FP32 reference))*100; Z500 separately. Uniform grid. Acceptance evaluates +240h versus both qualified frozen references.",
+  "sensitivity": [
+    {
+      "scope": "linear0",
+      "xf32_percent": 0.03560614493932656,
+      "rne_percent": 0.009198032481439999,
+      "relative_error_reduction_percent": 74.16728910946806
+    },
+    {
+      "scope": "linear1",
+      "xf32_percent": 0.040156472569334675,
+      "rne_percent": 0.013315671236525642,
+      "relative_error_reduction_percent": 66.84053557359991
+    },
+    {
+      "scope": "nodes",
+      "xf32_percent": 0.0712635943453307,
+      "rne_percent": 0.016401906210138102,
+      "relative_error_reduction_percent": 76.98417212769625
+    }
+  ],
+  "fp32_repeat_single_step_percent": 0.00010326437053891596,
+  "forty_reductions": [
+    {
+      "scope": "nodes",
+      "xf32_percent": 6.092202410563745,
+      "rne_percent": 0.28959226898346485,
+      "absolute_percentage_point_reduction": 5.80261014158028,
+      "relative_error_reduction_percent": 95.24650939894383
+    },
+    {
+      "scope": "all",
+      "xf32_percent": 22.78880798262051,
+      "rne_percent": 1.7656373706319108,
+      "absolute_percentage_point_reduction": 21.0231706119886,
+      "relative_error_reduction_percent": 92.2521732072233
+    }
+  ]
+}

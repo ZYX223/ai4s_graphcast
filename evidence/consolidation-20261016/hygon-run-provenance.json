@@ -1,0 +1,134 @@
+{
+  "report_sha256": "ebf28555770f4424d797b91fe57f3d764a4c36dfba207606c29447b7d5783ef3",
+  "source": {
+    "repository": "https://github.com/google-deepmind/graphcast",
+    "commit": "08cf73625c9d12bd9aaa038868bcb2fe488f2a22",
+    "scope": "Unmodified official GraphCast inference import closure and upstream license",
+    "files": {
+      "LICENSE": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+      "graphcast/xarray_jax.py": "0203d371ea2029023d2eae90f447020caa3f0858b01b4244f2824611efb34b18",
+      "graphcast/rollout.py": "0858c305f04c1bc0ecbfc2c2075acc985166eac7a111027dfb354f585cdbf2da",
+      "graphcast/xarray_tree.py": "b6c05004109e88175c6e1faee4f864faea652f78fa99065e2e9635039a8c6fae",
+      "graphcast/normalization.py": "5b5f95bcf830be1236244fd09cc418caa28c1c970793130e93bccbc98e0e00e7",
+      "graphcast/predictor_base.py": "ff3f3297e1ec0484d2baf76b4d7e68c96394f17a6f436381f1e181ebbef823b0",
+      "graphcast/losses.py": "520aa2010ddbc441ee0630598c48176a905c3638582e4af6d15887a68b7c7ab8",
+      "graphcast/graphcast.py": "6aeb9cfa2490b0e2dbfa70f255594914ee1765d5e20c3e66ca912b80bc66e953",
+      "graphcast/typed_graph.py": "feebe364b3ef12f0fc56c0f956330c70680297a9c44378d01ae972db504cd6d6",
+      "graphcast/model_utils.py": "bc8006a4454e40eb6c0b4a802b1bbeac77f136af740cafefcb829f5965a9cce0",
+      "graphcast/icosahedral_mesh.py": "bfafc9a3efa272714122963e6b49efe961b3ab1b5d35a7eddd727aa74d693fbe",
+      "graphcast/grid_mesh_connectivity.py": "914aa71a500a9a3e13cd856a25caffbbba724dda65a30ccf6dbf882e1fe72fc2",
+      "graphcast/deep_typed_graph_net.py": "7812649e3128a002603b537e61c7eda060b03a7a2d90bd037eeb7791b52cc59a",
+      "graphcast/typed_graph_net.py": "58bc7c9b090a65ec83d65f0b3cd48d4a450f57f50b8bba5425f33b25d436e7a4",
+      "graphcast/mlp.py": "a0d0cdf91f01817344935ef8b5ffed20902041e386321ed3da45e6a26a92d266",
+      "graphcast/checkpoint.py": "07dc3521a5ed9e606869246a47f865f524e2fc4c689c745305fcdd3f2e5ab24a",
+      "graphcast/autoregressive.py": "2e44d4505bed0c6a5b6d42fd58d0d0d5414bab2658f02ba2b05e92727887749a"
+    }
+  },
+  "code_at_rollout": {
+    "configs/case.json": "58b0a7c916b65bb165d96b47a864355e42977d2250f7b770e70c11176bd62300",
+    "configs/h100.json": "7b600a302129f5a25c64aa24c3eeffe2c96dec759a7ae663e9265dd5c9f91dd7",
+    "configs/hygon.json": "486bff55c23089345f6ede2b2ee13f2bc20630263d3953cf0a5b636f1d0502ef",
+    "kernels/xf32_rne/PROVENANCE.json": "53654a6c6bf652f0018bcd13b02b22127df8b5f77b4c8b0bd915c19d4ba4fcdd",
+    "kernels/xf32_rne/rne_kernel.h": "62e4ad9ce6cb7e27df9e41dbdfe6353241b810c11c92f0aa5e29618d494efd4d",
+    "kernels/xf32_rne/rne_kernel.hip": "6e1ceda3230760855460a09bc3c8d5f173f223a649311bd32ef893b34cf7a690",
+    "kernels/xf32_rne/weights.json": "bd9ad13385c662f316e7ea5dadf94184b237146c9ed6243d99e0725083f8d379",
+    "kernels/xf32_rne/weights.tsv": "ca4119f77e5df8c8f6609990d4adb594b5102e15de2f72efd0781577bb294fc9",
+    "kernels/xf32_rne/xf32_rne_router.cc": "f9177d33c82c842461a43af95f371fd5b32a259ba3e6283b31aa61256a86b8e8",
+    "scripts/build_kernel.py": "ddce6aada99a04621b3a7bf013fe74ba2f2ace7ef9ea20ffabf71bee4d9ce457",
+    "scripts/compare.py": "cfc8ff860441393a9edcfb4e1ac68f3ba1d38673aa9ef67d8cb8113c730ce067",
+    "scripts/entry.py": "1a64022e0ec56560b7e490336fa4f48814550ae260d7802104fc5fcd0a71dcba",
+    "scripts/in_container.sh": "2b23cc57d84c2924909a2c967944e84ebe94ede65f464529e5188698a8a70144",
+    "scripts/prepare_data.py": "3c664c01726e0faeba699669caaddbcf064e4154fc5154d84b8a4ec8403e2c54",
+    "scripts/probe_h100.py": "4c8fab779e8193479338c3f52dc23ae615eb80b3beed26c42bf5558c9e8da218",
+    "scripts/probe_hygon.py": "6c35f88d49bf6f83ec1fe7b9ce559d70bded1dde065189a94a88fddecb64f7eb",
+    "scripts/run.py": "31a14400fa79bb0c28944ca94991b91d3581271c2b1eedbb4b7987f08f84ba65",
+    "src/graphcast_bench/__init__.py": "0b1f04fd491075770fb44036aff45175fccb0045cb6973d91dbf090b419b6537",
+    "src/graphcast_bench/assets.py": "cab87ed8a68ac717bac048046096e6cc3d223a28f3e3b0c1630b4261a4701ce8",
+    "src/graphcast_bench/benchmark.py": "976fd587b1f985630565a0b258958278b38b694a6feb14a43e780ff001e4de0a",
+    "src/graphcast_bench/metrics.py": "04f71913b4a5225f731d10f8c69cbdcbc6a02f3fa13c4274c327e58dc04d9821",
+    "src/graphcast_bench/router.py": "78928a6bc98a4b9e9ac9a0321983303d23540f7745fe37d3489e01261bdabe26",
+    "third_party/graphcast/LICENSE": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+    "third_party/graphcast/UPSTREAM.json": "8878f3fe9ff91123d805859c501cba7ae6229390d100370a7fd7baec22d08b89",
+    "third_party/graphcast/graphcast/autoregressive.py": "2e44d4505bed0c6a5b6d42fd58d0d0d5414bab2658f02ba2b05e92727887749a",
+    "third_party/graphcast/graphcast/checkpoint.py": "07dc3521a5ed9e606869246a47f865f524e2fc4c689c745305fcdd3f2e5ab24a",
+    "third_party/graphcast/graphcast/deep_typed_graph_net.py": "7812649e3128a002603b537e61c7eda060b03a7a2d90bd037eeb7791b52cc59a",
+    "third_party/graphcast/graphcast/graphcast.py": "6aeb9cfa2490b0e2dbfa70f255594914ee1765d5e20c3e66ca912b80bc66e953",
+    "third_party/graphcast/graphcast/grid_mesh_connectivity.py": "914aa71a500a9a3e13cd856a25caffbbba724dda65a30ccf6dbf882e1fe72fc2",
+    "third_party/graphcast/graphcast/icosahedral_mesh.py": "bfafc9a3efa272714122963e6b49efe961b3ab1b5d35a7eddd727aa74d693fbe",
+    "third_party/graphcast/graphcast/losses.py": "520aa2010ddbc441ee0630598c48176a905c3638582e4af6d15887a68b7c7ab8",
+    "third_party/graphcast/graphcast/mlp.py": "a0d0cdf91f01817344935ef8b5ffed20902041e386321ed3da45e6a26a92d266",
+    "third_party/graphcast/graphcast/model_utils.py": "bc8006a4454e40eb6c0b4a802b1bbeac77f136af740cafefcb829f5965a9cce0",
+    "third_party/graphcast/graphcast/normalization.py": "5b5f95bcf830be1236244fd09cc418caa28c1c970793130e93bccbc98e0e00e7",
+    "third_party/graphcast/graphcast/predictor_base.py": "ff3f3297e1ec0484d2baf76b4d7e68c96394f17a6f436381f1e181ebbef823b0",
+    "third_party/graphcast/graphcast/rollout.py": "0858c305f04c1bc0ecbfc2c2075acc985166eac7a111027dfb354f585cdbf2da",
+    "third_party/graphcast/graphcast/typed_graph.py": "feebe364b3ef12f0fc56c0f956330c70680297a9c44378d01ae972db504cd6d6",
+    "third_party/graphcast/graphcast/typed_graph_net.py": "58bc7c9b090a65ec83d65f0b3cd48d4a450f57f50b8bba5425f33b25d436e7a4",
+    "third_party/graphcast/graphcast/xarray_jax.py": "0203d371ea2029023d2eae90f447020caa3f0858b01b4244f2824611efb34b18",
+    "third_party/graphcast/graphcast/xarray_tree.py": "b6c05004109e88175c6e1faee4f864faea652f78fa99065e2e9635039a8c6fae"
+  },
+  "post_review_code_changes": {
+    "scripts/compare.py": {
+      "at_rollout": "cfc8ff860441393a9edcfb4e1ac68f3ba1d38673aa9ef67d8cb8113c730ce067",
+      "after_review": "8c450e202708face7353c436c554e215a78489c4f30c40d7da4604e88ac76e0a"
+    },
+    "scripts/prepare_data.py": {
+      "at_rollout": "3c664c01726e0faeba699669caaddbcf064e4154fc5154d84b8a4ec8403e2c54",
+      "after_review": "6812adb5ab86e9c5024d738ad91293b50a0a2bfaacda81534a071710be70cc3e"
+    },
+    "scripts/probe_h100.py": {
+      "at_rollout": "4c8fab779e8193479338c3f52dc23ae615eb80b3beed26c42bf5558c9e8da218",
+      "after_review": "5ce95d5e46daf22316dc615822c6daea4aee8c97a46083a1c9074ca2d485a12d"
+    },
+    "src/graphcast_bench/benchmark.py": {
+      "at_rollout": "976fd587b1f985630565a0b258958278b38b694a6feb14a43e780ff001e4de0a",
+      "after_review": "08e55062948cf9a4c70cd320d14db8c7581334718e3526028530849618a96477"
+    },
+    "src/graphcast_bench/metrics.py": {
+      "at_rollout": "04f71913b4a5225f731d10f8c69cbdcbc6a02f3fa13c4274c327e58dc04d9821",
+      "after_review": "a21741b5660b4969e4a8eb34cedd8ca87f71813b7aa334ca912d45b516f72457"
+    }
+  },
+  "case": {
+    "schema": "graphcast.jax_case.v1",
+    "case_config_sha256": "58b0a7c916b65bb165d96b47a864355e42977d2250f7b770e70c11176bd62300",
+    "source_reference_bundle_sha256": "10227f90bbd6dc94c032cf890ff6c6c9871e21d0a1678123c6ca183ae996be10",
+    "reference_sha256": "e4baa7f8eb65e19767adc2bd9a0e564127703787b93895232de6b881032df95d",
+    "reference": "official_jax_fp32",
+    "reference_values_changed": false
+  },
+  "versions": {
+    "jax": "0.6.0+das.opt1.dtk2604",
+    "jaxlib": "0.6.0+das.opt1.dtk2604",
+    "dm-haiku": "0.0.14",
+    "numpy": "1.26.4",
+    "xarray": "2025.1.2"
+  },
+  "device": "BW1200",
+  "pci": "0000:88:00.0",
+  "router_build": {
+    "command": [
+      "/opt/dtk/bin/hipcc",
+      "--offload-arch=gfx938",
+      "-O2",
+      "-fPIC",
+      "-shared",
+      "/repo/kernels/xf32_rne/xf32_rne_router.cc",
+      "/repo/kernels/xf32_rne/rne_kernel.hip",
+      "-o",
+      "/output/native/libxf32_rne_router.so",
+      "-lcrypto",
+      "-ldl",
+      "-pthread"
+    ],
+    "library_sha256": "d2725c734d8949d3d6377d405353ad2661d1a2821e3a4150290b682119440d41",
+    "sources": {
+      "rne_kernel.h": "62e4ad9ce6cb7e27df9e41dbdfe6353241b810c11c92f0aa5e29618d494efd4d",
+      "rne_kernel.hip": "6e1ceda3230760855460a09bc3c8d5f173f223a649311bd32ef893b34cf7a690",
+      "xf32_rne_router.cc": "f9177d33c82c842461a43af95f371fd5b32a259ba3e6283b31aa61256a86b8e8",
+      "weights.tsv": "ca4119f77e5df8c8f6609990d4adb594b5102e15de2f72efd0781577bb294fc9",
+      "weights.json": "bd9ad13385c662f316e7ea5dadf94184b237146c9ed6243d99e0725083f8d379"
+    },
+    "compiler": "dcc version: 26.02.0-0\nclang version 17.0.0 (http://10.4.0.1/dcutoolkit/driverruntime/llvm-project.git 6ad204e7c757944bd452afd2b75e6946fa141acc)\nTarget: x86_64-unknown-linux-gnu\nThread model: posix\nInstalledDir: /opt/dtk-26.04-DCC2602-0317/llvm/bin\n"
+  },
+  "steps_checked": 135
+}
