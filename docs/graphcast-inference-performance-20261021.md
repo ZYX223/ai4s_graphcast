@@ -1,6 +1,6 @@
 # GraphCast 五国产平台推理性能表
 
-数据采集：2026-10-20；整理：2026-10-21。本文整理已有测试，不代表重新测试。配套见[算子接入与覆盖率表](graphcast-inference-operator-coverage-20261021.md)。
+主表数据采集：2026-10-20；整理：2026-10-21。主表保留原有结果，后续 910C 官方 Cat 隔离试验单列，不混入主表。配套见[算子接入与覆盖率表](graphcast-inference-operator-coverage-20261021.md)。
 
 ## 性能结果
 
@@ -47,6 +47,46 @@ $$\text{等效吞吐}=F_{40步}/T_{E2E},\qquad \mathrm{MFU}=\frac{F_{40步}}{T_{
 表中的“通过”不是逐步误差或所有单层误差都小于 5%，也不等同于多案例天气技能验证。固定参考 SHA256：`10227f90bbd6dc94c032cf890ff6c6c9871e21d0a1678123c6ca183ae996be10`。
 
 五平台均保留 `domestic-v1` 的边投影线性分解、full-grid mesh→grid 快速路径、`advanced_index` gather 和设备侧自回归。S5000、910C、海光的 FlagGems 组另有已测融合路径。精度请求相同不保证底层指令相同；S5000、海光部分内部 AddMM 路径含 TF32 舍入、FP16 打包及 FP32 累加，不能表述为全数值范围硬件 TF32 等价。
+
+## 910C 官方 Cat 隔离试验
+
+2026-10-21 补充：新版官方 Ascend Cat 数值测试通过，真实模型中也确认调用了 Triton；但在当前环境下，大尺寸末维拼接明显变慢，暂不替换正式配置。上面的 E2E、MFU 和配套覆盖率表均不变。
+
+测试源码来自已合并的 [PR #6548](https://github.com/flagos-ai/FlagGems/pull/6548)，固定为 [FlagGems `72b2a1a` 的 Ascend Cat](https://github.com/flagos-ai/FlagGems/blob/72b2a1a38b476df9bec0b20e8a498c1e4756d199/src/flag_gems/runtime/backend/_ascend/ops/cat.py)。官方文件保持字节不变；只在隔离源码中替换 Cat，没有升级整个算子库或运行环境，也不是此前的 common Cat 兼容改写。已验证的官方 Mul、二维无拷贝视图、HF32 AddMM 和模型侧优化保持不变。
+
+环境：910C 单逻辑 NPU；Torch 2.8.0+cpu、torch_npu 2.8.0.post2、Triton 3.2.0、CANN 8.5.0。该结果不代表其他运行环境中的表现。
+
+### 正确性与接管验证
+
+- FP32、FP16、BF16 各 9 个定向用例，共 27 个，与 Native 完全一致。
+- 固定环境和当前官方的 `tests/test_cat.py` 各 137 项通过；官方 core benchmark 对应尺寸、精度的数值补查 9 项通过。
+- 官方 `benchmark/test_cat.py` 的 2 项测试通过，保留 Cat/Cat_out × 3 精度 × 3 尺寸的 18 条性能记录。这是 Cat 专项测试，不是全库 CI。
+- 真实模型做了 1 次预热和 1 个预报步，输出 finite。测量窗口内 21 次 Cat 对应 42 个官方 `_cat_copy_strided_kernel` 设备任务，累计 **6.280632 秒**。
+
+### 模型尺寸重放
+
+五类实际输入，按每个预报步的调用次数 `1、1、1、17、1` 加权，共 21 次 Cat。每项先校验数值，再预热 3 次，取 5 次同步计时的中位数；输入已在设备上，计入输出分配，不计随机输入构造。
+
+| 路径 | Cat 累计耗时 / ms·预报步⁻¹ |
+| --- | ---: |
+| Torch Native | 15.376 |
+| 原 Ascend 包装路径（不计 Triton 接管） | 30.787 |
+| 新版官方 Ascend Triton | 6279.729 |
+
+Native 和新版官方在同一进程内对照；原包装路径另起进程重放。以上是算子耗时合计，不是模型 E2E，不能据此发布候选版本的 MFU。
+
+设备 trace 的 6.281 秒与重放的 6.280 秒一致，主要耗时发生在设备内核，而非首次编译或 Python 调度。最重的 Grid 节点拼接为两个 `[1,1038240,512]` 沿末维拼接，单次约 3112.379 ms。此次官方 core benchmark 只测 `dim=0` 的 flat-copy 分支；模型调用的是 `dim=-1` 的 strided-copy 分支，不能用前者替代后者的性能验证。更深层的编译器、指令原因尚未确定。
+
+由于算子层已出现明显退化，没有继续进行三轮 40 步 E2E 和完整双参考 5% 诊断。单步输出有限、Cat 数值测试通过，不等于完整自回归诊断通过。覆盖率证据与日志检查限制见[覆盖率表的 Cat 试验说明](graphcast-inference-operator-coverage-20261021.md#910c-官方-cat-隔离验证)。
+
+### 试验记录
+
+- 本地目录：`/mdata/data/zhangyuxin/wxt/inference-910c-cat-official-20261021-JnT9TN`；说明为 `README.md`，汇总为 `result-summary.json`，原始证据为 `evidence-final/`。
+- 910C 容器 `zyx-graphcast-910c` 内目录：`/workspace/FlagOS/campaigns/inference-910c-cat-official-20261021-JnT9TN`。
+- 官方 Cat 文件 SHA256：`dc9fc6b8ff5cc287557c29ec92049bbc911a914ea821508a584b5f6471c5e050`。
+- 日志、trace、脚本与源码清单归档 `final-evidence.tar.gz`，SHA256：`3268e42ae56aabde302be995f00b92fa72ff9062220622610d206dba5974c0fe`。大体积 NetCDF 和首帧资产保留在远端，不在此归档中。
+
+本次只补充文档，原始证据未上传 GitHub；上述本地与容器路径需要对应机器访问权限。
 
 ## 测试版本与数据来源
 
