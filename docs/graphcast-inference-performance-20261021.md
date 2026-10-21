@@ -1,6 +1,6 @@
 # GraphCast 五国产平台推理性能表
 
-主表数据采集：2026-10-20；整理：2026-10-21。主表保留原有结果，后续 910C 官方 Cat 隔离试验单列，不混入主表。配套见[算子接入与覆盖率表](graphcast-inference-operator-coverage-20261021.md)。
+主表数据采集：2026-10-20；910C FlagGems 行更新为 2026-10-21 官方新版 Mul 的实测结果，其他行不变。910C 官方 Cat 隔离试验单列，不混入主表。配套见[算子接入与覆盖率表](graphcast-inference-operator-coverage-20261021.md)。
 
 ## 性能结果
 
@@ -14,7 +14,7 @@
 | S5000 | Native（排查记录） | 21.0232 | 0.5256 | 54.9054 | 224.07 | 24.5037%* | 0/3 通过 |
 | S5000 | FlagGems + 内部优化 | 28.5038 | 0.7126 | 40.4959 | 224.07 | 18.0729% | 3/3 通过 |
 | 910C | Native | 34.8585 | 0.8715 | 33.1134 | 199 | 16.6399% | 3/3 通过 |
-| 910C | FlagGems + 内部优化 | 47.9672 | 1.1992 | 24.0640 | 199 | 12.0925% | 3/3 通过 |
+| 910C | FlagGems + 内部优化 + 官方新版 Mul | 34.1451 | 0.8536 | 33.8053 | 199 | 16.9876% | 3/3 通过 |
 | 海光 BW1101 | Native（排查记录） | 53.7974 | 1.3449 | 21.4561 | 236.94（暂定） | | 0/3 通过 |
 | 海光 BW1101 | FlagGems + 内部优化 | 24.1941 | 0.6049 | 47.7094 | 236.94（暂定） | | 3/3 通过 |
 | 810E | Native | 25.2885 | 0.6322 | 45.6447 | 61.5 | 74.2190% | 3/3 通过 |
@@ -22,11 +22,11 @@
 
 - 海光为新 BW1101、约 144 GiB，不能当作旧 BW3000 同硬件复测。峰值暂记 236.94 TFLOP/s，尚未核实；按当前约定，Native 和 FlagGems 的 MFU 均留空，不计算，也不发布此前两种分母下的条件结果。
 - `*`：S5000 Native 的 MFU 仅为耗时的算术换算，诊断未通过，不是合格性能结果。S5000、海光的 Native 均只保留作排查记录，不用于正式加速比。
-- H100 沿用历史 Native TF32 eager 对照，本轮没有重测。其 MFU 的 80% 为 15.7985%；C550、S5000、810E 的 FlagGems 达到该值，910C 未达到，海光暂不判断。达到这一跨平台门槛不等于快于同平台 Native。
+- H100 沿用历史 Native TF32 eager 对照，本轮没有重测。其 MFU 的 80% 为 15.7985%；C550、S5000、910C、810E 的 FlagGems 均达到该值，海光暂不判断。910C 更新后的 MFU 约为 H100 的 86.02%。达到这一跨平台门槛不等于快于同平台 Native。
 
 ## 计时与 MFU 口径
 
-每次先做 3 次 forward 预热，再计时连续 40 个预报步；每步 6 小时，末帧为 +240h。算子 trace 单独采集，不混入性能计时。
+每次先做 3 次 forward 预热，再计时连续 40 个预报步；每步 6 小时，末帧为 +240h。算子 trace 单独采集，不混入性能计时。新版 910C Mul 测试还预先指定了一轮完整运行用于预热缓存，保留记录但不计入三轮中位数。
 
 - 计入：模型计算、残差还原、状态更新、forcing 选择、末帧有限值检查、末帧 D2H 和最终同步。
 - 不计入：进程及模型初始化、数据读取和初始上传、预热编译、CPU 物理量转换、NetCDF 写盘及离线诊断。计时内如发生新编译，不事后扣除。
@@ -48,9 +48,38 @@ $$\text{等效吞吐}=F_{40步}/T_{E2E},\qquad \mathrm{MFU}=\frac{F_{40步}}{T_{
 
 五平台均保留 `domestic-v1` 的边投影线性分解、full-grid mesh→grid 快速路径、`advanced_index` gather 和设备侧自回归。S5000、910C、海光的 FlagGems 组另有已测融合路径。精度请求相同不保证底层指令相同；S5000、海光部分内部 AddMM 路径含 TF32 舍入、FP16 打包及 FP32 累加，不能表述为全数值范围硬件 TF32 等价。
 
+## 910C 官方新版 Mul
+
+主表采用完整官方 Ascend `mul.py`，固定到 [FlagGems `367d193`](https://github.com/flagos-ai/FlagGems/blob/367d19367880eaf8843449abe11db4cfb7d47e03/src/flag_gems/runtime/backend/_ascend/ops/mul.py)，不再使用本地分块移植实现。只导出非原地 `mul`，并复制同一提交的 `mul_flat`、`mul_broadcast_tiled` 调优配置；`mul_` 及其他算子保持原实现，没有整体升级 FlagGems。
+
+模型侧保留乘法前后的二维无拷贝视图：`[1,N,C] → [N,C] → [1,N,C]`，使实际调用命中官方分块广播内核。输入、状态和乘法仍为 FP32，矩阵运算请求 HF32；投影分解、full-grid 路径和原有融合配置均保留。Cat 仍用原包装路径，`copy_` 仍用 Native。
+
+| 第 1 轮 / s | 第 2 轮 / s | 第 3 轮 / s | 中位数 / s | 双参考末帧诊断 |
+| ---: | ---: | ---: | ---: | --- |
+| 34.2245 | 33.9634 | 34.1451 | 34.1451 | 3/3 通过 |
+
+另有一轮完整缓存预热，耗时 37.5220 秒，按测试前约定不计分。三轮均无 profiler；设备 trace 另采集。沿用原分子和 199 TFLOP/s 分母：
+
+$$\mathrm{MFU}=\frac{1154.28377903104}{34.1451016003266\times199}\times100\%=16.9876\%.$$
+
+三轮双参考诊断中，整体误差最大为 **0.1007705%**，Z500 最大为 **0.00110695%**，均小于 5%。这是 40 步末帧的固定案例诊断，不代表所有时效或多案例天气技能验证。算子专项测试 78 项、旧版与新版官方非原地 Mul 测试分别 176、224 项通过；两套官方测试各按平台规则跳过 48 项。
+
+完整 40 步设备 trace 确认 **400 次 `mul_broadcast_tiled_kernel`**，来源为上述官方文件，没有发现 Native `aclnnMul`。此次只专项复核 Mul，没有重新发布全模型覆盖率；沿用既有 10/12＝83.33% 的统计，不将日志中的 `11/11` 当作覆盖率。
+
+旧主表的 47.9672 秒、12.0925% 保留为历史记录，由上述实测结果替代。新方案较旧记录耗时下降约 28.82%；这一变化包含二维视图与分块 Mul 两部分，不能全部归因于“换成官方整文件”。与已验证分块移植版的 34.0446 秒相比，官方整文件版耗时高约 0.30%，三轮区间重叠，未观察到明显性能差异。
+
+复查记录：
+
+- 本地目录：`/mdata/data/zhangyuxin/wxt/inference-910c-mul-official-20261021-3X1LSo`；`result-summary.json` 为从原始报告、诊断和设备 trace 复算的汇总，`evidence/model-results/official-r1` 至 `official-r3` 为三轮原始记录。
+- 容器内算子目录：`/workspace/FlagOS/campaigns/inference-910c-mul-official-20261021-3X1LSo/gems-official`；模型使用已验证二维视图副本 `inference-910c-mul-view-20261021-BHQVmn/candidate-project`，不是仅凭原提交号复现。
+- 官方 Mul 文件 SHA256：`3d4269688e13ba1f3dda7160a95223010c39cbbcd9fd47ce3dfe0bcb4721519b`。
+- 原始证据包 `completed-evidence.tar.gz`，SHA256：`87775588964fee179ffd64b9edfcdfe243bf6d1e15ecb41bde8d766f5e4c98ce`。原始证据未上传 GitHub；大体积预测文件保留在远端，哈希在证据包中。
+
+本次更新的是文档中的已测配置和结果，没有修改远端运行环境或重新启动测试。
+
 ## 910C 官方 Cat 隔离试验
 
-2026-10-21 补充：新版官方 Ascend Cat 数值测试通过，真实模型中也确认调用了 Triton；但在当前环境下，大尺寸末维拼接明显变慢，暂不替换正式配置。上面的 E2E、MFU 和配套覆盖率表均不变。
+2026-10-21 补充：新版官方 Ascend Cat 数值测试通过，真实模型中也确认调用了 Triton；但在当前环境下，大尺寸末维拼接明显变慢，暂不替换正式配置。此 Cat 候选不纳入上表 E2E、MFU 和配套覆盖率。
 
 测试源码来自已合并的 [PR #6548](https://github.com/flagos-ai/FlagGems/pull/6548)，固定为 [FlagGems `72b2a1a` 的 Ascend Cat](https://github.com/flagos-ai/FlagGems/blob/72b2a1a38b476df9bec0b20e8a498c1e4756d199/src/flag_gems/runtime/backend/_ascend/ops/cat.py)。官方文件保持字节不变；只在隔离源码中替换 Cat，没有升级整个算子库或运行环境，也不是此前的 common Cat 兼容改写。已验证的官方 Mul、二维无拷贝视图、HF32 AddMM 和模型侧优化保持不变。
 
@@ -94,9 +123,9 @@ Native 和新版官方在同一进程内对照；原包装路径另起进程重�
 
 - C550、810E：`ef885d531400f189faeba522197f260c35461207`
 - S5000：`6f18d99e198b3176a14c6647b1a3c54c0537aac9`
-- 910C：`38814839d1a3f93cdf18d84f9e41e7c069408c37`
+- 910C：基础提交 `38814839d1a3f93cdf18d84f9e41e7c069408c37`；FlagGems 新结果另含已验证二维视图改动及官方 Mul，具体副本和文件哈希见[新版 Mul 说明](#910c-官方新版-mul)。Native 行仍为原结果。
 - 海光 BW1101：`eb626ffc40599417d4381b6e8a1b19071a341605`
 
 本次仅向本仓库提交结果文档，不包含上述隔离源码或运行环境；不能将本仓库当前代码直接视为这些结果的完整复现包。算子基线及内部来源见[覆盖率表的源码说明](graphcast-inference-operator-coverage-20261021.md#算子源码来源)。
 
-归档标识：`inference-coverage-perf-20261020-b0NcP0`；数据整理标识：`graphcast-inference-five-platform-report-20261021`。原始 `performance.csv` SHA256 为 `59dbb35d29acbea197390be7aa25268456e3d8302b4a39e906d0ecc7d803b489`。本表仅将海光分母改为暂定值并清空其 MFU，没有更改原始耗时或诊断结果。原始日志和 trace 未随本次两张表上传。
+原始五平台归档标识：`inference-coverage-perf-20261020-b0NcP0`；数据整理标识：`graphcast-inference-five-platform-report-20261021`。原始 `performance.csv` SHA256 为 `59dbb35d29acbea197390be7aa25268456e3d8302b4a39e906d0ecc7d803b489`，原文件未改。本文在该快照上将海光分母记为暂定并清空其 MFU，再以 `inference-910c-mul-official-20261021-3X1LSo` 的新实测结果更新 910C FlagGems 行；其他平台耗时、诊断不变。原始日志和 trace 未随本次两张表上传。
