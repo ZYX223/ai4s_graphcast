@@ -16,7 +16,18 @@ ROOT = Path(__file__).resolve().parents[1]
 def main():
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument(
-        "action", choices=("prepare", "check", "compare", "probe", "benchmark", "profile")
+        "action",
+        choices=(
+            "prepare",
+            "check",
+            "compare",
+            "probe",
+            "benchmark",
+            "profile",
+            "operators",
+            "logical-catalog",
+            "logical-bench",
+        ),
     )
     p.add_argument("--platform", choices=("h100", "hygon"), required=True)
     p.add_argument("--output", type=Path, required=True, help="A new directory; never overwritten")
@@ -28,6 +39,16 @@ def main():
     p.add_argument("--device", type=int)
     p.add_argument("--mode", choices=("tf32", "fp32", "xf32", "rne_xf32", "all"))
     p.add_argument("--repeats", type=int, default=3)
+    p.add_argument(
+        "--inventory",
+        type=Path,
+        help="Frozen logical catalog directory, with optimized-hlo.txt in its parent",
+    )
+    p.add_argument(
+        "--smoke",
+        action="store_true",
+        help="Logical benchmark: one case per operator, not a complete result",
+    )
     p.add_argument("--gpu-access", choices=("volume", "standard"), default="volume")
     args = p.parse_args()
     config = json.loads((ROOT / "configs" / (args.platform + ".json")).read_text())
@@ -38,11 +59,35 @@ def main():
         or (args.platform == "hygon" and mode == "tf32")
     ):
         p.error("Unsupported mode/repeats for this platform")
-    if args.action == "profile" and args.platform != "h100":
-        p.error("The included profiler entry is for H100")
-    if args.action in ("benchmark", "profile") and (
-        args.data is None or not (args.data / "manifest.json").is_file()
+    if args.action == "profile" and mode == "all":
+        p.error("Profile one precision mode per output directory")
+    if args.action == "profile" and args.platform == "hygon" and mode != "rne_xf32":
+        p.error("The current Hygon model profile measures RNE+XF32 only")
+    if args.action == "operators" and args.platform != "hygon":
+        p.error("The included standalone operator benchmark is for Hygon")
+    if args.action == "operators" and mode != "rne_xf32":
+        p.error("The current standalone operator benchmark measures RNE+XF32 only")
+    if args.action in ("logical-catalog", "logical-bench") and (
+        args.platform != "hygon" or mode != "rne_xf32"
     ):
+        p.error("Logical inventory currently requires Hygon RNE+XF32")
+    if args.action == "logical-bench" and (
+        args.inventory is None
+        or not (args.inventory / "inventory.json").is_file()
+        or not (args.inventory.parent / "optimized-hlo.txt").is_file()
+    ):
+        p.error(
+            "logical-bench requires --inventory with inventory.json, constants.npz and adjacent optimized-hlo.txt"
+        )
+    if args.smoke and args.action != "logical-bench":
+        p.error("--smoke applies only to logical-bench")
+    if args.action in (
+        "benchmark",
+        "profile",
+        "operators",
+        "logical-catalog",
+        "logical-bench",
+    ) and (args.data is None or not (args.data / "manifest.json").is_file()):
         p.error("--data must point to a prepared JAX case")
     if args.action == "prepare" and (args.case is None or args.baseline is None):
         p.error("prepare requires --case and --baseline")
@@ -54,7 +99,14 @@ def main():
     device = args.device if args.device is not None else config["device_default"]
     if device < 0:
         p.error("Device index must be nonnegative")
-    gpu = args.action in ("probe", "benchmark", "profile")
+    gpu = args.action in (
+        "probe",
+        "benchmark",
+        "profile",
+        "operators",
+        "logical-catalog",
+        "logical-bench",
+    )
     access = []
     gpu_env = {}
     telemetry = None
@@ -130,6 +182,7 @@ def main():
     }
     if gpu:
         env.update(GRAPHCAST_EXPECTED_PCI=pci.lower(), GRAPHCAST_PHYSICAL_DEVICE=str(device))
+        env["GRAPHCAST_EXPECTED_DEVICE"] = config["expected_device"]
     command = [
         "docker",
         "run",
@@ -146,6 +199,9 @@ def main():
         command += ["-v", "/opt/hyhal:/opt/hyhal:ro"]
     if args.data:
         command += ["-v", str(args.data.resolve()) + ":/data:ro"]
+    if args.action == "logical-bench":
+        command += ["-v", str(args.inventory.resolve().parent) + ":/inventory:ro"]
+        env["GRAPHCAST_LOGICAL_FOLDER"] = "/inventory/" + args.inventory.name
     if args.action == "prepare":
         command += [
             "-v",
@@ -170,8 +226,14 @@ def main():
         "/repo/scripts/in_container.sh",
         args.action,
     ]
-    if args.action in ("benchmark", "profile"):
+    if args.action in ("benchmark", "profile", "logical-catalog"):
         command += ["--mode", mode, "--repeats", str(args.repeats)]
+    if args.action == "operators":
+        command += ["--repeats", str(args.repeats)]
+    if args.action == "logical-bench":
+        command += ["--repeats", str(args.repeats)]
+        if args.smoke:
+            command += ["--smoke"]
     launch = {
         "command": command,
         "platform_config": config,

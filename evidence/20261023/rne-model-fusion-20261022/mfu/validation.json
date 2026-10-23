@@ -1,0 +1,26 @@
+{
+  "status": "passed",
+  "baseline_files_unchanged": 115,
+  "model_trace_files_verified": true,
+  "model_shapes_cross_checked": true,
+  "probe_sizes_passed": [
+    8192,
+    16384,
+    24576
+  ],
+  "theoretical_peak_confirmed": true,
+  "theoretical_mfu_status": "computed_with_user_designated_1300mhz_peak",
+  "gpu_time_definition": "all kernel interval union",
+  "peak_confirmation_authority": "user_designated_screenshot",
+  "theoretical_peak_tflops": 170.3936,
+  "peak_image_sha256": "68d22b813025819f7472d26a0e2980d5aae81aba7d7f2706c552954fa7e1c787",
+  "profile_time_and_flops_unchanged": true,
+  "reference_frequency_mhz": 1300,
+  "profile_recorded_sclk_mhz": 1350,
+  "frequency_rescaled": false,
+  "mfu_percent": {
+    "baseline": 17.236717254712442,
+    "fused": 23.32050887874723
+  },
+  "mfu_increase_percentage_points": 6.083791624034788
+}

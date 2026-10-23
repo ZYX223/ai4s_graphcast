@@ -1,0 +1,24 @@
+{
+  "status": "local_checks_passed",
+  "gpu_rerun": false,
+  "archive_files_verified": 223,
+  "repo_cpu_tests": 35,
+  "frozen_fusion_tests": 39,
+  "training_cpu_tests": 8,
+  "python_syntax_files": 164,
+  "shell_syntax_files": 13,
+  "checkpoint_reuse_test": "CPU parameter diagnosis reproduced original relative gaps",
+  "ruff_version": "0.12.2",
+  "raw_validation_root": "/home/zhangyuxin/zyx/graphcast/outputs/repository-package-20261023",
+  "limitations": [
+    "No new 38-update or 40-step GPU measurement in this packaging task.",
+    "Historical 24 training profiler children have post-save signal11 warnings; not fixed.",
+    "Short training loss consistency passes; convergence not established."
+  ],
+  "validation_log_sha256": {
+    "repo-cpu-final/console.log": "0ad6b1708f7f278902b6cd112fae1f07c289b7acc994ee6d5112e7019d8b7175",
+    "fusion-cpu/console.log": "34c24ab16d6c54420d7a599f91e280471311ab0f2e69b1ec5e5b477f8ef08f06",
+    "train-cpu/console.log": "bc1fe1070d63494df5bfd0065b06ba35ee93598757af0b37ba6f0c48911b7da8",
+    "reused-checkpoints-cpu/console.log": "262b1646350bf914a36eb71767e5dc878efe366ceecf6c01f34f57e67eb33423"
+  }
+}

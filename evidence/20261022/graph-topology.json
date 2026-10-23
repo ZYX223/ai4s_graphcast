@@ -1,0 +1,26 @@
+[
+  {
+    "name": "grid2mesh",
+    "senders": 1038240,
+    "receivers": 40962,
+    "edges": 1618745,
+    "sender_sha256": "05e395204a4da82bdf16f756aa8f8a7105537cd9a2b6a275dbf466b23b870826",
+    "receiver_sha256": "a2c251abdcb79ac1ac8cbe35fef034af03c37fed4eafbe3889eb83aef2821f9b"
+  },
+  {
+    "name": "mesh",
+    "senders": 40962,
+    "receivers": 40962,
+    "edges": 327660,
+    "sender_sha256": "c0e347c93170d1c5291b30ec8fb8563ae86becc4ee46bcf6baa83ce43e78f522",
+    "receiver_sha256": "f91c5061f868a234cb0f0e8cc3651f856c4cfe37967b9e50ac92a2a211819b5a"
+  },
+  {
+    "name": "mesh2grid",
+    "senders": 40962,
+    "receivers": 1038240,
+    "edges": 3114720,
+    "sender_sha256": "6cd05fdc853440aa84996aa4262dc9f238ad4d347b3139734f6802422d01e3d2",
+    "receiver_sha256": "04ec627476847b94b07587ec8f5b39d4107be574f8c70ec646b14d5c4a8f0970"
+  }
+]

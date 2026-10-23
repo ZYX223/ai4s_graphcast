@@ -1,0 +1,34 @@
+{
+  "status": "completed",
+  "sources": {
+    "fp3216": {
+      "checkpoint_sha256": "2b68932c39edc6d0eb2c1824f6fc5b702435dc2720eee9607c01a0d1e1e30536",
+      "params_sha256": "c98da9c213dcbb7516342af2f8877fb2c77655876d6711571f9f643aa91079b7"
+    },
+    "fp3238": {
+      "checkpoint_sha256": "6ab5a80ba9d571fd850710e69e75b7158d5d09791e7e0f3353d5d9f30cba2c57",
+      "params_sha256": "fa40acf5d504b68052bd5a1ae676762d8efdf778a9cce8d2186e9d5da08a07f1"
+    },
+    "rne_xf3216": {
+      "checkpoint_sha256": "601ef84ffdc86e1f42d11bb140373eeb8a5ce53b57078a372d9076c6e39b62d5",
+      "params_sha256": "92f8dfdbd26588f09995c885e668e604f1feb41a5ca6ee47cbcb75ed651bfaf5"
+    },
+    "rne_xf3238": {
+      "checkpoint_sha256": "c91ad0a8a2e23ff5628b11acc00b1f8f9ddeafd1322625a38236a82d77422d9c",
+      "params_sha256": "53f38b43803cdea102ba5e1723b2c24f88d4e2789b4e0bcf356bb4d0461c29ed"
+    }
+  },
+  "relative_parameter_l2_gap_update16": 0.010829926073562457,
+  "relative_parameter_l2_gap_update38": 0.010824489082405362,
+  "change_in_gap_vector_from_update16_to38_relative_to_final_gap": 0.005007978487732773,
+  "cosine_between_gap_vectors_update16_update38": 0.9999875920880529,
+  "totals": {
+    "fp32_sq16": 29267.302432109864,
+    "fp32_sq38": 29267.344030461725,
+    "gap_sq16": 3.4326828442198405,
+    "gap_sq38": 3.429241936417436,
+    "gap_change_sq": 8.600486835039866e-05,
+    "gap_dot": 3.430919387884475
+  },
+  "caveat": "Parameter-gap location is measured; per-module parameter norms do not establish causal importance for output error."
+}

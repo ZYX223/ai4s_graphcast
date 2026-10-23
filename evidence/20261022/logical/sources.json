@@ -1,0 +1,18 @@
+{
+  "report.json": {
+    "source": "/home/zhangyuxin/zyx/graphcast/outputs/logical-operators-20261022/bench-full-r2/logical/report.json",
+    "sha256": "bdae6e5b7eceda0789d609f3c230766a9e4ec5434c27290b343901d401da5e3f"
+  },
+  "catalog.json": {
+    "source": "/home/zhangyuxin/zyx/graphcast/outputs/logical-operators-20261022/bench-full-r2/logical/catalog.json",
+    "sha256": "3a0c64d7ac2d2bcb7114ebd09798bca093844e445726d7397b922e8943557b2e"
+  },
+  "workbook-manifest.json": {
+    "source": "/home/zhangyuxin/zyx/graphcast/outputs/logical-operators-20261022/workbook/manifest.json",
+    "sha256": "40f5421e0f167d60dc7ac62f641dc34fd00eb4a810152e531dedffe1cc5e1227"
+  },
+  "workbook-validation.json": {
+    "source": "/home/zhangyuxin/zyx/graphcast/outputs/logical-operators-20261022/workbook/validation.json",
+    "sha256": "5a188439c9666aa8413ba545c337c5841e7642e189ab2fd98b6455da7e4d4bae"
+  }
+}

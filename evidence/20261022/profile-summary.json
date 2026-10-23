@@ -1,0 +1,1523 @@
+{
+  "gpu_kernel_count": 550,
+  "gpu_kernel_sum_ms": 969.0254809999998,
+  "gpu_kernel_busy_union_ms": 969.0233939993084,
+  "gpu_kernel_span_ms": 1053.864248999998,
+  "host_api_count": 2031,
+  "host_api_sum_ms": 42.82748300000006,
+  "device_copy_count": 24,
+  "device_copy_sum_ms": 27.391823,
+  "categories": {
+    "gemm": {
+      "calls": 84,
+      "total_ms": 321.3349549999999,
+      "percent_of_kernel_sum": 33.16063006603229
+    },
+    "rne": {
+      "calls": 168,
+      "total_ms": 284.46887799999996,
+      "percent_of_kernel_sum": 29.356181398495135
+    },
+    "scatter_fusion": {
+      "calls": 18,
+      "total_ms": 105.83063999999999,
+      "percent_of_kernel_sum": 10.921347485185482
+    },
+    "layer_norm_fusion": {
+      "calls": 192,
+      "total_ms": 105.03431700000004,
+      "percent_of_kernel_sum": 10.83916976998462
+    },
+    "other_device_kernel": {
+      "calls": 68,
+      "total_ms": 91.82793500000001,
+      "percent_of_kernel_sum": 9.476317888486983
+    },
+    "gather_fusion": {
+      "calls": 20,
+      "total_ms": 60.528755999999994,
+      "percent_of_kernel_sum": 6.2463533918155045
+    }
+  },
+  "kernels": [
+    {
+      "name": "Cijk_Ailk_Bljk_SB_MX_MT256x256x16_SE_AMAS3_BW_DTL0_BL1_DRB16_ALT_KME0_ETN_EPS0_FL0_GRVW4_GSU1_ISA938_IU1_KME_GRCMn2_K1_KLA_LDL1_LRVW4_MAC_MMAC_BW1_MMAC_KM0_MMAC_KME1_NLCA1_NLCB1_OLDSR0_PGR2_PLR1_RK1_SU0_SUM0_SUS256_SVW4_TT8_16_TLM0_ULDSWM0_USFGRO0_USSB0_VAW1_VSn1_VW4_WG32_16_1_WGM1",
+      "category": "gemm",
+      "hlo_tags": [],
+      "calls": 80,
+      "total_ms": 308.46328399999993,
+      "percent_of_kernel_sum": 31.8323191751033
+    },
+    {
+      "name": "round_rne(float const*, float*, int, int, int)",
+      "category": "rne",
+      "hlo_tags": [],
+      "calls": 168,
+      "total_ms": 284.46887799999996,
+      "percent_of_kernel_sum": 29.356181398495135
+    },
+    {
+      "name": "input_scatter_fusion_16",
+      "category": "scatter_fusion",
+      "hlo_tags": [
+        "scatter",
+        "layer_norm"
+      ],
+      "calls": 15,
+      "total_ms": 52.98155899999999,
+      "percent_of_kernel_sum": 5.4675093729552815
+    },
+    {
+      "name": "input_scatter_fusion",
+      "category": "scatter_fusion",
+      "hlo_tags": [
+        "scatter",
+        "layer_norm"
+      ],
+      "calls": 1,
+      "total_ms": 30.442377,
+      "percent_of_kernel_sum": 3.141545562721896
+    },
+    {
+      "name": "loop_multiply_fusion_39",
+      "category": "other_device_kernel",
+      "hlo_tags": [],
+      "calls": 2,
+      "total_ms": 23.204303,
+      "percent_of_kernel_sum": 2.3946019433930656
+    },
+    {
+      "name": "input_scatter_fusion_17",
+      "category": "scatter_fusion",
+      "hlo_tags": [
+        "scatter",
+        "layer_norm"
+      ],
+      "calls": 1,
+      "total_ms": 18.903826000000002,
+      "percent_of_kernel_sum": 1.9508079375262586
+    },
+    {
+      "name": "loop_multiply_fusion_35",
+      "category": "other_device_kernel",
+      "hlo_tags": [],
+      "calls": 17,
+      "total_ms": 18.681908,
+      "percent_of_kernel_sum": 1.9279067853531506
+    },
+    {
+      "name": "input_concatenate_fusion",
+      "category": "gather_fusion",
+      "hlo_tags": [
+        "gather",
+        "layer_norm"
+      ],
+      "calls": 3,
+      "total_ms": 18.585106,
+      "percent_of_kernel_sum": 1.9179171615612038
+    },
+    {
+      "name": "input_concatenate_fusion_14",
+      "category": "gather_fusion",
+      "hlo_tags": [
+        "gather",
+        "layer_norm"
+      ],
+      "calls": 7,
+      "total_ms": 15.694707999999999,
+      "percent_of_kernel_sum": 1.619638317849353
+    },
+    {
+      "name": "loop_multiply_fusion_41",
+      "category": "other_device_kernel",
+      "hlo_tags": [],
+      "calls": 4,
+      "total_ms": 13.520631,
+      "percent_of_kernel_sum": 1.3952812660867482
+    },
+    {
+      "name": "input_reduce_fusion_38",
+      "category": "layer_norm_fusion",
+      "hlo_tags": [
+        "layer_norm",
+        "reduction"
+      ],
+      "calls": 2,
+      "total_ms": 12.672150000000002,
+      "percent_of_kernel_sum": 1.3077210298869328
+    },
+    {
+      "name": "input_reduce_fusion_41",
+      "category": "layer_norm_fusion",
+      "hlo_tags": [
+        "layer_norm",
+        "reduction"
+      ],
+      "calls": 2,
+      "total_ms": 12.238230000000001,
+      "percent_of_kernel_sum": 1.2629420216453529
+    },
+    {
+      "name": "input_concatenate_fusion_15",
+      "category": "gather_fusion",
+      "hlo_tags": [
+        "gather"
+      ],
+      "calls": 7,
+      "total_ms": 11.928792,
+      "percent_of_kernel_sum": 1.231009115228829
+    },
+    {
+      "name": "loop_add_fusion_10",
+      "category": "layer_norm_fusion",
+      "hlo_tags": [
+        "layer_norm"
+      ],
+      "calls": 6,
+      "total_ms": 11.885589,
+      "percent_of_kernel_sum": 1.2265507185357496
+    },
+    {
+      "name": "input_reduce_fusion_34",
+      "category": "layer_norm_fusion",
+      "hlo_tags": [
+        "layer_norm",
+        "reduction"
+      ],
+      "calls": 17,
+      "total_ms": 11.341752,
+      "percent_of_kernel_sum": 1.1704286649197002
+    },
+    {
+      "name": "loop_multiply_fusion_38",
+      "category": "other_device_kernel",
+      "hlo_tags": [],
+      "calls": 2,
+      "total_ms": 11.066551,
+      "percent_of_kernel_sum": 1.142028895729317
+    },
+    {
+      "name": "input_reduce_fusion_48",
+      "category": "layer_norm_fusion",
+      "hlo_tags": [
+        "layer_norm",
+        "reduction"
+      ],
+      "calls": 17,
+      "total_ms": 11.00415,
+      "percent_of_kernel_sum": 1.1355893333830713
+    },
+    {
+      "name": "input_concatenate_fusion_17",
+      "category": "gather_fusion",
+      "hlo_tags": [
+        "gather",
+        "layer_norm"
+      ],
+      "calls": 1,
+      "total_ms": 9.608633,
+      "percent_of_kernel_sum": 0.9915769180893192
+    },
+    {
+      "name": "Cijk_Ailk_Bljk_SB_MT128x128x16_SE_AMAS3_BW_DTL0_BL1_DRB16_ALT_KME0_ETN_EPS0_FL0_GRVW4_GSU1_ISA938_IU1_KME_GRCMn1_K1_KLA_LDL1_LRVW4_MAC_MMAC_BW1_MMAC_KM0_MMAC_KME1_NLCA1_NLCB1_OLDSR0_PGR2_PLR1_RK0_SU32_SUM0_SUS256_SVW4_TT4_8_TLM0_ULDSWM0_USFGRO0_USSB0_VAW1_VSn1_VW4_WG32_16_1_WGM8",
+      "category": "gemm",
+      "hlo_tags": [],
+      "calls": 2,
+      "total_ms": 9.164152999999999,
+      "percent_of_kernel_sum": 0.9457081552223909
+    },
+    {
+      "name": "input_concatenate_fusion_18",
+      "category": "other_device_kernel",
+      "hlo_tags": [],
+      "calls": 1,
+      "total_ms": 7.807354,
+      "percent_of_kernel_sum": 0.8056913004953274
+    },
+    {
+      "name": "loop_add_fusion_3",
+      "category": "layer_norm_fusion",
+      "hlo_tags": [
+        "layer_norm"
+      ],
+      "calls": 2,
+      "total_ms": 7.652154,
+      "percent_of_kernel_sum": 0.7896752097894526
+    },
+    {
+      "name": "input_reduce_fusion_37",
+      "category": "layer_norm_fusion",
+      "hlo_tags": [
+        "layer_norm",
+        "reduction"
+      ],
+      "calls": 2,
+      "total_ms": 6.295995,
+      "percent_of_kernel_sum": 0.6497244007972584
+    },
+    {
+      "name": "input_reduce_fusion_40",
+      "category": "layer_norm_fusion",
+      "hlo_tags": [
+        "layer_norm",
+        "reduction"
+      ],
+      "calls": 3,
+      "total_ms": 6.123994999999999,
+      "percent_of_kernel_sum": 0.6319746095510569
+    },
+    {
+      "name": "input_reduce_fusion_43",
+      "category": "layer_norm_fusion",
+      "hlo_tags": [
+        "layer_norm",
+        "reduction"
+      ],
+      "calls": 2,
+      "total_ms": 6.031516,
+      "percent_of_kernel_sum": 0.6224311040588624
+    },
+    {
+      "name": "input_reduce_fusion_45",
+      "category": "layer_norm_fusion",
+      "hlo_tags": [
+        "layer_norm",
+        "reduction"
+      ],
+      "calls": 3,
+      "total_ms": 5.893437,
+      "percent_of_kernel_sum": 0.6081818399572096
+    },
+    {
+      "name": "wrapped_concatenate_17",
+      "category": "other_device_kernel",
+      "hlo_tags": [],
+      "calls": 1,
+      "total_ms": 5.233276,
+      "percent_of_kernel_sum": 0.5400555612427699
+    },
+    {
+      "name": "wrapped_concatenate",
+      "category": "other_device_kernel",
+      "hlo_tags": [],
+      "calls": 17,
+      "total_ms": 4.339357,
+      "percent_of_kernel_sum": 0.447806284260135
+    },
+    {
+      "name": "input_scatter_fusion_1",
+      "category": "scatter_fusion",
+      "hlo_tags": [
+        "scatter",
+        "layer_norm"
+      ],
+      "calls": 1,
+      "total_ms": 3.502878,
+      "percent_of_kernel_sum": 0.36148461198204557
+    },
+    {
+      "name": "loop_add_fusion_12",
+      "category": "layer_norm_fusion",
+      "hlo_tags": [
+        "layer_norm"
+      ],
+      "calls": 17,
+      "total_ms": 3.4401560000000004,
+      "percent_of_kernel_sum": 0.35501192357190464
+    },
+    {
+      "name": "loop_multiply_fusion_36",
+      "category": "other_device_kernel",
+      "hlo_tags": [],
+      "calls": 17,
+      "total_ms": 3.165598000000001,
+      "percent_of_kernel_sum": 0.32667850970577333
+    },
+    {
+      "name": "Cijk_Ailk_Bljk_SB_MX_MT128x128x8_SE_AMAS3_BW_DTL1_BL1_DRB16_ALT_KME0_ETN_EPS1_FL0_GRVW4_GSU1_ISA938_IU1_KME_GRCMn2_K1_KLA_LDL1_LRVW4_MAC_MMAC_BW1_MMAC_KM0_MMAC_KME1_NLCA1_NLCB1_OLDSR0_PGR1_PLR1_RK0_SU0_SUM0_SUS256_SVW4_TT8_8_TLM1_ULDSWM0_USFGRO0_USSB0_VAW1_VSn1_VW4_WG16_16_1_WGM8",
+      "category": "gemm",
+      "hlo_tags": [],
+      "calls": 1,
+      "total_ms": 3.066718,
+      "percent_of_kernel_sum": 0.31647444366842203
+    },
+    {
+      "name": "input_concatenate_fusion_1",
+      "category": "gather_fusion",
+      "hlo_tags": [
+        "gather",
+        "layer_norm"
+      ],
+      "calls": 1,
+      "total_ms": 2.9217579999999996,
+      "percent_of_kernel_sum": 0.3015150847204605
+    },
+    {
+      "name": "loop_add_fusion_2",
+      "category": "layer_norm_fusion",
+      "hlo_tags": [
+        "layer_norm"
+      ],
+      "calls": 1,
+      "total_ms": 2.864798,
+      "percent_of_kernel_sum": 0.29563701431706735
+    },
+    {
+      "name": "input_reduce_fusion_35",
+      "category": "layer_norm_fusion",
+      "hlo_tags": [
+        "layer_norm",
+        "reduction"
+      ],
+      "calls": 17,
+      "total_ms": 2.3060779999999994,
+      "percent_of_kernel_sum": 0.23797908777591784
+    },
+    {
+      "name": "input_reduce_fusion_65",
+      "category": "layer_norm_fusion",
+      "hlo_tags": [
+        "layer_norm",
+        "reduction"
+      ],
+      "calls": 17,
+      "total_ms": 2.2953600000000005,
+      "percent_of_kernel_sum": 0.23687302810977384
+    },
+    {
+      "name": "loop_broadcast_fusion",
+      "category": "other_device_kernel",
+      "hlo_tags": [],
+      "calls": 1,
+      "total_ms": 2.020799,
+      "percent_of_kernel_sum": 0.20853930465426018
+    },
+    {
+      "name": "input_concatenate_fusion_16",
+      "category": "gather_fusion",
+      "hlo_tags": [
+        "gather",
+        "layer_norm"
+      ],
+      "calls": 1,
+      "total_ms": 1.789759,
+      "percent_of_kernel_sum": 0.18469679436633932
+    },
+    {
+      "name": "loop_add_fusion_11",
+      "category": "layer_norm_fusion",
+      "hlo_tags": [
+        "layer_norm"
+      ],
+      "calls": 1,
+      "total_ms": 1.6127989999999999,
+      "percent_of_kernel_sum": 0.1664351486748985
+    },
+    {
+      "name": "loop_broadcast_fusion_1",
+      "category": "other_device_kernel",
+      "hlo_tags": [],
+      "calls": 1,
+      "total_ms": 1.328799,
+      "percent_of_kernel_sum": 0.13712735382651928
+    },
+    {
+      "name": "loop_add_fusion",
+      "category": "other_device_kernel",
+      "hlo_tags": [],
+      "calls": 1,
+      "total_ms": 1.145279,
+      "percent_of_kernel_sum": 0.1181887393526652
+    },
+    {
+      "name": "Cijk_Ailk_Bljk_SB_MT128x128x16_SE_AMAS3_BW_DTL0_BL1_DRB16_ALT_KME0_ETN_EPS0_FL0_GRVW4_GSU1_ISA938_IU1_KME_GRCMn1_K1_KLA_LDL1_LRVW4_MAC_MMAC_BW1_MMAC_KM0_MMAC_KME1_NLCA1_NLCB1_OLDSR0_PGR2_PLR1_RK0_SU0_SUM0_SUS256_SVW4_TT4_8_TLM0_ULDSWM0_USFGRO0_USSB0_VAW1_VSn1_VW4_WG32_16_1_WGM8",
+      "category": "gemm",
+      "hlo_tags": [],
+      "calls": 1,
+      "total_ms": 0.6407999999999999,
+      "percent_of_kernel_sum": 0.06612829203817398
+    },
+    {
+      "name": "loop_add_fusion_1",
+      "category": "other_device_kernel",
+      "hlo_tags": [],
+      "calls": 1,
+      "total_ms": 0.19824,
+      "percent_of_kernel_sum": 0.020457666375854573
+    },
+    {
+      "name": "loop_rsqrt_fusion_3",
+      "category": "layer_norm_fusion",
+      "hlo_tags": [
+        "layer_norm"
+      ],
+      "calls": 2,
+      "total_ms": 0.168319,
+      "percent_of_kernel_sum": 0.017369925074240646
+    },
+    {
+      "name": "loop_add_fusion_29",
+      "category": "layer_norm_fusion",
+      "hlo_tags": [
+        "layer_norm"
+      ],
+      "calls": 1,
+      "total_ms": 0.16176,
+      "percent_of_kernel_sum": 0.016693059488288114
+    },
+    {
+      "name": "loop_multiply_fusion_42",
+      "category": "layer_norm_fusion",
+      "hlo_tags": [
+        "layer_norm"
+      ],
+      "calls": 2,
+      "total_ms": 0.16016,
+      "percent_of_kernel_sum": 0.016527945151114148
+    },
+    {
+      "name": "loop_rsqrt_fusion_1",
+      "category": "layer_norm_fusion",
+      "hlo_tags": [
+        "layer_norm"
+      ],
+      "calls": 2,
+      "total_ms": 0.16,
+      "percent_of_kernel_sum": 0.01651143371739675
+    },
+    {
+      "name": "loop_rsqrt_fusion_6",
+      "category": "layer_norm_fusion",
+      "hlo_tags": [
+        "layer_norm"
+      ],
+      "calls": 3,
+      "total_ms": 0.13984000000000002,
+      "percent_of_kernel_sum": 0.014430993069004762
+    },
+    {
+      "name": "loop_multiply_fusion_63",
+      "category": "layer_norm_fusion",
+      "hlo_tags": [
+        "layer_norm"
+      ],
+      "calls": 3,
+      "total_ms": 0.139679,
+      "percent_of_kernel_sum": 0.014414378438826628
+    },
+    {
+      "name": "loop_transpose_fusion",
+      "category": "other_device_kernel",
+      "hlo_tags": [],
+      "calls": 1,
+      "total_ms": 0.11023999999999999,
+      "percent_of_kernel_sum": 0.01137637783128636
+    },
+    {
+      "name": "loop_multiply_fusion_66",
+      "category": "layer_norm_fusion",
+      "hlo_tags": [
+        "layer_norm"
+      ],
+      "calls": 17,
+      "total_ms": 0.10064,
+      "percent_of_kernel_sum": 0.010385691808242553
+    },
+    {
+      "name": "loop_rsqrt_fusion_23",
+      "category": "layer_norm_fusion",
+      "hlo_tags": [
+        "layer_norm"
+      ],
+      "calls": 17,
+      "total_ms": 0.09839999999999999,
+      "percent_of_kernel_sum": 0.010154531736199
+    },
+    {
+      "name": "loop_multiply_fusion_44",
+      "category": "layer_norm_fusion",
+      "hlo_tags": [
+        "layer_norm"
+      ],
+      "calls": 17,
+      "total_ms": 0.09839999999999997,
+      "percent_of_kernel_sum": 0.010154531736198999
+    },
+    {
+      "name": "loop_rsqrt_fusion_40",
+      "category": "layer_norm_fusion",
+      "hlo_tags": [
+        "layer_norm"
+      ],
+      "calls": 17,
+      "total_ms": 0.09791999999999998,
+      "percent_of_kernel_sum": 0.010104997435046809
+    },
+    {
+      "name": "loop_multiply_fusion_61",
+      "category": "layer_norm_fusion",
+      "hlo_tags": [
+        "layer_norm"
+      ],
+      "calls": 2,
+      "total_ms": 0.05104,
+      "percent_of_kernel_sum": 0.005267147355849563
+    },
+    {
+      "name": "wrapped_slice_1",
+      "category": "other_device_kernel",
+      "hlo_tags": [],
+      "calls": 1,
+      "total_ms": 0.0028799999999999997,
+      "percent_of_kernel_sum": 0.0002972058069131415
+    },
+    {
+      "name": "wrapped_slice",
+      "category": "other_device_kernel",
+      "hlo_tags": [],
+      "calls": 1,
+      "total_ms": 0.00272,
+      "percent_of_kernel_sum": 0.00028069437319574477
+    }
+  ],
+  "host_apis": {
+    "hipMemcpyHtoDAsync": {
+      "calls": 23,
+      "total_ms": 16.213153000000002
+    },
+    "hipEventRecord": {
+      "calls": 102,
+      "total_ms": 12.821191000000002
+    },
+    "hipLaunchHostFunc": {
+      "calls": 62,
+      "total_ms": 4.778061
+    },
+    "hipStreamWaitEvent": {
+      "calls": 108,
+      "total_ms": 3.1288469999999995
+    },
+    "hipModuleLaunchKernel": {
+      "calls": 298,
+      "total_ms": 2.321303999999999
+    },
+    "hipLaunchKernel": {
+      "calls": 168,
+      "total_ms": 1.1725540000000008
+    },
+    "hipStreamQuery": {
+      "calls": 84,
+      "total_ms": 0.610575
+    },
+    "hipExtModuleLaunchKernel": {
+      "calls": 84,
+      "total_ms": 0.550592
+    },
+    "hipCtxSetCurrent": {
+      "calls": 249,
+      "total_ms": 0.39572400000000046
+    },
+    "hipStreamIsCapturing": {
+      "calls": 168,
+      "total_ms": 0.19092100000000004
+    },
+    "hipDeviceSynchronize": {
+      "calls": 1,
+      "total_ms": 0.12523099999999998
+    },
+    "__hipPopCallConfiguration": {
+      "calls": 168,
+      "total_ms": 0.11359999999999998
+    },
+    "__hipPushCallConfiguration": {
+      "calls": 168,
+      "total_ms": 0.10379999999999989
+    },
+    "hipGetLastError": {
+      "calls": 168,
+      "total_ms": 0.09423000000000012
+    },
+    "hipGetDeviceProperties": {
+      "calls": 84,
+      "total_ms": 0.07425999999999995
+    },
+    "hipGetDevice": {
+      "calls": 84,
+      "total_ms": 0.05506000000000001
+    },
+    "hipMemcpyDtoDAsync": {
+      "calls": 1,
+      "total_ms": 0.048170000000000004
+    },
+    "hipEventQuery": {
+      "calls": 11,
+      "total_ms": 0.030210000000000004
+    }
+  },
+  "classification": "Exclusive precedence: GEMM/RNE, then fusion containing scatter, gather, LayerNorm, other reduction, other. Fusion labels include all operations fused into that kernel; HLO tags retain overlapping semantic labels.",
+  "time_units": "Trace timestamps/durations are microseconds; all report times milliseconds.",
+  "limits": "Host API times can overlap device time; never add them. Kernel sum percentages describe GPU kernel work, not end-to-end latency. Busy time is the union across device kernel intervals.",
+  "mode": "rne_xf32",
+  "platform": "hygon",
+  "product_name": "BW1100",
+  "driver_device_name": "BW1200",
+  "pci": "0000:9c:00.0",
+  "profile_rollout_ms": 1058.865169994533,
+  "profile_model_call_ms": 1020.3784220211674,
+  "status": "passed",
+  "jit_cache_unchanged": true,
+  "sources": {
+    "/home/zhangyuxin/zyx/graphcast/outputs/inference-operators-20261022/model-profile-rne-r3/model-trace.json": "758c00dcb6ad6d32923c0d3e1a68001709fbd79589afc0d12e8d3c77c13d032a",
+    "/home/zhangyuxin/zyx/graphcast/outputs/inference-operators-20261022/model-profile-rne-r3/run/optimized-hlo.txt": "be3aebd5dea500588b633bfdc809a4723546794117fb74bf20d4b31d739bf956",
+    "/home/zhangyuxin/zyx/graphcast/outputs/inference-operators-20261022/model-profile-rne-r3/run/report.json": "82d38f6c59bc789c829d95f61717983d02574b6187f6ae10010b9401f7d40d8e",
+    "/home/zhangyuxin/zyx/graphcast/outputs/inference-operators-20261022/model-profile-rne-r3/run/step-audit.json": "3e9ea5bd6eefe48b811d7b4efa97abc8e6b41f5dec30909cb443070d9053905a",
+    "/home/zhangyuxin/zyx/graphcast/outputs/inference-operators-20261022/model-profile-rne-r3/model-gemm.jsonl": "c9875a4286c8b7e6e769fa7a240a41634ba05cd6646236ffccecd8e86ed81443"
+  },
+  "layer_timings": [
+    {
+      "index": 1,
+      "layer": "grid2mesh_gnn/~_networks_builder/encoder_nodes_grid_nodes_mlp/~/linear_0",
+      "m": 512,
+      "n": 1038240,
+      "k": 184,
+      "weight_rne_ms": 0.00624,
+      "activation_rne_ms": 1.869439,
+      "gemm_ms": 3.413757
+    },
+    {
+      "index": 2,
+      "layer": "grid2mesh_gnn/~_networks_builder/encoder_nodes_grid_nodes_mlp/~/linear_1",
+      "m": 512,
+      "n": 1038240,
+      "k": 512,
+      "weight_rne_ms": 0.0064,
+      "activation_rne_ms": 4.908156,
+      "gemm_ms": 6.085435
+    },
+    {
+      "index": 3,
+      "layer": "grid2mesh_gnn/~_networks_builder/encoder_edges_grid2mesh_mlp/~/linear_0",
+      "m": 512,
+      "n": 1618745,
+      "k": 4,
+      "weight_rne_ms": 0.00592,
+      "activation_rne_ms": 0.156,
+      "gemm_ms": 3.167198
+    },
+    {
+      "index": 4,
+      "layer": "grid2mesh_gnn/~_networks_builder/encoder_edges_grid2mesh_mlp/~/linear_1",
+      "m": 512,
+      "n": 1618745,
+      "k": 512,
+      "weight_rne_ms": 0.00704,
+      "activation_rne_ms": 7.611834,
+      "gemm_ms": 9.495993
+    },
+    {
+      "index": 5,
+      "layer": "grid2mesh_gnn/~_networks_builder/processor_edges_0_grid2mesh_mlp/~/linear_0",
+      "m": 512,
+      "n": 1618745,
+      "k": 1536,
+      "weight_rne_ms": 0.072958,
+      "activation_rne_ms": 22.643183,
+      "gemm_ms": 23.487022
+    },
+    {
+      "index": 6,
+      "layer": "grid2mesh_gnn/~_networks_builder/processor_edges_0_grid2mesh_mlp/~/linear_1",
+      "m": 512,
+      "n": 1618745,
+      "k": 512,
+      "weight_rne_ms": 0.0064,
+      "activation_rne_ms": 7.732953999999999,
+      "gemm_ms": 9.566711999999999
+    },
+    {
+      "index": 7,
+      "layer": "grid2mesh_gnn/~_networks_builder/processor_nodes_0_mesh_nodes_mlp/~/linear_0",
+      "m": 512,
+      "n": 40962,
+      "k": 1024,
+      "weight_rne_ms": 0.069758,
+      "activation_rne_ms": 0.4992,
+      "gemm_ms": 0.56448
+    },
+    {
+      "index": 8,
+      "layer": "grid2mesh_gnn/~_networks_builder/processor_nodes_0_mesh_nodes_mlp/~/linear_1",
+      "m": 512,
+      "n": 40962,
+      "k": 512,
+      "weight_rne_ms": 0.06591899999999999,
+      "activation_rne_ms": 0.33488,
+      "gemm_ms": 0.3232
+    },
+    {
+      "index": 9,
+      "layer": "mesh_gnn/~_networks_builder/encoder_edges_mesh_mlp/~/linear_0",
+      "m": 512,
+      "n": 327660,
+      "k": 4,
+      "weight_rne_ms": 0.0057599999999999995,
+      "activation_rne_ms": 0.079839,
+      "gemm_ms": 0.6407999999999999
+    },
+    {
+      "index": 10,
+      "layer": "mesh_gnn/~_networks_builder/encoder_edges_mesh_mlp/~/linear_1",
+      "m": 512,
+      "n": 327660,
+      "k": 512,
+      "weight_rne_ms": 0.06559999999999999,
+      "activation_rne_ms": 1.6655989999999998,
+      "gemm_ms": 2.039518
+    },
+    {
+      "index": 11,
+      "layer": "mesh_gnn/~_networks_builder/processor_edges_0_mesh_mlp/~/linear_0",
+      "m": 512,
+      "n": 327660,
+      "k": 1536,
+      "weight_rne_ms": 0.07343999999999999,
+      "activation_rne_ms": 4.6839960000000005,
+      "gemm_ms": 4.745916
+    },
+    {
+      "index": 12,
+      "layer": "mesh_gnn/~_networks_builder/processor_edges_0_mesh_mlp/~/linear_1",
+      "m": 512,
+      "n": 327660,
+      "k": 512,
+      "weight_rne_ms": 0.0064,
+      "activation_rne_ms": 1.634238,
+      "gemm_ms": 1.9238389999999999
+    },
+    {
+      "index": 13,
+      "layer": "mesh_gnn/~_networks_builder/processor_nodes_0_mesh_nodes_mlp/~/linear_0",
+      "m": 512,
+      "n": 40962,
+      "k": 1024,
+      "weight_rne_ms": 0.06943899999999999,
+      "activation_rne_ms": 0.4992,
+      "gemm_ms": 0.564
+    },
+    {
+      "index": 14,
+      "layer": "mesh_gnn/~_networks_builder/processor_nodes_0_mesh_nodes_mlp/~/linear_1",
+      "m": 512,
+      "n": 40962,
+      "k": 512,
+      "weight_rne_ms": 0.065439,
+      "activation_rne_ms": 0.33424,
+      "gemm_ms": 0.32672
+    },
+    {
+      "index": 15,
+      "layer": "mesh_gnn/~_networks_builder/processor_edges_1_mesh_mlp/~/linear_0",
+      "m": 512,
+      "n": 327660,
+      "k": 1536,
+      "weight_rne_ms": 0.01392,
+      "activation_rne_ms": 4.661757,
+      "gemm_ms": 4.903196
+    },
+    {
+      "index": 16,
+      "layer": "mesh_gnn/~_networks_builder/processor_edges_1_mesh_mlp/~/linear_1",
+      "m": 512,
+      "n": 327660,
+      "k": 512,
+      "weight_rne_ms": 0.06512000000000001,
+      "activation_rne_ms": 1.664639,
+      "gemm_ms": 2.095358
+    },
+    {
+      "index": 17,
+      "layer": "mesh_gnn/~_networks_builder/processor_nodes_1_mesh_nodes_mlp/~/linear_0",
+      "m": 512,
+      "n": 40962,
+      "k": 1024,
+      "weight_rne_ms": 0.06848,
+      "activation_rne_ms": 0.49807999999999997,
+      "gemm_ms": 0.563199
+    },
+    {
+      "index": 18,
+      "layer": "mesh_gnn/~_networks_builder/processor_nodes_1_mesh_nodes_mlp/~/linear_1",
+      "m": 512,
+      "n": 40962,
+      "k": 512,
+      "weight_rne_ms": 0.06448000000000001,
+      "activation_rne_ms": 0.33408,
+      "gemm_ms": 0.326239
+    },
+    {
+      "index": 19,
+      "layer": "mesh_gnn/~_networks_builder/processor_edges_2_mesh_mlp/~/linear_0",
+      "m": 512,
+      "n": 327660,
+      "k": 1536,
+      "weight_rne_ms": 0.07232,
+      "activation_rne_ms": 4.681916,
+      "gemm_ms": 5.089595999999999
+    },
+    {
+      "index": 20,
+      "layer": "mesh_gnn/~_networks_builder/processor_edges_2_mesh_mlp/~/linear_1",
+      "m": 512,
+      "n": 327660,
+      "k": 512,
+      "weight_rne_ms": 0.00656,
+      "activation_rne_ms": 1.665117,
+      "gemm_ms": 1.919199
+    },
+    {
+      "index": 21,
+      "layer": "mesh_gnn/~_networks_builder/processor_nodes_2_mesh_nodes_mlp/~/linear_0",
+      "m": 512,
+      "n": 40962,
+      "k": 1024,
+      "weight_rne_ms": 0.06896,
+      "activation_rne_ms": 0.49904000000000004,
+      "gemm_ms": 0.5361589999999999
+    },
+    {
+      "index": 22,
+      "layer": "mesh_gnn/~_networks_builder/processor_nodes_2_mesh_nodes_mlp/~/linear_1",
+      "m": 512,
+      "n": 40962,
+      "k": 512,
+      "weight_rne_ms": 0.06512000000000001,
+      "activation_rne_ms": 0.33376,
+      "gemm_ms": 0.29808
+    },
+    {
+      "index": 23,
+      "layer": "mesh_gnn/~_networks_builder/processor_edges_3_mesh_mlp/~/linear_0",
+      "m": 512,
+      "n": 327660,
+      "k": 1536,
+      "weight_rne_ms": 0.07248,
+      "activation_rne_ms": 4.6803159999999995,
+      "gemm_ms": 4.920157000000001
+    },
+    {
+      "index": 24,
+      "layer": "mesh_gnn/~_networks_builder/processor_edges_3_mesh_mlp/~/linear_1",
+      "m": 512,
+      "n": 327660,
+      "k": 512,
+      "weight_rne_ms": 0.06559999999999999,
+      "activation_rne_ms": 1.6631980000000002,
+      "gemm_ms": 2.067679
+    },
+    {
+      "index": 25,
+      "layer": "mesh_gnn/~_networks_builder/processor_nodes_3_mesh_nodes_mlp/~/linear_0",
+      "m": 512,
+      "n": 40962,
+      "k": 1024,
+      "weight_rne_ms": 0.06944,
+      "activation_rne_ms": 0.498239,
+      "gemm_ms": 0.56032
+    },
+    {
+      "index": 26,
+      "layer": "mesh_gnn/~_networks_builder/processor_nodes_3_mesh_nodes_mlp/~/linear_1",
+      "m": 512,
+      "n": 40962,
+      "k": 512,
+      "weight_rne_ms": 0.00656,
+      "activation_rne_ms": 0.33408,
+      "gemm_ms": 0.326399
+    },
+    {
+      "index": 27,
+      "layer": "mesh_gnn/~_networks_builder/processor_edges_4_mesh_mlp/~/linear_0",
+      "m": 512,
+      "n": 327660,
+      "k": 1536,
+      "weight_rne_ms": 0.0728,
+      "activation_rne_ms": 4.683037000000001,
+      "gemm_ms": 5.156956
+    },
+    {
+      "index": 28,
+      "layer": "mesh_gnn/~_networks_builder/processor_edges_4_mesh_mlp/~/linear_1",
+      "m": 512,
+      "n": 327660,
+      "k": 512,
+      "weight_rne_ms": 0.00656,
+      "activation_rne_ms": 1.634558,
+      "gemm_ms": 1.9238389999999999
+    },
+    {
+      "index": 29,
+      "layer": "mesh_gnn/~_networks_builder/processor_nodes_4_mesh_nodes_mlp/~/linear_0",
+      "m": 512,
+      "n": 40962,
+      "k": 1024,
+      "weight_rne_ms": 0.06992,
+      "activation_rne_ms": 0.49839999999999995,
+      "gemm_ms": 0.5352
+    },
+    {
+      "index": 30,
+      "layer": "mesh_gnn/~_networks_builder/processor_nodes_4_mesh_nodes_mlp/~/linear_1",
+      "m": 512,
+      "n": 40962,
+      "k": 512,
+      "weight_rne_ms": 0.0648,
+      "activation_rne_ms": 0.33375900000000003,
+      "gemm_ms": 0.29663999999999996
+    },
+    {
+      "index": 31,
+      "layer": "mesh_gnn/~_networks_builder/processor_edges_5_mesh_mlp/~/linear_0",
+      "m": 512,
+      "n": 327660,
+      "k": 1536,
+      "weight_rne_ms": 0.072958,
+      "activation_rne_ms": 4.683197,
+      "gemm_ms": 4.904636
+    },
+    {
+      "index": 32,
+      "layer": "mesh_gnn/~_networks_builder/processor_edges_5_mesh_mlp/~/linear_1",
+      "m": 512,
+      "n": 327660,
+      "k": 512,
+      "weight_rne_ms": 0.06464,
+      "activation_rne_ms": 1.632799,
+      "gemm_ms": 2.127838
+    },
+    {
+      "index": 33,
+      "layer": "mesh_gnn/~_networks_builder/processor_nodes_5_mesh_nodes_mlp/~/linear_0",
+      "m": 512,
+      "n": 40962,
+      "k": 1024,
+      "weight_rne_ms": 0.06864,
+      "activation_rne_ms": 0.46704,
+      "gemm_ms": 0.565119
+    },
+    {
+      "index": 34,
+      "layer": "mesh_gnn/~_networks_builder/processor_nodes_5_mesh_nodes_mlp/~/linear_1",
+      "m": 512,
+      "n": 40962,
+      "k": 512,
+      "weight_rne_ms": 0.0064,
+      "activation_rne_ms": 0.33424,
+      "gemm_ms": 0.32576
+    },
+    {
+      "index": 35,
+      "layer": "mesh_gnn/~_networks_builder/processor_edges_6_mesh_mlp/~/linear_0",
+      "m": 512,
+      "n": 327660,
+      "k": 1536,
+      "weight_rne_ms": 0.07152,
+      "activation_rne_ms": 4.681436,
+      "gemm_ms": 5.025116
+    },
+    {
+      "index": 36,
+      "layer": "mesh_gnn/~_networks_builder/processor_edges_6_mesh_mlp/~/linear_1",
+      "m": 512,
+      "n": 327660,
+      "k": 512,
+      "weight_rne_ms": 0.0648,
+      "activation_rne_ms": 1.6641590000000002,
+      "gemm_ms": 1.920798
+    },
+    {
+      "index": 37,
+      "layer": "mesh_gnn/~_networks_builder/processor_nodes_6_mesh_nodes_mlp/~/linear_0",
+      "m": 512,
+      "n": 40962,
+      "k": 1024,
+      "weight_rne_ms": 0.06976,
+      "activation_rne_ms": 0.498399,
+      "gemm_ms": 0.53504
+    },
+    {
+      "index": 38,
+      "layer": "mesh_gnn/~_networks_builder/processor_nodes_6_mesh_nodes_mlp/~/linear_1",
+      "m": 512,
+      "n": 40962,
+      "k": 512,
+      "weight_rne_ms": 0.06656000000000001,
+      "activation_rne_ms": 0.33391899999999997,
+      "gemm_ms": 0.29616000000000003
+    },
+    {
+      "index": 39,
+      "layer": "mesh_gnn/~_networks_builder/processor_edges_7_mesh_mlp/~/linear_0",
+      "m": 512,
+      "n": 327660,
+      "k": 1536,
+      "weight_rne_ms": 0.073119,
+      "activation_rne_ms": 4.681756999999999,
+      "gemm_ms": 4.920316
+    },
+    {
+      "index": 40,
+      "layer": "mesh_gnn/~_networks_builder/processor_edges_7_mesh_mlp/~/linear_1",
+      "m": 512,
+      "n": 327660,
+      "k": 512,
+      "weight_rne_ms": 0.06559999999999999,
+      "activation_rne_ms": 1.663359,
+      "gemm_ms": 2.068479
+    },
+    {
+      "index": 41,
+      "layer": "mesh_gnn/~_networks_builder/processor_nodes_7_mesh_nodes_mlp/~/linear_0",
+      "m": 512,
+      "n": 40962,
+      "k": 1024,
+      "weight_rne_ms": 0.06848,
+      "activation_rne_ms": 0.49759800000000004,
+      "gemm_ms": 0.56032
+    },
+    {
+      "index": 42,
+      "layer": "mesh_gnn/~_networks_builder/processor_nodes_7_mesh_nodes_mlp/~/linear_1",
+      "m": 512,
+      "n": 40962,
+      "k": 512,
+      "weight_rne_ms": 0.06479900000000001,
+      "activation_rne_ms": 0.33472,
+      "gemm_ms": 0.32544
+    },
+    {
+      "index": 43,
+      "layer": "mesh_gnn/~_networks_builder/processor_edges_8_mesh_mlp/~/linear_0",
+      "m": 512,
+      "n": 327660,
+      "k": 1536,
+      "weight_rne_ms": 0.07248,
+      "activation_rne_ms": 4.681916,
+      "gemm_ms": 4.981596
+    },
+    {
+      "index": 44,
+      "layer": "mesh_gnn/~_networks_builder/processor_edges_8_mesh_mlp/~/linear_1",
+      "m": 512,
+      "n": 327660,
+      "k": 512,
+      "weight_rne_ms": 0.06576,
+      "activation_rne_ms": 1.662239,
+      "gemm_ms": 1.9831990000000002
+    },
+    {
+      "index": 45,
+      "layer": "mesh_gnn/~_networks_builder/processor_nodes_8_mesh_nodes_mlp/~/linear_0",
+      "m": 512,
+      "n": 40962,
+      "k": 1024,
+      "weight_rne_ms": 0.06784,
+      "activation_rne_ms": 0.49824,
+      "gemm_ms": 0.537439
+    },
+    {
+      "index": 46,
+      "layer": "mesh_gnn/~_networks_builder/processor_nodes_8_mesh_nodes_mlp/~/linear_1",
+      "m": 512,
+      "n": 40962,
+      "k": 512,
+      "weight_rne_ms": 0.06576,
+      "activation_rne_ms": 0.33376,
+      "gemm_ms": 0.29648
+    },
+    {
+      "index": 47,
+      "layer": "mesh_gnn/~_networks_builder/processor_edges_9_mesh_mlp/~/linear_0",
+      "m": 512,
+      "n": 327660,
+      "k": 1536,
+      "weight_rne_ms": 0.07184,
+      "activation_rne_ms": 4.681756,
+      "gemm_ms": 4.901596
+    },
+    {
+      "index": 48,
+      "layer": "mesh_gnn/~_networks_builder/processor_edges_9_mesh_mlp/~/linear_1",
+      "m": 512,
+      "n": 327660,
+      "k": 512,
+      "weight_rne_ms": 0.0064,
+      "activation_rne_ms": 1.6641579999999998,
+      "gemm_ms": 2.069119
+    },
+    {
+      "index": 49,
+      "layer": "mesh_gnn/~_networks_builder/processor_nodes_9_mesh_nodes_mlp/~/linear_0",
+      "m": 512,
+      "n": 40962,
+      "k": 1024,
+      "weight_rne_ms": 0.06928,
+      "activation_rne_ms": 0.497439,
+      "gemm_ms": 0.5624
+    },
+    {
+      "index": 50,
+      "layer": "mesh_gnn/~_networks_builder/processor_nodes_9_mesh_nodes_mlp/~/linear_1",
+      "m": 512,
+      "n": 40962,
+      "k": 512,
+      "weight_rne_ms": 0.0064,
+      "activation_rne_ms": 0.33343900000000004,
+      "gemm_ms": 0.32512
+    },
+    {
+      "index": 51,
+      "layer": "mesh_gnn/~_networks_builder/processor_edges_10_mesh_mlp/~/linear_0",
+      "m": 512,
+      "n": 327660,
+      "k": 1536,
+      "weight_rne_ms": 0.07184,
+      "activation_rne_ms": 4.6839960000000005,
+      "gemm_ms": 5.1537560000000004
+    },
+    {
+      "index": 52,
+      "layer": "mesh_gnn/~_networks_builder/processor_edges_10_mesh_mlp/~/linear_1",
+      "m": 512,
+      "n": 327660,
+      "k": 512,
+      "weight_rne_ms": 0.0064,
+      "activation_rne_ms": 1.6635170000000001,
+      "gemm_ms": 1.923199
+    },
+    {
+      "index": 53,
+      "layer": "mesh_gnn/~_networks_builder/processor_nodes_10_mesh_nodes_mlp/~/linear_0",
+      "m": 512,
+      "n": 40962,
+      "k": 1024,
+      "weight_rne_ms": 0.07008,
+      "activation_rne_ms": 0.49872000000000005,
+      "gemm_ms": 0.535359
+    },
+    {
+      "index": 54,
+      "layer": "mesh_gnn/~_networks_builder/processor_nodes_10_mesh_nodes_mlp/~/linear_1",
+      "m": 512,
+      "n": 40962,
+      "k": 512,
+      "weight_rne_ms": 0.00656,
+      "activation_rne_ms": 0.3336,
+      "gemm_ms": 0.29648
+    },
+    {
+      "index": 55,
+      "layer": "mesh_gnn/~_networks_builder/processor_edges_11_mesh_mlp/~/linear_0",
+      "m": 512,
+      "n": 327660,
+      "k": 1536,
+      "weight_rne_ms": 0.07152,
+      "activation_rne_ms": 4.681596,
+      "gemm_ms": 4.902877
+    },
+    {
+      "index": 56,
+      "layer": "mesh_gnn/~_networks_builder/processor_edges_11_mesh_mlp/~/linear_1",
+      "m": 512,
+      "n": 327660,
+      "k": 512,
+      "weight_rne_ms": 0.006719999999999999,
+      "activation_rne_ms": 1.662558,
+      "gemm_ms": 2.073599
+    },
+    {
+      "index": 57,
+      "layer": "mesh_gnn/~_networks_builder/processor_nodes_11_mesh_nodes_mlp/~/linear_0",
+      "m": 512,
+      "n": 40962,
+      "k": 1024,
+      "weight_rne_ms": 0.06992,
+      "activation_rne_ms": 0.499039,
+      "gemm_ms": 0.5592
+    },
+    {
+      "index": 58,
+      "layer": "mesh_gnn/~_networks_builder/processor_nodes_11_mesh_nodes_mlp/~/linear_1",
+      "m": 512,
+      "n": 40962,
+      "k": 512,
+      "weight_rne_ms": 0.0064,
+      "activation_rne_ms": 0.33456,
+      "gemm_ms": 0.326239
+    },
+    {
+      "index": 59,
+      "layer": "mesh_gnn/~_networks_builder/processor_edges_12_mesh_mlp/~/linear_0",
+      "m": 512,
+      "n": 327660,
+      "k": 1536,
+      "weight_rne_ms": 0.07296,
+      "activation_rne_ms": 4.681117,
+      "gemm_ms": 5.154876
+    },
+    {
+      "index": 60,
+      "layer": "mesh_gnn/~_networks_builder/processor_edges_12_mesh_mlp/~/linear_1",
+      "m": 512,
+      "n": 327660,
+      "k": 512,
+      "weight_rne_ms": 0.00656,
+      "activation_rne_ms": 1.6316780000000002,
+      "gemm_ms": 1.9814390000000002
+    },
+    {
+      "index": 61,
+      "layer": "mesh_gnn/~_networks_builder/processor_nodes_12_mesh_nodes_mlp/~/linear_0",
+      "m": 512,
+      "n": 40962,
+      "k": 1024,
+      "weight_rne_ms": 0.06864,
+      "activation_rne_ms": 0.49760000000000004,
+      "gemm_ms": 0.5344
+    },
+    {
+      "index": 62,
+      "layer": "mesh_gnn/~_networks_builder/processor_nodes_12_mesh_nodes_mlp/~/linear_1",
+      "m": 512,
+      "n": 40962,
+      "k": 512,
+      "weight_rne_ms": 0.0064,
+      "activation_rne_ms": 0.33344,
+      "gemm_ms": 0.29568
+    },
+    {
+      "index": 63,
+      "layer": "mesh_gnn/~_networks_builder/processor_edges_13_mesh_mlp/~/linear_0",
+      "m": 512,
+      "n": 327660,
+      "k": 1536,
+      "weight_rne_ms": 0.072958,
+      "activation_rne_ms": 4.681117,
+      "gemm_ms": 4.901596
+    },
+    {
+      "index": 64,
+      "layer": "mesh_gnn/~_networks_builder/processor_edges_13_mesh_mlp/~/linear_1",
+      "m": 512,
+      "n": 327660,
+      "k": 512,
+      "weight_rne_ms": 0.0648,
+      "activation_rne_ms": 1.6619190000000001,
+      "gemm_ms": 2.071038
+    },
+    {
+      "index": 65,
+      "layer": "mesh_gnn/~_networks_builder/processor_nodes_13_mesh_nodes_mlp/~/linear_0",
+      "m": 512,
+      "n": 40962,
+      "k": 1024,
+      "weight_rne_ms": 0.06848,
+      "activation_rne_ms": 0.49872000000000005,
+      "gemm_ms": 0.563519
+    },
+    {
+      "index": 66,
+      "layer": "mesh_gnn/~_networks_builder/processor_nodes_13_mesh_nodes_mlp/~/linear_1",
+      "m": 512,
+      "n": 40962,
+      "k": 512,
+      "weight_rne_ms": 0.0064,
+      "activation_rne_ms": 0.33376,
+      "gemm_ms": 0.32383999999999996
+    },
+    {
+      "index": 67,
+      "layer": "mesh_gnn/~_networks_builder/processor_edges_14_mesh_mlp/~/linear_0",
+      "m": 512,
+      "n": 327660,
+      "k": 1536,
+      "weight_rne_ms": 0.07296,
+      "activation_rne_ms": 4.681436,
+      "gemm_ms": 5.153595999999999
+    },
+    {
+      "index": 68,
+      "layer": "mesh_gnn/~_networks_builder/processor_edges_14_mesh_mlp/~/linear_1",
+      "m": 512,
+      "n": 327660,
+      "k": 512,
+      "weight_rne_ms": 0.006719999999999999,
+      "activation_rne_ms": 1.663359,
+      "gemm_ms": 2.176478
+    },
+    {
+      "index": 69,
+      "layer": "mesh_gnn/~_networks_builder/processor_nodes_14_mesh_nodes_mlp/~/linear_0",
+      "m": 512,
+      "n": 40962,
+      "k": 1024,
+      "weight_rne_ms": 0.06928,
+      "activation_rne_ms": 0.49904000000000004,
+      "gemm_ms": 0.535519
+    },
+    {
+      "index": 70,
+      "layer": "mesh_gnn/~_networks_builder/processor_nodes_14_mesh_nodes_mlp/~/linear_1",
+      "m": 512,
+      "n": 40962,
+      "k": 512,
+      "weight_rne_ms": 0.00656,
+      "activation_rne_ms": 0.3344,
+      "gemm_ms": 0.29760000000000003
+    },
+    {
+      "index": 71,
+      "layer": "mesh_gnn/~_networks_builder/processor_edges_15_mesh_mlp/~/linear_0",
+      "m": 512,
+      "n": 327660,
+      "k": 1536,
+      "weight_rne_ms": 0.07343999999999999,
+      "activation_rne_ms": 4.680796,
+      "gemm_ms": 4.743517
+    },
+    {
+      "index": 72,
+      "layer": "mesh_gnn/~_networks_builder/processor_edges_15_mesh_mlp/~/linear_1",
+      "m": 512,
+      "n": 327660,
+      "k": 512,
+      "weight_rne_ms": 0.0664,
+      "activation_rne_ms": 1.663519,
+      "gemm_ms": 1.923518
+    },
+    {
+      "index": 73,
+      "layer": "mesh_gnn/~_networks_builder/processor_nodes_15_mesh_nodes_mlp/~/linear_0",
+      "m": 512,
+      "n": 40962,
+      "k": 1024,
+      "weight_rne_ms": 0.067838,
+      "activation_rne_ms": 0.49856,
+      "gemm_ms": 0.5364800000000001
+    },
+    {
+      "index": 74,
+      "layer": "mesh_gnn/~_networks_builder/processor_nodes_15_mesh_nodes_mlp/~/linear_1",
+      "m": 512,
+      "n": 40962,
+      "k": 512,
+      "weight_rne_ms": 0.064639,
+      "activation_rne_ms": 0.33312,
+      "gemm_ms": 0.29968
+    },
+    {
+      "index": 75,
+      "layer": "grid2mesh_gnn/~_networks_builder/processor_nodes_0_grid_nodes_mlp/~/linear_0",
+      "m": 512,
+      "n": 1038240,
+      "k": 512,
+      "weight_rne_ms": 0.0064,
+      "activation_rne_ms": 4.890236,
+      "gemm_ms": 6.075515
+    },
+    {
+      "index": 76,
+      "layer": "grid2mesh_gnn/~_networks_builder/processor_nodes_0_grid_nodes_mlp/~/linear_1",
+      "m": 512,
+      "n": 1038240,
+      "k": 512,
+      "weight_rne_ms": 0.0064,
+      "activation_rne_ms": 4.887996,
+      "gemm_ms": 6.081115
+    },
+    {
+      "index": 77,
+      "layer": "mesh2grid_gnn/~_networks_builder/encoder_edges_mesh2grid_mlp/~/linear_0",
+      "m": 512,
+      "n": 3114720,
+      "k": 4,
+      "weight_rne_ms": 0.0056,
+      "activation_rne_ms": 0.25024,
+      "gemm_ms": 5.996955
+    },
+    {
+      "index": 78,
+      "layer": "mesh2grid_gnn/~_networks_builder/encoder_edges_mesh2grid_mlp/~/linear_1",
+      "m": 512,
+      "n": 3114720,
+      "k": 512,
+      "weight_rne_ms": 0.06816,
+      "activation_rne_ms": 15.158228999999999,
+      "gemm_ms": 20.249903999999997
+    },
+    {
+      "index": 79,
+      "layer": "mesh2grid_gnn/~_networks_builder/processor_edges_0_mesh2grid_mlp/~/linear_0",
+      "m": 512,
+      "n": 3114720,
+      "k": 1536,
+      "weight_rne_ms": 0.080958,
+      "activation_rne_ms": 51.68508,
+      "gemm_ms": 51.982679
+    },
+    {
+      "index": 80,
+      "layer": "mesh2grid_gnn/~_networks_builder/processor_edges_0_mesh2grid_mlp/~/linear_1",
+      "m": 512,
+      "n": 3114720,
+      "k": 512,
+      "weight_rne_ms": 0.00752,
+      "activation_rne_ms": 17.135345,
+      "gemm_ms": 20.186384999999998
+    },
+    {
+      "index": 81,
+      "layer": "mesh2grid_gnn/~_networks_builder/processor_nodes_0_grid_nodes_mlp/~/linear_0",
+      "m": 512,
+      "n": 1038240,
+      "k": 1024,
+      "weight_rne_ms": 0.07056,
+      "activation_rne_ms": 9.701111000000001,
+      "gemm_ms": 11.206391
+    },
+    {
+      "index": 82,
+      "layer": "mesh2grid_gnn/~_networks_builder/processor_nodes_0_grid_nodes_mlp/~/linear_1",
+      "m": 512,
+      "n": 1038240,
+      "k": 512,
+      "weight_rne_ms": 0.00656,
+      "activation_rne_ms": 4.884156,
+      "gemm_ms": 6.066715
+    },
+    {
+      "index": 83,
+      "layer": "mesh2grid_gnn/~_networks_builder/decoder_nodes_grid_nodes_mlp/~/linear_0",
+      "m": 512,
+      "n": 1038240,
+      "k": 512,
+      "weight_rne_ms": 0.0072,
+      "activation_rne_ms": 4.884796000000001,
+      "gemm_ms": 6.064316
+    },
+    {
+      "index": 84,
+      "layer": "mesh2grid_gnn/~_networks_builder/decoder_nodes_grid_nodes_mlp/~/linear_1",
+      "m": 83,
+      "n": 1038240,
+      "k": 512,
+      "weight_rne_ms": 0.0064,
+      "activation_rne_ms": 4.885116,
+      "gemm_ms": 3.066718
+    }
+  ],
+  "rne_split": {
+    "weight_ms": 3.933102000000001,
+    "activation_ms": 280.53577600000006,
+    "method": "Match 84 native log calls to 84 same-stream device triples (round A, round B, GEMM). A has frozen weight shape [m,k], B is activation [k,n]. Checkpoint fingerprints and shapes checked for each call."
+  }
+}

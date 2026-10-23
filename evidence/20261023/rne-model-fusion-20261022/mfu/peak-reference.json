@@ -1,0 +1,14 @@
+{
+  "theoretical_peak_tflops": 170.3936,
+  "source": "用户指定截图：NMZ 峰值算力（1300 MHz），TF32TensorSpeed = 170.3936 TFLOP/s，作为本项目 XF32 峰值分母",
+  "table_column": "NMZ峰值算力（1300 MHz）",
+  "table_row": "TF32TensorSpeed",
+  "reference_frequency_mhz": 1300,
+  "table_empirical_tflops": 170.06,
+  "source_image": "peak-source.png",
+  "source_image_sha256": "68d22b813025819f7472d26a0e2980d5aae81aba7d7f2706c552954fa7e1c787",
+  "source_authority": "User-designated project reference; not independently verified vendor specification",
+  "profile_telemetry_sclk_mhz": 1350,
+  "profile_telemetry_fclk_mhz": 1300,
+  "frequency_policy": "Use the supplied 1300 MHz table peak exactly as requested; do not rescale peak or claim model profiles were locked to 1300 MHz."
+}

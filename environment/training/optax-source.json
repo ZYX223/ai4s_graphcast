@@ -1,0 +1,24 @@
+{
+  "comment_text": "",
+  "core-metadata": {
+    "sha256": "661a8f6beac06076e00ddd05c8cbab75c45008d2197f26d922ee8af76ea5ed01"
+  },
+  "digests": {
+    "blake2b_256": "5c2428d0bb21600a78e46754947333ec9a297044af884d360092eb8561575fe9",
+    "md5": "75da99bca79c999c245299b8f4c1e3d2",
+    "sha256": "db35c04e50b52596662efb002334de08c2a0a74971e4da33f467e84fac08886a"
+  },
+  "downloads": -1,
+  "filename": "optax-0.2.4-py3-none-any.whl",
+  "has_sig": false,
+  "md5_digest": "75da99bca79c999c245299b8f4c1e3d2",
+  "packagetype": "bdist_wheel",
+  "python_version": "py3",
+  "requires_python": ">=3.9",
+  "size": 319212,
+  "upload_time": "2024-11-12T21:52:15",
+  "upload_time_iso_8601": "2024-11-12T21:52:15.446173Z",
+  "url": "https://files.pythonhosted.org/packages/5c/24/28d0bb21600a78e46754947333ec9a297044af884d360092eb8561575fe9/optax-0.2.4-py3-none-any.whl",
+  "yanked": false,
+  "yanked_reason": null
+}

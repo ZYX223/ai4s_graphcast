@@ -1,0 +1,23 @@
+{
+  "train-rne_xf32-infer-fp32": {
+    "status": "verified",
+    "training_mode": "rne_xf32",
+    "inference_mode": "fp32",
+    "checkpoint_sha256": "c91ad0a8a2e23ff5628b11acc00b1f8f9ddeafd1322625a38236a82d77422d9c",
+    "output_sha256": "b0e9498fcc2e24399f62dacd6d944f4d313b9eb71573ea9dce742ab6247dd61f",
+    "forecast_steps": 40,
+    "forecast_gemm_calls": 3360
+  },
+  "train-fp32-infer-rne_xf32": {
+    "status": "verified",
+    "training_mode": "fp32",
+    "inference_mode": "rne_xf32",
+    "checkpoint_sha256": "6ab5a80ba9d571fd850710e69e75b7158d5d09791e7e0f3353d5d9f30cba2c57",
+    "output_sha256": "539d33a3d3ac017093311bf4ebc367d6ec678db83e7d268c6d39e157bc435bbb",
+    "forecast_steps": 40,
+    "forecast_gemm_calls": 3360
+  },
+  "evidence_validation_passed": true,
+  "comparison_rows": 5,
+  "parameter_analysis_passed": true
+}

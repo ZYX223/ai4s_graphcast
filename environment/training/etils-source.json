@@ -1,0 +1,24 @@
+{
+  "comment_text": null,
+  "core-metadata": {
+    "sha256": "4487aff3c798b9523c5f7a0b4829b6bccffd68314c74c793bea50a723aadb199"
+  },
+  "digests": {
+    "blake2b_256": "dd7140ee142e564b8a34a7ae9546e99e665e0001011a3254d5bbbe113d72ccba",
+    "md5": "a097a4b62c412039f57a2e47ab2c3abc",
+    "sha256": "4600bec9de6cf5cb043a171e1856e38b5f273719cf3ecef90199f7091a6b3912"
+  },
+  "downloads": -1,
+  "filename": "etils-1.12.2-py3-none-any.whl",
+  "has_sig": false,
+  "md5_digest": "a097a4b62c412039f57a2e47ab2c3abc",
+  "packagetype": "bdist_wheel",
+  "python_version": "py3",
+  "requires_python": ">=3.10",
+  "size": 167613,
+  "upload_time": "2025-03-10T15:14:12",
+  "upload_time_iso_8601": "2025-03-10T15:14:12.333610Z",
+  "url": "https://files.pythonhosted.org/packages/dd/71/40ee142e564b8a34a7ae9546e99e665e0001011a3254d5bbbe113d72ccba/etils-1.12.2-py3-none-any.whl",
+  "yanked": false,
+  "yanked_reason": null
+}

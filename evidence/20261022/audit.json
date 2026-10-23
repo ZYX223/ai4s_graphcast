@@ -1,0 +1,185 @@
+{
+  "schema": "graphcast.inference_audit.v1",
+  "recorded_at_utc": "2026-10-22T08:54:26.280884Z",
+  "repo": "/home/zhangyuxin/zyx/graphcast-sugon",
+  "commit": "ffbdd281edaed36c1ec16b3a2c8fe77e59222710",
+  "reported_hardware_model": "BW1100",
+  "reported_hardware_source": "User correction on 2026-10-22",
+  "driver_name_policy": "Keep BW1200 as raw driver identity; expected_device validates that string, not the product label.",
+  "status": "records_verified_runtime_available",
+  "checks": {
+    "official_source_unchanged": true,
+    "data_weights_reference_hashes_match": true,
+    "historical_case_and_weight_map_match": true,
+    "historical_pci_present_on_current_host": true,
+    "hlo_runtime_catalog_match": true,
+    "current_container_image_accessible": true
+  },
+  "current_host": {
+    "identity": {
+      "command": [
+        "id"
+      ],
+      "returncode": 0,
+      "stdout": "uid=1011(zhangyuxin) gid=1011(docker) groups=1011(docker),1012(zhangyuxin)\n",
+      "stderr": ""
+    },
+    "devices": {
+      "command": [
+        "/opt/hyhal/bin/hy-smi",
+        "--showproductname",
+        "--showbus",
+        "--showmeminfo",
+        "vram",
+        "--json"
+      ],
+      "returncode": 0,
+      "stdout": "{\"card0\": {\"Card Series\": \"BW1200\", \"Card Vendor\": \"C-3000 IC Design Co., Ltd.\", \"PCI Bus\": \"0000:05:00.0 --> SN: N/A --> OAM ID: 8\", \"vram Total Memory (MiB)\": \"147440\", \"vram Total Used Memory (MiB)\": \"133867\"}, \"card1\": {\"Card Series\": \"BW1200\", \"Card Vendor\": \"C-3000 IC Design Co., Ltd.\", \"PCI Bus\": \"0000:08:00.0 --> SN: N/A --> OAM ID: 9\", \"vram Total Memory (MiB)\": \"147440\", \"vram Total Used Memory (MiB)\": \"133979\"}, \"card2\": {\"Card Series\": \"BW1200\", \"Card Vendor\": \"C-3000 IC Design Co., Ltd.\", \"PCI Bus\": \"0000:49:00.0 --> SN: N/A --> OAM ID: 10\", \"vram Total Memory (MiB)\": \"147440\", \"vram Total Used Memory (MiB)\": \"133979\"}, \"card3\": {\"Card Series\": \"BW1200\", \"Card Vendor\": \"C-3000 IC Design Co., Ltd.\", \"PCI Bus\": \"0000:4c:00.0 --> SN: N/A --> OAM ID: 11\", \"vram Total Memory (MiB)\": \"147440\", \"vram Total Used Memory (MiB)\": \"133979\"}, \"card4\": {\"Card Series\": \"BW1200\", \"Card Vendor\": \"C-3000 IC Design Co., Ltd.\", \"PCI Bus\": \"0000:60:00.0 --> SN: N/A --> OAM ID: 3\", \"vram Total Memory (MiB)\": \"147440\", \"vram Total Used Memory (MiB)\": \"133979\"}, \"card5\": {\"Card Series\": \"BW1200\", \"Card Vendor\": \"C-3000 IC Design Co., Ltd.\", \"PCI Bus\": \"0000:63:00.0 --> SN: N/A --> OAM ID: 0\", \"vram Total Memory (MiB)\": \"147440\", \"vram Total Used Memory (MiB)\": \"133979\"}, \"card6\": {\"Card Series\": \"BW1200\", \"Card Vendor\": \"C-3000 IC Design Co., Ltd.\", \"PCI Bus\": \"0000:72:00.0 --> SN: N/A --> OAM ID: 1\", \"vram Total Memory (MiB)\": \"147440\", \"vram Total Used Memory (MiB)\": \"133979\"}, \"card7\": {\"Card Series\": \"BW1200\", \"Card Vendor\": \"C-3000 IC Design Co., Ltd.\", \"PCI Bus\": \"0000:75:00.0 --> SN: N/A --> OAM ID: 2\", \"vram Total Memory (MiB)\": \"147440\", \"vram Total Used Memory (MiB)\": \"133595\"}, \"card8\": {\"Card Series\": \"BW1200\", \"Card Vendor\": \"C-3000 IC Design Co., Ltd.\", \"PCI Bus\": \"0000:85:00.0 --> SN: N/A --> OAM ID: 6\", \"vram Total Memory (MiB)\": \"147440\", \"vram Total Used Memory (MiB)\": \"11\"}, \"card9\": {\"Card Series\": \"BW1200\", \"Card Vendor\": \"C-3000 IC Design Co., Ltd.\", \"PCI Bus\": \"0000:88:00.0 --> SN: N/A --> OAM ID: 12\", \"vram Total Memory (MiB)\": \"147440\", \"vram Total Used Memory (MiB)\": \"40826\"}, \"card10\": {\"Card Series\": \"BW1200\", \"Card Vendor\": \"C-3000 IC Design Co., Ltd.\", \"PCI Bus\": \"0000:99:00.0 --> SN: N/A --> OAM ID: 4\", \"vram Total Memory (MiB)\": \"147440\", \"vram Total Used Memory (MiB)\": \"11\"}, \"card11\": {\"Card Series\": \"BW1200\", \"Card Vendor\": \"C-3000 IC Design Co., Ltd.\", \"PCI Bus\": \"0000:9c:00.0 --> SN: N/A --> OAM ID: 14\", \"vram Total Memory (MiB)\": \"147440\", \"vram Total Used Memory (MiB)\": \"18651\"}, \"card12\": {\"Card Series\": \"BW1200\", \"Card Vendor\": \"C-3000 IC Design Co., Ltd.\", \"PCI Bus\": \"0000:b0:00.0 --> SN: N/A --> OAM ID: 13\", \"vram Total Memory (MiB)\": \"147440\", \"vram Total Used Memory (MiB)\": \"11\"}, \"card13\": {\"Card Series\": \"BW1200\", \"Card Vendor\": \"C-3000 IC Design Co., Ltd.\", \"PCI Bus\": \"0000:b3:00.0 --> SN: N/A --> OAM ID: 5\", \"vram Total Memory (MiB)\": \"147440\", \"vram Total Used Memory (MiB)\": \"11\"}, \"card14\": {\"Card Series\": \"BW1200\", \"Card Vendor\": \"C-3000 IC Design Co., Ltd.\", \"PCI Bus\": \"0000:f2:00.0 --> SN: N/A --> OAM ID: 15\", \"vram Total Memory (MiB)\": \"147440\", \"vram Total Used Memory (MiB)\": \"138467\"}, \"card15\": {\"Card Series\": \"BW1200\", \"Card Vendor\": \"C-3000 IC Design Co., Ltd.\", \"PCI Bus\": \"0000:f5:00.0 --> SN: N/A --> OAM ID: 7\", \"vram Total Memory (MiB)\": \"147440\", \"vram Total Used Memory (MiB)\": \"33774\"}}\n",
+      "stderr": ""
+    },
+    "docker_access": {
+      "command": [
+        "docker",
+        "image",
+        "inspect",
+        "sha256:919cf075fadd5fab21b2ea5978374be00caf1db7d6f02fc90846633c4c4bd546",
+        "--format",
+        "{{.Id}}"
+      ],
+      "returncode": 0,
+      "stdout": "sha256:919cf075fadd5fab21b2ea5978374be00caf1db7d6f02fc90846633c4c4bd546\n",
+      "stderr": ""
+    },
+    "docker_service": {
+      "command": [
+        "systemctl",
+        "show",
+        "docker",
+        "-p",
+        "ActiveState",
+        "-p",
+        "ExecMainStartTimestamp"
+      ],
+      "returncode": 0,
+      "stdout": "ExecMainStartTimestamp=Tue 2026-10-20 08:54:06 CST\nActiveState=active\n",
+      "stderr": ""
+    },
+    "socket_acl": {
+      "command": [
+        "getfacl",
+        "-p",
+        "/var/run/docker.sock"
+      ],
+      "returncode": 0,
+      "stdout": "# file: /var/run/docker.sock\n# owner: root\n# group: docker\nuser::rw-\ngroup::rw-\nother::---\n\n",
+      "stderr": ""
+    }
+  },
+  "historical": {
+    "pci": "0000:88:00.0",
+    "jax": "0.6.0+das.opt1.dtk2604",
+    "image": "sha256:919cf075fadd5fab21b2ea5978374be00caf1db7d6f02fc90846633c4c4bd546",
+    "launch": "/home/zhangyuxin/zyx/graphcast/outputs/jax-reorganization-20261016/hygon-benchmark-r1/launch.json",
+    "launch_sha256": "368f4747544c873c229b122c6367ae32717e73563117944aa30c1a9b46310fa8",
+    "report": "/home/zhangyuxin/zyx/graphcast/outputs/jax-hygon-20261015/xf32-rne-performance-20261016/benchmark-r1/report.json",
+    "report_sha256": "1fa85f1fea49c46aa2bf8cf872a509334ae081cb7eedd8ad4392f4826bc5f58b"
+  },
+  "prepared_data": {
+    "schema": "graphcast.jax_case.v1",
+    "case_config_sha256": "58b0a7c916b65bb165d96b47a864355e42977d2250f7b770e70c11176bd62300",
+    "source_reference_bundle_sha256": "10227f90bbd6dc94c032cf890ff6c6c9871e21d0a1678123c6ca183ae996be10",
+    "reference_sha256": "e4baa7f8eb65e19767adc2bd9a0e564127703787b93895232de6b881032df95d",
+    "reference": "official_jax_fp32",
+    "reference_values_changed": false
+  },
+  "historical_timing_boundary": "Model calls include synchronized inference, pending transfers and routing/RNE overhead. Difference from rollout is host/autoregressive work outside these calls, not all CPU overhead.",
+  "historical_timing_rounds": [
+    {
+      "run": "round1-fp32",
+      "mode": "fp32",
+      "model_calls_seconds": 48.945728732738644,
+      "rollout_seconds": 51.84521790873259,
+      "outside_model_calls_seconds": 2.899489175993949
+    },
+    {
+      "run": "round1-xf32",
+      "mode": "xf32",
+      "model_calls_seconds": 29.151206123176962,
+      "rollout_seconds": 32.12208096217364,
+      "outside_model_calls_seconds": 2.9708748389966786
+    },
+    {
+      "run": "round1-rne_xf32",
+      "mode": "rne_xf32",
+      "model_calls_seconds": 39.93144685868174,
+      "rollout_seconds": 42.859111493919045,
+      "outside_model_calls_seconds": 2.9276646352373064
+    },
+    {
+      "run": "round2-xf32",
+      "mode": "xf32",
+      "model_calls_seconds": 29.1704314337112,
+      "rollout_seconds": 32.03665469959378,
+      "outside_model_calls_seconds": 2.8662232658825815
+    },
+    {
+      "run": "round2-rne_xf32",
+      "mode": "rne_xf32",
+      "model_calls_seconds": 39.87933368654922,
+      "rollout_seconds": 42.73470494803041,
+      "outside_model_calls_seconds": 2.8553712614811957
+    },
+    {
+      "run": "round2-fp32",
+      "mode": "fp32",
+      "model_calls_seconds": 49.105241062585264,
+      "rollout_seconds": 52.13846225803718,
+      "outside_model_calls_seconds": 3.0332211954519153
+    },
+    {
+      "run": "round3-rne_xf32",
+      "mode": "rne_xf32",
+      "model_calls_seconds": 39.78628230979666,
+      "rollout_seconds": 42.59647542703897,
+      "outside_model_calls_seconds": 2.8101931172423065
+    },
+    {
+      "run": "round3-fp32",
+      "mode": "fp32",
+      "model_calls_seconds": 48.937387744896114,
+      "rollout_seconds": 51.968306532129645,
+      "outside_model_calls_seconds": 3.0309187872335315
+    },
+    {
+      "run": "round3-xf32",
+      "mode": "xf32",
+      "model_calls_seconds": 29.216491701547056,
+      "rollout_seconds": 32.1399584133178,
+      "outside_model_calls_seconds": 2.923466711770743
+    }
+  ],
+  "historical_timing_medians": [
+    {
+      "mode": "fp32",
+      "rounds": 3,
+      "model_calls_seconds": 48.945728732738644,
+      "rollout_seconds": 51.968306532129645,
+      "outside_model_calls_seconds": 3.0309187872335315
+    },
+    {
+      "mode": "rne_xf32",
+      "rounds": 3,
+      "model_calls_seconds": 39.87933368654922,
+      "rollout_seconds": 42.73470494803041,
+      "outside_model_calls_seconds": 2.8553712614811957
+    },
+    {
+      "mode": "xf32",
+      "rounds": 3,
+      "model_calls_seconds": 29.1704314337112,
+      "rollout_seconds": 32.12208096217364,
+      "outside_model_calls_seconds": 2.923466711770743
+    }
+  ],
+  "new_gpu_measurements": false
+}

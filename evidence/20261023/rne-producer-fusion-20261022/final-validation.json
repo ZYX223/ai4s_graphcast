@@ -1,0 +1,8 @@
+{
+  "status": "passed",
+  "cpu_tests": 36,
+  "all_456_runtime_hashes_verified": true,
+  "summary_sha256": "476dfefc4ad06707edd13f39b9a0033c121ee88e5b316054e39cb63667b513ae",
+  "readme_sha256": "1d112b54a70d80d56a8fa507397586f9140da03aada94bcb379dd7e8307d07d9",
+  "independent_review": "v2: no remaining blockers; wording clarified"
+}

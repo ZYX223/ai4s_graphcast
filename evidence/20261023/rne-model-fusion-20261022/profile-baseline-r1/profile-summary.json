@@ -1,0 +1,669 @@
+{
+  "gpu_kernel_count": 550,
+  "gpu_kernel_sum_ms": 980.0724590000011,
+  "gpu_kernel_busy_union_ms": 980.0711989991069,
+  "gpu_kernel_span_ms": 1267.8544290000052,
+  "host_api_count": 2033,
+  "host_api_sum_ms": 248.54154199999957,
+  "device_copy_count": 25,
+  "device_copy_sum_ms": 73.56426,
+  "categories": {
+    "gemm": {
+      "calls": 84,
+      "total_ms": 322.574086,
+      "percent_of_kernel_sum": 32.913289526483844
+    },
+    "rne": {
+      "calls": 168,
+      "total_ms": 287.15711899999997,
+      "percent_of_kernel_sum": 29.29958049152768
+    },
+    "scatter_fusion": {
+      "calls": 18,
+      "total_ms": 107.47130499999999,
+      "percent_of_kernel_sum": 10.965648918413272
+    },
+    "layer_norm_fusion": {
+      "calls": 192,
+      "total_ms": 105.54106300000004,
+      "percent_of_kernel_sum": 10.768700010985608
+    },
+    "other_device_kernel": {
+      "calls": 68,
+      "total_ms": 92.680596,
+      "percent_of_kernel_sum": 9.456504480756957
+    },
+    "gather_fusion": {
+      "calls": 20,
+      "total_ms": 64.64829,
+      "percent_of_kernel_sum": 6.596276571832525
+    }
+  },
+  "kernels": [
+    {
+      "name": "Cijk_Ailk_Bljk_SB_MX_MT256x256x16_SE_AMAS3_BW_DTL0_BL1_DRB16_ALT_KME0_ETN_EPS0_FL0_GRVW4_GSU1_ISA938_IU1_KME_GRCMn2_K1_KLA_LDL1_LRVW4_MAC_MMAC_BW1_MMAC_KM0_MMAC_KME1_NLCA1_NLCB1_OLDSR0_PGR2_PLR1_RK1_SU0_SUM0_SUS256_SVW4_TT8_16_TLM0_ULDSWM0_USFGRO0_USSB0_VAW1_VSn1_VW4_WG32_16_1_WGM1",
+      "category": "gemm",
+      "hlo_tags": [],
+      "calls": 80,
+      "total_ms": 309.528972,
+      "percent_of_kernel_sum": 31.58225385864043
+    },
+    {
+      "name": "round_rne(float const*, float*, int, int, int)",
+      "category": "rne",
+      "hlo_tags": [],
+      "calls": 168,
+      "total_ms": 287.15711899999997,
+      "percent_of_kernel_sum": 29.29958049152768
+    },
+    {
+      "name": "input_scatter_fusion_16",
+      "category": "scatter_fusion",
+      "hlo_tags": [
+        "scatter",
+        "layer_norm"
+      ],
+      "calls": 15,
+      "total_ms": 53.195812,
+      "percent_of_kernel_sum": 5.427742766517219
+    },
+    {
+      "name": "input_scatter_fusion",
+      "category": "scatter_fusion",
+      "hlo_tags": [
+        "scatter",
+        "layer_norm"
+      ],
+      "calls": 1,
+      "total_ms": 31.580304,
+      "percent_of_kernel_sum": 3.2222417546782594
+    },
+    {
+      "name": "loop_multiply_fusion_39",
+      "category": "other_device_kernel",
+      "hlo_tags": [],
+      "calls": 2,
+      "total_ms": 23.717909,
+      "percent_of_kernel_sum": 2.4200158653779673
+    },
+    {
+      "name": "input_scatter_fusion_17",
+      "category": "scatter_fusion",
+      "hlo_tags": [
+        "scatter",
+        "layer_norm"
+      ],
+      "calls": 1,
+      "total_ms": 18.951031,
+      "percent_of_kernel_sum": 1.9336357047861887
+    },
+    {
+      "name": "loop_multiply_fusion_35",
+      "category": "other_device_kernel",
+      "hlo_tags": [],
+      "calls": 17,
+      "total_ms": 18.825751,
+      "percent_of_kernel_sum": 1.9208529764430387
+    },
+    {
+      "name": "input_concatenate_fusion",
+      "category": "gather_fusion",
+      "hlo_tags": [
+        "gather",
+        "layer_norm"
+      ],
+      "calls": 3,
+      "total_ms": 18.749271,
+      "percent_of_kernel_sum": 1.9130494717840019
+    },
+    {
+      "name": "input_concatenate_fusion_14",
+      "category": "gather_fusion",
+      "hlo_tags": [
+        "gather",
+        "layer_norm"
+      ],
+      "calls": 7,
+      "total_ms": 16.851832,
+      "percent_of_kernel_sum": 1.7194475617848153
+    },
+    {
+      "name": "input_concatenate_fusion_15",
+      "category": "gather_fusion",
+      "hlo_tags": [
+        "gather"
+      ],
+      "calls": 7,
+      "total_ms": 14.074873,
+      "percent_of_kernel_sum": 1.436105348206707
+    },
+    {
+      "name": "loop_multiply_fusion_41",
+      "category": "other_device_kernel",
+      "hlo_tags": [],
+      "calls": 4,
+      "total_ms": 13.632152999999999,
+      "percent_of_kernel_sum": 1.3909331779314884
+    },
+    {
+      "name": "input_reduce_fusion_38",
+      "category": "layer_norm_fusion",
+      "hlo_tags": [
+        "layer_norm",
+        "reduction"
+      ],
+      "calls": 2,
+      "total_ms": 12.653113000000001,
+      "percent_of_kernel_sum": 1.291038523101687
+    },
+    {
+      "name": "input_reduce_fusion_41",
+      "category": "layer_norm_fusion",
+      "hlo_tags": [
+        "layer_norm",
+        "reduction"
+      ],
+      "calls": 2,
+      "total_ms": 12.242394,
+      "percent_of_kernel_sum": 1.2491315195706347
+    },
+    {
+      "name": "loop_add_fusion_10",
+      "category": "layer_norm_fusion",
+      "hlo_tags": [
+        "layer_norm"
+      ],
+      "calls": 6,
+      "total_ms": 12.109434,
+      "percent_of_kernel_sum": 1.2355651756968702
+    },
+    {
+      "name": "input_reduce_fusion_34",
+      "category": "layer_norm_fusion",
+      "hlo_tags": [
+        "layer_norm",
+        "reduction"
+      ],
+      "calls": 17,
+      "total_ms": 11.317598,
+      "percent_of_kernel_sum": 1.1547715575588873
+    },
+    {
+      "name": "loop_multiply_fusion_38",
+      "category": "other_device_kernel",
+      "hlo_tags": [],
+      "calls": 2,
+      "total_ms": 11.055035,
+      "percent_of_kernel_sum": 1.1279813955061855
+    },
+    {
+      "name": "input_reduce_fusion_48",
+      "category": "layer_norm_fusion",
+      "hlo_tags": [
+        "layer_norm",
+        "reduction"
+      ],
+      "calls": 17,
+      "total_ms": 10.950709,
+      "percent_of_kernel_sum": 1.1173366723490377
+    },
+    {
+      "name": "input_concatenate_fusion_17",
+      "category": "gather_fusion",
+      "hlo_tags": [
+        "gather",
+        "layer_norm"
+      ],
+      "calls": 1,
+      "total_ms": 9.987356,
+      "percent_of_kernel_sum": 1.0190426134604798
+    },
+    {
+      "name": "Cijk_Ailk_Bljk_SB_MT128x128x16_SE_AMAS3_BW_DTL0_BL1_DRB16_ALT_KME0_ETN_EPS0_FL0_GRVW4_GSU1_ISA938_IU1_KME_GRCMn1_K1_KLA_LDL1_LRVW4_MAC_MMAC_BW1_MMAC_KM0_MMAC_KME1_NLCA1_NLCB1_OLDSR0_PGR2_PLR1_RK0_SU32_SUM0_SUS256_SVW4_TT4_8_TLM0_ULDSWM0_USFGRO0_USSB0_VAW1_VSn1_VW4_WG32_16_1_WGM8",
+      "category": "gemm",
+      "hlo_tags": [],
+      "calls": 2,
+      "total_ms": 9.345756,
+      "percent_of_kernel_sum": 0.9535780660070553
+    },
+    {
+      "name": "loop_add_fusion_3",
+      "category": "layer_norm_fusion",
+      "hlo_tags": [
+        "layer_norm"
+      ],
+      "calls": 2,
+      "total_ms": 8.084316,
+      "percent_of_kernel_sum": 0.824869215103614
+    },
+    {
+      "name": "input_concatenate_fusion_18",
+      "category": "other_device_kernel",
+      "hlo_tags": [],
+      "calls": 1,
+      "total_ms": 7.748317,
+      "percent_of_kernel_sum": 0.7905861376724995
+    },
+    {
+      "name": "input_reduce_fusion_37",
+      "category": "layer_norm_fusion",
+      "hlo_tags": [
+        "layer_norm",
+        "reduction"
+      ],
+      "calls": 2,
+      "total_ms": 6.186878,
+      "percent_of_kernel_sum": 0.6312674071376996
+    },
+    {
+      "name": "input_reduce_fusion_40",
+      "category": "layer_norm_fusion",
+      "hlo_tags": [
+        "layer_norm",
+        "reduction"
+      ],
+      "calls": 3,
+      "total_ms": 6.134877,
+      "percent_of_kernel_sum": 0.6259615749492246
+    },
+    {
+      "name": "input_reduce_fusion_43",
+      "category": "layer_norm_fusion",
+      "hlo_tags": [
+        "layer_norm",
+        "reduction"
+      ],
+      "calls": 2,
+      "total_ms": 5.973756,
+      "percent_of_kernel_sum": 0.6095218720966011
+    },
+    {
+      "name": "input_reduce_fusion_45",
+      "category": "layer_norm_fusion",
+      "hlo_tags": [
+        "layer_norm",
+        "reduction"
+      ],
+      "calls": 3,
+      "total_ms": 5.928797,
+      "percent_of_kernel_sum": 0.6049345582110673
+    },
+    {
+      "name": "wrapped_concatenate_17",
+      "category": "other_device_kernel",
+      "hlo_tags": [],
+      "calls": 1,
+      "total_ms": 5.376318,
+      "percent_of_kernel_sum": 0.5485633180107548
+    },
+    {
+      "name": "wrapped_concatenate",
+      "category": "other_device_kernel",
+      "hlo_tags": [],
+      "calls": 17,
+      "total_ms": 4.391999,
+      "percent_of_kernel_sum": 0.4481300295369278
+    },
+    {
+      "name": "input_scatter_fusion_1",
+      "category": "scatter_fusion",
+      "hlo_tags": [
+        "scatter",
+        "layer_norm"
+      ],
+      "calls": 1,
+      "total_ms": 3.744158,
+      "percent_of_kernel_sum": 0.3820286924316068
+    },
+    {
+      "name": "loop_add_fusion_12",
+      "category": "layer_norm_fusion",
+      "hlo_tags": [
+        "layer_norm"
+      ],
+      "calls": 17,
+      "total_ms": 3.581118,
+      "percent_of_kernel_sum": 0.36539318772960194
+    },
+    {
+      "name": "loop_multiply_fusion_36",
+      "category": "other_device_kernel",
+      "hlo_tags": [],
+      "calls": 17,
+      "total_ms": 3.2057569999999997,
+      "percent_of_kernel_sum": 0.3270938766375432
+    },
+    {
+      "name": "Cijk_Ailk_Bljk_SB_MX_MT128x128x8_SE_AMAS3_BW_DTL1_BL1_DRB16_ALT_KME0_ETN_EPS1_FL0_GRVW4_GSU1_ISA938_IU1_KME_GRCMn2_K1_KLA_LDL1_LRVW4_MAC_MMAC_BW1_MMAC_KM0_MMAC_KME1_NLCA1_NLCB1_OLDSR0_PGR1_PLR1_RK0_SU0_SUM0_SUS256_SVW4_TT8_8_TLM1_ULDSWM0_USFGRO0_USSB0_VAW1_VSn1_VW4_WG16_16_1_WGM8",
+      "category": "gemm",
+      "hlo_tags": [],
+      "calls": 1,
+      "total_ms": 3.070718,
+      "percent_of_kernel_sum": 0.3133154055908428
+    },
+    {
+      "name": "input_concatenate_fusion_1",
+      "category": "gather_fusion",
+      "hlo_tags": [
+        "gather",
+        "layer_norm"
+      ],
+      "calls": 1,
+      "total_ms": 3.045439,
+      "percent_of_kernel_sum": 0.31073610650250877
+    },
+    {
+      "name": "loop_add_fusion_2",
+      "category": "layer_norm_fusion",
+      "hlo_tags": [
+        "layer_norm"
+      ],
+      "calls": 1,
+      "total_ms": 2.9339180000000002,
+      "percent_of_kernel_sum": 0.29935725395177104
+    },
+    {
+      "name": "input_reduce_fusion_35",
+      "category": "layer_norm_fusion",
+      "hlo_tags": [
+        "layer_norm",
+        "reduction"
+      ],
+      "calls": 17,
+      "total_ms": 2.3087969999999998,
+      "percent_of_kernel_sum": 0.23557411279118468
+    },
+    {
+      "name": "input_reduce_fusion_65",
+      "category": "layer_norm_fusion",
+      "hlo_tags": [
+        "layer_norm",
+        "reduction"
+      ],
+      "calls": 17,
+      "total_ms": 2.29824,
+      "percent_of_kernel_sum": 0.2344969475364063
+    },
+    {
+      "name": "loop_broadcast_fusion",
+      "category": "other_device_kernel",
+      "hlo_tags": [],
+      "calls": 1,
+      "total_ms": 2.0420789999999998,
+      "percent_of_kernel_sum": 0.20836000249242773
+    },
+    {
+      "name": "input_concatenate_fusion_16",
+      "category": "gather_fusion",
+      "hlo_tags": [
+        "gather",
+        "layer_norm"
+      ],
+      "calls": 1,
+      "total_ms": 1.939519,
+      "percent_of_kernel_sum": 0.19789547009401248
+    },
+    {
+      "name": "loop_add_fusion_11",
+      "category": "layer_norm_fusion",
+      "hlo_tags": [
+        "layer_norm"
+      ],
+      "calls": 1,
+      "total_ms": 1.628479,
+      "percent_of_kernel_sum": 0.1661590411041229
+    },
+    {
+      "name": "loop_broadcast_fusion_1",
+      "category": "other_device_kernel",
+      "hlo_tags": [],
+      "calls": 1,
+      "total_ms": 1.245759,
+      "percent_of_kernel_sum": 0.12710886716183079
+    },
+    {
+      "name": "loop_add_fusion",
+      "category": "other_device_kernel",
+      "hlo_tags": [],
+      "calls": 1,
+      "total_ms": 1.12928,
+      "percent_of_kernel_sum": 0.11522413364744889
+    },
+    {
+      "name": "Cijk_Ailk_Bljk_SB_MT128x128x16_SE_AMAS3_BW_DTL0_BL1_DRB16_ALT_KME0_ETN_EPS0_FL0_GRVW4_GSU1_ISA938_IU1_KME_GRCMn1_K1_KLA_LDL1_LRVW4_MAC_MMAC_BW1_MMAC_KM0_MMAC_KME1_NLCA1_NLCB1_OLDSR0_PGR2_PLR1_RK0_SU0_SUM0_SUS256_SVW4_TT4_8_TLM0_ULDSWM0_USFGRO0_USSB0_VAW1_VSn1_VW4_WG32_16_1_WGM8",
+      "category": "gemm",
+      "hlo_tags": [],
+      "calls": 1,
+      "total_ms": 0.62864,
+      "percent_of_kernel_sum": 0.06414219624551243
+    },
+    {
+      "name": "loop_add_fusion_1",
+      "category": "other_device_kernel",
+      "hlo_tags": [],
+      "calls": 1,
+      "total_ms": 0.19952,
+      "percent_of_kernel_sum": 0.020357678472424024
+    },
+    {
+      "name": "loop_add_fusion_29",
+      "category": "layer_norm_fusion",
+      "hlo_tags": [
+        "layer_norm"
+      ],
+      "calls": 1,
+      "total_ms": 0.162879,
+      "percent_of_kernel_sum": 0.01661907734517819
+    },
+    {
+      "name": "loop_rsqrt_fusion_1",
+      "category": "layer_norm_fusion",
+      "hlo_tags": [
+        "layer_norm"
+      ],
+      "calls": 2,
+      "total_ms": 0.16176,
+      "percent_of_kernel_sum": 0.016504902113569118
+    },
+    {
+      "name": "loop_multiply_fusion_42",
+      "category": "layer_norm_fusion",
+      "hlo_tags": [
+        "layer_norm"
+      ],
+      "calls": 2,
+      "total_ms": 0.16048,
+      "percent_of_kernel_sum": 0.01637429952513336
+    },
+    {
+      "name": "loop_rsqrt_fusion_3",
+      "category": "layer_norm_fusion",
+      "hlo_tags": [
+        "layer_norm"
+      ],
+      "calls": 2,
+      "total_ms": 0.11008,
+      "percent_of_kernel_sum": 0.011231822605475323
+    },
+    {
+      "name": "loop_transpose_fusion",
+      "category": "other_device_kernel",
+      "hlo_tags": [],
+      "calls": 1,
+      "total_ms": 0.105119,
+      "percent_of_kernel_sum": 0.01072563554201454
+    },
+    {
+      "name": "loop_multiply_fusion_44",
+      "category": "layer_norm_fusion",
+      "hlo_tags": [
+        "layer_norm"
+      ],
+      "calls": 17,
+      "total_ms": 0.10255999999999998,
+      "percent_of_kernel_sum": 0.010464532398415235
+    },
+    {
+      "name": "loop_rsqrt_fusion_23",
+      "category": "layer_norm_fusion",
+      "hlo_tags": [
+        "layer_norm"
+      ],
+      "calls": 17,
+      "total_ms": 0.10143999999999999,
+      "percent_of_kernel_sum": 0.010350255133533945
+    },
+    {
+      "name": "loop_rsqrt_fusion_40",
+      "category": "layer_norm_fusion",
+      "hlo_tags": [
+        "layer_norm"
+      ],
+      "calls": 17,
+      "total_ms": 0.0992,
+      "percent_of_kernel_sum": 0.010121700603771367
+    },
+    {
+      "name": "loop_multiply_fusion_66",
+      "category": "layer_norm_fusion",
+      "hlo_tags": [
+        "layer_norm"
+      ],
+      "calls": 17,
+      "total_ms": 0.09807999999999999,
+      "percent_of_kernel_sum": 0.010007423338890077
+    },
+    {
+      "name": "loop_multiply_fusion_63",
+      "category": "layer_norm_fusion",
+      "hlo_tags": [
+        "layer_norm"
+      ],
+      "calls": 3,
+      "total_ms": 0.08095999999999999,
+      "percent_of_kernel_sum": 0.008260613718561793
+    },
+    {
+      "name": "loop_rsqrt_fusion_6",
+      "category": "layer_norm_fusion",
+      "hlo_tags": [
+        "layer_norm"
+      ],
+      "calls": 3,
+      "total_ms": 0.08048000000000001,
+      "percent_of_kernel_sum": 0.008211637747898385
+    },
+    {
+      "name": "loop_multiply_fusion_61",
+      "category": "layer_norm_fusion",
+      "hlo_tags": [
+        "layer_norm"
+      ],
+      "calls": 2,
+      "total_ms": 0.05072,
+      "percent_of_kernel_sum": 0.0051751275667669735
+    },
+    {
+      "name": "wrapped_slice_1",
+      "category": "other_device_kernel",
+      "hlo_tags": [],
+      "calls": 1,
+      "total_ms": 0.0028799999999999997,
+      "percent_of_kernel_sum": 0.00029385582398045904
+    },
+    {
+      "name": "wrapped_slice",
+      "category": "other_device_kernel",
+      "hlo_tags": [],
+      "calls": 1,
+      "total_ms": 0.00272,
+      "percent_of_kernel_sum": 0.0002775305004259891
+    }
+  ],
+  "host_apis": {
+    "hipHostMalloc": {
+      "calls": 1,
+      "total_ms": 223.449442
+    },
+    "hipEventRecord": {
+      "calls": 102,
+      "total_ms": 7.512396000000002
+    },
+    "hipStreamWaitEvent": {
+      "calls": 108,
+      "total_ms": 5.580176
+    },
+    "hipLaunchHostFunc": {
+      "calls": 62,
+      "total_ms": 3.8527419999999997
+    },
+    "hipMemcpyHtoDAsync": {
+      "calls": 23,
+      "total_ms": 2.2529349999999995
+    },
+    "hipModuleLaunchKernel": {
+      "calls": 298,
+      "total_ms": 2.1246469999999986
+    },
+    "hipLaunchKernel": {
+      "calls": 168,
+      "total_ms": 1.1099789999999998
+    },
+    "hipStreamQuery": {
+      "calls": 84,
+      "total_ms": 1.0368350000000002
+    },
+    "hipExtModuleLaunchKernel": {
+      "calls": 84,
+      "total_ms": 0.5770429999999999
+    },
+    "hipCtxSetCurrent": {
+      "calls": 250,
+      "total_ms": 0.2536020000000001
+    },
+    "hipStreamIsCapturing": {
+      "calls": 168,
+      "total_ms": 0.2041500000000001
+    },
+    "__hipPopCallConfiguration": {
+      "calls": 168,
+      "total_ms": 0.11171999999999993
+    },
+    "__hipPushCallConfiguration": {
+      "calls": 168,
+      "total_ms": 0.10405099999999999
+    },
+    "hipGetLastError": {
+      "calls": 168,
+      "total_ms": 0.09318100000000012
+    },
+    "hipGetDeviceProperties": {
+      "calls": 84,
+      "total_ms": 0.08031099999999998
+    },
+    "hipDeviceSynchronize": {
+      "calls": 1,
+      "total_ms": 0.06745
+    },
+    "hipGetDevice": {
+      "calls": 84,
+      "total_ms": 0.05607100000000001
+    },
+    "hipMemcpyDtoDAsync": {
+      "calls": 1,
+      "total_ms": 0.04247
+    },
+    "hipEventQuery": {
+      "calls": 11,
+      "total_ms": 0.032341
+    }
+  },
+  "classification": "Exclusive precedence: GEMM/RNE, then fusion containing scatter, gather, LayerNorm, other reduction, other. Fusion labels include all operations fused into that kernel; HLO tags retain overlapping semantic labels.",
+  "time_units": "Trace timestamps/durations are microseconds; all report times milliseconds.",
+  "limits": "Host API times can overlap device time; never add them. Kernel sum percentages describe GPU kernel work, not end-to-end latency. Busy time is the union across device kernel intervals.",
+  "native_gemm_audit": {
+    "calls": 84,
+    "xf32_mode_verified": true,
+    "activation_rne_skipped": 0
+  }
+}

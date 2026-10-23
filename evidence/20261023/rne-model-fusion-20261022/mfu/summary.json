@@ -1,0 +1,121 @@
+{
+  "schema": "graphcast.gpu_active_mfu_estimate.v1",
+  "status": "computed_with_theoretical_peak",
+  "model": "Official JAX GraphCast RNE+XF32 inference",
+  "product_model": "BW1100",
+  "raw_driver_model": "BW1200",
+  "pci": "0000:b0:00.0",
+  "model_time_source": "Existing single-step HIPPROF capture after 5 warmup steps; not a new 40-step device-time measurement",
+  "time_definition": "Union of all HIPOPS GPU kernel intervals, including RNE/scatter/gather/norm/etc. Excludes CPU, copies and idle gaps; device first-to-last kernel span supplied separately.",
+  "flops_definition": "Approximate useful model FLOPs from 84 actual dense GEMMs, sum(2*M*N*K), FMA=2. Excludes elementwise/reduction/transcendental FLOPs, RNE/integer work, padding and compiler work. Same numerator for both variants.",
+  "theoretical_peak_tflops": 170.3936,
+  "theoretical_peak_source": "用户指定截图：NMZ 峰值算力（1300 MHz），TF32TensorSpeed = 170.3936 TFLOP/s，作为本项目 XF32 峰值分母",
+  "empirical_reference": {
+    "n": 8192,
+    "gemm_device_ms": [
+      11.2467155,
+      11.3095154,
+      11.2697395
+    ],
+    "median_device_ms": 11.2697395,
+    "median_tflops": 97.56318038904094,
+    "iterations_per_round": 20,
+    "warmups": 5
+  },
+  "empirical_reference_definition": "Highest median among only 3 tested square sizes, same card/native rocBLAS XF32, pre-rounded FP32 inputs, HIP events. No RNE overhead in denominator. Not a vendor theoretical peak or proven global maximum.",
+  "square_probes": [
+    {
+      "n": 8192,
+      "gemm_device_ms": [
+        11.2467155,
+        11.3095154,
+        11.2697395
+      ],
+      "median_device_ms": 11.2697395,
+      "median_tflops": 97.56318038904094,
+      "iterations_per_round": 20,
+      "warmups": 5
+    },
+    {
+      "n": 16384,
+      "gemm_device_ms": [
+        139.02323,
+        138.741907,
+        138.90968
+      ],
+      "median_device_ms": 138.90968,
+      "median_tflops": 63.32239065130666,
+      "iterations_per_round": 20,
+      "warmups": 5
+    },
+    {
+      "n": 24576,
+      "gemm_device_ms": [
+        470.546436,
+        465.882861,
+        466.541504
+      ],
+      "median_device_ms": 466.541504,
+      "median_tflops": 63.631667698211906,
+      "iterations_per_round": 20,
+      "warmups": 5
+    }
+  ],
+  "rows": [
+    {
+      "variant": "baseline",
+      "gemm_flops_per_step": 28784948924416,
+      "gpu_kernel_busy_ms": 980.0711989991069,
+      "gpu_kernel_sum_ms": 980.0724590000011,
+      "gpu_kernel_span_ms": 1267.8544290000052,
+      "effective_tflops_gpu_active": 29.370263052125697,
+      "effective_tflops_device_span": 22.70367028422936,
+      "empirical_reference_utilization_percent": 30.103839312135417,
+      "theoretical_mfu_percent": 17.236717254712442,
+      "gemm_only_tflops": 89.23515611981304
+    },
+    {
+      "variant": "fused",
+      "gemm_flops_per_step": 28784948924416,
+      "gpu_kernel_busy_ms": 724.3928609992713,
+      "gpu_kernel_sum_ms": 724.3945179999998,
+      "gpu_kernel_span_ms": 988.830351000011,
+      "effective_tflops_gpu_active": 39.73665461681704,
+      "effective_tflops_device_span": 29.11009850709536,
+      "empirical_reference_utilization_percent": 40.72915054466652,
+      "theoretical_mfu_percent": 23.32050887874723,
+      "gemm_only_tflops": 88.2736063712307
+    }
+  ],
+  "throughput_relative_increase_percent": 35.29553530485341,
+  "source_sha256": {
+    "mfu/peak-reference.json": "dec9d117c7e6a9cb84647e8b29e156ef20047123f38b278bad793416768be983",
+    "mfu/peak-source.png": "68d22b813025819f7472d26a0e2980d5aae81aba7d7f2706c552954fa7e1c787",
+    "mfu/probe-r2/gemm-8192.json": "1c6eb1812d3ebcb4b95ced332feab959397fc59e75a7b85526d9a210f7555d9c",
+    "mfu/probe-r2/gemm-16384.json": "6fc80f3184987eddf4d71793dbc10554a3424d10ba5d4571f1c32ad1482fdb7b",
+    "mfu/probe-r2/gemm-24576.json": "ae41c4c1b782cd8d80832f32dbef55fd72d968b8a5f10dc84e1024f9e953e8f9",
+    "profile-baseline-r1/run/report.json": "83e588a5613dcf7fb809fb3ba1e86d5384709cecfb210ef86549480eecdd8b11",
+    "profile-baseline-r1/gemm.jsonl": "c9875a4286c8b7e6e769fa7a240a41634ba05cd6646236ffccecd8e86ed81443",
+    "profile-baseline-r1/trace.json": "6f56c6ddf2227d6ac5218066fae56dd7277c0ba0125829f517877354cac7162c",
+    "profile-baseline-r1/profile-summary.json": "a81bef4c6aa01ced2dbcde9d337ced2d1dc2179d241a4e6994614d59492d1329",
+    "profile-fused-r1/run/report.json": "85e1f4eb8da8306de6f6fa73775e5e20d6b21440ab3a67c89c07d5eeea36c7c8",
+    "profile-fused-r1/gemm.jsonl": "542ad1f480b61420293ae771196f1a848648a12e0b6f1d11ad95baf1dde66474",
+    "profile-fused-r1/trace.json": "797b31540d6a609b8a83e47fdb75e7b5823018f708e97d0385c6f32d2da6da34",
+    "profile-fused-r1/profile-summary.json": "c556afca87678455e714704396a2bf4e27e449aa248e33a0f06fef15d27c53d3",
+    "baseline-source/configs/operators.json": "a45ba0d7b442b9949aa90c399f3bf4f664f28ebd01c076325ca19cf040a42226"
+  },
+  "peak_reference_metadata": {
+    "theoretical_peak_tflops": 170.3936,
+    "source": "用户指定截图：NMZ 峰值算力（1300 MHz），TF32TensorSpeed = 170.3936 TFLOP/s，作为本项目 XF32 峰值分母",
+    "table_column": "NMZ峰值算力（1300 MHz）",
+    "table_row": "TF32TensorSpeed",
+    "reference_frequency_mhz": 1300,
+    "table_empirical_tflops": 170.06,
+    "source_image": "peak-source.png",
+    "source_image_sha256": "68d22b813025819f7472d26a0e2980d5aae81aba7d7f2706c552954fa7e1c787",
+    "source_authority": "User-designated project reference; not independently verified vendor specification",
+    "profile_telemetry_sclk_mhz": 1350,
+    "profile_telemetry_fclk_mhz": 1300,
+    "frequency_policy": "Use the supplied 1300 MHz table peak exactly as requested; do not rescale peak or claim model profiles were locked to 1300 MHz."
+  }
+}

@@ -1,0 +1,908 @@
+{
+  "status": "completed",
+  "horizons": [
+    {
+      "rollout": 1,
+      "updates": 16,
+      "fp32_jax_peak_gib": 74.93298411369324,
+      "rne_xf32_jax_peak_gib": 74.93298411369324,
+      "fp32_device_peak_gib": 101.3115234375,
+      "rne_xf32_device_peak_gib": 125.0810546875,
+      "fp32_mean_gpu_ms": 11398.763678999998,
+      "rne_xf32_mean_gpu_ms": 9270.7901768125,
+      "speedup": 1.229535288967045,
+      "fp32_loss_first": 1.404221534729004,
+      "fp32_loss_last": 6.834235429763794,
+      "fp32_loss_min": 1.3054049015045166,
+      "rne_xf32_loss_first": 1.4042288064956665,
+      "rne_xf32_loss_last": 6.850003242492676,
+      "rne_xf32_loss_min": 1.3054136037826538,
+      "max_loss_relative_abs": 0.013202804123283405,
+      "max_gradient_relative_l2": 0.626313339317891,
+      "parameter_relative_l2": 0.010829926073562406
+    },
+    {
+      "rollout": 2,
+      "updates": 2,
+      "fp32_jax_peak_gib": 77.82469654083252,
+      "rne_xf32_jax_peak_gib": 77.82469654083252,
+      "fp32_device_peak_gib": 101.2919921875,
+      "rne_xf32_device_peak_gib": 124.728515625,
+      "fp32_mean_gpu_ms": 27464.862153000002,
+      "rne_xf32_mean_gpu_ms": 22041.571390999998,
+      "speedup": 1.246048281485704,
+      "fp32_loss_first": 9.20090627670288,
+      "fp32_loss_last": 9.103409767150879,
+      "fp32_loss_min": 9.103409767150879,
+      "rne_xf32_loss_first": 9.187919616699219,
+      "rne_xf32_loss_last": 9.104232788085938,
+      "rne_xf32_loss_min": 9.104232788085938,
+      "max_loss_relative_abs": 0.0014114544386290436,
+      "max_gradient_relative_l2": 0.6275742181064853,
+      "parameter_relative_l2": 0.010830723757591988
+    },
+    {
+      "rollout": 3,
+      "updates": 2,
+      "fp32_jax_peak_gib": 79.07863426208496,
+      "rne_xf32_jax_peak_gib": 79.07863426208496,
+      "fp32_device_peak_gib": 100.962890625,
+      "rne_xf32_device_peak_gib": 124.73046875,
+      "fp32_mean_gpu_ms": 41028.193503500006,
+      "rne_xf32_mean_gpu_ms": 33038.937787999996,
+      "speedup": 1.241813334519543,
+      "fp32_loss_first": 11.312531471252441,
+      "fp32_loss_last": 11.764613628387451,
+      "fp32_loss_min": 11.312531471252441,
+      "rne_xf32_loss_first": 11.28145456314087,
+      "rne_xf32_loss_last": 11.743205070495605,
+      "rne_xf32_loss_min": 11.28145456314087,
+      "max_loss_relative_abs": 0.0027471223563483847,
+      "max_gradient_relative_l2": 0.6727536695482158,
+      "parameter_relative_l2": 0.010831218158006847
+    },
+    {
+      "rollout": 4,
+      "updates": 2,
+      "fp32_jax_peak_gib": 80.51380920410156,
+      "rne_xf32_jax_peak_gib": 80.51380920410156,
+      "fp32_device_peak_gib": 101.1982421875,
+      "rne_xf32_device_peak_gib": 125.1005859375,
+      "fp32_mean_gpu_ms": 54614.992375999995,
+      "rne_xf32_mean_gpu_ms": 43980.0447255,
+      "speedup": 1.2418130249043098,
+      "fp32_loss_first": 13.258453845977783,
+      "fp32_loss_last": 13.58130931854248,
+      "fp32_loss_min": 13.258453845977783,
+      "rne_xf32_loss_first": 13.228127002716064,
+      "rne_xf32_loss_last": 13.557323932647705,
+      "rne_xf32_loss_min": 13.228127002716064,
+      "max_loss_relative_abs": 0.0022873589646291224,
+      "max_gradient_relative_l2": 0.7085884797055023,
+      "parameter_relative_l2": 0.010831305137422318
+    },
+    {
+      "rollout": 5,
+      "updates": 2,
+      "fp32_jax_peak_gib": 81.66119909286499,
+      "rne_xf32_jax_peak_gib": 81.66119909286499,
+      "fp32_device_peak_gib": 101.3271484375,
+      "rne_xf32_device_peak_gib": 125.0947265625,
+      "fp32_mean_gpu_ms": 68134.955143,
+      "rne_xf32_mean_gpu_ms": 54634.8960145,
+      "speedup": 1.2470959059740336,
+      "fp32_loss_first": 15.955542087554932,
+      "fp32_loss_last": 15.645981311798096,
+      "fp32_loss_min": 15.645981311798096,
+      "rne_xf32_loss_first": 15.915480136871338,
+      "rne_xf32_loss_last": 15.606443881988525,
+      "rne_xf32_loss_min": 15.606443881988525,
+      "max_loss_relative_abs": 0.002527002239211196,
+      "max_gradient_relative_l2": 0.7391414702112422,
+      "parameter_relative_l2": 0.010830981889346133
+    },
+    {
+      "rollout": 6,
+      "updates": 2,
+      "fp32_jax_peak_gib": 83.11244463920593,
+      "rne_xf32_jax_peak_gib": 83.11244463920593,
+      "fp32_device_peak_gib": 101.322265625,
+      "rne_xf32_device_peak_gib": 128.2236328125,
+      "fp32_mean_gpu_ms": 81677.3969515,
+      "rne_xf32_mean_gpu_ms": 65636.421213,
+      "speedup": 1.2443913827422834,
+      "fp32_loss_first": 18.001254081726074,
+      "fp32_loss_last": 17.926753997802734,
+      "fp32_loss_min": 17.926753997802734,
+      "rne_xf32_loss_first": 17.953052520751953,
+      "rne_xf32_loss_last": 17.8645601272583,
+      "rne_xf32_loss_min": 17.8645601272583,
+      "max_loss_relative_abs": 0.0034693325156387286,
+      "max_gradient_relative_l2": 0.7491994281713018,
+      "parameter_relative_l2": 0.010830391105596434
+    },
+    {
+      "rollout": 7,
+      "updates": 2,
+      "fp32_jax_peak_gib": 84.33465003967285,
+      "rne_xf32_jax_peak_gib": 84.33465003967285,
+      "fp32_device_peak_gib": 101.322265625,
+      "rne_xf32_device_peak_gib": 125.08984375,
+      "fp32_mean_gpu_ms": 95324.641053,
+      "rne_xf32_mean_gpu_ms": 76881.9049755,
+      "speedup": 1.239883963377041,
+      "fp32_loss_first": 20.536815643310547,
+      "fp32_loss_last": 19.45380401611328,
+      "fp32_loss_min": 19.45380401611328,
+      "rne_xf32_loss_first": 20.477327346801758,
+      "rne_xf32_loss_last": 19.418312072753906,
+      "rne_xf32_loss_min": 19.418312072753906,
+      "max_loss_relative_abs": 0.002896666043168488,
+      "max_gradient_relative_l2": 0.7403080200964935,
+      "parameter_relative_l2": 0.010829618894643978
+    },
+    {
+      "rollout": 8,
+      "updates": 2,
+      "fp32_jax_peak_gib": 85.54436421394348,
+      "rne_xf32_jax_peak_gib": 85.54436421394348,
+      "fp32_device_peak_gib": 101.322265625,
+      "rne_xf32_device_peak_gib": 125.08984375,
+      "fp32_mean_gpu_ms": 108721.362156,
+      "rne_xf32_mean_gpu_ms": 87832.8006065,
+      "speedup": 1.2378218775361942,
+      "fp32_loss_first": 21.689186096191406,
+      "fp32_loss_last": 22.187061309814453,
+      "fp32_loss_min": 21.689186096191406,
+      "rne_xf32_loss_first": 21.662086486816406,
+      "rne_xf32_loss_last": 22.157608032226562,
+      "rne_xf32_loss_min": 21.662086486816406,
+      "max_loss_relative_abs": 0.0013274979131581504,
+      "max_gradient_relative_l2": 0.7542611174839481,
+      "parameter_relative_l2": 0.010828708542029853
+    },
+    {
+      "rollout": 9,
+      "updates": 2,
+      "fp32_jax_peak_gib": 86.93103742599487,
+      "rne_xf32_jax_peak_gib": 86.93103742599487,
+      "fp32_device_peak_gib": 101.3193359375,
+      "rne_xf32_device_peak_gib": 124.7353515625,
+      "fp32_mean_gpu_ms": 122558.554703,
+      "rne_xf32_mean_gpu_ms": 98801.475584,
+      "speedup": 1.240452675211333,
+      "fp32_loss_first": 23.617207527160645,
+      "fp32_loss_last": 23.959409713745117,
+      "fp32_loss_min": 23.617207527160645,
+      "rne_xf32_loss_first": 23.607958793640137,
+      "rne_xf32_loss_last": 23.955608367919922,
+      "rne_xf32_loss_min": 23.607958793640137,
+      "max_loss_relative_abs": 0.00039160995261067313,
+      "max_gradient_relative_l2": 0.7518917934556482,
+      "parameter_relative_l2": 0.010827700518470922
+    },
+    {
+      "rollout": 10,
+      "updates": 2,
+      "fp32_jax_peak_gib": 88.21958017349243,
+      "rne_xf32_jax_peak_gib": 88.21958017349243,
+      "fp32_device_peak_gib": 100.96875,
+      "rne_xf32_device_peak_gib": 124.736328125,
+      "fp32_mean_gpu_ms": 136059.762005,
+      "rne_xf32_mean_gpu_ms": 109947.0555895,
+      "speedup": 1.237502553165178,
+      "fp32_loss_first": 25.31869888305664,
+      "fp32_loss_last": 25.724515914916992,
+      "fp32_loss_min": 25.31869888305664,
+      "rne_xf32_loss_first": 25.358593940734863,
+      "rne_xf32_loss_last": 25.749984741210938,
+      "rne_xf32_loss_min": 25.358593940734863,
+      "max_loss_relative_abs": 0.0015757151606601936,
+      "max_gradient_relative_l2": 0.7523409888440251,
+      "parameter_relative_l2": 0.010826644268366653
+    },
+    {
+      "rollout": 11,
+      "updates": 2,
+      "fp32_jax_peak_gib": 89.54702544212341,
+      "rne_xf32_jax_peak_gib": 89.54702544212341,
+      "fp32_device_peak_gib": 100.970703125,
+      "rne_xf32_device_peak_gib": 124.7373046875,
+      "fp32_mean_gpu_ms": 149507.11241549999,
+      "rne_xf32_mean_gpu_ms": 120353.5705835,
+      "speedup": 1.2422324629893184,
+      "fp32_loss_first": 27.08154296875,
+      "fp32_loss_last": 27.156365394592285,
+      "fp32_loss_min": 27.08154296875,
+      "rne_xf32_loss_first": 27.155704498291016,
+      "rne_xf32_loss_last": 27.22170639038086,
+      "rne_xf32_loss_min": 27.155704498291016,
+      "max_loss_relative_abs": 0.0027384528875105925,
+      "max_gradient_relative_l2": 0.7517223584780833,
+      "parameter_relative_l2": 0.010825565612640298
+    },
+    {
+      "rollout": 12,
+      "updates": 2,
+      "fp32_jax_peak_gib": 90.86638116836548,
+      "rne_xf32_jax_peak_gib": 90.86638116836548,
+      "fp32_device_peak_gib": 100.9677734375,
+      "rne_xf32_device_peak_gib": 124.7314453125,
+      "fp32_mean_gpu_ms": 163147.0325845,
+      "rne_xf32_mean_gpu_ms": 131666.63697499997,
+      "speedup": 1.239091666140735,
+      "fp32_loss_first": 28.678329467773438,
+      "fp32_loss_last": 28.65761375427246,
+      "fp32_loss_min": 28.65761375427246,
+      "rne_xf32_loss_first": 28.788410186767578,
+      "rne_xf32_loss_last": 28.762954711914062,
+      "rne_xf32_loss_min": 28.762954711914062,
+      "max_loss_relative_abs": 0.003838463433438168,
+      "max_gradient_relative_l2": 0.7610722419885805,
+      "parameter_relative_l2": 0.010824489082405315
+    }
+  ],
+  "updates": [
+    {
+      "update": 1,
+      "rollout": 1,
+      "lr": 0.0,
+      "starts": [
+        0,
+        8
+      ],
+      "fp32_loss": 1.404221534729004,
+      "rne_xf32_loss": 1.4042288064956665,
+      "loss_relative_abs": 5.178503877595789e-06,
+      "fp32_gradient_norm": 31.570473545049637,
+      "rne_xf32_gradient_norm": 31.706398747462543,
+      "gradient_relative_l2": 0.022900503575258337,
+      "fp32_gpu_kernel_ms": 11384.041735,
+      "rne_xf32_gpu_kernel_ms": 9097.902594
+    },
+    {
+      "update": 2,
+      "rollout": 1,
+      "lr": 0.0002,
+      "starts": [
+        2,
+        3
+      ],
+      "fp32_loss": 1.3054049015045166,
+      "rne_xf32_loss": 1.3054136037826538,
+      "loss_relative_abs": 6.6663440034409294e-06,
+      "fp32_gradient_norm": 20.509518822659054,
+      "rne_xf32_gradient_norm": 20.59943460567529,
+      "gradient_relative_l2": 0.035381587038520734,
+      "fp32_gpu_kernel_ms": 11499.247016,
+      "rne_xf32_gpu_kernel_ms": 9256.700575
+    },
+    {
+      "update": 3,
+      "rollout": 1,
+      "lr": 0.0004,
+      "starts": [
+        11,
+        1
+      ],
+      "fp32_loss": 28.436410903930664,
+      "rne_xf32_loss": 28.46761989593506,
+      "loss_relative_abs": 0.0010975010914644162,
+      "fp32_gradient_norm": 1667.0908594957764,
+      "rne_xf32_gradient_norm": 1649.9891010965364,
+      "gradient_relative_l2": 0.031484408475279585,
+      "fp32_gpu_kernel_ms": 11467.027371,
+      "rne_xf32_gpu_kernel_ms": 9238.104493
+    },
+    {
+      "update": 4,
+      "rollout": 1,
+      "lr": 0.0006000000000000001,
+      "starts": [
+        7,
+        3
+      ],
+      "fp32_loss": 22.684926986694336,
+      "rne_xf32_loss": 22.58164119720459,
+      "loss_relative_abs": 0.004553058052614741,
+      "fp32_gradient_norm": 713.0488444144044,
+      "rne_xf32_gradient_norm": 703.2173511852569,
+      "gradient_relative_l2": 0.04240780179891594,
+      "fp32_gpu_kernel_ms": 11442.491407,
+      "rne_xf32_gpu_kernel_ms": 9222.56488
+    },
+    {
+      "update": 5,
+      "rollout": 1,
+      "lr": 0.0008,
+      "starts": [
+        5,
+        11
+      ],
+      "fp32_loss": 11.096459865570068,
+      "rne_xf32_loss": 11.065762042999268,
+      "loss_relative_abs": 0.0027664519083288475,
+      "fp32_gradient_norm": 132.16914565578455,
+      "rne_xf32_gradient_norm": 130.63681475146043,
+      "gradient_relative_l2": 0.06762529772279235,
+      "fp32_gpu_kernel_ms": 11424.275286,
+      "rne_xf32_gpu_kernel_ms": 9251.184281
+    },
+    {
+      "update": 6,
+      "rollout": 1,
+      "lr": 0.001,
+      "starts": [
+        2,
+        9
+      ],
+      "fp32_loss": 8.792013168334961,
+      "rne_xf32_loss": 8.796508312225342,
+      "loss_relative_abs": 0.0005112758368663993,
+      "fp32_gradient_norm": 39.04201393235081,
+      "rne_xf32_gradient_norm": 38.95883111377775,
+      "gradient_relative_l2": 0.06996648402696212,
+      "fp32_gpu_kernel_ms": 11396.618827,
+      "rne_xf32_gpu_kernel_ms": 9339.52347
+    },
+    {
+      "update": 7,
+      "rollout": 1,
+      "lr": 0.001,
+      "starts": [
+        8,
+        0
+      ],
+      "fp32_loss": 8.649012088775635,
+      "rne_xf32_loss": 8.651711463928223,
+      "loss_relative_abs": 0.0003121021366233305,
+      "fp32_gradient_norm": 19.45269152614992,
+      "rne_xf32_gradient_norm": 18.119764893490057,
+      "gradient_relative_l2": 0.19804058109485903,
+      "fp32_gpu_kernel_ms": 11393.428292,
+      "rne_xf32_gpu_kernel_ms": 9313.951672
+    },
+    {
+      "update": 8,
+      "rollout": 1,
+      "lr": 0.0009698463103929542,
+      "starts": [
+        10,
+        2
+      ],
+      "fp32_loss": 8.087101936340332,
+      "rne_xf32_loss": 8.19387435913086,
+      "loss_relative_abs": 0.013202804123283405,
+      "fp32_gradient_norm": 40.44517226325801,
+      "rne_xf32_gradient_norm": 45.35061202926419,
+      "gradient_relative_l2": 0.3808503449394029,
+      "fp32_gpu_kernel_ms": 11385.825419,
+      "rne_xf32_gpu_kernel_ms": 9306.961472
+    },
+    {
+      "update": 9,
+      "rollout": 1,
+      "lr": 0.000883022221559489,
+      "starts": [
+        3,
+        3
+      ],
+      "fp32_loss": 7.924935817718506,
+      "rne_xf32_loss": 7.92232084274292,
+      "loss_relative_abs": 0.0003299679689189909,
+      "fp32_gradient_norm": 18.53374570741066,
+      "rne_xf32_gradient_norm": 17.840017203884294,
+      "gradient_relative_l2": 0.29015217574922514,
+      "fp32_gpu_kernel_ms": 11386.367829,
+      "rne_xf32_gpu_kernel_ms": 9254.331783
+    },
+    {
+      "update": 10,
+      "rollout": 1,
+      "lr": 0.00075,
+      "starts": [
+        11,
+        11
+      ],
+      "fp32_loss": 7.513591766357422,
+      "rne_xf32_loss": 7.568746566772461,
+      "loss_relative_abs": 0.007340670365137235,
+      "fp32_gradient_norm": 9.780389840460865,
+      "rne_xf32_gradient_norm": 9.961519852655853,
+      "gradient_relative_l2": 0.41981888515339505,
+      "fp32_gpu_kernel_ms": 11374.490237,
+      "rne_xf32_gpu_kernel_ms": 9296.592123
+    },
+    {
+      "update": 11,
+      "rollout": 1,
+      "lr": 0.0005868240888334653,
+      "starts": [
+        3,
+        4
+      ],
+      "fp32_loss": 7.429581880569458,
+      "rne_xf32_loss": 7.468049764633179,
+      "loss_relative_abs": 0.00517766473027581,
+      "fp32_gradient_norm": 10.601192149248929,
+      "rne_xf32_gradient_norm": 9.568068844188362,
+      "gradient_relative_l2": 0.4842145365993488,
+      "fp32_gpu_kernel_ms": 11373.66384,
+      "rne_xf32_gpu_kernel_ms": 9278.418406
+    },
+    {
+      "update": 12,
+      "rollout": 1,
+      "lr": 0.00041317591116653486,
+      "starts": [
+        7,
+        2
+      ],
+      "fp32_loss": 6.938167572021484,
+      "rne_xf32_loss": 6.943318128585815,
+      "loss_relative_abs": 0.0007423511339075951,
+      "fp32_gradient_norm": 8.348994470342925,
+      "rne_xf32_gradient_norm": 7.383618878987437,
+      "gradient_relative_l2": 0.5714134037198139,
+      "fp32_gpu_kernel_ms": 11374.862395,
+      "rne_xf32_gpu_kernel_ms": 9316.987206
+    },
+    {
+      "update": 13,
+      "rollout": 1,
+      "lr": 0.0002500000000000001,
+      "starts": [
+        4,
+        10
+      ],
+      "fp32_loss": 6.947113275527954,
+      "rne_xf32_loss": 6.989700078964233,
+      "loss_relative_abs": 0.006130143808982712,
+      "fp32_gradient_norm": 8.555392963578369,
+      "rne_xf32_gradient_norm": 9.626844809945878,
+      "gradient_relative_l2": 0.626313339317891,
+      "fp32_gpu_kernel_ms": 11371.922559,
+      "rne_xf32_gpu_kernel_ms": 9272.3455
+    },
+    {
+      "update": 14,
+      "rollout": 1,
+      "lr": 0.00011697777844051105,
+      "starts": [
+        0,
+        10
+      ],
+      "fp32_loss": 6.973063230514526,
+      "rne_xf32_loss": 7.002408981323242,
+      "loss_relative_abs": 0.0042084446732530865,
+      "fp32_gradient_norm": 8.317816978801527,
+      "rne_xf32_gradient_norm": 8.806557756321958,
+      "gradient_relative_l2": 0.5911030955171409,
+      "fp32_gpu_kernel_ms": 11364.342724,
+      "rne_xf32_gpu_kernel_ms": 9310.838628
+    },
+    {
+      "update": 15,
+      "rollout": 1,
+      "lr": 3.0153689607045842e-05,
+      "starts": [
+        1,
+        3
+      ],
+      "fp32_loss": 7.021172285079956,
+      "rne_xf32_loss": 7.032008647918701,
+      "loss_relative_abs": 0.0015433836970177289,
+      "fp32_gradient_norm": 7.0762512794135395,
+      "rne_xf32_gradient_norm": 6.804153731050467,
+      "gradient_relative_l2": 0.5595078311619073,
+      "fp32_gpu_kernel_ms": 11366.50048,
+      "rne_xf32_gpu_kernel_ms": 9294.420101
+    },
+    {
+      "update": 16,
+      "rollout": 1,
+      "lr": 0.0,
+      "starts": [
+        3,
+        4
+      ],
+      "fp32_loss": 6.834235429763794,
+      "rne_xf32_loss": 6.850003242492676,
+      "loss_relative_abs": 0.002307180209246436,
+      "fp32_gradient_norm": 8.195398220141405,
+      "rne_xf32_gradient_norm": 7.905932966767468,
+      "gradient_relative_l2": 0.5120123775646717,
+      "fp32_gpu_kernel_ms": 11375.113447,
+      "rne_xf32_gpu_kernel_ms": 9281.815645
+    },
+    {
+      "update": 17,
+      "rollout": 2,
+      "lr": 3e-07,
+      "starts": [
+        5,
+        8
+      ],
+      "fp32_loss": 9.20090627670288,
+      "rne_xf32_loss": 9.187919616699219,
+      "loss_relative_abs": 0.0014114544386290436,
+      "fp32_gradient_norm": 12.292978805737805,
+      "rne_xf32_gradient_norm": 11.399760837837155,
+      "gradient_relative_l2": 0.6129882078059414,
+      "fp32_gpu_kernel_ms": 27480.667886,
+      "rne_xf32_gpu_kernel_ms": 21999.955672
+    },
+    {
+      "update": 18,
+      "rollout": 2,
+      "lr": 3e-07,
+      "starts": [
+        7,
+        2
+      ],
+      "fp32_loss": 9.103409767150879,
+      "rne_xf32_loss": 9.104232788085938,
+      "loss_relative_abs": 9.040798515171937e-05,
+      "fp32_gradient_norm": 11.55997364677961,
+      "rne_xf32_gradient_norm": 11.13682517418067,
+      "gradient_relative_l2": 0.6275742181064853,
+      "fp32_gpu_kernel_ms": 27449.05642,
+      "rne_xf32_gpu_kernel_ms": 22083.18711
+    },
+    {
+      "update": 19,
+      "rollout": 3,
+      "lr": 3e-07,
+      "starts": [
+        5,
+        7
+      ],
+      "fp32_loss": 11.312531471252441,
+      "rne_xf32_loss": 11.28145456314087,
+      "loss_relative_abs": 0.0027471223563483847,
+      "fp32_gradient_norm": 19.55881432593433,
+      "rne_xf32_gradient_norm": 19.13445992841427,
+      "gradient_relative_l2": 0.6534002881347382,
+      "fp32_gpu_kernel_ms": 41038.163198,
+      "rne_xf32_gpu_kernel_ms": 33090.205264
+    },
+    {
+      "update": 20,
+      "rollout": 3,
+      "lr": 3e-07,
+      "starts": [
+        9,
+        4
+      ],
+      "fp32_loss": 11.764613628387451,
+      "rne_xf32_loss": 11.743205070495605,
+      "loss_relative_abs": 0.0018197416904697894,
+      "fp32_gradient_norm": 19.065404552578862,
+      "rne_xf32_gradient_norm": 18.35561457657984,
+      "gradient_relative_l2": 0.6727536695482158,
+      "fp32_gpu_kernel_ms": 41018.223809,
+      "rne_xf32_gpu_kernel_ms": 32987.670312
+    },
+    {
+      "update": 21,
+      "rollout": 4,
+      "lr": 3e-07,
+      "starts": [
+        6,
+        5
+      ],
+      "fp32_loss": 13.258453845977783,
+      "rne_xf32_loss": 13.228127002716064,
+      "loss_relative_abs": 0.0022873589646291224,
+      "fp32_gradient_norm": 27.5919835807766,
+      "rne_xf32_gradient_norm": 28.596126703730615,
+      "gradient_relative_l2": 0.7085884797055023,
+      "fp32_gpu_kernel_ms": 54652.745463,
+      "rne_xf32_gpu_kernel_ms": 43758.13398
+    },
+    {
+      "update": 22,
+      "rollout": 4,
+      "lr": 3e-07,
+      "starts": [
+        8,
+        8
+      ],
+      "fp32_loss": 13.58130931854248,
+      "rne_xf32_loss": 13.557323932647705,
+      "loss_relative_abs": 0.0017660584360617048,
+      "fp32_gradient_norm": 29.068438578416597,
+      "rne_xf32_gradient_norm": 29.350783993533458,
+      "gradient_relative_l2": 0.6931438418018125,
+      "fp32_gpu_kernel_ms": 54577.239289,
+      "rne_xf32_gpu_kernel_ms": 44201.955471
+    },
+    {
+      "update": 23,
+      "rollout": 5,
+      "lr": 3e-07,
+      "starts": [
+        7,
+        0
+      ],
+      "fp32_loss": 15.955542087554932,
+      "rne_xf32_loss": 15.915480136871338,
+      "loss_relative_abs": 0.0025108486107057078,
+      "fp32_gradient_norm": 39.067603189463,
+      "rne_xf32_gradient_norm": 41.44656048376514,
+      "gradient_relative_l2": 0.7331319891861166,
+      "fp32_gpu_kernel_ms": 68037.366966,
+      "rne_xf32_gpu_kernel_ms": 54575.560398
+    },
+    {
+      "update": 24,
+      "rollout": 5,
+      "lr": 3e-07,
+      "starts": [
+        6,
+        2
+      ],
+      "fp32_loss": 15.645981311798096,
+      "rne_xf32_loss": 15.606443881988525,
+      "loss_relative_abs": 0.002527002239211196,
+      "fp32_gradient_norm": 37.56863528285436,
+      "rne_xf32_gradient_norm": 40.296372510975715,
+      "gradient_relative_l2": 0.7391414702112422,
+      "fp32_gpu_kernel_ms": 68232.54332,
+      "rne_xf32_gpu_kernel_ms": 54694.231631
+    },
+    {
+      "update": 25,
+      "rollout": 6,
+      "lr": 3e-07,
+      "starts": [
+        0,
+        5
+      ],
+      "fp32_loss": 18.001254081726074,
+      "rne_xf32_loss": 17.953052520751953,
+      "loss_relative_abs": 0.00267767794150813,
+      "fp32_gradient_norm": 50.51994524693451,
+      "rne_xf32_gradient_norm": 55.861455916821846,
+      "gradient_relative_l2": 0.7491994281713018,
+      "fp32_gpu_kernel_ms": 81622.472589,
+      "rne_xf32_gpu_kernel_ms": 65511.766066
+    },
+    {
+      "update": 26,
+      "rollout": 6,
+      "lr": 3e-07,
+      "starts": [
+        2,
+        4
+      ],
+      "fp32_loss": 17.926753997802734,
+      "rne_xf32_loss": 17.8645601272583,
+      "loss_relative_abs": 0.0034693325156387286,
+      "fp32_gradient_norm": 49.31843593578392,
+      "rne_xf32_gradient_norm": 53.62366364290276,
+      "gradient_relative_l2": 0.7443309374722245,
+      "fp32_gpu_kernel_ms": 81732.321314,
+      "rne_xf32_gpu_kernel_ms": 65761.07636
+    },
+    {
+      "update": 27,
+      "rollout": 7,
+      "lr": 3e-07,
+      "starts": [
+        0,
+        0
+      ],
+      "fp32_loss": 20.536815643310547,
+      "rne_xf32_loss": 20.477327346801758,
+      "loss_relative_abs": 0.002896666043168488,
+      "fp32_gradient_norm": 66.98483299911629,
+      "rne_xf32_gradient_norm": 75.87321496331425,
+      "gradient_relative_l2": 0.7394039526923729,
+      "fp32_gpu_kernel_ms": 95244.75938,
+      "rne_xf32_gpu_kernel_ms": 77201.010876
+    },
+    {
+      "update": 28,
+      "rollout": 7,
+      "lr": 3e-07,
+      "starts": [
+        4,
+        5
+      ],
+      "fp32_loss": 19.45380401611328,
+      "rne_xf32_loss": 19.418312072753906,
+      "loss_relative_abs": 0.0018244217598767612,
+      "fp32_gradient_norm": 63.542638346721375,
+      "rne_xf32_gradient_norm": 71.52311325184678,
+      "gradient_relative_l2": 0.7403080200964935,
+      "fp32_gpu_kernel_ms": 95404.522726,
+      "rne_xf32_gpu_kernel_ms": 76562.799075
+    },
+    {
+      "update": 29,
+      "rollout": 8,
+      "lr": 3e-07,
+      "starts": [
+        1,
+        4
+      ],
+      "fp32_loss": 21.689186096191406,
+      "rne_xf32_loss": 21.662086486816406,
+      "loss_relative_abs": 0.0012494525730386286,
+      "fp32_gradient_norm": 76.84937385621961,
+      "rne_xf32_gradient_norm": 89.0487106935298,
+      "gradient_relative_l2": 0.7542611174839481,
+      "fp32_gpu_kernel_ms": 108708.807359,
+      "rne_xf32_gpu_kernel_ms": 87833.559407
+    },
+    {
+      "update": 30,
+      "rollout": 8,
+      "lr": 3e-07,
+      "starts": [
+        1,
+        0
+      ],
+      "fp32_loss": 22.187061309814453,
+      "rne_xf32_loss": 22.157608032226562,
+      "loss_relative_abs": 0.0013274979131581504,
+      "fp32_gradient_norm": 78.22796502685475,
+      "rne_xf32_gradient_norm": 91.43241400340692,
+      "gradient_relative_l2": 0.7493812748412884,
+      "fp32_gpu_kernel_ms": 108733.916953,
+      "rne_xf32_gpu_kernel_ms": 87832.041806
+    },
+    {
+      "update": 31,
+      "rollout": 9,
+      "lr": 3e-07,
+      "starts": [
+        3,
+        1
+      ],
+      "fp32_loss": 23.617207527160645,
+      "rne_xf32_loss": 23.607958793640137,
+      "loss_relative_abs": 0.00039160995261067313,
+      "fp32_gradient_norm": 92.0303967046075,
+      "rne_xf32_gradient_norm": 108.22978825161205,
+      "gradient_relative_l2": 0.7518917934556482,
+      "fp32_gpu_kernel_ms": 122442.006661,
+      "rne_xf32_gpu_kernel_ms": 98974.674485
+    },
+    {
+      "update": 32,
+      "rollout": 9,
+      "lr": 3e-07,
+      "starts": [
+        0,
+        1
+      ],
+      "fp32_loss": 23.959409713745117,
+      "rne_xf32_loss": 23.955608367919922,
+      "loss_relative_abs": 0.00015865774118026553,
+      "fp32_gradient_norm": 93.57598426530772,
+      "rne_xf32_gradient_norm": 111.8545648074854,
+      "gradient_relative_l2": 0.7500993818714239,
+      "fp32_gpu_kernel_ms": 122675.102745,
+      "rne_xf32_gpu_kernel_ms": 98628.276683
+    },
+    {
+      "update": 33,
+      "rollout": 10,
+      "lr": 3e-07,
+      "starts": [
+        1,
+        2
+      ],
+      "fp32_loss": 25.31869888305664,
+      "rne_xf32_loss": 25.358593940734863,
+      "loss_relative_abs": 0.0015757151606601936,
+      "fp32_gradient_norm": 108.55963392210482,
+      "rne_xf32_gradient_norm": 131.74394440525612,
+      "gradient_relative_l2": 0.7498806935020692,
+      "fp32_gpu_kernel_ms": 135976.930975,
+      "rne_xf32_gpu_kernel_ms": 109430.778488
+    },
+    {
+      "update": 34,
+      "rollout": 10,
+      "lr": 3e-07,
+      "starts": [
+        0,
+        0
+      ],
+      "fp32_loss": 25.724515914916992,
+      "rne_xf32_loss": 25.749984741210938,
+      "loss_relative_abs": 0.0009900604690942537,
+      "fp32_gradient_norm": 111.6961062097288,
+      "rne_xf32_gradient_norm": 136.56101908113592,
+      "gradient_relative_l2": 0.7523409888440251,
+      "fp32_gpu_kernel_ms": 136142.593035,
+      "rne_xf32_gpu_kernel_ms": 110463.332691
+    },
+    {
+      "update": 35,
+      "rollout": 11,
+      "lr": 3e-07,
+      "starts": [
+        1,
+        1
+      ],
+      "fp32_loss": 27.08154296875,
+      "rne_xf32_loss": 27.155704498291016,
+      "loss_relative_abs": 0.0027384528875105925,
+      "fp32_gradient_norm": 125.79598620871009,
+      "rne_xf32_gradient_norm": 154.3977772041547,
+      "gradient_relative_l2": 0.7452796231109312,
+      "fp32_gpu_kernel_ms": 149508.559429,
+      "rne_xf32_gpu_kernel_ms": 120396.966151
+    },
+    {
+      "update": 36,
+      "rollout": 11,
+      "lr": 3e-07,
+      "starts": [
+        1,
+        0
+      ],
+      "fp32_loss": 27.156365394592285,
+      "rne_xf32_loss": 27.22170639038086,
+      "loss_relative_abs": 0.002406102394011304,
+      "fp32_gradient_norm": 125.86584555905468,
+      "rne_xf32_gradient_norm": 155.5450483387778,
+      "gradient_relative_l2": 0.7517223584780833,
+      "fp32_gpu_kernel_ms": 149505.665402,
+      "rne_xf32_gpu_kernel_ms": 120310.175016
+    },
+    {
+      "update": 37,
+      "rollout": 12,
+      "lr": 3e-07,
+      "starts": [
+        0,
+        0
+      ],
+      "fp32_loss": 28.678329467773438,
+      "rne_xf32_loss": 28.788410186767578,
+      "loss_relative_abs": 0.003838463433438168,
+      "fp32_gradient_norm": 144.6714701887837,
+      "rne_xf32_gradient_norm": 182.5704837825447,
+      "gradient_relative_l2": 0.7610722419885805,
+      "fp32_gpu_kernel_ms": 163073.14274,
+      "rne_xf32_gpu_kernel_ms": 131475.653569
+    },
+    {
+      "update": 38,
+      "rollout": 12,
+      "lr": 3e-07,
+      "starts": [
+        0,
+        0
+      ],
+      "fp32_loss": 28.65761375427246,
+      "rne_xf32_loss": 28.762954711914062,
+      "loss_relative_abs": 0.0036758453981848597,
+      "fp32_gradient_norm": 143.71606759801946,
+      "rne_xf32_gradient_norm": 180.931962173044,
+      "gradient_relative_l2": 0.7584697291067851,
+      "fp32_gpu_kernel_ms": 163220.922429,
+      "rne_xf32_gpu_kernel_ms": 131857.620381
+    }
+  ],
+  "notes": [
+    "GPU times are traced kernel-duration sums including RNE/recomputation/optimizer.",
+    "38-update small-sample validation, not convergence or weather RMSE.",
+    "Independent trajectories: later gradient/parameter differences include previous update divergence.",
+    "Observed whole-device memory includes allocator reservation and RNE scratch."
+  ],
+  "aggregate": {
+    "completed_updates_per_mode": 38,
+    "fp32_gpu_seconds": 2278.857948952,
+    "rne_xf32_gpu_seconds": 1837.963273721,
+    "speedup": 1.2398822008768424,
+    "max_loss_relative_abs": 0.013202804123283405,
+    "max_gradient_relative_l2": 0.7610722419885805,
+    "trajectory_loss_relative_l1": 0.002378778217406814
+  }
+}

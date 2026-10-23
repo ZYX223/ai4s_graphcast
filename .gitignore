@@ -10,6 +10,11 @@ __pycache__/
 *.nc
 *.npz
 *.npy
+*.pkl
+*.hiptrace
+*.db
+core
+core.*
 *.so
 *.o
 *.whl

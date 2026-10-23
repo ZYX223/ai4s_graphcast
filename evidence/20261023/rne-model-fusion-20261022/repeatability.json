@@ -1,0 +1,3178 @@
+{
+  "baseline": [
+    {
+      "round": 2,
+      "accuracy": {
+        "reference": "baseline_round1",
+        "overall_mean_percent": 0.5024517749128432,
+        "z500_percent": 0.0058261308178440855,
+        "z500_mae_m": 0.3205443042578374,
+        "z500_rmse_m": 0.5581071325967832,
+        "metrics_within_limits": true,
+        "layers": [
+          {
+            "variable": "u_component_of_wind",
+            "level_hpa": 50,
+            "mae": 0.014769840930832116,
+            "relative_error_percent": 0.1742068451676549,
+            "rmse": 0.02149337976804825,
+            "max_abs": 0.626983642578125,
+            "bias": -0.002713606606139766,
+            "reference_mean_abs": 8.478335576663346
+          },
+          {
+            "variable": "u_component_of_wind",
+            "level_hpa": 100,
+            "mae": 0.021718632112753204,
+            "relative_error_percent": 0.1705179300449038,
+            "rmse": 0.030488371775864453,
+            "max_abs": 0.6650409698486328,
+            "bias": -0.0019201754830256753,
+            "reference_mean_abs": 12.736861224525697
+          },
+          {
+            "variable": "u_component_of_wind",
+            "level_hpa": 150,
+            "mae": 0.03159820712332196,
+            "relative_error_percent": 0.19831962776388107,
+            "rmse": 0.04656038646935197,
+            "max_abs": 0.5613937377929688,
+            "bias": -0.001511616611952614,
+            "reference_mean_abs": 15.932970165183407
+          },
+          {
+            "variable": "u_component_of_wind",
+            "level_hpa": 200,
+            "mae": 0.045775150658082985,
+            "relative_error_percent": 0.27297525779691273,
+            "rmse": 0.07830691759902232,
+            "max_abs": 0.930511474609375,
+            "bias": -0.0007191248967036962,
+            "reference_mean_abs": 16.768974238734355
+          },
+          {
+            "variable": "u_component_of_wind",
+            "level_hpa": 250,
+            "mae": 0.060023243505437196,
+            "relative_error_percent": 0.3708783130373012,
+            "rmse": 0.10576839365388135,
+            "max_abs": 1.5178031921386719,
+            "bias": -0.0016054766329491384,
+            "reference_mean_abs": 16.184080167394512
+          },
+          {
+            "variable": "u_component_of_wind",
+            "level_hpa": 300,
+            "mae": 0.06838041292827077,
+            "relative_error_percent": 0.4564819200487967,
+            "rmse": 0.11913998966244398,
+            "max_abs": 1.7329645156860352,
+            "bias": -0.001287870855775045,
+            "reference_mean_abs": 14.979873227172083
+          },
+          {
+            "variable": "u_component_of_wind",
+            "level_hpa": 400,
+            "mae": 0.0646439647409544,
+            "relative_error_percent": 0.5329727359036063,
+            "rmse": 0.11523480888142318,
+            "max_abs": 1.8787765502929688,
+            "bias": -0.0005465963895083424,
+            "reference_mean_abs": 12.128944012747011
+          },
+          {
+            "variable": "u_component_of_wind",
+            "level_hpa": 500,
+            "mae": 0.054388886194440406,
+            "relative_error_percent": 0.5596972676411492,
+            "rmse": 0.09883298968802598,
+            "max_abs": 1.578256607055664,
+            "bias": 0.00023697986464573512,
+            "reference_mean_abs": 9.717554352849177
+          },
+          {
+            "variable": "u_component_of_wind",
+            "level_hpa": 600,
+            "mae": 0.04678450610649395,
+            "relative_error_percent": 0.5767944402740108,
+            "rmse": 0.08373252960283055,
+            "max_abs": 1.0451011657714844,
+            "bias": 0.0009470439930397737,
+            "reference_mean_abs": 8.111122930427102
+          },
+          {
+            "variable": "u_component_of_wind",
+            "level_hpa": 700,
+            "mae": 0.041650660732354905,
+            "relative_error_percent": 0.5844907315264561,
+            "rmse": 0.07368485892535731,
+            "max_abs": 0.9061689376831055,
+            "bias": 0.001092353709509994,
+            "reference_mean_abs": 7.125974542586848
+          },
+          {
+            "variable": "u_component_of_wind",
+            "level_hpa": 850,
+            "mae": 0.03719627259672459,
+            "relative_error_percent": 0.6009603178427444,
+            "rmse": 0.06960512955308207,
+            "max_abs": 1.7082905769348145,
+            "bias": 0.0008962070782732165,
+            "reference_mean_abs": 6.189472331592097
+          },
+          {
+            "variable": "u_component_of_wind",
+            "level_hpa": 925,
+            "mae": 0.03598040649943653,
+            "relative_error_percent": 0.6096616483499365,
+            "rmse": 0.06925672941669576,
+            "max_abs": 1.8783607482910156,
+            "bias": 0.0007096482455066114,
+            "reference_mean_abs": 5.90170081992501
+          },
+          {
+            "variable": "u_component_of_wind",
+            "level_hpa": 1000,
+            "mae": 0.027768381406470515,
+            "relative_error_percent": 0.5948786736875189,
+            "rmse": 0.054774323404849966,
+            "max_abs": 1.4940147399902344,
+            "bias": 0.0007189005131459381,
+            "reference_mean_abs": 4.667906690004631
+          },
+          {
+            "variable": "v_component_of_wind",
+            "level_hpa": 50,
+            "mae": 0.013092143801656774,
+            "relative_error_percent": 0.3027256693019998,
+            "rmse": 0.018699984348876805,
+            "max_abs": 0.17867326736450195,
+            "bias": -0.000337242613493505,
+            "reference_mean_abs": 4.324755093231299
+          },
+          {
+            "variable": "v_component_of_wind",
+            "level_hpa": 100,
+            "mae": 0.020472441535261284,
+            "relative_error_percent": 0.3670704973676842,
+            "rmse": 0.02799485123152815,
+            "max_abs": 0.26574134826660156,
+            "bias": -0.00016385027537052212,
+            "reference_mean_abs": 5.577250605012424
+          },
+          {
+            "variable": "v_component_of_wind",
+            "level_hpa": 150,
+            "mae": 0.02939289155062038,
+            "relative_error_percent": 0.411468905873473,
+            "rmse": 0.0435972481932163,
+            "max_abs": 0.40465354919433594,
+            "bias": 0.0003789942260681936,
+            "reference_mean_abs": 7.143405280703936
+          },
+          {
+            "variable": "v_component_of_wind",
+            "level_hpa": 200,
+            "mae": 0.044388271601374055,
+            "relative_error_percent": 0.5175455931318849,
+            "rmse": 0.07553679522206862,
+            "max_abs": 1.0077934265136719,
+            "bias": 0.0007098838477419246,
+            "reference_mean_abs": 8.576688158575953
+          },
+          {
+            "variable": "v_component_of_wind",
+            "level_hpa": 250,
+            "mae": 0.061197571882177115,
+            "relative_error_percent": 0.6600962086427055,
+            "rmse": 0.10954700076263324,
+            "max_abs": 1.5584373474121094,
+            "bias": 0.0006164947101533241,
+            "reference_mean_abs": 9.271007935042075
+          },
+          {
+            "variable": "v_component_of_wind",
+            "level_hpa": 300,
+            "mae": 0.0719136047465281,
+            "relative_error_percent": 0.7887581944561604,
+            "rmse": 0.12840979831212077,
+            "max_abs": 2.074277400970459,
+            "bias": 0.00038136255594548924,
+            "reference_mean_abs": 9.117319509575642
+          },
+          {
+            "variable": "v_component_of_wind",
+            "level_hpa": 400,
+            "mae": 0.06811705903910505,
+            "relative_error_percent": 0.899387006522992,
+            "rmse": 0.12718749657557954,
+            "max_abs": 2.9601192474365234,
+            "bias": 2.4767593651818308e-05,
+            "reference_mean_abs": 7.573720605820615
+          },
+          {
+            "variable": "v_component_of_wind",
+            "level_hpa": 500,
+            "mae": 0.056038839653854464,
+            "relative_error_percent": 0.9229044047971868,
+            "rmse": 0.10573657179759696,
+            "max_abs": 2.74820613861084,
+            "bias": -0.0002662164201070536,
+            "reference_mean_abs": 6.0720091227833395
+          },
+          {
+            "variable": "v_component_of_wind",
+            "level_hpa": 600,
+            "mae": 0.04681827088826592,
+            "relative_error_percent": 0.9177075117736062,
+            "rmse": 0.08577887372593272,
+            "max_abs": 1.6456995010375977,
+            "bias": -0.00046696391585411253,
+            "reference_mean_abs": 5.101654970414555
+          },
+          {
+            "variable": "v_component_of_wind",
+            "level_hpa": 700,
+            "mae": 0.04115037656076063,
+            "relative_error_percent": 0.8942784661408347,
+            "rmse": 0.0755307230020727,
+            "max_abs": 1.1238763332366943,
+            "bias": -0.0004348163961065347,
+            "reference_mean_abs": 4.601517102199808
+          },
+          {
+            "variable": "v_component_of_wind",
+            "level_hpa": 850,
+            "mae": 0.03773919498971135,
+            "relative_error_percent": 0.8986769290145166,
+            "rmse": 0.07415570080320132,
+            "max_abs": 1.849663257598877,
+            "bias": -0.0008884097185806794,
+            "reference_mean_abs": 4.199417362488199
+          },
+          {
+            "variable": "v_component_of_wind",
+            "level_hpa": 925,
+            "mae": 0.03654515756688419,
+            "relative_error_percent": 0.8386642484739847,
+            "rmse": 0.07422637582864586,
+            "max_abs": 2.0051469802856445,
+            "bias": -0.0007425723903442707,
+            "reference_mean_abs": 4.357543275915358
+          },
+          {
+            "variable": "v_component_of_wind",
+            "level_hpa": 1000,
+            "mae": 0.027891911493145766,
+            "relative_error_percent": 0.7772108074420364,
+            "rmse": 0.05683692213932933,
+            "max_abs": 1.572265625,
+            "bias": -0.0008507345680374629,
+            "reference_mean_abs": 3.5887189454999846
+          },
+          {
+            "variable": "geopotential",
+            "level_hpa": 50,
+            "mae": 1.660479799347935,
+            "relative_error_percent": 0.0008321562862924497,
+            "rmse": 2.4658892996843162,
+            "max_abs": 28.328125,
+            "bias": 0.6153034371869702,
+            "reference_mean_abs": 199539.416657652
+          },
+          {
+            "variable": "geopotential",
+            "level_hpa": 100,
+            "mae": 2.1460018577111266,
+            "relative_error_percent": 0.0013611249395736674,
+            "rmse": 2.9918606427731067,
+            "max_abs": 19.0,
+            "bias": 0.5279739932481893,
+            "reference_mean_abs": 157663.84079210972
+          },
+          {
+            "variable": "geopotential",
+            "level_hpa": 150,
+            "mae": 2.67629079620319,
+            "relative_error_percent": 0.0020129585152282004,
+            "rmse": 3.781149613388375,
+            "max_abs": 19.765625,
+            "bias": 0.49810087263060565,
+            "reference_mean_abs": 132953.10240905735
+          },
+          {
+            "variable": "geopotential",
+            "level_hpa": 200,
+            "mae": 3.1455009950733936,
+            "relative_error_percent": 0.0027335278287827446,
+            "rmse": 4.872737056087428,
+            "max_abs": 31.3203125,
+            "bias": 0.470207123352982,
+            "reference_mean_abs": 115071.11659712289
+          },
+          {
+            "variable": "geopotential",
+            "level_hpa": 250,
+            "mae": 3.636780595948432,
+            "relative_error_percent": 0.003603148612926888,
+            "rmse": 5.976546477570229,
+            "max_abs": 61.7265625,
+            "bias": 0.44428930660300125,
+            "reference_mean_abs": 100933.40538052979
+          },
+          {
+            "variable": "geopotential",
+            "level_hpa": 300,
+            "mae": 3.8867933052569734,
+            "relative_error_percent": 0.004360543770402251,
+            "rmse": 6.524731023119564,
+            "max_abs": 81.6484375,
+            "bias": 0.40418308567864847,
+            "reference_mean_abs": 89135.5186396495
+          },
+          {
+            "variable": "geopotential",
+            "level_hpa": 400,
+            "mae": 3.7086760256539915,
+            "relative_error_percent": 0.005316872761258917,
+            "rmse": 6.303243818231441,
+            "max_abs": 65.7890625,
+            "bias": 0.30013698813617273,
+            "reference_mean_abs": 69752.95802970954
+          },
+          {
+            "variable": "geopotential",
+            "level_hpa": 500,
+            "mae": 3.1434658013501213,
+            "relative_error_percent": 0.0058261308178440855,
+            "rmse": 5.473161311880244,
+            "max_abs": 48.046875,
+            "bias": 0.18121803860981084,
+            "reference_mean_abs": 53954.60382939593
+          },
+          {
+            "variable": "geopotential",
+            "level_hpa": 600,
+            "mae": 2.720654590340384,
+            "relative_error_percent": 0.006712602534533483,
+            "rmse": 4.754828993007637,
+            "max_abs": 40.04296875,
+            "bias": 0.05579247241726383,
+            "reference_mean_abs": 40530.54797068311
+          },
+          {
+            "variable": "geopotential",
+            "level_hpa": 700,
+            "mae": 2.437921660845517,
+            "relative_error_percent": 0.008448688232679748,
+            "rmse": 4.300415923407032,
+            "max_abs": 40.65625,
+            "bias": -0.02616375579105024,
+            "reference_mean_abs": 28855.623425842277
+          },
+          {
+            "variable": "geopotential",
+            "level_hpa": 850,
+            "mae": 2.299542832664834,
+            "relative_error_percent": 0.01675315568627264,
+            "rmse": 4.079608789550792,
+            "max_abs": 41.873046875,
+            "bias": -0.1326277851746104,
+            "reference_mean_abs": 13726.02795393978
+          },
+          {
+            "variable": "geopotential",
+            "level_hpa": 925,
+            "mae": 2.3451690078902305,
+            "relative_error_percent": 0.03349137075112965,
+            "rmse": 4.1334254816629405,
+            "max_abs": 33.0205078125,
+            "bias": -0.17069236812982488,
+            "reference_mean_abs": 7002.308222368381
+          },
+          {
+            "variable": "geopotential",
+            "level_hpa": 1000,
+            "mae": 2.4495810353786323,
+            "relative_error_percent": 0.2138911129352788,
+            "rmse": 4.344088234290432,
+            "max_abs": 36.643096923828125,
+            "bias": -0.18246275977762455,
+            "reference_mean_abs": 1145.2467574563746
+          },
+          {
+            "variable": "temperature",
+            "level_hpa": 50,
+            "mae": 0.006898636596745529,
+            "relative_error_percent": 0.0032414465573674086,
+            "rmse": 0.009443333806718659,
+            "max_abs": 0.1742095947265625,
+            "bias": 0.0004668215938150139,
+            "reference_mean_abs": 212.82586260957405
+          },
+          {
+            "variable": "temperature",
+            "level_hpa": 100,
+            "mae": 0.008725786466300166,
+            "relative_error_percent": 0.004155625585610847,
+            "rmse": 0.012095170716568635,
+            "max_abs": 0.189178466796875,
+            "bias": 0.0003237863188808404,
+            "reference_mean_abs": 209.9752801723483
+          },
+          {
+            "variable": "temperature",
+            "level_hpa": 150,
+            "mae": 0.011177135046613402,
+            "relative_error_percent": 0.005205846682427268,
+            "rmse": 0.018379888407602202,
+            "max_abs": 0.2686004638671875,
+            "bias": 0.00023125241250649385,
+            "reference_mean_abs": 214.70350028445273
+          },
+          {
+            "variable": "temperature",
+            "level_hpa": 200,
+            "mae": 0.0157678748301428,
+            "relative_error_percent": 0.0072107195056224736,
+            "rmse": 0.029146384435009314,
+            "max_abs": 0.4863739013671875,
+            "bias": 0.0005301638953140877,
+            "reference_mean_abs": 218.6726971954461
+          },
+          {
+            "variable": "temperature",
+            "level_hpa": 250,
+            "mae": 0.016756895411857785,
+            "relative_error_percent": 0.0075167366333184285,
+            "rmse": 0.029637193712999145,
+            "max_abs": 0.6829071044921875,
+            "bias": 0.0006013906834250074,
+            "reference_mean_abs": 222.9277973845957
+          },
+          {
+            "variable": "temperature",
+            "level_hpa": 300,
+            "mae": 0.015217736976542409,
+            "relative_error_percent": 0.006663092920898882,
+            "rmse": 0.026741138683114868,
+            "max_abs": 0.3538360595703125,
+            "bias": 0.0009236962278298189,
+            "reference_mean_abs": 228.38848500539092
+          },
+          {
+            "variable": "temperature",
+            "level_hpa": 400,
+            "mae": 0.015420008874082809,
+            "relative_error_percent": 0.006391015606363558,
+            "rmse": 0.026326329529016992,
+            "max_abs": 0.53955078125,
+            "bias": 0.0015691684893970957,
+            "reference_mean_abs": 241.27634516694104
+          },
+          {
+            "variable": "temperature",
+            "level_hpa": 500,
+            "mae": 0.017080239357539,
+            "relative_error_percent": 0.006777217815901239,
+            "rmse": 0.029687005767802574,
+            "max_abs": 0.635223388671875,
+            "bias": 0.0022776771242068532,
+            "reference_mean_abs": 252.02435308282412
+          },
+          {
+            "variable": "temperature",
+            "level_hpa": 600,
+            "mae": 0.01755810827407214,
+            "relative_error_percent": 0.006744795898683655,
+            "rmse": 0.031344314608330634,
+            "max_abs": 0.533721923828125,
+            "bias": 0.002126885900734055,
+            "reference_mean_abs": 260.3208242001639
+          },
+          {
+            "variable": "temperature",
+            "level_hpa": 700,
+            "mae": 0.017239934127932247,
+            "relative_error_percent": 0.006461445484435756,
+            "rmse": 0.03120914264626544,
+            "max_abs": 0.361968994140625,
+            "bias": 0.001936321931657631,
+            "reference_mean_abs": 266.81234360731776
+          },
+          {
+            "variable": "temperature",
+            "level_hpa": 850,
+            "mae": 0.019055615861751318,
+            "relative_error_percent": 0.006954799331191597,
+            "rmse": 0.03708310297804477,
+            "max_abs": 0.598358154296875,
+            "bias": 0.0020718658148626973,
+            "reference_mean_abs": 273.9923174531972
+          },
+          {
+            "variable": "temperature",
+            "level_hpa": 925,
+            "mae": 0.018867152797953524,
+            "relative_error_percent": 0.006819758668132811,
+            "rmse": 0.03872983928748454,
+            "max_abs": 0.65374755859375,
+            "bias": 0.0013457143815608324,
+            "reference_mean_abs": 276.6542588393261
+          },
+          {
+            "variable": "temperature",
+            "level_hpa": 1000,
+            "mae": 0.017128362360234288,
+            "relative_error_percent": 0.006119120271035162,
+            "rmse": 0.03620673423833385,
+            "max_abs": 0.7115631103515625,
+            "bias": 0.0012152101872679743,
+            "reference_mean_abs": 279.91543884684444
+          },
+          {
+            "variable": "specific_humidity",
+            "level_hpa": 50,
+            "mae": 1.63080442552598e-10,
+            "relative_error_percent": 0.005750230949146029,
+            "rmse": 2.783259873575291e-10,
+            "max_abs": 3.47245077136904e-09,
+            "bias": 2.087640914405025e-12,
+            "reference_mean_abs": 2.836067698755946e-06
+          },
+          {
+            "variable": "specific_humidity",
+            "level_hpa": 100,
+            "mae": 1.0947119351762861e-09,
+            "relative_error_percent": 0.04024663254757827,
+            "rmse": 2.142293123662348e-09,
+            "max_abs": 3.7077370507176965e-08,
+            "bias": 4.32377709191569e-11,
+            "reference_mean_abs": 2.7200087706273385e-06
+          },
+          {
+            "variable": "specific_humidity",
+            "level_hpa": 150,
+            "mae": 4.070199528496015e-09,
+            "relative_error_percent": 0.08066357555844657,
+            "rmse": 8.532289953860729e-09,
+            "max_abs": 2.195783963543363e-07,
+            "bias": 2.3038799285656729e-10,
+            "reference_mean_abs": 5.045895251130868e-06
+          },
+          {
+            "variable": "specific_humidity",
+            "level_hpa": 200,
+            "mae": 3.108063102893633e-08,
+            "relative_error_percent": 0.17304708694027,
+            "rmse": 6.842136379049652e-08,
+            "max_abs": 3.0114970286376774e-06,
+            "bias": 2.6891928615443674e-10,
+            "reference_mean_abs": 1.796079412747602e-05
+          },
+          {
+            "variable": "specific_humidity",
+            "level_hpa": 250,
+            "mae": 1.2733382629063892e-07,
+            "relative_error_percent": 0.2311010788694651,
+            "rmse": 2.960513977435281e-07,
+            "max_abs": 7.895796443335712e-06,
+            "bias": -7.955135003706066e-10,
+            "reference_mean_abs": 5.509875891257177e-05
+          },
+          {
+            "variable": "specific_humidity",
+            "level_hpa": 300,
+            "mae": 3.641630701641218e-07,
+            "relative_error_percent": 0.2942572312987091,
+            "rmse": 8.70397336073056e-07,
+            "max_abs": 2.0438834326341748e-05,
+            "bias": -3.796801706260525e-09,
+            "reference_mean_abs": 0.00012375671060210896
+          },
+          {
+            "variable": "specific_humidity",
+            "level_hpa": 400,
+            "mae": 1.4042506157990527e-06,
+            "relative_error_percent": 0.3640596476557689,
+            "rmse": 3.819477444028704e-06,
+            "max_abs": 7.852353155612946e-05,
+            "bias": 2.1323842551920308e-08,
+            "reference_mean_abs": 0.00038571992936905234
+          },
+          {
+            "variable": "specific_humidity",
+            "level_hpa": 500,
+            "mae": 2.982747794552716e-06,
+            "relative_error_percent": 0.35864755966933987,
+            "rmse": 7.688591913364622e-06,
+            "max_abs": 0.00020218879217281938,
+            "bias": 1.2952957887143464e-08,
+            "reference_mean_abs": 0.000831665437038719
+          },
+          {
+            "variable": "specific_humidity",
+            "level_hpa": 600,
+            "mae": 4.761849472576963e-06,
+            "relative_error_percent": 0.3236733984400416,
+            "rmse": 1.1275685005942692e-05,
+            "max_abs": 0.000285253394395113,
+            "bias": 8.884537617926359e-08,
+            "reference_mean_abs": 0.0014711896298944891
+          },
+          {
+            "variable": "specific_humidity",
+            "level_hpa": 700,
+            "mae": 6.242402526733281e-06,
+            "relative_error_percent": 0.2753724745568715,
+            "rmse": 1.364548607093396e-05,
+            "max_abs": 0.00027445564046502113,
+            "bias": 1.8879220561419748e-07,
+            "reference_mean_abs": 0.0022668941537379635
+          },
+          {
+            "variable": "specific_humidity",
+            "level_hpa": 850,
+            "mae": 7.490761206623306e-06,
+            "relative_error_percent": 0.1741672014883616,
+            "rmse": 1.5314928424387418e-05,
+            "max_abs": 0.0003141644410789013,
+            "bias": 1.342816979404742e-07,
+            "reference_mean_abs": 0.0043009023183528975
+          },
+          {
+            "variable": "specific_humidity",
+            "level_hpa": 925,
+            "mae": 5.681910311946444e-06,
+            "relative_error_percent": 0.09875974445200517,
+            "rmse": 1.1050750869481937e-05,
+            "max_abs": 0.00026531796902418137,
+            "bias": 8.047669066828908e-09,
+            "reference_mean_abs": 0.0057532655065827085
+          },
+          {
+            "variable": "specific_humidity",
+            "level_hpa": 1000,
+            "mae": 4.853241076961161e-06,
+            "relative_error_percent": 0.07333713614318872,
+            "rmse": 8.470306970667332e-06,
+            "max_abs": 0.0002221902832388878,
+            "bias": 1.183835369777138e-07,
+            "reference_mean_abs": 0.006617712842624974
+          },
+          {
+            "variable": "vertical_velocity",
+            "level_hpa": 50,
+            "mae": 5.713447866849827e-05,
+            "relative_error_percent": 1.7138976705477391,
+            "rmse": 0.0001558280008567389,
+            "max_abs": 0.020439233630895615,
+            "bias": 6.414377248282445e-07,
+            "reference_mean_abs": 0.003333599178662682
+          },
+          {
+            "variable": "vertical_velocity",
+            "level_hpa": 100,
+            "mae": 0.0001595047866490288,
+            "relative_error_percent": 1.8497716962467659,
+            "rmse": 0.0004012327416492272,
+            "max_abs": 0.045355431735515594,
+            "bias": 1.951516587088691e-06,
+            "reference_mean_abs": 0.008622944494862155
+          },
+          {
+            "variable": "vertical_velocity",
+            "level_hpa": 150,
+            "mae": 0.0002732443566326253,
+            "relative_error_percent": 1.8229158587577505,
+            "rmse": 0.0006506403188124847,
+            "max_abs": 0.07473456859588623,
+            "bias": 9.160482469535925e-07,
+            "reference_mean_abs": 0.014989411349947395
+          },
+          {
+            "variable": "vertical_velocity",
+            "level_hpa": 200,
+            "mae": 0.00040419010686990097,
+            "relative_error_percent": 1.6136552043529362,
+            "rmse": 0.0009428733247719392,
+            "max_abs": 0.09665277600288391,
+            "bias": 4.201463645430398e-07,
+            "reference_mean_abs": 0.025048108528982694
+          },
+          {
+            "variable": "vertical_velocity",
+            "level_hpa": 250,
+            "mae": 0.0006099754312522397,
+            "relative_error_percent": 1.5401705209057794,
+            "rmse": 0.001361576249753882,
+            "max_abs": 0.10539007186889648,
+            "bias": -6.275926052711377e-07,
+            "reference_mean_abs": 0.03960440892567604
+          },
+          {
+            "variable": "vertical_velocity",
+            "level_hpa": 300,
+            "mae": 0.0008635615500266253,
+            "relative_error_percent": 1.5975898769328245,
+            "rmse": 0.001893267139003531,
+            "max_abs": 0.08861428499221802,
+            "bias": 2.877810549092184e-06,
+            "reference_mean_abs": 0.054054019901813403
+          },
+          {
+            "variable": "vertical_velocity",
+            "level_hpa": 400,
+            "mae": 0.0013245865032624489,
+            "relative_error_percent": 1.7876573045497688,
+            "rmse": 0.0029374938669496833,
+            "max_abs": 0.12004828453063965,
+            "bias": -8.347801533263266e-06,
+            "reference_mean_abs": 0.0740962207852278
+          },
+          {
+            "variable": "vertical_velocity",
+            "level_hpa": 500,
+            "mae": 0.0015319083830566576,
+            "relative_error_percent": 1.8580703158511358,
+            "rmse": 0.0035503681132136576,
+            "max_abs": 0.13627764582633972,
+            "bias": -1.4690035821682368e-05,
+            "reference_mean_abs": 0.08244620077012148
+          },
+          {
+            "variable": "vertical_velocity",
+            "level_hpa": 600,
+            "mae": 0.0015722769869508785,
+            "relative_error_percent": 1.8844572532713457,
+            "rmse": 0.003743102157138219,
+            "max_abs": 0.1545405387878418,
+            "bias": -1.4333540520242949e-05,
+            "reference_mean_abs": 0.08343394280880959
+          },
+          {
+            "variable": "vertical_velocity",
+            "level_hpa": 700,
+            "mae": 0.0015638927519222659,
+            "relative_error_percent": 1.8235230832409146,
+            "rmse": 0.003869464336639174,
+            "max_abs": 0.17118322849273682,
+            "bias": -1.170296243528071e-05,
+            "reference_mean_abs": 0.08576215822520807
+          },
+          {
+            "variable": "vertical_velocity",
+            "level_hpa": 850,
+            "mae": 0.001443882696636685,
+            "relative_error_percent": 1.624193685797323,
+            "rmse": 0.003438602327766814,
+            "max_abs": 0.13065743446350098,
+            "bias": -2.1192172726581263e-06,
+            "reference_mean_abs": 0.08889843060360608
+          },
+          {
+            "variable": "vertical_velocity",
+            "level_hpa": 925,
+            "mae": 0.0011618432008355891,
+            "relative_error_percent": 1.4586510758757376,
+            "rmse": 0.0028401541527827935,
+            "max_abs": 0.16013550758361816,
+            "bias": -4.876611661517276e-06,
+            "reference_mean_abs": 0.07965189345492016
+          },
+          {
+            "variable": "vertical_velocity",
+            "level_hpa": 1000,
+            "mae": 0.00042454553313344133,
+            "relative_error_percent": 0.838666731645424,
+            "rmse": 0.0013780574522254793,
+            "max_abs": 0.15407013893127441,
+            "bias": -1.142644779838744e-05,
+            "reference_mean_abs": 0.050621482540568086
+          }
+        ]
+      }
+    },
+    {
+      "round": 3,
+      "accuracy": {
+        "reference": "baseline_round1",
+        "overall_mean_percent": 0.48158616233510326,
+        "z500_percent": 0.004934789246066067,
+        "z500_mae_m": 0.2715041311284262,
+        "z500_rmse_m": 0.5020204414996502,
+        "metrics_within_limits": true,
+        "layers": [
+          {
+            "variable": "u_component_of_wind",
+            "level_hpa": 50,
+            "mae": 0.013205434812209189,
+            "relative_error_percent": 0.1557550381534461,
+            "rmse": 0.023235431221378968,
+            "max_abs": 1.3136024475097656,
+            "bias": 0.0009780111223128818,
+            "reference_mean_abs": 8.478335576663346
+          },
+          {
+            "variable": "u_component_of_wind",
+            "level_hpa": 100,
+            "mae": 0.018183637757342584,
+            "relative_error_percent": 0.14276388379209742,
+            "rmse": 0.02770038314128988,
+            "max_abs": 0.8487434387207031,
+            "bias": -0.00015100473958508265,
+            "reference_mean_abs": 12.736861224525697
+          },
+          {
+            "variable": "u_component_of_wind",
+            "level_hpa": 150,
+            "mae": 0.025014499680025993,
+            "relative_error_percent": 0.15699834632645876,
+            "rmse": 0.037918288108899884,
+            "max_abs": 0.7113265991210938,
+            "bias": 0.00016858202446420244,
+            "reference_mean_abs": 15.932970165183407
+          },
+          {
+            "variable": "u_component_of_wind",
+            "level_hpa": 200,
+            "mae": 0.03634370340746201,
+            "relative_error_percent": 0.2167318220545198,
+            "rmse": 0.0603646695039715,
+            "max_abs": 0.8041419982910156,
+            "bias": 0.00067230466610811,
+            "reference_mean_abs": 16.768974238734355
+          },
+          {
+            "variable": "u_component_of_wind",
+            "level_hpa": 250,
+            "mae": 0.05059383461144042,
+            "relative_error_percent": 0.3126148294381908,
+            "rmse": 0.08880563218578734,
+            "max_abs": 1.2144508361816406,
+            "bias": -0.0005414950197032006,
+            "reference_mean_abs": 16.184080167394512
+          },
+          {
+            "variable": "u_component_of_wind",
+            "level_hpa": 300,
+            "mae": 0.061262374212830185,
+            "relative_error_percent": 0.40896457055261315,
+            "rmse": 0.11417857376902184,
+            "max_abs": 2.0283069610595703,
+            "bias": -0.001197168612659026,
+            "reference_mean_abs": 14.979873227172083
+          },
+          {
+            "variable": "u_component_of_wind",
+            "level_hpa": 400,
+            "mae": 0.06027950654591491,
+            "relative_error_percent": 0.49698890919575256,
+            "rmse": 0.12989840405295713,
+            "max_abs": 4.100574493408203,
+            "bias": -0.0012344775766030638,
+            "reference_mean_abs": 12.128944012747011
+          },
+          {
+            "variable": "u_component_of_wind",
+            "level_hpa": 500,
+            "mae": 0.05062191733776746,
+            "relative_error_percent": 0.5209326904657361,
+            "rmse": 0.11327309662508508,
+            "max_abs": 4.090799331665039,
+            "bias": -0.0023706391444034977,
+            "reference_mean_abs": 9.717554352849177
+          },
+          {
+            "variable": "u_component_of_wind",
+            "level_hpa": 600,
+            "mae": 0.04361651758720384,
+            "relative_error_percent": 0.5377371044838444,
+            "rmse": 0.09065782675652544,
+            "max_abs": 2.110912322998047,
+            "bias": -0.0031974450369743035,
+            "reference_mean_abs": 8.111122930427102
+          },
+          {
+            "variable": "u_component_of_wind",
+            "level_hpa": 700,
+            "mae": 0.038955386978108714,
+            "relative_error_percent": 0.5466675013403466,
+            "rmse": 0.07801585569572932,
+            "max_abs": 2.669205665588379,
+            "bias": -0.0029656070317553534,
+            "reference_mean_abs": 7.125974542586848
+          },
+          {
+            "variable": "u_component_of_wind",
+            "level_hpa": 850,
+            "mae": 0.03466505361757126,
+            "relative_error_percent": 0.5600647641744039,
+            "rmse": 0.07041626141686426,
+            "max_abs": 2.1436767578125,
+            "bias": -0.002156108148611825,
+            "reference_mean_abs": 6.189472331592097
+          },
+          {
+            "variable": "u_component_of_wind",
+            "level_hpa": 925,
+            "mae": 0.03348972243524757,
+            "relative_error_percent": 0.5674588302101208,
+            "rmse": 0.07040923544920918,
+            "max_abs": 2.5358595848083496,
+            "bias": -0.0008186840759626271,
+            "reference_mean_abs": 5.90170081992501
+          },
+          {
+            "variable": "u_component_of_wind",
+            "level_hpa": 1000,
+            "mae": 0.02550447850544881,
+            "relative_error_percent": 0.5463793558697616,
+            "rmse": 0.05450421617505683,
+            "max_abs": 2.346673011779785,
+            "bias": 0.00039265811685963936,
+            "reference_mean_abs": 4.667906690004631
+          },
+          {
+            "variable": "v_component_of_wind",
+            "level_hpa": 50,
+            "mae": 0.011626797629190028,
+            "relative_error_percent": 0.2688429143048401,
+            "rmse": 0.018416893777772666,
+            "max_abs": 0.33862972259521484,
+            "bias": -0.00010613349903129432,
+            "reference_mean_abs": 4.324755093231299
+          },
+          {
+            "variable": "v_component_of_wind",
+            "level_hpa": 100,
+            "mae": 0.016778113147673825,
+            "relative_error_percent": 0.30083125783508613,
+            "rmse": 0.025210134115209937,
+            "max_abs": 0.5102782249450684,
+            "bias": 4.1714569868221535e-05,
+            "reference_mean_abs": 5.577250605012424
+          },
+          {
+            "variable": "v_component_of_wind",
+            "level_hpa": 150,
+            "mae": 0.02366060679015395,
+            "relative_error_percent": 0.33122307723554434,
+            "rmse": 0.03562133011379513,
+            "max_abs": 0.3788261413574219,
+            "bias": 0.0005036573647788524,
+            "reference_mean_abs": 7.143405280703936
+          },
+          {
+            "variable": "v_component_of_wind",
+            "level_hpa": 200,
+            "mae": 0.03505182576005216,
+            "relative_error_percent": 0.4086871891803987,
+            "rmse": 0.05841861796591608,
+            "max_abs": 0.7644500732421875,
+            "bias": 0.00018749496106951324,
+            "reference_mean_abs": 8.576688158575953
+          },
+          {
+            "variable": "v_component_of_wind",
+            "level_hpa": 250,
+            "mae": 0.04974744233025426,
+            "relative_error_percent": 0.5365915192696735,
+            "rmse": 0.08959237865281604,
+            "max_abs": 1.313385009765625,
+            "bias": 0.0002155458665164788,
+            "reference_mean_abs": 9.271007935042075
+          },
+          {
+            "variable": "v_component_of_wind",
+            "level_hpa": 300,
+            "mae": 0.0609200247466788,
+            "relative_error_percent": 0.6681791142966566,
+            "rmse": 0.11341942322187837,
+            "max_abs": 1.59702467918396,
+            "bias": 0.00019821946418004804,
+            "reference_mean_abs": 9.117319509575642
+          },
+          {
+            "variable": "v_component_of_wind",
+            "level_hpa": 400,
+            "mae": 0.06048310922805759,
+            "relative_error_percent": 0.7985917671900206,
+            "rmse": 0.11945243529723776,
+            "max_abs": 2.5507378578186035,
+            "bias": -0.0001927097247238934,
+            "reference_mean_abs": 7.573720605820615
+          },
+          {
+            "variable": "v_component_of_wind",
+            "level_hpa": 500,
+            "mae": 0.051425072540872085,
+            "relative_error_percent": 0.846920212091174,
+            "rmse": 0.1021658730937927,
+            "max_abs": 2.1331138610839844,
+            "bias": -6.093580003837749e-05,
+            "reference_mean_abs": 6.0720091227833395
+          },
+          {
+            "variable": "v_component_of_wind",
+            "level_hpa": 600,
+            "mae": 0.04352225069061825,
+            "relative_error_percent": 0.8531006299526696,
+            "rmse": 0.08406118084820807,
+            "max_abs": 1.3579483032226562,
+            "bias": -0.0005305306379438196,
+            "reference_mean_abs": 5.101654970414555
+          },
+          {
+            "variable": "v_component_of_wind",
+            "level_hpa": 700,
+            "mae": 0.03948314576498607,
+            "relative_error_percent": 0.8580462679604233,
+            "rmse": 0.07649327691019887,
+            "max_abs": 1.683694839477539,
+            "bias": -0.0003549765164635125,
+            "reference_mean_abs": 4.601517102199808
+          },
+          {
+            "variable": "v_component_of_wind",
+            "level_hpa": 850,
+            "mae": 0.03644219161561155,
+            "relative_error_percent": 0.8677916117872877,
+            "rmse": 0.07388096938606914,
+            "max_abs": 1.867579460144043,
+            "bias": -0.00012782369540664205,
+            "reference_mean_abs": 4.199417362488199
+          },
+          {
+            "variable": "v_component_of_wind",
+            "level_hpa": 925,
+            "mae": 0.03555680381611495,
+            "relative_error_percent": 0.8159828041787099,
+            "rmse": 0.07268719121866526,
+            "max_abs": 2.0114188194274902,
+            "bias": 0.0003473463356862727,
+            "reference_mean_abs": 4.357543275915358
+          },
+          {
+            "variable": "v_component_of_wind",
+            "level_hpa": 1000,
+            "mae": 0.02706919715070726,
+            "relative_error_percent": 0.7542857928356367,
+            "rmse": 0.057209792344142904,
+            "max_abs": 1.987199306488037,
+            "bias": 0.0005635168151611353,
+            "reference_mean_abs": 3.5887189454999846
+          },
+          {
+            "variable": "geopotential",
+            "level_hpa": 50,
+            "mae": 1.4757265149435583,
+            "relative_error_percent": 0.0007395664173336986,
+            "rmse": 2.50043241512111,
+            "max_abs": 41.53125,
+            "bias": -0.10894146885594853,
+            "reference_mean_abs": 199539.416657652
+          },
+          {
+            "variable": "geopotential",
+            "level_hpa": 100,
+            "mae": 1.5282715069492603,
+            "relative_error_percent": 0.0009693227687916013,
+            "rmse": 2.311179598402154,
+            "max_abs": 30.96875,
+            "bias": -0.0866930604917938,
+            "reference_mean_abs": 157663.84079210972
+          },
+          {
+            "variable": "geopotential",
+            "level_hpa": 150,
+            "mae": 1.9068434020554015,
+            "relative_error_percent": 0.0014342225698416638,
+            "rmse": 2.869015444097763,
+            "max_abs": 26.8984375,
+            "bias": -0.048709745579056864,
+            "reference_mean_abs": 132953.10240905735
+          },
+          {
+            "variable": "geopotential",
+            "level_hpa": 200,
+            "mae": 2.352897300961242,
+            "relative_error_percent": 0.002044733179394621,
+            "rmse": 3.813925598298209,
+            "max_abs": 32.8359375,
+            "bias": -0.004579354243720142,
+            "reference_mean_abs": 115071.11659712289
+          },
+          {
+            "variable": "geopotential",
+            "level_hpa": 250,
+            "mae": 2.891731409645169,
+            "relative_error_percent": 0.0028649894440230476,
+            "rmse": 4.980550588321648,
+            "max_abs": 53.578125,
+            "bias": 0.049196160690206506,
+            "reference_mean_abs": 100933.40538052979
+          },
+          {
+            "variable": "geopotential",
+            "level_hpa": 300,
+            "mae": 3.200516792540742,
+            "relative_error_percent": 0.003590618915316525,
+            "rmse": 5.679877908597883,
+            "max_abs": 71.609375,
+            "bias": 0.08941082836097627,
+            "reference_mean_abs": 89135.5186396495
+          },
+          {
+            "variable": "geopotential",
+            "level_hpa": 400,
+            "mae": 3.1240065557156824,
+            "relative_error_percent": 0.004478672509322242,
+            "rmse": 5.672162289272805,
+            "max_abs": 94.2109375,
+            "bias": 0.09777625100530705,
+            "reference_mean_abs": 69752.95802970954
+          },
+          {
+            "variable": "geopotential",
+            "level_hpa": 500,
+            "mae": 2.6625459875305806,
+            "relative_error_percent": 0.004934789246066067,
+            "rmse": 4.9231387626325445,
+            "max_abs": 97.21875,
+            "bias": 0.12041959605317654,
+            "reference_mean_abs": 53954.60382939593
+          },
+          {
+            "variable": "geopotential",
+            "level_hpa": 600,
+            "mae": 2.32492044830675,
+            "relative_error_percent": 0.00573621765486228,
+            "rmse": 4.2818319029966725,
+            "max_abs": 76.7734375,
+            "bias": 0.13439746891373863,
+            "reference_mean_abs": 40530.54797068311
+          },
+          {
+            "variable": "geopotential",
+            "level_hpa": 700,
+            "mae": 2.109050839265849,
+            "relative_error_percent": 0.007308976860909,
+            "rmse": 3.880206325617969,
+            "max_abs": 52.2109375,
+            "bias": 0.11862987671744972,
+            "reference_mean_abs": 28855.623425842277
+          },
+          {
+            "variable": "geopotential",
+            "level_hpa": 850,
+            "mae": 1.969728027005136,
+            "relative_error_percent": 0.01435031338720074,
+            "rmse": 3.6319208702414683,
+            "max_abs": 41.8505859375,
+            "bias": 0.07849379474970865,
+            "reference_mean_abs": 13726.02795393978
+          },
+          {
+            "variable": "geopotential",
+            "level_hpa": 925,
+            "mae": 1.962571683152649,
+            "relative_error_percent": 0.028027496374457662,
+            "rmse": 3.6038187262721153,
+            "max_abs": 45.3798828125,
+            "bias": 0.02977984518497048,
+            "reference_mean_abs": 7002.308222368381
+          },
+          {
+            "variable": "geopotential",
+            "level_hpa": 1000,
+            "mae": 2.011545223967481,
+            "relative_error_percent": 0.17564295300299995,
+            "rmse": 3.6849127647448796,
+            "max_abs": 49.839111328125,
+            "bias": -0.07446850379913159,
+            "reference_mean_abs": 1145.2467574563746
+          },
+          {
+            "variable": "temperature",
+            "level_hpa": 50,
+            "mae": 0.007169552146240272,
+            "relative_error_percent": 0.0033687410253295724,
+            "rmse": 0.011653763151042728,
+            "max_abs": 0.4125518798828125,
+            "bias": 0.00016744613353525257,
+            "reference_mean_abs": 212.82586260957405
+          },
+          {
+            "variable": "temperature",
+            "level_hpa": 100,
+            "mae": 0.008287788014287738,
+            "relative_error_percent": 0.003947030339707178,
+            "rmse": 0.012371970015607758,
+            "max_abs": 0.4645843505859375,
+            "bias": -0.00046976364013464944,
+            "reference_mean_abs": 209.9752801723483
+          },
+          {
+            "variable": "temperature",
+            "level_hpa": 150,
+            "mae": 0.009469411582200181,
+            "relative_error_percent": 0.004410459806036934,
+            "rmse": 0.015392873854975155,
+            "max_abs": 0.375244140625,
+            "bias": -0.00044717684349122373,
+            "reference_mean_abs": 214.70350028445273
+          },
+          {
+            "variable": "temperature",
+            "level_hpa": 200,
+            "mae": 0.013382489561097687,
+            "relative_error_percent": 0.006119872180081374,
+            "rmse": 0.025151545611611224,
+            "max_abs": 0.458038330078125,
+            "bias": -0.00046147613831083734,
+            "reference_mean_abs": 218.6726971954461
+          },
+          {
+            "variable": "temperature",
+            "level_hpa": 250,
+            "mae": 0.015035044031823649,
+            "relative_error_percent": 0.006744355889312962,
+            "rmse": 0.028640376141098565,
+            "max_abs": 0.5391845703125,
+            "bias": -0.0011608335853890584,
+            "reference_mean_abs": 222.9277973845957
+          },
+          {
+            "variable": "temperature",
+            "level_hpa": 300,
+            "mae": 0.012946714864781685,
+            "relative_error_percent": 0.00566872487659616,
+            "rmse": 0.024835454012847553,
+            "max_abs": 0.5185699462890625,
+            "bias": -0.0003089754584023353,
+            "reference_mean_abs": 228.38848500539092
+          },
+          {
+            "variable": "temperature",
+            "level_hpa": 400,
+            "mae": 0.013036006778170909,
+            "relative_error_percent": 0.005402936110106936,
+            "rmse": 0.023170308075794274,
+            "max_abs": 0.5108489990234375,
+            "bias": -0.0002839115482024041,
+            "reference_mean_abs": 241.27634516694104
+          },
+          {
+            "variable": "temperature",
+            "level_hpa": 500,
+            "mae": 0.014802832742339199,
+            "relative_error_percent": 0.005873572359681631,
+            "rmse": 0.028214495537495724,
+            "max_abs": 0.68511962890625,
+            "bias": -0.0003335362535941985,
+            "reference_mean_abs": 252.02435308282412
+          },
+          {
+            "variable": "temperature",
+            "level_hpa": 600,
+            "mae": 0.014654838537321122,
+            "relative_error_percent": 0.005629529862756133,
+            "rmse": 0.027862597274502233,
+            "max_abs": 0.70635986328125,
+            "bias": 7.164852702575392e-05,
+            "reference_mean_abs": 260.3208242001639
+          },
+          {
+            "variable": "temperature",
+            "level_hpa": 700,
+            "mae": 0.015119511343735102,
+            "relative_error_percent": 0.005666721089181432,
+            "rmse": 0.02759256271617157,
+            "max_abs": 0.623443603515625,
+            "bias": 0.0007800148822692128,
+            "reference_mean_abs": 266.81234360731776
+          },
+          {
+            "variable": "temperature",
+            "level_hpa": 850,
+            "mae": 0.016672190555825882,
+            "relative_error_percent": 0.0060849116905162095,
+            "rmse": 0.03066823417199074,
+            "max_abs": 0.5638427734375,
+            "bias": 0.0014155428735477603,
+            "reference_mean_abs": 273.9923174531972
+          },
+          {
+            "variable": "temperature",
+            "level_hpa": 925,
+            "mae": 0.017294752030145553,
+            "relative_error_percent": 0.006251395551510347,
+            "rmse": 0.03377754208525258,
+            "max_abs": 0.544189453125,
+            "bias": 0.00281126932363735,
+            "reference_mean_abs": 276.6542588393261
+          },
+          {
+            "variable": "temperature",
+            "level_hpa": 1000,
+            "mae": 0.01966521171561594,
+            "relative_error_percent": 0.0070254116016715135,
+            "rmse": 0.049046524721362596,
+            "max_abs": 0.88800048828125,
+            "bias": 0.006074878030095929,
+            "reference_mean_abs": 279.91543884684444
+          },
+          {
+            "variable": "specific_humidity",
+            "level_hpa": 50,
+            "mae": 1.3783183521080577e-10,
+            "relative_error_percent": 0.004859962802413579,
+            "rmse": 2.2638625928621625e-10,
+            "max_abs": 3.872173692798242e-09,
+            "bias": 3.974067382598999e-12,
+            "reference_mean_abs": 2.836067698755946e-06
+          },
+          {
+            "variable": "specific_humidity",
+            "level_hpa": 100,
+            "mae": 7.724589597820636e-10,
+            "relative_error_percent": 0.028399134889697614,
+            "rmse": 1.305648612228336e-09,
+            "max_abs": 2.3779648472554982e-08,
+            "bias": -3.115881684617534e-11,
+            "reference_mean_abs": 2.7200087706273385e-06
+          },
+          {
+            "variable": "specific_humidity",
+            "level_hpa": 150,
+            "mae": 3.086427408439147e-09,
+            "relative_error_percent": 0.0611670923558595,
+            "rmse": 5.690300924682524e-09,
+            "max_abs": 1.5371279005194083e-07,
+            "bias": 2.0196795657965416e-12,
+            "reference_mean_abs": 5.045895251130868e-06
+          },
+          {
+            "variable": "specific_humidity",
+            "level_hpa": 200,
+            "mae": 2.3792570885640635e-08,
+            "relative_error_percent": 0.13246948167644376,
+            "rmse": 4.4880617590303035e-08,
+            "max_abs": 1.3407916412688792e-06,
+            "bias": 5.920655465904929e-10,
+            "reference_mean_abs": 1.796079412747602e-05
+          },
+          {
+            "variable": "specific_humidity",
+            "level_hpa": 250,
+            "mae": 9.556132178986842e-08,
+            "relative_error_percent": 0.17343643246393411,
+            "rmse": 1.9351366231773173e-07,
+            "max_abs": 5.4626434575766325e-06,
+            "bias": 1.8192546451304813e-09,
+            "reference_mean_abs": 5.509875891257177e-05
+          },
+          {
+            "variable": "specific_humidity",
+            "level_hpa": 300,
+            "mae": 2.6885721912278347e-07,
+            "relative_error_percent": 0.21724657823783644,
+            "rmse": 5.62702359032406e-07,
+            "max_abs": 1.452787546440959e-05,
+            "bias": 5.145277236091765e-09,
+            "reference_mean_abs": 0.00012375671060210896
+          },
+          {
+            "variable": "specific_humidity",
+            "level_hpa": 400,
+            "mae": 1.0409338976160563e-06,
+            "relative_error_percent": 0.269867802609728,
+            "rmse": 2.313371450957946e-06,
+            "max_abs": 5.0127855502068996e-05,
+            "bias": 1.2445953817156455e-08,
+            "reference_mean_abs": 0.00038571992936905234
+          },
+          {
+            "variable": "specific_humidity",
+            "level_hpa": 500,
+            "mae": 2.3191342052362776e-06,
+            "relative_error_percent": 0.2788542245417742,
+            "rmse": 4.922874967441057e-06,
+            "max_abs": 0.0001366124488413334,
+            "bias": 2.6232279152574363e-08,
+            "reference_mean_abs": 0.000831665437038719
+          },
+          {
+            "variable": "specific_humidity",
+            "level_hpa": 600,
+            "mae": 4.0128396454476345e-06,
+            "relative_error_percent": 0.27276155051034634,
+            "rmse": 8.38018236694844e-06,
+            "max_abs": 0.000176931731402874,
+            "bias": -6.144657614774884e-08,
+            "reference_mean_abs": 0.0014711896298944891
+          },
+          {
+            "variable": "specific_humidity",
+            "level_hpa": 700,
+            "mae": 5.488223030986476e-06,
+            "relative_error_percent": 0.24210318871468908,
+            "rmse": 1.1263027327915849e-05,
+            "max_abs": 0.0004004674847237766,
+            "bias": -6.777188153236337e-08,
+            "reference_mean_abs": 0.0022668941537379635
+          },
+          {
+            "variable": "specific_humidity",
+            "level_hpa": 850,
+            "mae": 6.824236330704874e-06,
+            "relative_error_percent": 0.15866987496052523,
+            "rmse": 1.3303134678060924e-05,
+            "max_abs": 0.0002937196986749768,
+            "bias": 4.0631630924575354e-07,
+            "reference_mean_abs": 0.0043009023183528975
+          },
+          {
+            "variable": "specific_humidity",
+            "level_hpa": 925,
+            "mae": 5.55070954933453e-06,
+            "relative_error_percent": 0.09647928716280482,
+            "rmse": 1.0560330814951639e-05,
+            "max_abs": 0.00020444951951503754,
+            "bias": 6.077728487656752e-07,
+            "reference_mean_abs": 0.0057532655065827085
+          },
+          {
+            "variable": "specific_humidity",
+            "level_hpa": 1000,
+            "mae": 4.922958995974565e-06,
+            "relative_error_percent": 0.0743906408912997,
+            "rmse": 9.580913787870271e-06,
+            "max_abs": 0.00019901199266314507,
+            "bias": 6.797707912938057e-07,
+            "reference_mean_abs": 0.006617712842624974
+          },
+          {
+            "variable": "vertical_velocity",
+            "level_hpa": 50,
+            "mae": 6.706626214498185e-05,
+            "relative_error_percent": 2.0118274138730254,
+            "rmse": 0.0003772370196641937,
+            "max_abs": 0.0439976304769516,
+            "bias": 1.5696784779517814e-06,
+            "reference_mean_abs": 0.003333599178662682
+          },
+          {
+            "variable": "vertical_velocity",
+            "level_hpa": 100,
+            "mae": 0.00017362807665807103,
+            "relative_error_percent": 2.0135590199093194,
+            "rmse": 0.0007492423131647493,
+            "max_abs": 0.08505606651306152,
+            "bias": -8.543713040714534e-07,
+            "reference_mean_abs": 0.008622944494862155
+          },
+          {
+            "variable": "vertical_velocity",
+            "level_hpa": 150,
+            "mae": 0.0002816708954029456,
+            "relative_error_percent": 1.8791324677598773,
+            "rmse": 0.0010911894829571786,
+            "max_abs": 0.10297615826129913,
+            "bias": 1.6548057375637766e-06,
+            "reference_mean_abs": 0.014989411349947395
+          },
+          {
+            "variable": "vertical_velocity",
+            "level_hpa": 200,
+            "mae": 0.00040482900754224807,
+            "relative_error_percent": 1.6162058986363304,
+            "rmse": 0.0013456873433575578,
+            "max_abs": 0.12347820401191711,
+            "bias": 2.6236009101212463e-06,
+            "reference_mean_abs": 0.025048108528982694
+          },
+          {
+            "variable": "vertical_velocity",
+            "level_hpa": 250,
+            "mae": 0.000573906161992362,
+            "relative_error_percent": 1.4490966474702045,
+            "rmse": 0.0016678668220295647,
+            "max_abs": 0.18949675559997559,
+            "bias": -2.474767270813543e-06,
+            "reference_mean_abs": 0.03960440892567604
+          },
+          {
+            "variable": "vertical_velocity",
+            "level_hpa": 300,
+            "mae": 0.0008122464801456079,
+            "relative_error_percent": 1.5026569376727497,
+            "rmse": 0.0021881281533528197,
+            "max_abs": 0.15991425514221191,
+            "bias": -2.342494317670369e-06,
+            "reference_mean_abs": 0.054054019901813403
+          },
+          {
+            "variable": "vertical_velocity",
+            "level_hpa": 400,
+            "mae": 0.0013252378122641166,
+            "relative_error_percent": 1.7885363088967727,
+            "rmse": 0.0038881583026100395,
+            "max_abs": 0.3162994384765625,
+            "bias": 1.6191083834087033e-05,
+            "reference_mean_abs": 0.0740962207852278
+          },
+          {
+            "variable": "vertical_velocity",
+            "level_hpa": 500,
+            "mae": 0.0015755239344145994,
+            "relative_error_percent": 1.9109721487440203,
+            "rmse": 0.0051458242802326516,
+            "max_abs": 0.48216819763183594,
+            "bias": 3.0043577955620892e-05,
+            "reference_mean_abs": 0.08244620077012148
+          },
+          {
+            "variable": "vertical_velocity",
+            "level_hpa": 600,
+            "mae": 0.001614024431103431,
+            "relative_error_percent": 1.9344937764741597,
+            "rmse": 0.005711913730528218,
+            "max_abs": 0.4635043144226074,
+            "bias": 2.356580471190157e-05,
+            "reference_mean_abs": 0.08343394280880959
+          },
+          {
+            "variable": "vertical_velocity",
+            "level_hpa": 700,
+            "mae": 0.001573233503856497,
+            "relative_error_percent": 1.8344145441457376,
+            "rmse": 0.005520065037702658,
+            "max_abs": 0.4239048957824707,
+            "bias": 1.2425016417105335e-05,
+            "reference_mean_abs": 0.08576215822520807
+          },
+          {
+            "variable": "vertical_velocity",
+            "level_hpa": 850,
+            "mae": 0.0014213133437656945,
+            "relative_error_percent": 1.5988058890524892,
+            "rmse": 0.004272419114980938,
+            "max_abs": 0.3557405471801758,
+            "bias": 2.3198219569343722e-07,
+            "reference_mean_abs": 0.08889843060360608
+          },
+          {
+            "variable": "vertical_velocity",
+            "level_hpa": 925,
+            "mae": 0.001133024762888726,
+            "relative_error_percent": 1.4224705951654162,
+            "rmse": 0.003115274222297588,
+            "max_abs": 0.29615330696105957,
+            "bias": -6.800057160628923e-06,
+            "reference_mean_abs": 0.07965189345492016
+          },
+          {
+            "variable": "vertical_velocity",
+            "level_hpa": 1000,
+            "mae": 0.00039859123689919417,
+            "relative_error_percent": 0.7873954236321762,
+            "rmse": 0.0011672071162120636,
+            "max_abs": 0.17023921012878418,
+            "bias": -1.0368169857256525e-05,
+            "reference_mean_abs": 0.050621482540568086
+          }
+        ]
+      }
+    }
+  ],
+  "fused": [
+    {
+      "round": 2,
+      "accuracy": {
+        "reference": "fused_round1",
+        "overall_mean_percent": 0.5646822264345972,
+        "z500_percent": 0.006779267303921625,
+        "z500_mae_m": 0.3729848001797546,
+        "z500_rmse_m": 0.725119654635269,
+        "metrics_within_limits": true,
+        "layers": [
+          {
+            "variable": "u_component_of_wind",
+            "level_hpa": 50,
+            "mae": 0.016286316754333497,
+            "relative_error_percent": 0.19207906451479248,
+            "rmse": 0.025108218763089444,
+            "max_abs": 0.34262657165527344,
+            "bias": 0.0002489999706352799,
+            "reference_mean_abs": 8.478965052997355
+          },
+          {
+            "variable": "u_component_of_wind",
+            "level_hpa": 100,
+            "mae": 0.024057090299486716,
+            "relative_error_percent": 0.1888635949426285,
+            "rmse": 0.035168152183782955,
+            "max_abs": 0.5110492706298828,
+            "bias": -0.00022235086601399246,
+            "reference_mean_abs": 12.737812338473484
+          },
+          {
+            "variable": "u_component_of_wind",
+            "level_hpa": 150,
+            "mae": 0.032193673069287825,
+            "relative_error_percent": 0.20203558903100793,
+            "rmse": 0.04811131610694985,
+            "max_abs": 0.4264965057373047,
+            "bias": -0.0004513129651546604,
+            "reference_mean_abs": 15.934654495127992
+          },
+          {
+            "variable": "u_component_of_wind",
+            "level_hpa": 200,
+            "mae": 0.0451228377681899,
+            "relative_error_percent": 0.2690704123561551,
+            "rmse": 0.0763696096775601,
+            "max_abs": 0.9930648803710938,
+            "bias": -0.00022006825402005634,
+            "reference_mean_abs": 16.76989951182854
+          },
+          {
+            "variable": "u_component_of_wind",
+            "level_hpa": 250,
+            "mae": 0.061384746712307314,
+            "relative_error_percent": 0.3792603644884739,
+            "rmse": 0.10961291800987746,
+            "max_abs": 1.7824287414550781,
+            "bias": 0.0007002316032773267,
+            "reference_mean_abs": 16.185384094934303
+          },
+          {
+            "variable": "u_component_of_wind",
+            "level_hpa": 300,
+            "mae": 0.07395274524797467,
+            "relative_error_percent": 0.4936365181852089,
+            "rmse": 0.1362594782988018,
+            "max_abs": 1.8167457580566406,
+            "bias": 0.0013889322827216283,
+            "reference_mean_abs": 14.981214420653565
+          },
+          {
+            "variable": "u_component_of_wind",
+            "level_hpa": 400,
+            "mae": 0.07269123351058865,
+            "relative_error_percent": 0.5992261141756776,
+            "rmse": 0.1414087497978804,
+            "max_abs": 1.9059383869171143,
+            "bias": 0.0016139311786890157,
+            "reference_mean_abs": 12.130852075862212
+          },
+          {
+            "variable": "u_component_of_wind",
+            "level_hpa": 500,
+            "mae": 0.0640280108344016,
+            "relative_error_percent": 0.6588136460415389,
+            "rmse": 0.1330066504182913,
+            "max_abs": 2.1110477447509766,
+            "bias": 0.001638276250187888,
+            "reference_mean_abs": 9.718683154046959
+          },
+          {
+            "variable": "u_component_of_wind",
+            "level_hpa": 600,
+            "mae": 0.05485711405511619,
+            "relative_error_percent": 0.6763487481948294,
+            "rmse": 0.11423343601451921,
+            "max_abs": 1.6645441055297852,
+            "bias": 0.0011111630839458404,
+            "reference_mean_abs": 8.110773354948831
+          },
+          {
+            "variable": "u_component_of_wind",
+            "level_hpa": 700,
+            "mae": 0.048545463528811575,
+            "relative_error_percent": 0.6812273339692915,
+            "rmse": 0.10237664667583307,
+            "max_abs": 1.5517387390136719,
+            "bias": 4.196309284891561e-05,
+            "reference_mean_abs": 7.1261766972785505
+          },
+          {
+            "variable": "u_component_of_wind",
+            "level_hpa": 850,
+            "mae": 0.04310722713181067,
+            "relative_error_percent": 0.6962993630960753,
+            "rmse": 0.09643051669613667,
+            "max_abs": 1.8974571228027344,
+            "bias": -0.0008405656225898186,
+            "reference_mean_abs": 6.190904288657627
+          },
+          {
+            "variable": "u_component_of_wind",
+            "level_hpa": 925,
+            "mae": 0.04232382730935553,
+            "relative_error_percent": 0.7169426485275046,
+            "rmse": 0.09578991921983497,
+            "max_abs": 2.4867916107177734,
+            "bias": -0.0013064960097749526,
+            "reference_mean_abs": 5.903376985074397
+          },
+          {
+            "variable": "u_component_of_wind",
+            "level_hpa": 1000,
+            "mae": 0.03283200595476441,
+            "relative_error_percent": 0.7032179069691146,
+            "rmse": 0.07867489438548775,
+            "max_abs": 2.9112277030944824,
+            "bias": -0.0007658077746935985,
+            "reference_mean_abs": 4.668823934855572
+          },
+          {
+            "variable": "v_component_of_wind",
+            "level_hpa": 50,
+            "mae": 0.01617797746554681,
+            "relative_error_percent": 0.3740067621382546,
+            "rmse": 0.025530458785401545,
+            "max_abs": 0.1549816131591797,
+            "bias": 2.0503344172537112e-05,
+            "reference_mean_abs": 4.325584214856118
+          },
+          {
+            "variable": "v_component_of_wind",
+            "level_hpa": 100,
+            "mae": 0.023890587426622437,
+            "relative_error_percent": 0.428405269424969,
+            "rmse": 0.03438467063092853,
+            "max_abs": 0.3632545471191406,
+            "bias": 0.0005859638730611917,
+            "reference_mean_abs": 5.5766324860312295
+          },
+          {
+            "variable": "v_component_of_wind",
+            "level_hpa": 150,
+            "mae": 0.03299460248128607,
+            "relative_error_percent": 0.46195610662307546,
+            "rmse": 0.05018850159087075,
+            "max_abs": 0.5368032455444336,
+            "bias": 0.00022876681359052607,
+            "reference_mean_abs": 7.1423674258748155
+          },
+          {
+            "variable": "v_component_of_wind",
+            "level_hpa": 200,
+            "mae": 0.04614328830468807,
+            "relative_error_percent": 0.5382591644258016,
+            "rmse": 0.07780636306950776,
+            "max_abs": 0.7304239273071289,
+            "bias": 0.00045719055330165173,
+            "reference_mean_abs": 8.572689766260147
+          },
+          {
+            "variable": "v_component_of_wind",
+            "level_hpa": 250,
+            "mae": 0.06264657333926915,
+            "relative_error_percent": 0.676029579753133,
+            "rmse": 0.11635587499635355,
+            "max_abs": 1.4595341682434082,
+            "bias": 0.000851584353334967,
+            "reference_mean_abs": 9.266839087447314
+          },
+          {
+            "variable": "v_component_of_wind",
+            "level_hpa": 300,
+            "mae": 0.07708511778267553,
+            "relative_error_percent": 0.8460315549061663,
+            "rmse": 0.15333646384183672,
+            "max_abs": 2.5268659591674805,
+            "bias": 0.0008983029480964885,
+            "reference_mean_abs": 9.111376205255732
+          },
+          {
+            "variable": "v_component_of_wind",
+            "level_hpa": 400,
+            "mae": 0.07706348913110501,
+            "relative_error_percent": 1.0185140774539696,
+            "rmse": 0.16094759625798993,
+            "max_abs": 3.620542526245117,
+            "bias": -0.0001921914701701414,
+            "reference_mean_abs": 7.566266469653955
+          },
+          {
+            "variable": "v_component_of_wind",
+            "level_hpa": 500,
+            "mae": 0.06633808043820548,
+            "relative_error_percent": 1.0935016076295612,
+            "rmse": 0.141594637119772,
+            "max_abs": 2.990504264831543,
+            "bias": -0.000263404542264711,
+            "reference_mean_abs": 6.0665736543369055
+          },
+          {
+            "variable": "v_component_of_wind",
+            "level_hpa": 600,
+            "mae": 0.05623247182379527,
+            "relative_error_percent": 1.1027710131282822,
+            "rmse": 0.11789954316670258,
+            "max_abs": 2.5188169479370117,
+            "bias": 0.0004378717972948778,
+            "reference_mean_abs": 5.09919749017323
+          },
+          {
+            "variable": "v_component_of_wind",
+            "level_hpa": 700,
+            "mae": 0.04982422884830523,
+            "relative_error_percent": 1.0830765838479963,
+            "rmse": 0.10329692920965243,
+            "max_abs": 1.7788324356079102,
+            "bias": 0.0007140855561124013,
+            "reference_mean_abs": 4.600249843024746
+          },
+          {
+            "variable": "v_component_of_wind",
+            "level_hpa": 850,
+            "mae": 0.04471069628807826,
+            "relative_error_percent": 1.0640602822694392,
+            "rmse": 0.09567980290618126,
+            "max_abs": 1.7299144268035889,
+            "bias": -0.00028692980423551163,
+            "reference_mean_abs": 4.201895046088818
+          },
+          {
+            "variable": "v_component_of_wind",
+            "level_hpa": 925,
+            "mae": 0.04351453339989636,
+            "relative_error_percent": 0.9978979105181633,
+            "rmse": 0.09727776722275934,
+            "max_abs": 2.7115821838378906,
+            "bias": -0.0009148383497197791,
+            "reference_mean_abs": 4.36061975290651
+          },
+          {
+            "variable": "v_component_of_wind",
+            "level_hpa": 1000,
+            "mae": 0.032196795500564396,
+            "relative_error_percent": 0.8961643648552028,
+            "rmse": 0.07100019141442072,
+            "max_abs": 2.566932201385498,
+            "bias": -0.0009194897100708135,
+            "reference_mean_abs": 3.5927332934920453
+          },
+          {
+            "variable": "geopotential",
+            "level_hpa": 50,
+            "mae": 2.0904324265102483,
+            "relative_error_percent": 0.0010476244549809369,
+            "rmse": 3.5148398279738946,
+            "max_abs": 20.875,
+            "bias": -0.497744169219063,
+            "reference_mean_abs": 199540.2471344836
+          },
+          {
+            "variable": "geopotential",
+            "level_hpa": 100,
+            "mae": 2.4672377954519185,
+            "relative_error_percent": 0.0015648676773574299,
+            "rmse": 3.9132877381497955,
+            "max_abs": 25.6875,
+            "bias": -0.1278061611477115,
+            "reference_mean_abs": 157664.30805308142
+          },
+          {
+            "variable": "geopotential",
+            "level_hpa": 150,
+            "mae": 2.982933016450917,
+            "relative_error_percent": 0.002243592713940362,
+            "rmse": 4.735140884031285,
+            "max_abs": 30.359375,
+            "bias": 0.05323657704384343,
+            "reference_mean_abs": 132953.40985539532
+          },
+          {
+            "variable": "geopotential",
+            "level_hpa": 200,
+            "mae": 3.4516955526901296,
+            "relative_error_percent": 0.0029996140564151567,
+            "rmse": 5.865856941771383,
+            "max_abs": 40.03125,
+            "bias": 0.19061815247437972,
+            "reference_mean_abs": 115071.32210252597
+          },
+          {
+            "variable": "geopotential",
+            "level_hpa": 250,
+            "mae": 3.97304029084075,
+            "relative_error_percent": 0.003936293408138355,
+            "rmse": 7.175615420283594,
+            "max_abs": 55.203125,
+            "bias": 0.26710288414769223,
+            "reference_mean_abs": 100933.54023423203
+          },
+          {
+            "variable": "geopotential",
+            "level_hpa": 300,
+            "mae": 4.322464745025235,
+            "relative_error_percent": 0.00484931166723867,
+            "rmse": 8.091801960859916,
+            "max_abs": 87.5546875,
+            "bias": 0.295077833039567,
+            "reference_mean_abs": 89135.63494438304
+          },
+          {
+            "variable": "geopotential",
+            "level_hpa": 400,
+            "mae": 4.2067532442221935,
+            "relative_error_percent": 0.006030923206244892,
+            "rmse": 8.024778384097333,
+            "max_abs": 87.125,
+            "bias": 0.2495914247006954,
+            "reference_mean_abs": 69753.05604730948
+          },
+          {
+            "variable": "geopotential",
+            "level_hpa": 500,
+            "mae": 3.65773139068279,
+            "relative_error_percent": 0.006779267303921625,
+            "rmse": 7.11099466112896,
+            "max_abs": 65.37890625,
+            "bias": 0.2203265487146517,
+            "reference_mean_abs": 53954.67130447696
+          },
+          {
+            "variable": "geopotential",
+            "level_hpa": 600,
+            "mae": 3.198465018023289,
+            "relative_error_percent": 0.007891489851436605,
+            "rmse": 6.17245823716177,
+            "max_abs": 56.05078125,
+            "bias": 0.2333214216486554,
+            "reference_mean_abs": 40530.55985925174
+          },
+          {
+            "variable": "geopotential",
+            "level_hpa": 700,
+            "mae": 2.883290459169484,
+            "relative_error_percent": 0.009992145423332845,
+            "rmse": 5.5631051546124315,
+            "max_abs": 61.037109375,
+            "bias": 0.28787494153266585,
+            "reference_mean_abs": 28855.569419923155
+          },
+          {
+            "variable": "geopotential",
+            "level_hpa": 850,
+            "mae": 2.71286869598732,
+            "relative_error_percent": 0.019764608980061143,
+            "rmse": 5.268589579653208,
+            "max_abs": 68.05859375,
+            "bias": 0.3302902045318279,
+            "reference_mean_abs": 13725.891054683174
+          },
+          {
+            "variable": "geopotential",
+            "level_hpa": 925,
+            "mae": 2.7691692928996727,
+            "relative_error_percent": 0.03954758265174926,
+            "rmse": 5.261197138901092,
+            "max_abs": 60.0244140625,
+            "bias": 0.34699572338163626,
+            "reference_mean_abs": 7002.120249130289
+          },
+          {
+            "variable": "geopotential",
+            "level_hpa": 1000,
+            "mae": 2.8538595918514895,
+            "relative_error_percent": 0.24924539282755076,
+            "rmse": 5.332011872957176,
+            "max_abs": 50.8287353515625,
+            "bias": 0.32796073380710167,
+            "reference_mean_abs": 1144.9999374014642
+          },
+          {
+            "variable": "temperature",
+            "level_hpa": 50,
+            "mae": 0.007647433158226678,
+            "relative_error_percent": 0.0035932502190385266,
+            "rmse": 0.010849327597914658,
+            "max_abs": 0.1483306884765625,
+            "bias": -0.001985313043992643,
+            "reference_mean_abs": 212.827737898892
+          },
+          {
+            "variable": "temperature",
+            "level_hpa": 100,
+            "mae": 0.009410143640747165,
+            "relative_error_percent": 0.004481517996433764,
+            "rmse": 0.013815291964118324,
+            "max_abs": 0.178009033203125,
+            "bias": -0.0015867419778556665,
+            "reference_mean_abs": 209.97670093560774
+          },
+          {
+            "variable": "temperature",
+            "level_hpa": 150,
+            "mae": 0.011905980194674965,
+            "relative_error_percent": 0.005545276941867643,
+            "rmse": 0.02047908291610262,
+            "max_abs": 0.288543701171875,
+            "bias": -0.0017015374998297524,
+            "reference_mean_abs": 214.70487983716546
+          },
+          {
+            "variable": "temperature",
+            "level_hpa": 200,
+            "mae": 0.017226355872034457,
+            "relative_error_percent": 0.007877641355708414,
+            "rmse": 0.032370460093009104,
+            "max_abs": 0.4284820556640625,
+            "bias": -0.0014039210976318321,
+            "reference_mean_abs": 218.67403064181946
+          },
+          {
+            "variable": "temperature",
+            "level_hpa": 250,
+            "mae": 0.019776567572859553,
+            "relative_error_percent": 0.008871264331278777,
+            "rmse": 0.039416262283866604,
+            "max_abs": 0.7581634521484375,
+            "bias": -0.0010838645433016451,
+            "reference_mean_abs": 222.92839931654697
+          },
+          {
+            "variable": "temperature",
+            "level_hpa": 300,
+            "mae": 0.01679120643569869,
+            "relative_error_percent": 0.007352031206684528,
+            "rmse": 0.03273714792865472,
+            "max_abs": 0.4629058837890625,
+            "bias": 0.0001470514504122135,
+            "reference_mean_abs": 228.38867196907412
+          },
+          {
+            "variable": "temperature",
+            "level_hpa": 400,
+            "mae": 0.01610731365023381,
+            "relative_error_percent": 0.006675869433248632,
+            "rmse": 0.030434884600076966,
+            "max_abs": 0.519439697265625,
+            "bias": 0.0006942556201630885,
+            "reference_mean_abs": 241.27664285961956
+          },
+          {
+            "variable": "temperature",
+            "level_hpa": 500,
+            "mae": 0.018278316092759365,
+            "relative_error_percent": 0.007252576324672095,
+            "rmse": 0.03659917061622666,
+            "max_abs": 0.878448486328125,
+            "bias": 0.00016577875399225792,
+            "reference_mean_abs": 252.02514629979808
+          },
+          {
+            "variable": "temperature",
+            "level_hpa": 600,
+            "mae": 0.019103437212954173,
+            "relative_error_percent": 0.0073383820501915055,
+            "rmse": 0.038365857241878375,
+            "max_abs": 0.762786865234375,
+            "bias": -0.000860819138332772,
+            "reference_mean_abs": 260.32219476029655
+          },
+          {
+            "variable": "temperature",
+            "level_hpa": 700,
+            "mae": 0.01921249897569294,
+            "relative_error_percent": 0.007200705372427091,
+            "rmse": 0.03878948176105624,
+            "max_abs": 0.497100830078125,
+            "bias": -0.0013144911814404665,
+            "reference_mean_abs": 266.8141242004062
+          },
+          {
+            "variable": "temperature",
+            "level_hpa": 850,
+            "mae": 0.020656812464737124,
+            "relative_error_percent": 0.007539140801699081,
+            "rmse": 0.04382220491013903,
+            "max_abs": 0.615020751953125,
+            "bias": -0.000772904489969579,
+            "reference_mean_abs": 273.99425223736023
+          },
+          {
+            "variable": "temperature",
+            "level_hpa": 925,
+            "mae": 0.02034419652474718,
+            "relative_error_percent": 0.007353600248285223,
+            "rmse": 0.04789144102974681,
+            "max_abs": 1.3288421630859375,
+            "bias": -0.00046701150565838884,
+            "reference_mean_abs": 276.6562749925279
+          },
+          {
+            "variable": "temperature",
+            "level_hpa": 1000,
+            "mae": 0.018188079617059844,
+            "relative_error_percent": 0.00649763762146892,
+            "rmse": 0.04205282049907695,
+            "max_abs": 0.689849853515625,
+            "bias": 0.001510783765877794,
+            "reference_mean_abs": 279.91834381413327
+          },
+          {
+            "variable": "specific_humidity",
+            "level_hpa": 50,
+            "mae": 1.5274834832376952e-10,
+            "relative_error_percent": 0.005385919176343891,
+            "rmse": 2.619442268363371e-10,
+            "max_abs": 3.5083758120890707e-09,
+            "bias": -2.7594641627963916e-12,
+            "reference_mean_abs": 2.836068335274561e-06
+          },
+          {
+            "variable": "specific_humidity",
+            "level_hpa": 100,
+            "mae": 1.1093508098198529e-09,
+            "relative_error_percent": 0.040785036019622925,
+            "rmse": 2.1385155169905115e-09,
+            "max_abs": 2.9056991479592398e-08,
+            "bias": -3.2064327843946155e-11,
+            "reference_mean_abs": 2.7199946796322805e-06
+          },
+          {
+            "variable": "specific_humidity",
+            "level_hpa": 150,
+            "mae": 3.793075151824521e-09,
+            "relative_error_percent": 0.07516987451563613,
+            "rmse": 6.9112660557006494e-09,
+            "max_abs": 1.248554326593876e-07,
+            "bias": -2.1055959395191995e-10,
+            "reference_mean_abs": 5.046004368459497e-06
+          },
+          {
+            "variable": "specific_humidity",
+            "level_hpa": 200,
+            "mae": 2.815043560951147e-08,
+            "relative_error_percent": 0.15672781533862268,
+            "rmse": 5.4600073731958e-08,
+            "max_abs": 1.2462660379242152e-06,
+            "bias": -8.676446301241746e-10,
+            "reference_mean_abs": 1.796135264738442e-05
+          },
+          {
+            "variable": "specific_humidity",
+            "level_hpa": 250,
+            "mae": 1.1588595439393111e-07,
+            "relative_error_percent": 0.21032668052667663,
+            "rmse": 2.3828956894357982e-07,
+            "max_abs": 4.004177753813565e-06,
+            "bias": -7.912487892542053e-10,
+            "reference_mean_abs": 5.509807605185534e-05
+          },
+          {
+            "variable": "specific_humidity",
+            "level_hpa": 300,
+            "mae": 3.238120726709493e-07,
+            "relative_error_percent": 0.2616466503340658,
+            "rmse": 7.241099081662053e-07,
+            "max_abs": 1.5175937733147293e-05,
+            "bias": -1.9874916907877338e-10,
+            "reference_mean_abs": 0.00012375930372413013
+          },
+          {
+            "variable": "specific_humidity",
+            "level_hpa": 400,
+            "mae": 1.2747965943269376e-06,
+            "relative_error_percent": 0.33048770970781943,
+            "rmse": 3.1972226490792496e-06,
+            "max_abs": 8.525841985829175e-05,
+            "bias": -1.257248641475793e-08,
+            "reference_mean_abs": 0.0003857319219083733
+          },
+          {
+            "variable": "specific_humidity",
+            "level_hpa": 500,
+            "mae": 2.913303566708634e-06,
+            "relative_error_percent": 0.3502841435900583,
+            "rmse": 7.315691617918713e-06,
+            "max_abs": 0.00017388188280165195,
+            "bias": -2.1576248575455653e-08,
+            "reference_mean_abs": 0.0008316972435149985
+          },
+          {
+            "variable": "specific_humidity",
+            "level_hpa": 600,
+            "mae": 4.949200664727478e-06,
+            "relative_error_percent": 0.33640647042293725,
+            "rmse": 1.1879419496698921e-05,
+            "max_abs": 0.00029054004698991776,
+            "bias": -5.675853830903668e-08,
+            "reference_mean_abs": 0.0014711966326049672
+          },
+          {
+            "variable": "specific_humidity",
+            "level_hpa": 700,
+            "mae": 6.500511032286877e-06,
+            "relative_error_percent": 0.2867699719750682,
+            "rmse": 1.469863674640856e-05,
+            "max_abs": 0.00028571602888405323,
+            "bias": 1.042322818038411e-07,
+            "reference_mean_abs": 0.0022668032456522446
+          },
+          {
+            "variable": "specific_humidity",
+            "level_hpa": 850,
+            "mae": 7.73119483830426e-06,
+            "relative_error_percent": 0.17974665521619254,
+            "rmse": 1.6917046968723938e-05,
+            "max_abs": 0.0004369686357676983,
+            "bias": 8.297537711677095e-08,
+            "reference_mean_abs": 0.004301162004380815
+          },
+          {
+            "variable": "specific_humidity",
+            "level_hpa": 925,
+            "mae": 6.00109232064448e-06,
+            "relative_error_percent": 0.10430004632709305,
+            "rmse": 1.241520061193434e-05,
+            "max_abs": 0.00040829461067914963,
+            "bias": -1.9250227050048167e-09,
+            "reference_mean_abs": 0.005753681356789227
+          },
+          {
+            "variable": "specific_humidity",
+            "level_hpa": 1000,
+            "mae": 5.119328359053788e-06,
+            "relative_error_percent": 0.07735421463045508,
+            "rmse": 1.0162383692619904e-05,
+            "max_abs": 0.00029334425926208496,
+            "bias": 1.0069768613342696e-07,
+            "reference_mean_abs": 0.006618034173716839
+          },
+          {
+            "variable": "vertical_velocity",
+            "level_hpa": 50,
+            "mae": 6.154293856171828e-05,
+            "relative_error_percent": 1.8457807472851626,
+            "rmse": 0.00015283757182997526,
+            "max_abs": 0.012448310852050781,
+            "bias": -2.7289626088943977e-06,
+            "reference_mean_abs": 0.0033342496746830708
+          },
+          {
+            "variable": "vertical_velocity",
+            "level_hpa": 100,
+            "mae": 0.0001732155602850985,
+            "relative_error_percent": 2.0084981068724654,
+            "rmse": 0.00042114211373715045,
+            "max_abs": 0.02448749542236328,
+            "bias": -5.485181278160538e-06,
+            "reference_mean_abs": 0.008624133609706073
+          },
+          {
+            "variable": "vertical_velocity",
+            "level_hpa": 150,
+            "mae": 0.0002975110653502296,
+            "relative_error_percent": 1.9843358634847703,
+            "rmse": 0.000725309259386905,
+            "max_abs": 0.044006966054439545,
+            "bias": -5.438666095707456e-06,
+            "reference_mean_abs": 0.014992979304811773
+          },
+          {
+            "variable": "vertical_velocity",
+            "level_hpa": 200,
+            "mae": 0.0004416848209529093,
+            "relative_error_percent": 1.7633571645408002,
+            "rmse": 0.0010463611702768957,
+            "max_abs": 0.06668838858604431,
+            "bias": -6.738723135811817e-06,
+            "reference_mean_abs": 0.02504795000325016
+          },
+          {
+            "variable": "vertical_velocity",
+            "level_hpa": 250,
+            "mae": 0.0006573839075562965,
+            "relative_error_percent": 1.65998416390092,
+            "rmse": 0.0014958039481407213,
+            "max_abs": 0.07511401176452637,
+            "bias": -8.316747052744548e-06,
+            "reference_mean_abs": 0.039601818008399625
+          },
+          {
+            "variable": "vertical_velocity",
+            "level_hpa": 300,
+            "mae": 0.0009442810766870966,
+            "relative_error_percent": 1.7472135755225615,
+            "rmse": 0.0021336852523026564,
+            "max_abs": 0.1009979248046875,
+            "bias": -8.443045225842777e-06,
+            "reference_mean_abs": 0.05404497137132639
+          },
+          {
+            "variable": "vertical_velocity",
+            "level_hpa": 400,
+            "mae": 0.0015297788788532552,
+            "relative_error_percent": 2.0653465576989087,
+            "rmse": 0.0035858965853986305,
+            "max_abs": 0.1401103138923645,
+            "bias": -2.7080147291312717e-05,
+            "reference_mean_abs": 0.07406887106431415
+          },
+          {
+            "variable": "vertical_velocity",
+            "level_hpa": 500,
+            "mae": 0.0018215344983044765,
+            "relative_error_percent": 2.209886759192579,
+            "rmse": 0.0044027051287162545,
+            "max_abs": 0.14884400367736816,
+            "bias": -3.249500449696538e-05,
+            "reference_mean_abs": 0.08242659904302092
+          },
+          {
+            "variable": "vertical_velocity",
+            "level_hpa": 600,
+            "mae": 0.0018990266059120315,
+            "relative_error_percent": 2.277208543522468,
+            "rmse": 0.004768374252135929,
+            "max_abs": 0.15574538707733154,
+            "bias": -3.204029294210461e-05,
+            "reference_mean_abs": 0.08339274026148474
+          },
+          {
+            "variable": "vertical_velocity",
+            "level_hpa": 700,
+            "mae": 0.0018873014062151703,
+            "relative_error_percent": 2.201289321603235,
+            "rmse": 0.0049222356373534925,
+            "max_abs": 0.17438167333602905,
+            "bias": -2.3993509069093766e-05,
+            "reference_mean_abs": 0.08573618141392779
+          },
+          {
+            "variable": "vertical_velocity",
+            "level_hpa": 850,
+            "mae": 0.0016567577542840953,
+            "relative_error_percent": 1.8636788439734833,
+            "rmse": 0.004464744158108649,
+            "max_abs": 0.24607965350151062,
+            "bias": 3.050776469234013e-06,
+            "reference_mean_abs": 0.08889717022015343
+          },
+          {
+            "variable": "vertical_velocity",
+            "level_hpa": 925,
+            "mae": 0.0013021638008475726,
+            "relative_error_percent": 1.63498151874371,
+            "rmse": 0.0036935821077561807,
+            "max_abs": 0.21419857442378998,
+            "bias": 1.0312723364384924e-05,
+            "reference_mean_abs": 0.07964394618039056
+          },
+          {
+            "variable": "vertical_velocity",
+            "level_hpa": 1000,
+            "mae": 0.00044898275448830875,
+            "relative_error_percent": 0.8870941181852465,
+            "rmse": 0.0013400974668923355,
+            "max_abs": 0.1219857931137085,
+            "bias": 8.04969117415334e-06,
+            "reference_mean_abs": 0.050612752951942175
+          }
+        ]
+      }
+    },
+    {
+      "round": 3,
+      "accuracy": {
+        "reference": "fused_round1",
+        "overall_mean_percent": 0.6095268868055632,
+        "z500_percent": 0.007667264130981748,
+        "z500_mae_m": 0.42184101195793305,
+        "z500_rmse_m": 0.7968627245091665,
+        "metrics_within_limits": true,
+        "layers": [
+          {
+            "variable": "u_component_of_wind",
+            "level_hpa": 50,
+            "mae": 0.018505254332846645,
+            "relative_error_percent": 0.21824897516596023,
+            "rmse": 0.030512460214302047,
+            "max_abs": 0.7734928131103516,
+            "bias": -0.001780852143519117,
+            "reference_mean_abs": 8.478965052997355
+          },
+          {
+            "variable": "u_component_of_wind",
+            "level_hpa": 100,
+            "mae": 0.025843061423853637,
+            "relative_error_percent": 0.2028846142268626,
+            "rmse": 0.039588568973498876,
+            "max_abs": 0.6456775665283203,
+            "bias": -0.000456083294149591,
+            "reference_mean_abs": 12.737812338473484
+          },
+          {
+            "variable": "u_component_of_wind",
+            "level_hpa": 150,
+            "mae": 0.03425751575438185,
+            "relative_error_percent": 0.21498750264623595,
+            "rmse": 0.05332643761212413,
+            "max_abs": 0.6993789672851562,
+            "bias": -0.001359327879102808,
+            "reference_mean_abs": 15.934654495127992
+          },
+          {
+            "variable": "u_component_of_wind",
+            "level_hpa": 200,
+            "mae": 0.05010694350483411,
+            "relative_error_percent": 0.29879095858321336,
+            "rmse": 0.09241918759031244,
+            "max_abs": 2.086024284362793,
+            "bias": -0.0012880936726121413,
+            "reference_mean_abs": 16.76989951182854
+          },
+          {
+            "variable": "u_component_of_wind",
+            "level_hpa": 250,
+            "mae": 0.06896533835820999,
+            "relative_error_percent": 0.42609639631471424,
+            "rmse": 0.1344312401163674,
+            "max_abs": 3.45382022857666,
+            "bias": -0.0015058974721725623,
+            "reference_mean_abs": 16.185384094934303
+          },
+          {
+            "variable": "u_component_of_wind",
+            "level_hpa": 300,
+            "mae": 0.08278389103210526,
+            "relative_error_percent": 0.5525846483979084,
+            "rmse": 0.1601100667888246,
+            "max_abs": 3.1960039138793945,
+            "bias": -0.0020001439030994,
+            "reference_mean_abs": 14.981214420653565
+          },
+          {
+            "variable": "u_component_of_wind",
+            "level_hpa": 400,
+            "mae": 0.07942475407716444,
+            "relative_error_percent": 0.6547335140225032,
+            "rmse": 0.1634712153286569,
+            "max_abs": 3.5240936279296875,
+            "bias": -0.0027080148155465065,
+            "reference_mean_abs": 12.130852075862212
+          },
+          {
+            "variable": "u_component_of_wind",
+            "level_hpa": 500,
+            "mae": 0.06734824728910783,
+            "relative_error_percent": 0.692977085697699,
+            "rmse": 0.1448747661967078,
+            "max_abs": 4.367402076721191,
+            "bias": -0.0025115697200551778,
+            "reference_mean_abs": 9.718683154046959
+          },
+          {
+            "variable": "u_component_of_wind",
+            "level_hpa": 600,
+            "mae": 0.057137871037176505,
+            "relative_error_percent": 0.7044688408450414,
+            "rmse": 0.11823158272797184,
+            "max_abs": 1.9479904174804688,
+            "bias": -0.0016645073102077182,
+            "reference_mean_abs": 8.110773354948831
+          },
+          {
+            "variable": "u_component_of_wind",
+            "level_hpa": 700,
+            "mae": 0.050661093137705455,
+            "relative_error_percent": 0.7109154780999559,
+            "rmse": 0.10405255285181698,
+            "max_abs": 1.6472339630126953,
+            "bias": -0.0015593619899639914,
+            "reference_mean_abs": 7.1261766972785505
+          },
+          {
+            "variable": "u_component_of_wind",
+            "level_hpa": 850,
+            "mae": 0.046174675769930666,
+            "relative_error_percent": 0.745847030045795,
+            "rmse": 0.09895983606397087,
+            "max_abs": 1.9176883697509766,
+            "bias": -0.0007132022073004788,
+            "reference_mean_abs": 6.190904288657627
+          },
+          {
+            "variable": "u_component_of_wind",
+            "level_hpa": 925,
+            "mae": 0.04585095782539588,
+            "relative_error_percent": 0.7766903238827809,
+            "rmse": 0.09934116034740258,
+            "max_abs": 2.8259944915771484,
+            "bias": -0.00031304440403348967,
+            "reference_mean_abs": 5.903376985074397
+          },
+          {
+            "variable": "u_component_of_wind",
+            "level_hpa": 1000,
+            "mae": 0.03626964155908997,
+            "relative_error_percent": 0.7768474901851691,
+            "rmse": 0.0822057910186896,
+            "max_abs": 3.203258991241455,
+            "bias": 0.00019617849952018024,
+            "reference_mean_abs": 4.668823934855572
+          },
+          {
+            "variable": "v_component_of_wind",
+            "level_hpa": 50,
+            "mae": 0.01679942987020943,
+            "relative_error_percent": 0.38837366320397093,
+            "rmse": 0.027101500934346393,
+            "max_abs": 0.26818132400512695,
+            "bias": -0.00028651049047505463,
+            "reference_mean_abs": 4.325584214856118
+          },
+          {
+            "variable": "v_component_of_wind",
+            "level_hpa": 100,
+            "mae": 0.025662584370511433,
+            "relative_error_percent": 0.46018066341637204,
+            "rmse": 0.038107969630947744,
+            "max_abs": 0.4890553951263428,
+            "bias": -0.00013543285157496587,
+            "reference_mean_abs": 5.5766324860312295
+          },
+          {
+            "variable": "v_component_of_wind",
+            "level_hpa": 150,
+            "mae": 0.0359875810940386,
+            "relative_error_percent": 0.503860680194995,
+            "rmse": 0.05580176925349644,
+            "max_abs": 0.4741382598876953,
+            "bias": 0.00030052711981564913,
+            "reference_mean_abs": 7.1423674258748155
+          },
+          {
+            "variable": "v_component_of_wind",
+            "level_hpa": 200,
+            "mae": 0.052325419373755705,
+            "relative_error_percent": 0.6103734160507569,
+            "rmse": 0.0954343581605941,
+            "max_abs": 1.475388526916504,
+            "bias": -0.00013995537579130897,
+            "reference_mean_abs": 8.572689766260147
+          },
+          {
+            "variable": "v_component_of_wind",
+            "level_hpa": 250,
+            "mae": 0.07201895665106056,
+            "relative_error_percent": 0.7771685250110373,
+            "rmse": 0.13992145304184925,
+            "max_abs": 2.569296360015869,
+            "bias": 0.0008830979321932774,
+            "reference_mean_abs": 9.266839087447314
+          },
+          {
+            "variable": "v_component_of_wind",
+            "level_hpa": 300,
+            "mae": 0.08650146536851812,
+            "relative_error_percent": 0.949378704378613,
+            "rmse": 0.17003890124289062,
+            "max_abs": 3.2303123474121094,
+            "bias": 0.0009614408110714915,
+            "reference_mean_abs": 9.111376205255732
+          },
+          {
+            "variable": "v_component_of_wind",
+            "level_hpa": 400,
+            "mae": 0.08201307539922124,
+            "relative_error_percent": 1.0839305716782683,
+            "rmse": 0.16956299790539434,
+            "max_abs": 3.681473731994629,
+            "bias": 0.00030416170132597364,
+            "reference_mean_abs": 7.566266469653955
+          },
+          {
+            "variable": "v_component_of_wind",
+            "level_hpa": 500,
+            "mae": 0.06811163768422705,
+            "relative_error_percent": 1.1227365159497409,
+            "rmse": 0.14450002959629757,
+            "max_abs": 4.020564079284668,
+            "bias": 0.00023177874978885647,
+            "reference_mean_abs": 6.0665736543369055
+          },
+          {
+            "variable": "v_component_of_wind",
+            "level_hpa": 600,
+            "mae": 0.05610848347272764,
+            "relative_error_percent": 1.1003394863771305,
+            "rmse": 0.1172207698092653,
+            "max_abs": 2.437560558319092,
+            "bias": 0.0003081346019410862,
+            "reference_mean_abs": 5.09919749017323
+          },
+          {
+            "variable": "v_component_of_wind",
+            "level_hpa": 700,
+            "mae": 0.04959134920665741,
+            "relative_error_percent": 1.0780142578962673,
+            "rmse": 0.1025490850672918,
+            "max_abs": 1.9120502471923828,
+            "bias": 0.00029577616399828016,
+            "reference_mean_abs": 4.600249843024746
+          },
+          {
+            "variable": "v_component_of_wind",
+            "level_hpa": 850,
+            "mae": 0.045784852712396885,
+            "relative_error_percent": 1.0896239008876258,
+            "rmse": 0.09747438900041358,
+            "max_abs": 1.7242765426635742,
+            "bias": -0.0005868175214580871,
+            "reference_mean_abs": 4.201895046088818
+          },
+          {
+            "variable": "v_component_of_wind",
+            "level_hpa": 925,
+            "mae": 0.04461479595414595,
+            "relative_error_percent": 1.023129703625467,
+            "rmse": 0.10287849936232284,
+            "max_abs": 4.147021293640137,
+            "bias": -0.0008246839119192996,
+            "reference_mean_abs": 4.36061975290651
+          },
+          {
+            "variable": "v_component_of_wind",
+            "level_hpa": 1000,
+            "mae": 0.033840780077519186,
+            "relative_error_percent": 0.9419229681985888,
+            "rmse": 0.07546427974183023,
+            "max_abs": 3.148664951324463,
+            "bias": -0.0006883038198319637,
+            "reference_mean_abs": 3.5927332934920453
+          },
+          {
+            "variable": "geopotential",
+            "level_hpa": 50,
+            "mae": 2.436865813781014,
+            "relative_error_percent": 0.0012212402504135653,
+            "rmse": 4.23793411354033,
+            "max_abs": 28.328125,
+            "bias": 0.05101343379180151,
+            "reference_mean_abs": 199540.2471344836
+          },
+          {
+            "variable": "geopotential",
+            "level_hpa": 100,
+            "mae": 2.795655824399946,
+            "relative_error_percent": 0.0017731697547289664,
+            "rmse": 4.5079289163435785,
+            "max_abs": 29.40625,
+            "bias": 0.09623848110745108,
+            "reference_mean_abs": 157664.30805308142
+          },
+          {
+            "variable": "geopotential",
+            "level_hpa": 150,
+            "mae": 3.3001993683420983,
+            "relative_error_percent": 0.002482222435612225,
+            "rmse": 5.33801721817192,
+            "max_abs": 34.046875,
+            "bias": 0.14639590647393666,
+            "reference_mean_abs": 132953.40985539532
+          },
+          {
+            "variable": "geopotential",
+            "level_hpa": 200,
+            "mae": 3.9749694269268185,
+            "relative_error_percent": 0.0034543527912064918,
+            "rmse": 6.933796219942317,
+            "max_abs": 72.859375,
+            "bias": 0.1871566379762868,
+            "reference_mean_abs": 115071.32210252597
+          },
+          {
+            "variable": "geopotential",
+            "level_hpa": 250,
+            "mae": 4.655607589225516,
+            "relative_error_percent": 0.004612547601542017,
+            "rmse": 8.417630659722905,
+            "max_abs": 88.1875,
+            "bias": 0.27011162670721606,
+            "reference_mean_abs": 100933.54023423203
+          },
+          {
+            "variable": "geopotential",
+            "level_hpa": 300,
+            "mae": 4.983205532921097,
+            "relative_error_percent": 0.005590587351546227,
+            "rmse": 9.196667869677219,
+            "max_abs": 83.5859375,
+            "bias": 0.312011824096548,
+            "reference_mean_abs": 89135.63494438304
+          },
+          {
+            "variable": "geopotential",
+            "level_hpa": 400,
+            "mae": 4.767776319480563,
+            "relative_error_percent": 0.006835222124528644,
+            "rmse": 8.922757860116809,
+            "max_abs": 90.0390625,
+            "bias": 0.3267235146738712,
+            "reference_mean_abs": 69753.05604730948
+          },
+          {
+            "variable": "geopotential",
+            "level_hpa": 500,
+            "mae": 4.136847159917264,
+            "relative_error_percent": 0.007667264130981748,
+            "rmse": 7.814553837307817,
+            "max_abs": 81.99609375,
+            "bias": 0.3184418312480737,
+            "reference_mean_abs": 53954.67130447696
+          },
+          {
+            "variable": "geopotential",
+            "level_hpa": 600,
+            "mae": 3.6602069405014737,
+            "relative_error_percent": 0.009030733730824528,
+            "rmse": 6.771933111191881,
+            "max_abs": 63.421875,
+            "bias": 0.3176450313451129,
+            "reference_mean_abs": 40530.55985925174
+          },
+          {
+            "variable": "geopotential",
+            "level_hpa": 700,
+            "mae": 3.352713364007238,
+            "relative_error_percent": 0.011618947161348954,
+            "rmse": 6.127886147656904,
+            "max_abs": 59.53515625,
+            "bias": 0.30793538862943537,
+            "reference_mean_abs": 28855.569419923155
+          },
+          {
+            "variable": "geopotential",
+            "level_hpa": 850,
+            "mae": 3.1811938559334787,
+            "relative_error_percent": 0.023176592639849627,
+            "rmse": 5.86053449371375,
+            "max_abs": 64.9091796875,
+            "bias": 0.2834967672154319,
+            "reference_mean_abs": 13725.891054683174
+          },
+          {
+            "variable": "geopotential",
+            "level_hpa": 925,
+            "mae": 3.1985267616821043,
+            "relative_error_percent": 0.045679403493240255,
+            "rmse": 5.870889028638089,
+            "max_abs": 56.1357421875,
+            "bias": 0.2649347489595523,
+            "reference_mean_abs": 7002.120249130289
+          },
+          {
+            "variable": "geopotential",
+            "level_hpa": 1000,
+            "mae": 3.24224712683956,
+            "relative_error_percent": 0.2831657034145978,
+            "rmse": 5.978386532516724,
+            "max_abs": 59.187744140625,
+            "bias": 0.2006651351916981,
+            "reference_mean_abs": 1144.9999374014642
+          },
+          {
+            "variable": "temperature",
+            "level_hpa": 50,
+            "mae": 0.007238307567237246,
+            "relative_error_percent": 0.003401017009670021,
+            "rmse": 0.010680869114689882,
+            "max_abs": 0.3663482666015625,
+            "bias": 3.54737305167203e-05,
+            "reference_mean_abs": 212.827737898892
+          },
+          {
+            "variable": "temperature",
+            "level_hpa": 100,
+            "mae": 0.009419674916707563,
+            "relative_error_percent": 0.004486057202887589,
+            "rmse": 0.014282346467695535,
+            "max_abs": 0.2916259765625,
+            "bias": -0.0003605514558112241,
+            "reference_mean_abs": 209.97670093560774
+          },
+          {
+            "variable": "temperature",
+            "level_hpa": 150,
+            "mae": 0.012863800268104143,
+            "relative_error_percent": 0.0059913870042731165,
+            "rmse": 0.023608472251333674,
+            "max_abs": 0.372833251953125,
+            "bias": -0.0005452268056388922,
+            "reference_mean_abs": 214.70487983716546
+          },
+          {
+            "variable": "temperature",
+            "level_hpa": 200,
+            "mae": 0.018907122495160078,
+            "relative_error_percent": 0.008646258743970058,
+            "rmse": 0.03808094942043696,
+            "max_abs": 0.6094818115234375,
+            "bias": -0.0010174025407574507,
+            "reference_mean_abs": 218.67403064181946
+          },
+          {
+            "variable": "temperature",
+            "level_hpa": 250,
+            "mae": 0.02055796853822522,
+            "relative_error_percent": 0.009221780895234417,
+            "rmse": 0.04093357347720372,
+            "max_abs": 0.677001953125,
+            "bias": -0.0010307573320538996,
+            "reference_mean_abs": 222.92839931654697
+          },
+          {
+            "variable": "temperature",
+            "level_hpa": 300,
+            "mae": 0.017642601613988125,
+            "relative_error_percent": 0.007724814659974507,
+            "rmse": 0.03514100876501958,
+            "max_abs": 0.47137451171875,
+            "bias": -0.0005775654769711693,
+            "reference_mean_abs": 228.38867196907412
+          },
+          {
+            "variable": "temperature",
+            "level_hpa": 400,
+            "mae": 0.0177062378658648,
+            "relative_error_percent": 0.00733856276181972,
+            "rmse": 0.03340789015132094,
+            "max_abs": 0.419708251953125,
+            "bias": 5.7341854420551846e-05,
+            "reference_mean_abs": 241.27664285961956
+          },
+          {
+            "variable": "temperature",
+            "level_hpa": 500,
+            "mae": 0.01972438135028051,
+            "relative_error_percent": 0.007826354488776785,
+            "rmse": 0.03934842158524971,
+            "max_abs": 0.75445556640625,
+            "bias": 2.2560033799687452e-05,
+            "reference_mean_abs": 252.02514629979808
+          },
+          {
+            "variable": "temperature",
+            "level_hpa": 600,
+            "mae": 0.01999850006385694,
+            "relative_error_percent": 0.007682210916465062,
+            "rmse": 0.0413566859743878,
+            "max_abs": 0.73809814453125,
+            "bias": 3.3272666654852804e-05,
+            "reference_mean_abs": 260.32219476029655
+          },
+          {
+            "variable": "temperature",
+            "level_hpa": 700,
+            "mae": 0.019665380464090297,
+            "relative_error_percent": 0.007370442071994462,
+            "rmse": 0.04035243178485503,
+            "max_abs": 0.5830078125,
+            "bias": 0.0003090179027146451,
+            "reference_mean_abs": 266.8141242004062
+          },
+          {
+            "variable": "temperature",
+            "level_hpa": 850,
+            "mae": 0.020950112054042666,
+            "relative_error_percent": 0.007646186692957946,
+            "rmse": 0.043330776824309525,
+            "max_abs": 0.587982177734375,
+            "bias": 0.00022436429436869276,
+            "reference_mean_abs": 273.99425223736023
+          },
+          {
+            "variable": "temperature",
+            "level_hpa": 925,
+            "mae": 0.020995455380488404,
+            "relative_error_percent": 0.007589003857243238,
+            "rmse": 0.04774628495218288,
+            "max_abs": 1.28741455078125,
+            "bias": 0.0008423854764978624,
+            "reference_mean_abs": 276.6562749925279
+          },
+          {
+            "variable": "temperature",
+            "level_hpa": 1000,
+            "mae": 0.02079532918402439,
+            "relative_error_percent": 0.0074290698139570874,
+            "rmse": 0.04716704315236538,
+            "max_abs": 1.062530517578125,
+            "bias": 0.004006223021642621,
+            "reference_mean_abs": 279.91834381413327
+          },
+          {
+            "variable": "specific_humidity",
+            "level_hpa": 50,
+            "mae": 1.5606227956651055e-10,
+            "relative_error_percent": 0.005502768661298921,
+            "rmse": 2.6643394808186783e-10,
+            "max_abs": 3.6757228372152895e-09,
+            "bias": 2.857487962452266e-12,
+            "reference_mean_abs": 2.836068335274561e-06
+          },
+          {
+            "variable": "specific_humidity",
+            "level_hpa": 100,
+            "mae": 1.0297120265273482e-09,
+            "relative_error_percent": 0.03785713384801754,
+            "rmse": 1.8612841267214721e-09,
+            "max_abs": 2.761771611403674e-08,
+            "bias": -1.414028945577357e-10,
+            "reference_mean_abs": 2.7199946796322805e-06
+          },
+          {
+            "variable": "specific_humidity",
+            "level_hpa": 150,
+            "mae": 3.976276300861595e-09,
+            "relative_error_percent": 0.07880049263761377,
+            "rmse": 8.159536985462443e-09,
+            "max_abs": 2.2145331968204118e-07,
+            "bias": -2.1688128018902612e-10,
+            "reference_mean_abs": 5.046004368459497e-06
+          },
+          {
+            "variable": "specific_humidity",
+            "level_hpa": 200,
+            "mae": 2.9225593349469868e-08,
+            "relative_error_percent": 0.16271376618022015,
+            "rmse": 6.168736769225235e-08,
+            "max_abs": 1.8145037756767124e-06,
+            "bias": 3.8632828639364275e-10,
+            "reference_mean_abs": 1.796135264738442e-05
+          },
+          {
+            "variable": "specific_humidity",
+            "level_hpa": 250,
+            "mae": 1.1719018282768092e-07,
+            "relative_error_percent": 0.21269378393065458,
+            "rmse": 2.4609483605775406e-07,
+            "max_abs": 7.823149644536898e-06,
+            "bias": 3.6825324003921473e-09,
+            "reference_mean_abs": 5.509807605185534e-05
+          },
+          {
+            "variable": "specific_humidity",
+            "level_hpa": 300,
+            "mae": 3.411248177346676e-07,
+            "relative_error_percent": 0.2756356956363163,
+            "rmse": 8.526985277372509e-07,
+            "max_abs": 3.2243828172795475e-05,
+            "bias": 7.976084445397747e-09,
+            "reference_mean_abs": 0.00012375930372413013
+          },
+          {
+            "variable": "specific_humidity",
+            "level_hpa": 400,
+            "mae": 1.4123679743538216e-06,
+            "relative_error_percent": 0.3661527330603753,
+            "rmse": 4.339119456112789e-06,
+            "max_abs": 0.00017050717724487185,
+            "bias": 3.2654405176111447e-08,
+            "reference_mean_abs": 0.0003857319219083733
+          },
+          {
+            "variable": "specific_humidity",
+            "level_hpa": 500,
+            "mae": 3.2466504211840783e-06,
+            "relative_error_percent": 0.39036445611660003,
+            "rmse": 1.0128037924562627e-05,
+            "max_abs": 0.00038756662979722023,
+            "bias": 1.0826693510714537e-07,
+            "reference_mean_abs": 0.0008316972435149985
+          },
+          {
+            "variable": "specific_humidity",
+            "level_hpa": 600,
+            "mae": 5.4788353008348955e-06,
+            "relative_error_percent": 0.3724067320038534,
+            "rmse": 1.565560679505654e-05,
+            "max_abs": 0.0005862107500433922,
+            "bias": 9.526460963445969e-08,
+            "reference_mean_abs": 0.0014711966326049672
+          },
+          {
+            "variable": "specific_humidity",
+            "level_hpa": 700,
+            "mae": 7.3409499270562776e-06,
+            "relative_error_percent": 0.3238459244813729,
+            "rmse": 1.8502262514960067e-05,
+            "max_abs": 0.0005637598223984241,
+            "bias": 1.3657281546505373e-07,
+            "reference_mean_abs": 0.0022668032456522446
+          },
+          {
+            "variable": "specific_humidity",
+            "level_hpa": 850,
+            "mae": 8.843148969041824e-06,
+            "relative_error_percent": 0.2055990674156172,
+            "rmse": 2.045203363595728e-05,
+            "max_abs": 0.0006090709939599037,
+            "bias": 5.205637033803828e-07,
+            "reference_mean_abs": 0.004301162004380815
+          },
+          {
+            "variable": "specific_humidity",
+            "level_hpa": 925,
+            "mae": 6.784997407345623e-06,
+            "relative_error_percent": 0.11792445543303272,
+            "rmse": 1.5219143527030651e-05,
+            "max_abs": 0.000497942790389061,
+            "bias": 9.910860914232633e-08,
+            "reference_mean_abs": 0.005753681356789227
+          },
+          {
+            "variable": "specific_humidity",
+            "level_hpa": 1000,
+            "mae": 5.874684401349306e-06,
+            "relative_error_percent": 0.08876781604846186,
+            "rmse": 1.2686213661367694e-05,
+            "max_abs": 0.00041921716183423996,
+            "bias": 4.2754350337286494e-07,
+            "reference_mean_abs": 0.006618034173716839
+          },
+          {
+            "variable": "vertical_velocity",
+            "level_hpa": 50,
+            "mae": 7.171742078330354e-05,
+            "relative_error_percent": 2.1509313273044097,
+            "rmse": 0.00029248472088421726,
+            "max_abs": 0.030543029308319092,
+            "bias": -1.1226065277957651e-06,
+            "reference_mean_abs": 0.0033342496746830708
+          },
+          {
+            "variable": "vertical_velocity",
+            "level_hpa": 100,
+            "mae": 0.00019465809440535366,
+            "relative_error_percent": 2.2571321736745213,
+            "rmse": 0.0006379813148636886,
+            "max_abs": 0.059755951166152954,
+            "bias": -4.5865803233146585e-06,
+            "reference_mean_abs": 0.008624133609706073
+          },
+          {
+            "variable": "vertical_velocity",
+            "level_hpa": 150,
+            "mae": 0.0003282595575523685,
+            "relative_error_percent": 2.1894218012227795,
+            "rmse": 0.0010212453125473678,
+            "max_abs": 0.06725311279296875,
+            "bias": -4.887805198388466e-06,
+            "reference_mean_abs": 0.014992979304811773
+          },
+          {
+            "variable": "vertical_velocity",
+            "level_hpa": 200,
+            "mae": 0.00048388534810748563,
+            "relative_error_percent": 1.9318361304805298,
+            "rmse": 0.00134858766923544,
+            "max_abs": 0.12091004848480225,
+            "bias": -5.892809737644894e-06,
+            "reference_mean_abs": 0.02504795000325016
+          },
+          {
+            "variable": "vertical_velocity",
+            "level_hpa": 250,
+            "mae": 0.0007264047663009092,
+            "relative_error_percent": 1.834271260341728,
+            "rmse": 0.0018895929262572103,
+            "max_abs": 0.18658065795898438,
+            "bias": -1.0498151496845478e-05,
+            "reference_mean_abs": 0.039601818008399625
+          },
+          {
+            "variable": "vertical_velocity",
+            "level_hpa": 300,
+            "mae": 0.0010527716699467874,
+            "relative_error_percent": 1.9479549035441555,
+            "rmse": 0.0026569930800887836,
+            "max_abs": 0.15087813138961792,
+            "bias": -1.4847097296667976e-05,
+            "reference_mean_abs": 0.05404497137132639
+          },
+          {
+            "variable": "vertical_velocity",
+            "level_hpa": 400,
+            "mae": 0.001655414173789661,
+            "relative_error_percent": 2.234966120048275,
+            "rmse": 0.004368797082662546,
+            "max_abs": 0.3308696746826172,
+            "bias": -1.9615065873503102e-05,
+            "reference_mean_abs": 0.07406887106431415
+          },
+          {
+            "variable": "vertical_velocity",
+            "level_hpa": 500,
+            "mae": 0.001952320256801719,
+            "relative_error_percent": 2.36855612080118,
+            "rmse": 0.005449624822259367,
+            "max_abs": 0.502354621887207,
+            "bias": -2.2827113737073924e-05,
+            "reference_mean_abs": 0.08242659904302092
+          },
+          {
+            "variable": "vertical_velocity",
+            "level_hpa": 600,
+            "mae": 0.0019924901082909,
+            "relative_error_percent": 2.3892848490687375,
+            "rmse": 0.005939247179735203,
+            "max_abs": 0.4836711883544922,
+            "bias": -2.6762184616497547e-05,
+            "reference_mean_abs": 0.08339274026148474
+          },
+          {
+            "variable": "vertical_velocity",
+            "level_hpa": 700,
+            "mae": 0.001949978177955637,
+            "relative_error_percent": 2.274393547505096,
+            "rmse": 0.0059485402852267584,
+            "max_abs": 0.45886826515197754,
+            "bias": -8.960452050545882e-06,
+            "reference_mean_abs": 0.08573618141392779
+          },
+          {
+            "variable": "vertical_velocity",
+            "level_hpa": 850,
+            "mae": 0.0017448844362620865,
+            "relative_error_percent": 1.962812125448862,
+            "rmse": 0.004851301125369832,
+            "max_abs": 0.3919351100921631,
+            "bias": 1.1936799101987186e-05,
+            "reference_mean_abs": 0.08889717022015343
+          },
+          {
+            "variable": "vertical_velocity",
+            "level_hpa": 925,
+            "mae": 0.00140422959735046,
+            "relative_error_percent": 1.763134129705141,
+            "rmse": 0.004022030205716379,
+            "max_abs": 0.32431578636169434,
+            "bias": 2.1468575610406295e-05,
+            "reference_mean_abs": 0.07964394618039056
+          },
+          {
+            "variable": "vertical_velocity",
+            "level_hpa": 1000,
+            "mae": 0.0005042906956662383,
+            "relative_error_percent": 0.9963708082527587,
+            "rmse": 0.0016023827232511017,
+            "max_abs": 0.19515001773834229,
+            "bias": 3.192136556609508e-05,
+            "reference_mean_abs": 0.050612752951942175
+          }
+        ]
+      }
+    }
+  ]
+}

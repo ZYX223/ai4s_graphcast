@@ -1,0 +1,217 @@
+{
+  "status": "completed",
+  "date": "2026-10-22",
+  "product_model": "BW1100",
+  "driver_model": "BW1200",
+  "pci": "0000:b0:00.0",
+  "scope": "Official JAX GraphCast inference; same frozen checkpoint/input; 79 selected Linear input producers; native rocBLAS unchanged",
+  "benchmark_order": "baseline x3 followed by fused x3; sequential blocks, not randomized/counterbalanced",
+  "warmup_steps_each_round": 5,
+  "measured_steps_each_round": 40,
+  "performance": {
+    "baseline": {
+      "rollout_seconds": [
+        44.356028699025046,
+        43.512900258006994,
+        43.79884438298177
+      ],
+      "rollout_median_seconds": 43.79884438298177,
+      "apply_sum_seconds": [
+        40.978332206839696,
+        40.08048923721071,
+        40.36239783774363
+      ],
+      "apply_sum_median_seconds": 40.36239783774363
+    },
+    "fused": {
+      "rollout_seconds": [
+        33.672327077016234,
+        33.311109640984796,
+        33.17667255201377
+      ],
+      "rollout_median_seconds": 33.311109640984796,
+      "apply_sum_seconds": [
+        30.194771281676367,
+        29.762686707952525,
+        29.602161516959313
+      ],
+      "apply_sum_median_seconds": 29.762686707952525
+    },
+    "rollout_reduction_percent": 23.94523163737176,
+    "rollout_speedup": 1.3148419507794853
+  },
+  "accuracy_vs_official_jax_fp32": {
+    "baseline": [
+      {
+        "round": 1,
+        "overall_mean_percent": 1.6508871402797543,
+        "z500_percent": 0.02063515965990689,
+        "z500_rmse_m": 1.9200829965643549
+      },
+      {
+        "round": 2,
+        "overall_mean_percent": 1.5995255119048224,
+        "z500_percent": 0.01996643244225211,
+        "z500_rmse_m": 1.8355002971011865
+      },
+      {
+        "round": 3,
+        "overall_mean_percent": 1.7690629977428183,
+        "z500_percent": 0.021737505314295753,
+        "z500_rmse_m": 2.067280024494939
+      }
+    ],
+    "fused": [
+      {
+        "round": 1,
+        "overall_mean_percent": 1.7515878124454953,
+        "z500_percent": 0.021703567811239763,
+        "z500_rmse_m": 2.0979041515895425
+      },
+      {
+        "round": 2,
+        "overall_mean_percent": 1.669540415352867,
+        "z500_percent": 0.020919080010761443,
+        "z500_rmse_m": 1.957419175407505
+      },
+      {
+        "round": 3,
+        "overall_mean_percent": 1.802306133702525,
+        "z500_percent": 0.022160958279698103,
+        "z500_rmse_m": 2.2008478765329382
+      }
+    ]
+  },
+  "accuracy_fused_vs_same_index_baseline": [
+    {
+      "round": 1,
+      "overall_mean_percent": 0.5661085126789845,
+      "z500_percent": 0.006564434593507174,
+      "z500_rmse_m": 0.6816237476015655,
+      "all_11_variables_bitwise_equal": false
+    },
+    {
+      "round": 2,
+      "overall_mean_percent": 0.5810154571321899,
+      "z500_percent": 0.006309503907478213,
+      "z500_rmse_m": 0.6252396032362024,
+      "all_11_variables_bitwise_equal": false
+    },
+    {
+      "round": 3,
+      "overall_mean_percent": 0.5196966632914775,
+      "z500_percent": 0.006101243982102062,
+      "z500_rmse_m": 0.5806910651446328,
+      "all_11_variables_bitwise_equal": false
+    }
+  ],
+  "within_variant_repeatability": {
+    "baseline": [
+      {
+        "round": 2,
+        "overall_mean_percent": 0.5024517749128432,
+        "z500_percent": 0.0058261308178440855
+      },
+      {
+        "round": 3,
+        "overall_mean_percent": 0.48158616233510326,
+        "z500_percent": 0.004934789246066067
+      }
+    ],
+    "fused": [
+      {
+        "round": 2,
+        "overall_mean_percent": 0.5646822264345972,
+        "z500_percent": 0.006779267303921625
+      },
+      {
+        "round": 3,
+        "overall_mean_percent": 0.6095268868055632,
+        "z500_percent": 0.007667264130981748
+      }
+    ]
+  },
+  "profile": {
+    "baseline": {
+      "gpu_kernel_count": 550,
+      "gpu_kernel_sum_ms": 980.0724590000011,
+      "categories": {
+        "gemm": {
+          "calls": 84,
+          "total_ms": 322.574086,
+          "percent_of_kernel_sum": 32.913289526483844
+        },
+        "rne": {
+          "calls": 168,
+          "total_ms": 287.15711899999997,
+          "percent_of_kernel_sum": 29.29958049152768
+        },
+        "scatter_fusion": {
+          "calls": 18,
+          "total_ms": 107.47130499999999,
+          "percent_of_kernel_sum": 10.965648918413272
+        },
+        "layer_norm_fusion": {
+          "calls": 192,
+          "total_ms": 105.54106300000004,
+          "percent_of_kernel_sum": 10.768700010985608
+        },
+        "other_device_kernel": {
+          "calls": 68,
+          "total_ms": 92.680596,
+          "percent_of_kernel_sum": 9.456504480756957
+        },
+        "gather_fusion": {
+          "calls": 20,
+          "total_ms": 64.64829,
+          "percent_of_kernel_sum": 6.596276571832525
+        }
+      }
+    },
+    "fused": {
+      "gpu_kernel_count": 479,
+      "gpu_kernel_sum_ms": 724.3945179999998,
+      "categories": {
+        "gemm": {
+          "calls": 84,
+          "total_ms": 326.08783199999993,
+          "percent_of_kernel_sum": 45.015226357635136
+        },
+        "layer_norm_fusion": {
+          "calls": 200,
+          "total_ms": 118.89834400000001,
+          "percent_of_kernel_sum": 16.413479263795317
+        },
+        "scatter_fusion": {
+          "calls": 18,
+          "total_ms": 107.098028,
+          "percent_of_kernel_sum": 14.784489023424666
+        },
+        "other_device_kernel": {
+          "calls": 70,
+          "total_ms": 102.166672,
+          "percent_of_kernel_sum": 14.103733457574291
+        },
+        "gather_fusion": {
+          "calls": 18,
+          "total_ms": 56.144452,
+          "percent_of_kernel_sum": 7.750535185579636
+        },
+        "rne": {
+          "calls": 89,
+          "total_ms": 13.99919,
+          "percent_of_kernel_sum": 1.9325367119909656
+        }
+      }
+    }
+  },
+  "hlo_fusion": {
+    "selected": 79,
+    "concat": 37,
+    "silu": 42,
+    "canonical_runtime_kernel_groups": 13,
+    "same_gemm_kernel_names_and_multiplicities": true
+  },
+  "baseline_files_unchanged": 115,
+  "tests_passed": 39
+}

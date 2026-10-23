@@ -1,0 +1,146 @@
+[
+  {
+    "stage": "fp32-r01",
+    "lines": [
+      "\u001b[31mHIP_PROF [2026-10-23 03:15:50.745291] [266] [ERROR]: terminated by signal: 11"
+    ]
+  },
+  {
+    "stage": "fp32-r02",
+    "lines": [
+      "\u001b[31mHIP_PROF [2026-10-23 03:31:34.929061] [292] [ERROR]: terminated by signal: 11"
+    ]
+  },
+  {
+    "stage": "fp32-r03",
+    "lines": [
+      "\u001b[31mHIP_PROF [2026-10-23 03:39:20.911768] [223] [ERROR]: terminated by signal: 11"
+    ]
+  },
+  {
+    "stage": "fp32-r04",
+    "lines": [
+      "\u001b[31mHIP_PROF [2026-10-23 03:48:20.919394] [356] [ERROR]: terminated by signal: 11"
+    ]
+  },
+  {
+    "stage": "fp32-r05",
+    "lines": [
+      "\u001b[31mHIP_PROF [2026-10-23 04:00:54.82409] [190] [ERROR]: terminated by signal: 11"
+    ]
+  },
+  {
+    "stage": "fp32-r06",
+    "lines": [
+      "\u001b[31mHIP_PROF [2026-10-23 04:12:47.943314] [226] [ERROR]: terminated by signal: 11"
+    ]
+  },
+  {
+    "stage": "fp32-r07",
+    "lines": [
+      "\u001b[31mHIP_PROF [2026-10-23 04:26:24.125018] [240] [ERROR]: terminated by signal: 11"
+    ]
+  },
+  {
+    "stage": "fp32-r08",
+    "lines": [
+      "\u001b[31mHIP_PROF [2026-10-23 04:40:35.877627] [189] [ERROR]: terminated by signal: 11"
+    ]
+  },
+  {
+    "stage": "fp32-r09",
+    "lines": [
+      "\u001b[31mHIP_PROF [2026-10-23 04:57:08.893813] [250] [ERROR]: terminated by signal: 11"
+    ]
+  },
+  {
+    "stage": "fp32-r10",
+    "lines": [
+      "\u001b[31mHIP_PROF [2026-10-23 05:13:05.691530] [381] [ERROR]: terminated by signal: 11"
+    ]
+  },
+  {
+    "stage": "fp32-r11",
+    "lines": [
+      "\u001b[31mHIP_PROF [2026-10-23 05:30:34.519256] [247] [ERROR]: terminated by signal: 11"
+    ]
+  },
+  {
+    "stage": "fp32-r12",
+    "lines": [
+      "\u001b[31mHIP_PROF [2026-10-23 05:51:50.50285] [278] [ERROR]: terminated by signal: 11"
+    ]
+  },
+  {
+    "stage": "rne_xf32-r01",
+    "lines": [
+      "\u001b[31mHIP_PROF [2026-10-23 03:25:41.922705] [274] [ERROR]: terminated by signal: 11"
+    ]
+  },
+  {
+    "stage": "rne_xf32-r02",
+    "lines": [
+      "\u001b[31mHIP_PROF [2026-10-23 03:34:43.947473] [214] [ERROR]: terminated by signal: 11"
+    ]
+  },
+  {
+    "stage": "rne_xf32-r03",
+    "lines": [
+      "\u001b[31mHIP_PROF [2026-10-23 03:43:03.446568] [259] [ERROR]: terminated by signal: 11"
+    ]
+  },
+  {
+    "stage": "rne_xf32-r04",
+    "lines": [
+      "\u001b[31mHIP_PROF [2026-10-23 03:54:39.39554] [201] [ERROR]: terminated by signal: 11"
+    ]
+  },
+  {
+    "stage": "rne_xf32-r05",
+    "lines": [
+      "\u001b[31mHIP_PROF [2026-10-23 04:05:43.487461] [259] [ERROR]: terminated by signal: 11"
+    ]
+  },
+  {
+    "stage": "rne_xf32-r06",
+    "lines": [
+      "\u001b[31mHIP_PROF [2026-10-23 04:18:50.2521] [242] [ERROR]: terminated by signal: 11"
+    ]
+  },
+  {
+    "stage": "rne_xf32-r07",
+    "lines": [
+      "\u001b[31mHIP_PROF [2026-10-23 04:32:31.775457] [258] [ERROR]: terminated by signal: 11"
+    ]
+  },
+  {
+    "stage": "rne_xf32-r08",
+    "lines": [
+      "\u001b[31mHIP_PROF [2026-10-23 04:48:04.105981] [256] [ERROR]: terminated by signal: 11"
+    ]
+  },
+  {
+    "stage": "rne_xf32-r09",
+    "lines": [
+      "\u001b[31mHIP_PROF [2026-10-23 05:03:51.290414] [200] [ERROR]: terminated by signal: 11"
+    ]
+  },
+  {
+    "stage": "rne_xf32-r10",
+    "lines": [
+      "\u001b[31mHIP_PROF [2026-10-23 05:20:34.982743] [257] [ERROR]: terminated by signal: 11"
+    ]
+  },
+  {
+    "stage": "rne_xf32-r11",
+    "lines": [
+      "\u001b[31mHIP_PROF [2026-10-23 05:38:29.297566] [231] [ERROR]: terminated by signal: 11"
+    ]
+  },
+  {
+    "stage": "rne_xf32-r12",
+    "lines": [
+      "\u001b[31mHIP_PROF [2026-10-23 06:00:12.664854] [244] [ERROR]: terminated by signal: 11"
+    ]
+  }
+]

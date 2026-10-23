@@ -1,0 +1,120 @@
+{
+  "workbook": "/home/zhangyuxin/zyx/graphcast/outputs/logical-operators-20261022/workbook/GraphCast_BW1100_JAX_RNE-XF32_推理逻辑算子耗时_20261022.xlsx",
+  "sha256": "209701197d66fc5f10586dcfc9f70fa8a8204768fa96e3f12f876f4ec472dbd5",
+  "sheets": {
+    "逻辑算子汇总": {
+      "rows": 16,
+      "columns": 13
+    },
+    "分形状耗时": {
+      "rows": 108,
+      "columns": 18
+    },
+    "附件_Kernel明细": {
+      "copied_rows": 60,
+      "columns": 16,
+      "source_sheet": "海光BW1100算子明细"
+    },
+    "说明与来源": {
+      "rows": 14,
+      "columns": 2
+    }
+  },
+  "source_sha256": {
+    "/home/zhangyuxin/zyx/graphcast/outputs/logical-operators-20261022/bench-full-r2/logical/report.json": "bdae6e5b7eceda0789d609f3c230766a9e4ec5434c27290b343901d401da5e3f",
+    "/home/zhangyuxin/zyx/graphcast/outputs/logical-operators-20261022/bench-full-r2/logical/catalog.json": "3a0c64d7ac2d2bcb7114ebd09798bca093844e445726d7397b922e8943557b2e",
+    "/home/zhangyuxin/zyx/graphcast/outputs/inference-operators-20261022/operator-workbook/GraphCast_BW1100_JAX_RNE-XF32_推理算子耗时明细_20261022.xlsx": "f0fa8eccd028f7e33141ee34f6e71e2b30d23f43f6068a3e9accdf5a06dd6176",
+    "/home/zhangyuxin/.codex/attachments/b8ce3c13-73ba-4bdf-8ea2-cb8c0e26c407/GraphCast算子列表_v540训练_最新耗时_20261018.xlsx": "e01f9232a17439cf1dd86cbf680515a695662aa58d93ebc71127f90c31044fd6",
+    "/home/zhangyuxin/zyx/graphcast/outputs/logical-operators-20261022/workbook/archive/GraphCast_BW1100_JAX_RNE-XF32_推理逻辑算子耗时_20261022_完整16页.xlsx": "ffae79a121c47545b64a40d05b46718304ef2e061699ab53ed0de315e7298bdf",
+    "/home/zhangyuxin/zyx/graphcast/outputs/logical-operators-20261022/workbook/archive/GraphCast_BW1100_JAX_RNE-XF32_推理逻辑算子耗时_20261022_JAX列拆分前.xlsx": "bfa0c66f3ae021ae00da9ee3d90e46823f986631ef2e07cdccdc1ad109fe776f"
+  },
+  "logical_types": 16,
+  "cases": 108,
+  "logical_calls": 549,
+  "main_weighted_ms": {
+    "transpose": 12.176034273579717,
+    "reshape": 10.067885159514844,
+    "broadcast_in_dim": 15.086276252986863,
+    "sub": 5.12434815755114,
+    "div": 7.311207911698148,
+    "concatenate": 94.67219142243266,
+    "mul": 3.123219037661329,
+    "linear": 733.45544069889,
+    "silu": 67.87691795034334,
+    "layer_norm": 104.08540692878887,
+    "gather": 43.27740130247548,
+    "scatter-add": 106.07461730251089,
+    "add": 32.50365433632396,
+    "slice": 3.897012531524524,
+    "dynamic_slice": 1.6557630151510239,
+    "squeeze": 3.568891523173079
+  },
+  "format": "simplified-4-sheets-jax-flaggems",
+  "full_archive": "/home/zhangyuxin/zyx/graphcast/outputs/logical-operators-20261022/workbook/archive/GraphCast_BW1100_JAX_RNE-XF32_推理逻辑算子耗时_20261022_完整16页.xlsx",
+  "main_sheet": "逻辑算子汇总",
+  "case_sheet": "分形状耗时",
+  "text_updates": {
+    "附件_Kernel明细": {
+      "K3": {
+        "old": "更多尺寸见 GEMM逐层 / 逐次Kernel",
+        "new": "更多尺寸见完整备份的“附件_GEMM逐层 / 附件_逐次kernel”"
+      },
+      "O3": {
+        "old": "逐次配对原生调用日志；详见 GEMM逐层",
+        "new": "逐次配对原生调用日志；详见完整备份的“附件_GEMM逐层”"
+      },
+      "K4": {
+        "old": "更多尺寸见 GEMM逐层 / 逐次Kernel",
+        "new": "更多尺寸见完整备份的“附件_GEMM逐层 / 附件_逐次kernel”"
+      },
+      "O4": {
+        "old": "逐次配对原生调用日志；详见 GEMM逐层",
+        "new": "逐次配对原生调用日志；详见完整备份的“附件_GEMM逐层”"
+      },
+      "K21": {
+        "old": "更多尺寸见 GEMM逐层 / 逐次Kernel",
+        "new": "更多尺寸见完整备份的“附件_GEMM逐层 / 附件_逐次kernel”"
+      },
+      "O21": {
+        "old": "逐次配对原生调用日志；详见 GEMM逐层",
+        "new": "逐次配对原生调用日志；详见完整备份的“附件_GEMM逐层”"
+      },
+      "K33": {
+        "old": "更多尺寸见 GEMM逐层 / 逐次Kernel",
+        "new": "更多尺寸见完整备份的“附件_GEMM逐层 / 附件_逐次kernel”"
+      },
+      "O33": {
+        "old": "逐次配对原生调用日志；详见 GEMM逐层",
+        "new": "逐次配对原生调用日志；详见完整备份的“附件_GEMM逐层”"
+      },
+      "K43": {
+        "old": "更多尺寸见 GEMM逐层 / 逐次Kernel",
+        "new": "更多尺寸见完整备份的“附件_GEMM逐层 / 附件_逐次kernel”"
+      },
+      "O43": {
+        "old": "逐次配对原生调用日志；详见 GEMM逐层",
+        "new": "逐次配对原生调用日志；详见完整备份的“附件_GEMM逐层”"
+      },
+      "D2": {
+        "old": "累计耗时(ms)",
+        "new": "JAX累计耗时(ms)"
+      },
+      "G2": {
+        "old": "平均单次(ms)",
+        "new": "JAX平均单次(ms)"
+      },
+      "H2": {
+        "old": "最小单次(ms)",
+        "new": "JAX最小单次(ms)"
+      },
+      "I2": {
+        "old": "最大单次(ms)",
+        "new": "JAX最大单次(ms)"
+      }
+    }
+  },
+  "frameworks": {
+    "JAX": "measured RNE+XF32",
+    "FlagGems": "pending; timing cells empty"
+  }
+}

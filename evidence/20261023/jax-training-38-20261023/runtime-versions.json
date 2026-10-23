@@ -1,0 +1,12 @@
+{
+  "python": "3.10.12 (main, Aug 15 2025, 14:32:43) [GCC 11.4.0]",
+  "versions": {
+    "jax": "0.6.0+das.opt1.dtk2604",
+    "jaxlib": "0.6.0+das.opt1.dtk2604",
+    "numpy": "1.26.4",
+    "scipy": "1.15.3",
+    "xarray": "2025.1.2",
+    "dm-haiku": "0.0.14",
+    "optax": "0.2.4"
+  }
+}

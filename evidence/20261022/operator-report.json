@@ -1,0 +1,2277 @@
+{
+  "schema": "graphcast.operator_benchmark.v1",
+  "status": "passed",
+  "mode": "rne_xf32",
+  "source": {
+    "repository": "https://github.com/google-deepmind/graphcast",
+    "commit": "08cf73625c9d12bd9aaa038868bcb2fe488f2a22",
+    "scope": "Unmodified official GraphCast inference import closure and upstream license",
+    "files": {
+      "LICENSE": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+      "graphcast/xarray_jax.py": "0203d371ea2029023d2eae90f447020caa3f0858b01b4244f2824611efb34b18",
+      "graphcast/rollout.py": "0858c305f04c1bc0ecbfc2c2075acc985166eac7a111027dfb354f585cdbf2da",
+      "graphcast/xarray_tree.py": "b6c05004109e88175c6e1faee4f864faea652f78fa99065e2e9635039a8c6fae",
+      "graphcast/normalization.py": "5b5f95bcf830be1236244fd09cc418caa28c1c970793130e93bccbc98e0e00e7",
+      "graphcast/predictor_base.py": "ff3f3297e1ec0484d2baf76b4d7e68c96394f17a6f436381f1e181ebbef823b0",
+      "graphcast/losses.py": "520aa2010ddbc441ee0630598c48176a905c3638582e4af6d15887a68b7c7ab8",
+      "graphcast/graphcast.py": "6aeb9cfa2490b0e2dbfa70f255594914ee1765d5e20c3e66ca912b80bc66e953",
+      "graphcast/typed_graph.py": "feebe364b3ef12f0fc56c0f956330c70680297a9c44378d01ae972db504cd6d6",
+      "graphcast/model_utils.py": "bc8006a4454e40eb6c0b4a802b1bbeac77f136af740cafefcb829f5965a9cce0",
+      "graphcast/icosahedral_mesh.py": "bfafc9a3efa272714122963e6b49efe961b3ab1b5d35a7eddd727aa74d693fbe",
+      "graphcast/grid_mesh_connectivity.py": "914aa71a500a9a3e13cd856a25caffbbba724dda65a30ccf6dbf882e1fe72fc2",
+      "graphcast/deep_typed_graph_net.py": "7812649e3128a002603b537e61c7eda060b03a7a2d90bd037eeb7791b52cc59a",
+      "graphcast/typed_graph_net.py": "58bc7c9b090a65ec83d65f0b3cd48d4a450f57f50b8bba5425f33b25d436e7a4",
+      "graphcast/mlp.py": "a0d0cdf91f01817344935ef8b5ffed20902041e386321ed3da45e6a26a92d266",
+      "graphcast/checkpoint.py": "07dc3521a5ed9e606869246a47f865f524e2fc4c689c745305fcdd3f2e5ab24a",
+      "graphcast/autoregressive.py": "2e44d4505bed0c6a5b6d42fd58d0d0d5414bab2658f02ba2b05e92727887749a"
+    }
+  },
+  "code_sha256": {
+    "configs/case.json": "58b0a7c916b65bb165d96b47a864355e42977d2250f7b770e70c11176bd62300",
+    "configs/h100.json": "7b600a302129f5a25c64aa24c3eeffe2c96dec759a7ae663e9265dd5c9f91dd7",
+    "configs/hygon.json": "486bff55c23089345f6ede2b2ee13f2bc20630263d3953cf0a5b636f1d0502ef",
+    "configs/operators.json": "a45ba0d7b442b9949aa90c399f3bf4f664f28ebd01c076325ca19cf040a42226",
+    "kernels/operator_bench/gemm_bench.hip": "d1e332e082e427e448b7d41b8ff17ed162fe3c44c9252efafc17025638753f49",
+    "kernels/xf32_rne/PROVENANCE.json": "53654a6c6bf652f0018bcd13b02b22127df8b5f77b4c8b0bd915c19d4ba4fcdd",
+    "kernels/xf32_rne/rne_kernel.h": "62e4ad9ce6cb7e27df9e41dbdfe6353241b810c11c92f0aa5e29618d494efd4d",
+    "kernels/xf32_rne/rne_kernel.hip": "6e1ceda3230760855460a09bc3c8d5f173f223a649311bd32ef893b34cf7a690",
+    "kernels/xf32_rne/weights.json": "bd9ad13385c662f316e7ea5dadf94184b237146c9ed6243d99e0725083f8d379",
+    "kernels/xf32_rne/weights.tsv": "ca4119f77e5df8c8f6609990d4adb594b5102e15de2f72efd0781577bb294fc9",
+    "kernels/xf32_rne/xf32_rne_router.cc": "f9177d33c82c842461a43af95f371fd5b32a259ba3e6283b31aa61256a86b8e8",
+    "scripts/audit_inference.py": "78c2621f0ded955be7a3ba3d001b6c9fba6ca385fe0db66c45c881577971c006",
+    "scripts/build_kernel.py": "ddce6aada99a04621b3a7bf013fe74ba2f2ace7ef9ea20ffabf71bee4d9ce457",
+    "scripts/compare.py": "8c450e202708face7353c436c554e215a78489c4f30c40d7da4604e88ac76e0a",
+    "scripts/entry.py": "1a64022e0ec56560b7e490336fa4f48814550ae260d7802104fc5fcd0a71dcba",
+    "scripts/in_container.sh": "0397b7239c7da25375dfcddd24c5566fffbf157ff27fa32df3a0fafb0579f59c",
+    "scripts/operator_bench.py": "daf7ecf4d4b9d1d9d34b6a0bec51c1069669ed6755f0e6a2ee5a18d32ce15baf",
+    "scripts/prepare_data.py": "6812adb5ab86e9c5024d738ad91293b50a0a2bfaacda81534a071710be70cc3e",
+    "scripts/probe_h100.py": "5ce95d5e46daf22316dc615822c6daea4aee8c97a46083a1c9074ca2d485a12d",
+    "scripts/probe_hygon.py": "6c35f88d49bf6f83ec1fe7b9ce559d70bded1dde065189a94a88fddecb64f7eb",
+    "scripts/run.py": "ab3efbb609d08effeaa659e2522ee6051fec9e905fa9ec8c659e7872ba2fbae0",
+    "scripts/summarize_profile.py": "1351d583efc60c6b8b5aa99b7b17bc0dad911f7747d95ee279b248d67cb6fd53",
+    "src/graphcast_bench/__init__.py": "0b1f04fd491075770fb44036aff45175fccb0045cb6973d91dbf090b419b6537",
+    "src/graphcast_bench/assets.py": "cab87ed8a68ac717bac048046096e6cc3d223a28f3e3b0c1630b4261a4701ce8",
+    "src/graphcast_bench/benchmark.py": "78de68ede9f78d88b957c3fb5f875b4ceee1a3b52bea131a7c706b639b550d49",
+    "src/graphcast_bench/graph_operator_bench.py": "bdbd3e7d11a322ce225215755c939a03635deacfadbbfe8a1af9cd7a77323934",
+    "src/graphcast_bench/metrics.py": "a21741b5660b4969e4a8eb34cedd8ca87f71813b7aa334ca912d45b516f72457",
+    "src/graphcast_bench/operator_catalog.py": "e7f79e0efe00a3d6979e3b651823a314df1fadc0b140814f5135efe836e97157",
+    "src/graphcast_bench/profile_summary.py": "a200bda8ac53dcb2a434280260228b115764c141e39f2e165b3ee8dba2b87e71",
+    "src/graphcast_bench/router.py": "78928a6bc98a4b9e9ac9a0321983303d23540f7745fe37d3489e01261bdabe26",
+    "third_party/graphcast/LICENSE": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+    "third_party/graphcast/UPSTREAM.json": "8878f3fe9ff91123d805859c501cba7ae6229390d100370a7fd7baec22d08b89",
+    "third_party/graphcast/graphcast/autoregressive.py": "2e44d4505bed0c6a5b6d42fd58d0d0d5414bab2658f02ba2b05e92727887749a",
+    "third_party/graphcast/graphcast/checkpoint.py": "07dc3521a5ed9e606869246a47f865f524e2fc4c689c745305fcdd3f2e5ab24a",
+    "third_party/graphcast/graphcast/deep_typed_graph_net.py": "7812649e3128a002603b537e61c7eda060b03a7a2d90bd037eeb7791b52cc59a",
+    "third_party/graphcast/graphcast/graphcast.py": "6aeb9cfa2490b0e2dbfa70f255594914ee1765d5e20c3e66ca912b80bc66e953",
+    "third_party/graphcast/graphcast/grid_mesh_connectivity.py": "914aa71a500a9a3e13cd856a25caffbbba724dda65a30ccf6dbf882e1fe72fc2",
+    "third_party/graphcast/graphcast/icosahedral_mesh.py": "bfafc9a3efa272714122963e6b49efe961b3ab1b5d35a7eddd727aa74d693fbe",
+    "third_party/graphcast/graphcast/losses.py": "520aa2010ddbc441ee0630598c48176a905c3638582e4af6d15887a68b7c7ab8",
+    "third_party/graphcast/graphcast/mlp.py": "a0d0cdf91f01817344935ef8b5ffed20902041e386321ed3da45e6a26a92d266",
+    "third_party/graphcast/graphcast/model_utils.py": "bc8006a4454e40eb6c0b4a802b1bbeac77f136af740cafefcb829f5965a9cce0",
+    "third_party/graphcast/graphcast/normalization.py": "5b5f95bcf830be1236244fd09cc418caa28c1c970793130e93bccbc98e0e00e7",
+    "third_party/graphcast/graphcast/predictor_base.py": "ff3f3297e1ec0484d2baf76b4d7e68c96394f17a6f436381f1e181ebbef823b0",
+    "third_party/graphcast/graphcast/rollout.py": "0858c305f04c1bc0ecbfc2c2075acc985166eac7a111027dfb354f585cdbf2da",
+    "third_party/graphcast/graphcast/typed_graph.py": "feebe364b3ef12f0fc56c0f956330c70680297a9c44378d01ae972db504cd6d6",
+    "third_party/graphcast/graphcast/typed_graph_net.py": "58bc7c9b090a65ec83d65f0b3cd48d4a450f57f50b8bba5425f33b25d436e7a4",
+    "third_party/graphcast/graphcast/xarray_jax.py": "0203d371ea2029023d2eae90f447020caa3f0858b01b4244f2824611efb34b18",
+    "third_party/graphcast/graphcast/xarray_tree.py": "b6c05004109e88175c6e1faee4f864faea652f78fa99065e2e9635039a8c6fae"
+  },
+  "data": {
+    "schema": "graphcast.jax_case.v1",
+    "case_config_sha256": "58b0a7c916b65bb165d96b47a864355e42977d2250f7b770e70c11176bd62300",
+    "source_reference_bundle_sha256": "10227f90bbd6dc94c032cf890ff6c6c9871e21d0a1678123c6ca183ae996be10",
+    "reference_sha256": "e4baa7f8eb65e19767adc2bd9a0e564127703787b93895232de6b881032df95d",
+    "reference": "official_jax_fp32",
+    "reference_values_changed": false
+  },
+  "catalog_sha256": "a45ba0d7b442b9949aa90c399f3bf4f664f28ebd01c076325ca19cf040a42226",
+  "jax": "0.6.0+das.opt1.dtk2604",
+  "rounds": 3,
+  "iterations_per_round": 20,
+  "gemm_shapes": [
+    {
+      "status": "passed",
+      "pci": "0000:9c:00.0",
+      "m": 512,
+      "n": 40962,
+      "k": 512,
+      "iterations": 20,
+      "warmup": 5,
+      "input_seed": [
+        20261022,
+        20261023
+      ],
+      "inputs_unchanged_full": true,
+      "rne_explicit_match_full": true,
+      "oracle_output_samples": 32,
+      "timings": {
+        "rne_xf32": {
+          "round_ms": [
+            0.604759312,
+            0.602431345,
+            0.601319599
+          ],
+          "max_abs_error_vs_mode_fp64": 1.03976345e-06,
+          "max_abs_error_vs_original_fp64": 0.00155937503,
+          "median_ms": 0.602431345
+        },
+        "rne_gemm_only": {
+          "round_ms": [
+            0.31690371,
+            0.31500771,
+            0.314463806
+          ],
+          "max_abs_error_vs_mode_fp64": 1.03976345e-06,
+          "max_abs_error_vs_original_fp64": 0.00155937503,
+          "median_ms": 0.31500771
+        },
+        "round_weight": {
+          "round_ms": [
+            0.00681599975,
+            0.00684799999,
+            0.00680000037
+          ],
+          "median_ms": 0.00681599975
+        },
+        "round_activation": {
+          "round_ms": [
+            0.276247692,
+            0.276199698,
+            0.276247859
+          ],
+          "median_ms": 0.276247692
+        }
+      },
+      "calls_per_step": 17,
+      "id": "m512_n40962_k512"
+    },
+    {
+      "status": "passed",
+      "pci": "0000:9c:00.0",
+      "m": 512,
+      "n": 40962,
+      "k": 1024,
+      "iterations": 20,
+      "warmup": 5,
+      "input_seed": [
+        20261022,
+        20261023
+      ],
+      "inputs_unchanged_full": true,
+      "rne_explicit_match_full": true,
+      "oracle_output_samples": 32,
+      "timings": {
+        "rne_xf32": {
+          "round_ms": [
+            0.983558846,
+            0.983335018,
+            0.982735157
+          ],
+          "max_abs_error_vs_mode_fp64": 1.5621481e-06,
+          "max_abs_error_vs_original_fp64": 0.00160198034,
+          "median_ms": 0.983335018
+        },
+        "rne_gemm_only": {
+          "round_ms": [
+            0.53063941,
+            0.528407335,
+            0.530895519
+          ],
+          "max_abs_error_vs_mode_fp64": 1.5621481e-06,
+          "max_abs_error_vs_original_fp64": 0.00160198034,
+          "median_ms": 0.53063941
+        },
+        "round_weight": {
+          "round_ms": [
+            0.00983994976,
+            0.00981594995,
+            0.0105439499
+          ],
+          "median_ms": 0.00983994976
+        },
+        "round_activation": {
+          "round_ms": [
+            0.438751507,
+            0.439671516,
+            0.439687538
+          ],
+          "median_ms": 0.439671516
+        }
+      },
+      "calls_per_step": 17,
+      "id": "m512_n40962_k1024"
+    },
+    {
+      "status": "passed",
+      "pci": "0000:9c:00.0",
+      "m": 512,
+      "n": 327660,
+      "k": 512,
+      "iterations": 20,
+      "warmup": 5,
+      "input_seed": [
+        20261022,
+        20261023
+      ],
+      "inputs_unchanged_full": true,
+      "rne_explicit_match_full": true,
+      "oracle_output_samples": 32,
+      "timings": {
+        "rne_xf32": {
+          "round_ms": [
+            3.69572487,
+            3.69209251,
+            3.69451675
+          ],
+          "max_abs_error_vs_mode_fp64": 9.59960744e-07,
+          "max_abs_error_vs_original_fp64": 0.00155937503,
+          "median_ms": 3.69451675
+        },
+        "rne_gemm_only": {
+          "round_ms": [
+            2.13176613,
+            2.10900631,
+            2.32477398
+          ],
+          "max_abs_error_vs_mode_fp64": 9.59960744e-07,
+          "max_abs_error_vs_original_fp64": 0.00155937503,
+          "median_ms": 2.13176613
+        },
+        "round_weight": {
+          "round_ms": [
+            0.006752,
+            0.00679199994,
+            0.0329839498
+          ],
+          "median_ms": 0.00679199994
+        },
+        "round_activation": {
+          "round_ms": [
+            1.57151842,
+            1.57146273,
+            1.57155838
+          ],
+          "median_ms": 1.57151842
+        }
+      },
+      "calls_per_step": 17,
+      "id": "m512_n327660_k512"
+    },
+    {
+      "status": "passed",
+      "pci": "0000:9c:00.0",
+      "m": 512,
+      "n": 327660,
+      "k": 1536,
+      "iterations": 20,
+      "warmup": 5,
+      "input_seed": [
+        20261022,
+        20261023
+      ],
+      "inputs_unchanged_full": true,
+      "rne_explicit_match_full": true,
+      "oracle_output_samples": 32,
+      "timings": {
+        "rne_xf32": {
+          "round_ms": [
+            9.56535187,
+            10.3128876,
+            10.3287109
+          ],
+          "max_abs_error_vs_mode_fp64": 1.91041909e-06,
+          "max_abs_error_vs_original_fp64": 0.00214796674,
+          "median_ms": 10.3128876
+        },
+        "rne_gemm_only": {
+          "round_ms": [
+            5.71945,
+            5.76485863,
+            5.73848267
+          ],
+          "max_abs_error_vs_mode_fp64": 1.91041909e-06,
+          "max_abs_error_vs_original_fp64": 0.00214796674,
+          "median_ms": 5.73848267
+        },
+        "round_weight": {
+          "round_ms": [
+            0.0156959996,
+            0.01664,
+            0.0158719495
+          ],
+          "median_ms": 0.0158719495
+        },
+        "round_activation": {
+          "round_ms": [
+            4.59584389,
+            4.59742012,
+            4.59586716
+          ],
+          "median_ms": 4.59586716
+        }
+      },
+      "calls_per_step": 16,
+      "id": "m512_n327660_k1536"
+    },
+    {
+      "status": "passed",
+      "pci": "0000:9c:00.0",
+      "m": 512,
+      "n": 1038240,
+      "k": 512,
+      "iterations": 20,
+      "warmup": 5,
+      "input_seed": [
+        20261022,
+        20261023
+      ],
+      "inputs_unchanged_full": true,
+      "rne_explicit_match_full": true,
+      "oracle_output_samples": 32,
+      "timings": {
+        "rne_xf32": {
+          "round_ms": [
+            11.5558151,
+            12.1212715,
+            12.1259003
+          ],
+          "max_abs_error_vs_mode_fp64": 1.27793464e-06,
+          "max_abs_error_vs_original_fp64": 0.00155937503,
+          "median_ms": 12.1212715
+        },
+        "rne_gemm_only": {
+          "round_ms": [
+            7.27015457,
+            7.24550629,
+            7.2493782
+          ],
+          "max_abs_error_vs_mode_fp64": 1.27793464e-06,
+          "max_abs_error_vs_original_fp64": 0.00155937503,
+          "median_ms": 7.2493782
+        },
+        "round_weight": {
+          "round_ms": [
+            0.00747200027,
+            0.00743200034,
+            0.00709600002
+          ],
+          "median_ms": 0.00743200034
+        },
+        "round_activation": {
+          "round_ms": [
+            4.8526989,
+            4.85302048,
+            4.85108452
+          ],
+          "median_ms": 4.8526989
+        }
+      },
+      "calls_per_step": 5,
+      "id": "m512_n1038240_k512"
+    },
+    {
+      "status": "passed",
+      "pci": "0000:9c:00.0",
+      "m": 512,
+      "n": 1618745,
+      "k": 512,
+      "iterations": 20,
+      "warmup": 5,
+      "input_seed": [
+        20261022,
+        20261023
+      ],
+      "inputs_unchanged_full": true,
+      "rne_explicit_match_full": true,
+      "oracle_output_samples": 32,
+      "timings": {
+        "rne_xf32": {
+          "round_ms": [
+            18.0155319,
+            18.8149384,
+            18.8168091
+          ],
+          "max_abs_error_vs_mode_fp64": 5.93402547e-07,
+          "max_abs_error_vs_original_fp64": 0.00155937503,
+          "median_ms": 18.8149384
+        },
+        "rne_gemm_only": {
+          "round_ms": [
+            11.0706406,
+            11.1527847,
+            11.0750473
+          ],
+          "max_abs_error_vs_mode_fp64": 5.93402547e-07,
+          "max_abs_error_vs_original_fp64": 0.00155937503,
+          "median_ms": 11.0750473
+        },
+        "round_weight": {
+          "round_ms": [
+            0.00748799965,
+            0.00745600015,
+            0.00715200007
+          ],
+          "median_ms": 0.00745600015
+        },
+        "round_activation": {
+          "round_ms": [
+            7.52407455,
+            7.52444305,
+            7.52441635
+          ],
+          "median_ms": 7.52441635
+        }
+      },
+      "calls_per_step": 2,
+      "id": "m512_n1618745_k512"
+    },
+    {
+      "status": "passed",
+      "pci": "0000:9c:00.0",
+      "m": 512,
+      "n": 3114720,
+      "k": 512,
+      "iterations": 20,
+      "warmup": 5,
+      "input_seed": [
+        20261022,
+        20261023
+      ],
+      "inputs_unchanged_full": true,
+      "rne_explicit_match_full": true,
+      "oracle_output_samples": 32,
+      "timings": {
+        "rne_xf32": {
+          "round_ms": [
+            36.0442291,
+            36.4999878,
+            36.5162109
+          ],
+          "max_abs_error_vs_mode_fp64": 1.00466423e-06,
+          "max_abs_error_vs_original_fp64": 0.00155937503,
+          "median_ms": 36.4999878
+        },
+        "rne_gemm_only": {
+          "round_ms": [
+            21.7567841,
+            21.6889755,
+            21.8111588
+          ],
+          "max_abs_error_vs_mode_fp64": 1.00466423e-06,
+          "max_abs_error_vs_original_fp64": 0.00155937503,
+          "median_ms": 21.7567841
+        },
+        "round_weight": {
+          "round_ms": [
+            0.00737600029,
+            0.00744000003,
+            0.00732000023
+          ],
+          "median_ms": 0.00737600029
+        },
+        "round_activation": {
+          "round_ms": [
+            14.4188629,
+            14.4282455,
+            14.4194366
+          ],
+          "median_ms": 14.4194366
+        }
+      },
+      "calls_per_step": 2,
+      "id": "m512_n3114720_k512"
+    },
+    {
+      "status": "passed",
+      "pci": "0000:9c:00.0",
+      "m": 83,
+      "n": 1038240,
+      "k": 512,
+      "iterations": 20,
+      "warmup": 5,
+      "input_seed": [
+        20261022,
+        20261023
+      ],
+      "inputs_unchanged_full": true,
+      "rne_explicit_match_full": true,
+      "oracle_output_samples": 32,
+      "timings": {
+        "rne_xf32": {
+          "round_ms": [
+            7.98832169,
+            7.98884964,
+            7.98936157
+          ],
+          "max_abs_error_vs_mode_fp64": 1.42503995e-06,
+          "max_abs_error_vs_original_fp64": 0.000857994843,
+          "median_ms": 7.98884964
+        },
+        "rne_gemm_only": {
+          "round_ms": [
+            3.13518944,
+            3.13057346,
+            3.1323494
+          ],
+          "max_abs_error_vs_mode_fp64": 1.42503995e-06,
+          "max_abs_error_vs_original_fp64": 0.000857994843,
+          "median_ms": 3.1323494
+        },
+        "round_weight": {
+          "round_ms": [
+            0.00417600013,
+            0.0374879509,
+            0.00423199981
+          ],
+          "median_ms": 0.00423199981
+        },
+        "round_activation": {
+          "round_ms": [
+            4.85155602,
+            4.85174789,
+            4.85159607
+          ],
+          "median_ms": 4.85159607
+        }
+      },
+      "calls_per_step": 1,
+      "id": "m83_n1038240_k512"
+    },
+    {
+      "status": "passed",
+      "pci": "0000:9c:00.0",
+      "m": 512,
+      "n": 327660,
+      "k": 4,
+      "iterations": 20,
+      "warmup": 5,
+      "input_seed": [
+        20261022,
+        20261023
+      ],
+      "inputs_unchanged_full": true,
+      "rne_explicit_match_full": true,
+      "oracle_output_samples": 32,
+      "timings": {
+        "rne_xf32": {
+          "round_ms": [
+            0.593087244,
+            0.597767448,
+            0.595623398
+          ],
+          "max_abs_error_vs_mode_fp64": 1.86264515e-08,
+          "max_abs_error_vs_original_fp64": 8.67278068e-05,
+          "median_ms": 0.595623398
+        },
+        "rne_gemm_only": {
+          "round_ms": [
+            0.569319344,
+            0.568335342,
+            0.571647453
+          ],
+          "max_abs_error_vs_mode_fp64": 1.86264515e-08,
+          "max_abs_error_vs_original_fp64": 8.67278068e-05,
+          "median_ms": 0.569319344
+        },
+        "round_weight": {
+          "round_ms": [
+            0.00310399998,
+            0.00311200004,
+            0.00385599993
+          ],
+          "median_ms": 0.00311200004
+        },
+        "round_activation": {
+          "round_ms": [
+            0.0217120007,
+            0.0216959998,
+            0.0226239502
+          ],
+          "median_ms": 0.0217120007
+        }
+      },
+      "calls_per_step": 1,
+      "id": "m512_n327660_k4"
+    },
+    {
+      "status": "passed",
+      "pci": "0000:9c:00.0",
+      "m": 512,
+      "n": 1038240,
+      "k": 184,
+      "iterations": 20,
+      "warmup": 5,
+      "input_seed": [
+        20261022,
+        20261023
+      ],
+      "inputs_unchanged_full": true,
+      "rne_explicit_match_full": true,
+      "oracle_output_samples": 32,
+      "timings": {
+        "rne_xf32": {
+          "round_ms": [
+            5.32438698,
+            5.34072266,
+            5.39092293
+          ],
+          "max_abs_error_vs_mode_fp64": 3.90806235e-07,
+          "max_abs_error_vs_original_fp64": 0.000850624912,
+          "median_ms": 5.34072266
+        },
+        "rne_gemm_only": {
+          "round_ms": [
+            3.53986855,
+            3.54586029,
+            3.70419655
+          ],
+          "max_abs_error_vs_mode_fp64": 3.90806235e-07,
+          "max_abs_error_vs_original_fp64": 0.000850624912,
+          "median_ms": 3.54586029
+        },
+        "round_weight": {
+          "round_ms": [
+            0.00481600016,
+            0.0048080001,
+            0.0335359514
+          ],
+          "median_ms": 0.00481600016
+        },
+        "round_activation": {
+          "round_ms": [
+            1.78122234,
+            1.78123016,
+            1.78176613
+          ],
+          "median_ms": 1.78123016
+        }
+      },
+      "calls_per_step": 1,
+      "id": "m512_n1038240_k184"
+    },
+    {
+      "status": "passed",
+      "pci": "0000:9c:00.0",
+      "m": 512,
+      "n": 1038240,
+      "k": 1024,
+      "iterations": 20,
+      "warmup": 5,
+      "input_seed": [
+        20261022,
+        20261023
+      ],
+      "inputs_unchanged_full": true,
+      "rne_explicit_match_full": true,
+      "oracle_output_samples": 32,
+      "timings": {
+        "rne_xf32": {
+          "round_ms": [
+            21.3977051,
+            22.3002975,
+            22.2945419
+          ],
+          "max_abs_error_vs_mode_fp64": 1.62224751e-06,
+          "max_abs_error_vs_original_fp64": 0.00199199096,
+          "median_ms": 22.2945419
+        },
+        "rne_gemm_only": {
+          "round_ms": [
+            12.230864,
+            12.3592628,
+            12.2400833
+          ],
+          "max_abs_error_vs_mode_fp64": 1.62224751e-06,
+          "max_abs_error_vs_original_fp64": 0.00199199096,
+          "median_ms": 12.2400833
+        },
+        "round_weight": {
+          "round_ms": [
+            0.0121040002,
+            0.012128,
+            0.010904
+          ],
+          "median_ms": 0.0121040002
+        },
+        "round_activation": {
+          "round_ms": [
+            9.64406509,
+            9.63693695,
+            9.6378891
+          ],
+          "median_ms": 9.6378891
+        }
+      },
+      "calls_per_step": 1,
+      "id": "m512_n1038240_k1024"
+    },
+    {
+      "status": "passed",
+      "pci": "0000:9c:00.0",
+      "m": 512,
+      "n": 1618745,
+      "k": 4,
+      "iterations": 20,
+      "warmup": 5,
+      "input_seed": [
+        20261022,
+        20261023
+      ],
+      "inputs_unchanged_full": true,
+      "rne_explicit_match_full": true,
+      "oracle_output_samples": 32,
+      "timings": {
+        "rne_xf32": {
+          "round_ms": [
+            3.03599663,
+            3.02837448,
+            3.04090233
+          ],
+          "max_abs_error_vs_mode_fp64": 1.49011612e-08,
+          "max_abs_error_vs_original_fp64": 9.17784975e-05,
+          "median_ms": 3.03599663
+        },
+        "rne_gemm_only": {
+          "round_ms": [
+            2.93692589,
+            2.94330177,
+            2.93429432
+          ],
+          "max_abs_error_vs_mode_fp64": 1.49011612e-08,
+          "max_abs_error_vs_original_fp64": 9.17784975e-05,
+          "median_ms": 2.93692589
+        },
+        "round_weight": {
+          "round_ms": [
+            0.00474399999,
+            0.00484800003,
+            0.00471200012
+          ],
+          "median_ms": 0.00474399999
+        },
+        "round_activation": {
+          "round_ms": [
+            0.097695899,
+            0.0976719499,
+            0.0976719499
+          ],
+          "median_ms": 0.0976719499
+        }
+      },
+      "calls_per_step": 1,
+      "id": "m512_n1618745_k4"
+    },
+    {
+      "status": "passed",
+      "pci": "0000:9c:00.0",
+      "m": 512,
+      "n": 1618745,
+      "k": 1536,
+      "iterations": 20,
+      "warmup": 5,
+      "input_seed": [
+        20261022,
+        20261023
+      ],
+      "inputs_unchanged_full": true,
+      "rne_explicit_match_full": true,
+      "oracle_output_samples": 32,
+      "timings": {
+        "rne_xf32": {
+          "round_ms": [
+            54.2938782,
+            54.4606262,
+            54.439917
+          ],
+          "max_abs_error_vs_mode_fp64": 3.54353688e-06,
+          "max_abs_error_vs_original_fp64": 0.00206650155,
+          "median_ms": 54.439917
+        },
+        "rne_gemm_only": {
+          "round_ms": [
+            27.7288666,
+            27.7091278,
+            27.7780792
+          ],
+          "max_abs_error_vs_mode_fp64": 3.54353688e-06,
+          "max_abs_error_vs_original_fp64": 0.00206650155,
+          "median_ms": 27.7288666
+        },
+        "round_weight": {
+          "round_ms": [
+            0.0171039999,
+            0.0162559494,
+            0.0169679999
+          ],
+          "median_ms": 0.0169679999
+        },
+        "round_activation": {
+          "round_ms": [
+            26.2755859,
+            26.270282,
+            26.2842987
+          ],
+          "median_ms": 26.2755859
+        }
+      },
+      "calls_per_step": 1,
+      "id": "m512_n1618745_k1536"
+    },
+    {
+      "status": "passed",
+      "pci": "0000:9c:00.0",
+      "m": 512,
+      "n": 3114720,
+      "k": 4,
+      "iterations": 20,
+      "warmup": 5,
+      "input_seed": [
+        20261022,
+        20261023
+      ],
+      "inputs_unchanged_full": true,
+      "rne_explicit_match_full": true,
+      "oracle_output_samples": 32,
+      "timings": {
+        "rne_xf32": {
+          "round_ms": [
+            5.81200333,
+            5.80707397,
+            5.79796333
+          ],
+          "max_abs_error_vs_mode_fp64": 1.49011612e-08,
+          "max_abs_error_vs_original_fp64": 0.000147473869,
+          "median_ms": 5.80707397
+        },
+        "rne_gemm_only": {
+          "round_ms": [
+            5.61378632,
+            5.60865936,
+            5.60027504
+          ],
+          "max_abs_error_vs_mode_fp64": 1.49011612e-08,
+          "max_abs_error_vs_original_fp64": 0.000147473869,
+          "median_ms": 5.60865936
+        },
+        "round_weight": {
+          "round_ms": [
+            0.00369599983,
+            0.0039760001,
+            0.00331199989
+          ],
+          "median_ms": 0.00369599983
+        },
+        "round_activation": {
+          "round_ms": [
+            0.183399844,
+            0.184407854,
+            0.183415794
+          ],
+          "median_ms": 0.183415794
+        }
+      },
+      "calls_per_step": 1,
+      "id": "m512_n3114720_k4"
+    },
+    {
+      "status": "passed",
+      "pci": "0000:9c:00.0",
+      "m": 512,
+      "n": 3114720,
+      "k": 1536,
+      "iterations": 20,
+      "warmup": 5,
+      "input_seed": [
+        20261022,
+        20261023
+      ],
+      "inputs_unchanged_full": true,
+      "rne_explicit_match_full": true,
+      "oracle_output_samples": 32,
+      "timings": {
+        "rne_xf32": {
+          "round_ms": [
+            105.486816,
+            105.571887,
+            105.576428
+          ],
+          "max_abs_error_vs_mode_fp64": 2.84013913e-06,
+          "max_abs_error_vs_original_fp64": 0.00211684226,
+          "median_ms": 105.571887
+        },
+        "rne_gemm_only": {
+          "round_ms": [
+            53.6480042,
+            53.6506409,
+            53.6635437
+          ],
+          "max_abs_error_vs_mode_fp64": 2.84013913e-06,
+          "max_abs_error_vs_original_fp64": 0.00211684226,
+          "median_ms": 53.6506409
+        },
+        "round_weight": {
+          "round_ms": [
+            0.0174079999,
+            0.0174239501,
+            0.0186719999
+          ],
+          "median_ms": 0.0174239501
+        },
+        "round_activation": {
+          "round_ms": [
+            49.4429565,
+            49.4551514,
+            49.4609375
+          ],
+          "median_ms": 49.4551514
+        }
+      },
+      "calls_per_step": 1,
+      "id": "m512_n3114720_k1536"
+    }
+  ],
+  "input_policy": "Deterministic synthetic inputs; actual model shapes and frequencies. Not captured activations.",
+  "timing_scope": "HIP event averages over repeated operations, 5 warmups, allocations and correctness excluded. No interposer/routing overhead. Synthetic inputs at real model shapes; not end-to-end performance.",
+  "frequency_weighted_standalone_ms_per_model_step": {
+    "rne_xf32": {
+      "round_ms": [
+        612.7051540699999,
+        631.0616112390001,
+        631.41629196
+      ],
+      "median_ms": 631.0616112390001
+    },
+    "rne_gemm_only": {
+      "round_ms": [
+        353.567903844,
+        353.85571468699993,
+        357.3517610679999
+      ],
+      "median_ms": 353.85571468699993
+    },
+    "round_weight": {
+      "round_ms": [
+        0.7833111365900001,
+        0.8319830006899999,
+        1.2701414448400004
+      ],
+      "median_ms": 0.8319830006899999
+    },
+    "round_activation": {
+      "round_ms": [
+        272.8518647567,
+        272.9130026717,
+        272.88459646309997
+      ],
+      "median_ms": 272.88459646309997
+    }
+  },
+  "graph_operators": {
+    "status": "passed",
+    "rows": [
+      {
+        "name": "grid2mesh-gather-senders",
+        "operation": "gather",
+        "input_shape": [
+          1038240,
+          512
+        ],
+        "output_shape": [
+          1618745,
+          512
+        ],
+        "dtype": "float32",
+        "round_samples_ms": [
+          [
+            3.459761996055022,
+            3.435801016166806,
+            3.4798120032064617,
+            3.4043610212393105,
+            3.4635810006875545,
+            3.4020220045931637,
+            3.463032015133649,
+            3.403561015147716,
+            3.4677410149015486,
+            3.3802909892983735,
+            3.472092008451,
+            3.3913709921762347,
+            3.4598020138219,
+            3.3872209896799177,
+            3.4568909904919565,
+            3.3883520227391273,
+            3.4792810038197786,
+            3.3871310006361455,
+            3.469982009846717,
+            3.382730996236205
+          ],
+          [
+            3.4708620223682374,
+            3.399221022846177,
+            3.4485909854993224,
+            4.501537972828373,
+            3.9909849874675274,
+            3.3842410193756223,
+            3.508281981339678,
+            3.3900510170497,
+            4.034084995510057,
+            4.061176005052403,
+            3.4491709957364947,
+            3.4198609937448055,
+            3.4601420047692955,
+            3.389541001524776,
+            3.461852000327781,
+            3.386100986972451,
+            3.454741003224626,
+            3.4020610037259758,
+            3.4602419764269143,
+            3.3833909837994725
+          ],
+          [
+            3.4495310101192445,
+            3.968824981711805,
+            3.45013098558411,
+            3.3979020081460476,
+            3.4619309881236404,
+            3.393822000361979,
+            3.659861977212131,
+            3.95094501436688,
+            3.859243995975703,
+            3.9679050096310675,
+            3.4523209906183183,
+            3.3958810090553015,
+            3.4612120070960373,
+            3.387391014257446,
+            3.4615619806572795,
+            3.382141003385186,
+            3.4566910180728883,
+            3.397521999431774,
+            3.4585109970066696,
+            3.391241014469415
+          ]
+        ],
+        "round_median_ms": [
+          3.4463460033293813,
+          3.4519559994805604,
+          3.4545060043456033
+        ],
+        "median_ms": 3.4535309969214723,
+        "sample_rows_checked": 32,
+        "max_abs_error": 0.0,
+        "status": "passed",
+        "jit_cache_unchanged": true
+      },
+      {
+        "name": "grid2mesh-gather-receivers",
+        "operation": "gather",
+        "input_shape": [
+          40962,
+          512
+        ],
+        "output_shape": [
+          1618745,
+          512
+        ],
+        "dtype": "float32",
+        "round_samples_ms": [
+          [
+            3.1947600073181093,
+            3.4086010127793998,
+            3.275000985013321,
+            3.505441010929644,
+            4.069996008183807,
+            3.619641996920109,
+            3.9559949946124107,
+            3.553292015567422,
+            3.2622900034766644,
+            3.8496739871334285,
+            3.2741809845902026,
+            3.2577200036030263,
+            4.1379560134373605,
+            3.2617699762340635,
+            3.2665310136508197,
+            3.251100017223507,
+            3.2680300064384937,
+            3.2700609881430864,
+            3.2110000029206276,
+            3.474690980510786
+          ],
+          [
+            3.2758809975348413,
+            3.252869995776564,
+            3.27717000618577,
+            3.2536399958189577,
+            3.3086010080296546,
+            3.2589799957349896,
+            3.5245019826106727,
+            3.3540810109116137,
+            3.9611050160601735,
+            3.2545799913350493,
+            3.389591001905501,
+            3.372651000972837,
+            3.2780710025690496,
+            3.5059209913015366,
+            3.2698310096748173,
+            3.2583300198893994,
+            3.675252984976396,
+            3.251720016123727,
+            3.261729987571016,
+            3.2487309945281595
+          ],
+          [
+            3.2991110056173056,
+            3.262449987232685,
+            3.2733000116422772,
+            3.254461014876142,
+            3.263189981225878,
+            3.2642609730828553,
+            3.265480016125366,
+            3.4865610068663955,
+            3.276950999861583,
+            3.2568499736953527,
+            3.273270995123312,
+            3.2655200047884136,
+            3.2689300132915378,
+            3.4990719868801534,
+            3.339351009344682,
+            3.259690012782812,
+            3.2650410139467567,
+            3.2561399857513607,
+            3.2717199937906116,
+            3.2567699963692576
+          ]
+        ],
+        "round_median_ms": [
+          3.274590984801762,
+          3.2765255018603057,
+          3.26550001045689
+        ],
+        "median_ms": 3.270890490966849,
+        "sample_rows_checked": 32,
+        "max_abs_error": 0.0,
+        "status": "passed",
+        "jit_cache_unchanged": true
+      },
+      {
+        "name": "grid2mesh-scatter",
+        "operation": "scatter",
+        "input_shape": [
+          1618745,
+          512
+        ],
+        "output_shape": [
+          40962,
+          512
+        ],
+        "dtype": "float32",
+        "round_samples_ms": [
+          [
+            19.03292801580392,
+            18.942057999083772,
+            19.936733995564282,
+            18.919388996437192,
+            19.02913799858652,
+            18.9419980160892,
+            19.380940997507423,
+            18.902066978625953,
+            19.062239007325843,
+            18.920067988801748,
+            19.019447994651273,
+            18.871137988753617,
+            19.02330797747709,
+            18.892438005423173,
+            19.003537978278473,
+            19.380971003556624,
+            19.021727988729253,
+            18.909967999206856,
+            19.40908099641092,
+            18.890028004534543
+          ],
+          [
+            19.036157988011837,
+            18.92833801684901,
+            19.05067899497226,
+            18.939938017865643,
+            19.049097987590358,
+            19.338191021233797,
+            19.029338989639655,
+            18.93007699982263,
+            19.040159008000046,
+            18.8874370069243,
+            19.02022902504541,
+            18.919818016001955,
+            19.053567986702546,
+            18.950899015180767,
+            19.6083819901105,
+            18.934708001324907,
+            19.012508011655882,
+            18.893576983828098,
+            19.05236899619922,
+            19.502031995216385
+          ],
+          [
+            18.98127800086513,
+            18.914758024038747,
+            19.024028995772824,
+            18.89222697354853,
+            19.025159010197967,
+            18.887787009589374,
+            19.202230003429577,
+            18.879787996411324,
+            19.56909100408666,
+            19.15875999839045,
+            19.655701995361596,
+            18.871126987505704,
+            19.58006201311946,
+            19.451851985650137,
+            19.032518001040444,
+            18.918648012913764,
+            19.02030801284127,
+            18.90894799726084,
+            19.028848997550085,
+            18.923077994259074
+          ]
+        ],
+        "round_median_ms": [
+          19.011492986464873,
+          19.024784007342532,
+          19.022168504307047
+        ],
+        "median_ms": 19.02026851894334,
+        "sample_rows_checked": 32,
+        "max_abs_error": 1.0903575457632542e-05,
+        "status": "passed",
+        "jit_cache_unchanged": true
+      },
+      {
+        "name": "mesh-gather-senders",
+        "operation": "gather",
+        "input_shape": [
+          40962,
+          512
+        ],
+        "output_shape": [
+          327660,
+          512
+        ],
+        "dtype": "float32",
+        "round_samples_ms": [
+          [
+            1.5083299949765205,
+            0.8475650101900101,
+            1.5272690216079354,
+            0.854615995194763,
+            0.9106459910981357,
+            0.8263250056188554,
+            0.8387950074393302,
+            1.1220570013392717,
+            0.8576849941164255,
+            1.491809991421178,
+            1.1583669984247535,
+            0.8450949972029775,
+            0.8282350027002394,
+            0.8800560026429594,
+            1.3614979980047792,
+            1.2325679999776185,
+            1.096366991987452,
+            0.7274739909917116,
+            0.7282450096681714,
+            0.7369840168394148
+          ],
+          [
+            0.7251439965330064,
+            0.7242550200317055,
+            1.0352660028729588,
+            0.7273350202012807,
+            0.7291240035556257,
+            0.7291649817489088,
+            1.027065998641774,
+            0.9891059889923781,
+            0.7284549938049167,
+            1.0164859995711595,
+            0.7363550248555839,
+            0.7218040118459612,
+            0.9992359846364707,
+            1.1186370102223009,
+            0.7248040055856109,
+            0.7169950113166124,
+            0.823384994873777,
+            0.9536259749438614,
+            1.2782180274371058,
+            0.8828649879433215
+          ],
+          [
+            0.7968349964357913,
+            1.514380011940375,
+            0.9067950013559312,
+            0.7221849809866399,
+            0.924345018574968,
+            0.8071959891822189,
+            0.778093992266804,
+            0.8118760015349835,
+            0.8055350044742227,
+            0.9821060230024159,
+            0.72653399547562,
+            0.7237549871206284,
+            0.8842149982228875,
+            0.7531150185968727,
+            1.350687991362065,
+            0.9714960178826004,
+            0.7311750086955726,
+            0.9787660092115402,
+            0.9970559913199395,
+            0.8313450089190155
+          ]
+        ],
+        "round_median_ms": [
+          0.8688704983796924,
+          0.7798700098646805,
+          0.8216105052269995
+        ],
+        "median_ms": 0.8510905026923865,
+        "sample_rows_checked": 32,
+        "max_abs_error": 0.0,
+        "status": "passed",
+        "jit_cache_unchanged": true
+      },
+      {
+        "name": "mesh-gather-receivers",
+        "operation": "gather",
+        "input_shape": [
+          40962,
+          512
+        ],
+        "output_shape": [
+          327660,
+          512
+        ],
+        "dtype": "float32",
+        "round_samples_ms": [
+          [
+            0.8149550121743232,
+            0.9775759826879948,
+            1.590639993082732,
+            1.4824789832346141,
+            0.8810859872028232,
+            0.9608359832782298,
+            0.8744059887249023,
+            0.84681500447914,
+            0.8416950004175305,
+            1.014887006022036,
+            0.8059050014708191,
+            0.862054992467165,
+            1.48030900163576,
+            1.5718299837317318,
+            1.2581579794641584,
+            1.4028679870534688,
+            1.2527980143204331,
+            0.7985949923750013,
+            0.7959849899634719,
+            0.7946749974507838
+          ],
+          [
+            0.7996149943210185,
+            0.8001250098459423,
+            0.7956149929668754,
+            0.7972750172484666,
+            0.816585001302883,
+            0.7942950178403407,
+            0.7953149906825274,
+            0.7949249993544072,
+            0.8437549986410886,
+            0.8038349915295839,
+            0.8219050068873912,
+            0.8494160138070583,
+            0.8750050037633628,
+            0.8568060002289712,
+            1.4877289941068739,
+            0.7996150234248489,
+            0.8060849795583636,
+            0.8349849958904088,
+            0.8404060208704323,
+            0.8343450026586652
+          ],
+          [
+            0.7947050034999847,
+            0.803244998678565,
+            0.8019049710128456,
+            0.8018349763005972,
+            0.8042349945753813,
+            0.8089150069281459,
+            1.0268869809806347,
+            0.821474997792393,
+            0.8072950004134327,
+            0.8087049936875701,
+            0.8016150095500052,
+            0.8007050200831145,
+            0.8141649886965752,
+            0.8030250028241426,
+            0.7978449866641313,
+            0.7956649933476001,
+            0.878344988450408,
+            0.9810169867705554,
+            0.8074849902186543,
+            0.803504983196035
+          ]
+        ],
+        "round_median_ms": [
+          0.9209609852405265,
+          0.8113349904306233,
+          0.8038699888857082
+        ],
+        "median_ms": 0.8145600004354492,
+        "sample_rows_checked": 32,
+        "max_abs_error": 0.0,
+        "status": "passed",
+        "jit_cache_unchanged": true
+      },
+      {
+        "name": "mesh-scatter",
+        "operation": "scatter",
+        "input_shape": [
+          327660,
+          512
+        ],
+        "output_shape": [
+          40962,
+          512
+        ],
+        "dtype": "float32",
+        "round_samples_ms": [
+          [
+            3.495181998005137,
+            3.451902011875063,
+            3.5126210132148117,
+            3.4445720084477216,
+            3.554711991455406,
+            3.454211982898414,
+            3.492960997391492,
+            3.4667720028664917,
+            3.504242020426318,
+            3.444950998527929,
+            3.845524013740942,
+            3.4461820032447577,
+            3.490161005174741,
+            3.4698919916991144,
+            3.515332005918026,
+            3.448411007411778,
+            3.4903019841294736,
+            3.448841016506776,
+            3.5010320134460926,
+            3.4612220188137144
+          ],
+          [
+            3.4858720027841628,
+            3.465260990196839,
+            3.4943920036312193,
+            3.457442013313994,
+            3.5020709910895675,
+            3.4541820059530437,
+            3.4885909990407526,
+            3.4567120019346476,
+            3.4874120028689504,
+            3.456321021076292,
+            3.500352002447471,
+            3.456211998127401,
+            3.501531988149509,
+            3.4804909955710173,
+            3.5020019859075546,
+            3.446781018283218,
+            3.4931419941131026,
+            3.458111983491108,
+            3.4971520071849227,
+            3.4518209868110716
+          ],
+          [
+            3.497031982988119,
+            3.450342017458752,
+            3.513261995976791,
+            3.449901007115841,
+            3.486241999780759,
+            3.4514110011514276,
+            3.492311981972307,
+            3.4539219923317432,
+            3.4987010003533214,
+            3.459561994532123,
+            3.4930910042021424,
+            3.466282010776922,
+            3.5283220058772713,
+            3.454271994996816,
+            3.477400983683765,
+            3.4544820082373917,
+            3.5111120087094605,
+            3.4637509961612523,
+            3.494131990009919,
+            3.4496709995437413
+          ]
+        ],
+        "round_median_ms": [
+          3.480026498436928,
+          3.48318149917759,
+          3.4718414972303435
+        ],
+        "median_ms": 3.478945989627391,
+        "sample_rows_checked": 32,
+        "max_abs_error": 2.7213245630264282e-06,
+        "status": "passed",
+        "jit_cache_unchanged": true
+      },
+      {
+        "name": "mesh2grid-gather-senders",
+        "operation": "gather",
+        "input_shape": [
+          40962,
+          512
+        ],
+        "output_shape": [
+          3114720,
+          512
+        ],
+        "dtype": "float32",
+        "round_samples_ms": [
+          [
+            6.179568998049945,
+            6.135888019343838,
+            6.185979000292718,
+            6.096168013755232,
+            6.174537993501872,
+            6.101248000049964,
+            6.190418993355706,
+            6.095787975937128,
+            6.183257995871827,
+            6.0926479927729815,
+            6.187868973938748,
+            6.103886989876628,
+            6.1801990086678416,
+            6.1011280049569905,
+            6.184599013067782,
+            6.11579799442552,
+            6.176577997393906,
+            6.107277993578464,
+            6.202649004990235,
+            6.100388010963798
+          ],
+          [
+            6.171997985802591,
+            6.120358011685312,
+            6.198509014211595,
+            6.116478005424142,
+            6.18365898844786,
+            6.103627005359158,
+            6.176948983920738,
+            6.103697989601642,
+            6.179888994665816,
+            6.107547989813611,
+            6.181867996929213,
+            6.096377997891977,
+            6.204648991115391,
+            6.109668000135571,
+            6.196019006893039,
+            6.106607004767284,
+            6.188009021570906,
+            6.103107996750623,
+            6.256419001147151,
+            6.477590010035783
+          ],
+          [
+            6.180097989272326,
+            6.102868006564677,
+            6.183538993354887,
+            6.31832901854068,
+            6.182277982588857,
+            6.104808999225497,
+            6.181598000694066,
+            6.104068015702069,
+            6.180689000757411,
+            6.106757005909458,
+            6.179468997288495,
+            6.114418007200584,
+            6.170248991111293,
+            6.10311797936447,
+            6.38515900936909,
+            6.11118899541907,
+            6.181277974974364,
+            6.111768016126007,
+            6.17925901315175,
+            6.103736988734454
+          ]
+        ],
+        "round_median_ms": [
+          6.155213006422855,
+          6.1744734848616645,
+          6.174754002131522
+        ],
+        "median_ms": 6.173267989652231,
+        "sample_rows_checked": 32,
+        "max_abs_error": 0.0,
+        "status": "passed",
+        "jit_cache_unchanged": true
+      },
+      {
+        "name": "mesh2grid-gather-receivers",
+        "operation": "gather",
+        "input_shape": [
+          1038240,
+          512
+        ],
+        "output_shape": [
+          3114720,
+          512
+        ],
+        "dtype": "float32",
+        "round_samples_ms": [
+          [
+            6.252699007745832,
+            6.179867981700227,
+            6.255788990529254,
+            6.168927997350693,
+            6.251529004657641,
+            6.17651900392957,
+            6.2496990140061826,
+            6.181308010127395,
+            6.25113898422569,
+            6.176789000164717,
+            6.252148014027625,
+            6.182348995935172,
+            6.254779000300914,
+            6.179229007102549,
+            6.259349000174552,
+            6.191377993673086,
+            6.252699007745832,
+            6.180238997330889,
+            6.252488004975021,
+            6.181809003464878
+          ],
+          [
+            6.252299004700035,
+            6.18849802413024,
+            6.244660005904734,
+            6.174278008984402,
+            6.255938991671428,
+            6.178777985041961,
+            6.258609006181359,
+            6.177259027026594,
+            6.284279021201655,
+            6.180069001857191,
+            6.254948995774612,
+            6.17946800775826,
+            6.2518990016542375,
+            6.180928001413122,
+            6.253178988117725,
+            6.174059002660215,
+            6.250219012144953,
+            6.186527985846624,
+            6.249188998481259,
+            6.181518983794376
+          ],
+          [
+            6.240309012355283,
+            6.179928983328864,
+            6.252618972212076,
+            6.184578989632428,
+            6.2517879996448755,
+            6.195219000801444,
+            6.253628991544247,
+            6.181078002555296,
+            6.251809012610465,
+            6.174929003464058,
+            6.261549016926438,
+            6.175207992782816,
+            6.257859000470489,
+            6.17902900557965,
+            6.250339007237926,
+            6.36119901901111,
+            6.261698988964781,
+            6.181659002322704,
+            6.256179010961205,
+            6.430659996112809
+          ]
+        ],
+        "round_median_ms": [
+          6.220538503839634,
+          6.216579015017487,
+          6.251063503441401
+        ],
+        "median_ms": 6.246924502192996,
+        "sample_rows_checked": 32,
+        "max_abs_error": 0.0,
+        "status": "passed",
+        "jit_cache_unchanged": true
+      },
+      {
+        "name": "mesh2grid-scatter",
+        "operation": "scatter",
+        "input_shape": [
+          3114720,
+          512
+        ],
+        "output_shape": [
+          1038240,
+          512
+        ],
+        "dtype": "float32",
+        "round_samples_ms": [
+          [
+            30.86934200837277,
+            31.002903007902205,
+            30.876981996698305,
+            31.059674016432837,
+            30.866352026350796,
+            30.987182981334627,
+            31.210364017169923,
+            31.4518460072577,
+            30.885873013176024,
+            31.01801298907958,
+            30.87266199872829,
+            31.02033300092444,
+            30.88505199411884,
+            30.939032993046567,
+            30.80929201678373,
+            30.974572990089655,
+            30.886402004398406,
+            31.018864014185965,
+            30.880461999913678,
+            31.156623997958377
+          ],
+          [
+            30.85387300234288,
+            30.984241981059313,
+            30.86533199530095,
+            31.05448401765898,
+            30.860711995046586,
+            31.014833017252386,
+            30.816272017545998,
+            31.01920400513336,
+            30.947941995691508,
+            31.106364011066034,
+            30.86820201133378,
+            30.963383003836498,
+            30.867241992382333,
+            31.07534401351586,
+            30.92759201535955,
+            31.01695398800075,
+            30.865081993397325,
+            31.055252999067307,
+            30.887032015016302,
+            31.120314000872895
+          ],
+          [
+            31.17234498495236,
+            30.931021989090368,
+            30.851662013446912,
+            30.959552997956052,
+            31.052923994138837,
+            31.025952979689464,
+            30.86243200232275,
+            31.24761499930173,
+            30.79945099307224,
+            30.993313004728407,
+            30.86945301038213,
+            30.934442998841405,
+            30.874332005623728,
+            30.98322299774736,
+            30.811292002908885,
+            30.994463013485074,
+            30.839191982522607,
+            31.056982988957316,
+            30.80075199250132,
+            31.003842974314466
+          ]
+        ],
+        "round_median_ms": [
+          30.95680299156811,
+          30.955662499764003,
+          30.94699799839873
+        ],
+        "median_ms": 30.95374749682378,
+        "sample_rows_checked": 32,
+        "max_abs_error": 4.76837158203125e-07,
+        "status": "passed",
+        "jit_cache_unchanged": true
+      },
+      {
+        "name": "layer-norm-40962",
+        "operation": "layer_norm",
+        "input_shape": [
+          40962,
+          512
+        ],
+        "output_shape": [
+          40962,
+          512
+        ],
+        "dtype": "float32",
+        "round_samples_ms": [
+          [
+            0.4267820040695369,
+            0.43859300785697997,
+            0.4911230062134564,
+            0.2868619922082871,
+            0.7312149973586202,
+            0.3669419966172427,
+            0.3704720002133399,
+            0.3639719798229635,
+            0.3663530224002898,
+            0.3642619994934648,
+            0.4903530061710626,
+            0.27412199415266514,
+            0.3390620113350451,
+            0.28270200709812343,
+            0.28407099307514727,
+            0.48612302634865046,
+            0.29130198527127504,
+            0.2860120148397982,
+            0.28406199999153614,
+            0.5112229846417904
+          ],
+          [
+            0.2862019755411893,
+            0.2870009921025485,
+            0.6205039971973747,
+            0.28294199728406966,
+            0.2908320166170597,
+            0.5449530144687742,
+            0.4848829994443804,
+            0.5152529920451343,
+            0.2820120134856552,
+            0.28531200950965285,
+            0.28418199508450925,
+            0.2817510103341192,
+            0.2872909826692194,
+            0.2844319969881326,
+            0.2843420079443604,
+            0.28462198679335415,
+            0.29516100767068565,
+            0.30107199563644826,
+            0.28385198675096035,
+            0.2848820004146546
+          ],
+          [
+            0.28264199499972165,
+            0.282891996903345,
+            0.49169297562912107,
+            0.4937530029565096,
+            0.5251630209386349,
+            0.28451200341805816,
+            0.2896120131481439,
+            0.29542201082222164,
+            0.28865199419669807,
+            0.28800201835110784,
+            0.2854210033547133,
+            0.28360201395116746,
+            0.28439200832508504,
+            0.2838119980879128,
+            0.2828709839377552,
+            0.28314199880696833,
+            0.2903419954236597,
+            0.2877820224966854,
+            0.5224929773248732,
+            0.48328301636502147
+          ]
+        ],
+        "round_median_ms": [
+          0.3653075109468773,
+          0.2857569925254211,
+          0.2878920204238966
+        ],
+        "median_ms": 0.28832700627390295,
+        "sample_rows_checked": 32,
+        "max_abs_error": 5.023985258922892e-07,
+        "status": "passed",
+        "jit_cache_unchanged": true
+      },
+      {
+        "name": "layer-norm-327660",
+        "operation": "layer_norm",
+        "input_shape": [
+          327660,
+          512
+        ],
+        "output_shape": [
+          327660,
+          512
+        ],
+        "dtype": "float32",
+        "round_samples_ms": [
+          [
+            1.5918090066406876,
+            1.6301110154017806,
+            1.5988700033631176,
+            1.616130000911653,
+            1.6104299866128713,
+            1.5947200008668005,
+            2.0411229925230145,
+            1.5966990031301975,
+            1.6088899865280837,
+            1.5996700094547123,
+            1.6062299837358296,
+            1.6042400093283504,
+            1.6038600006140769,
+            1.6050199919845909,
+            1.6004499921109527,
+            1.9839820160996169,
+            1.608460006536916,
+            1.5944199985824525,
+            1.6104300157167017,
+            1.6011299740057439
+          ],
+          [
+            1.610220002476126,
+            1.6049999976530671,
+            1.6201699909288436,
+            1.6056399908848107,
+            1.5988400264177471,
+            1.6146999842021614,
+            1.60548000712879,
+            1.6012809937819839,
+            1.6100500070024282,
+            1.611049985513091,
+            1.614039996638894,
+            1.6038789763115346,
+            1.6111500153783709,
+            1.6015800065360963,
+            1.6041000199038535,
+            1.617620000615716,
+            1.6433409764431417,
+            1.6149999864865094,
+            1.6142500098794699,
+            1.6053100116550922
+          ],
+          [
+            1.6207000007852912,
+            1.602590986294672,
+            1.6060199995990843,
+            1.6084399831015617,
+            1.600620016688481,
+            1.6122499946504831,
+            1.6019390022847801,
+            1.6085199895314872,
+            1.6068199765868485,
+            1.6003299970179796,
+            1.6045899828895926,
+            1.6045809898059815,
+            1.5992199769243598,
+            1.6111499862745404,
+            1.6069799894466996,
+            1.6112500161398202,
+            1.600730000063777,
+            1.6129499999806285,
+            1.9735120004042983,
+            1.6277900140266865
+          ]
+        ],
+        "round_median_ms": [
+          1.6046300006564707,
+          1.610135004739277,
+          1.606899983016774
+        ],
+        "median_ms": 1.606524980161339,
+        "sample_rows_checked": 32,
+        "max_abs_error": 4.551384034101602e-07,
+        "status": "passed",
+        "jit_cache_unchanged": true
+      },
+      {
+        "name": "layer-norm-1038240",
+        "operation": "layer_norm",
+        "input_shape": [
+          1038240,
+          512
+        ],
+        "output_shape": [
+          1038240,
+          512
+        ],
+        "dtype": "float32",
+        "round_samples_ms": [
+          [
+            5.050631007179618,
+            5.130712001118809,
+            5.05778199294582,
+            5.1269409887026995,
+            5.062101990915835,
+            5.1289820112288,
+            5.055690999142826,
+            5.122923001181334,
+            5.052181018982083,
+            5.12624200200662,
+            5.060141003923491,
+            5.116362008266151,
+            5.0872220017481595,
+            5.118522007251158,
+            5.072121013654396,
+            5.12647200957872,
+            5.079441994894296,
+            5.129272001795471,
+            5.055210989667103,
+            5.123562004882842
+          ],
+          [
+            5.055121990153566,
+            5.132810998475179,
+            5.059322022134438,
+            5.129311990458518,
+            5.064800992840901,
+            5.132713005878031,
+            5.0623709976207465,
+            5.13227199553512,
+            5.058772017946467,
+            5.148502008523792,
+            5.111461010528728,
+            5.128753022290766,
+            5.0604309944901615,
+            5.133461992954835,
+            5.454514001030475,
+            5.123811977682635,
+            5.063641001470387,
+            5.131401994731277,
+            5.061651987489313,
+            5.121532012708485
+          ],
+          [
+            5.07144202128984,
+            5.189971998333931,
+            5.1498419779818505,
+            5.27775299269706,
+            5.283113016048446,
+            5.402614013291895,
+            5.394674022682011,
+            5.497624020790681,
+            5.472894001286477,
+            5.527723988052458,
+            5.471153999678791,
+            5.507545021828264,
+            5.441974004497752,
+            5.4182030144147575,
+            5.446123977890238,
+            5.383884010370821,
+            5.364602984627709,
+            5.416803993284702,
+            5.261632992187515,
+            5.377642984967679
+          ]
+        ],
+        "round_median_ms": [
+          5.101792005007155,
+          5.12267199519556,
+          5.398644017986953
+        ],
+        "median_ms": 5.128867516759783,
+        "sample_rows_checked": 32,
+        "max_abs_error": 5.552954105425556e-07,
+        "status": "passed",
+        "jit_cache_unchanged": true
+      },
+      {
+        "name": "layer-norm-1618745",
+        "operation": "layer_norm",
+        "input_shape": [
+          1618745,
+          512
+        ],
+        "output_shape": [
+          1618745,
+          512
+        ],
+        "dtype": "float32",
+        "round_samples_ms": [
+          [
+            7.815258984919637,
+            7.8672389790881425,
+            7.816218974767253,
+            7.870778994401917,
+            7.830167975043878,
+            7.864968996727839,
+            7.818688987754285,
+            7.876478979596868,
+            7.817538978997618,
+            7.869388995459303,
+            7.806247973348945,
+            7.866819010814652,
+            7.810178998624906,
+            7.866358995670453,
+            7.805909001035616,
+            7.865679013775662,
+            7.814967975718901,
+            7.860789017286152,
+            7.809928996721283,
+            7.877458992879838
+          ],
+          [
+            7.861318998038769,
+            8.05924998712726,
+            8.230031002312899,
+            8.539063011994585,
+            8.70832399232313,
+            8.799684990663081,
+            8.73139500617981,
+            8.9120949851349,
+            8.721474994672462,
+            8.536753011867404,
+            8.42587198712863,
+            8.393082011025399,
+            8.287431992357597,
+            8.289951976621523,
+            8.18445099866949,
+            8.213210996473208,
+            8.160010998835787,
+            8.216180984163657,
+            8.207020990084857,
+            8.315341983688995
+          ],
+          [
+            8.347672002855688,
+            8.388493006350473,
+            8.314261009218171,
+            8.349611976882443,
+            8.299892011564225,
+            8.333771984325722,
+            8.314941980643198,
+            8.321892004460096,
+            8.284681010991335,
+            8.345401991391554,
+            8.306761999847367,
+            8.368942013476044,
+            8.425592008279637,
+            8.36408298346214,
+            8.320301014464349,
+            8.361173007870093,
+            8.30934097757563,
+            8.35037199431099,
+            8.30385202425532,
+            8.35666200146079
+          ]
+        ],
+        "round_median_ms": [
+          7.845478496165015,
+          8.30264698015526,
+          8.339586987858638
+        ],
+        "median_ms": 8.28869198448956,
+        "sample_rows_checked": 32,
+        "max_abs_error": 6.215233847584045e-07,
+        "status": "passed",
+        "jit_cache_unchanged": true
+      },
+      {
+        "name": "layer-norm-3114720",
+        "operation": "layer_norm",
+        "input_shape": [
+          3114720,
+          512
+        ],
+        "output_shape": [
+          3114720,
+          512
+        ],
+        "dtype": "float32",
+        "round_samples_ms": [
+          [
+            14.372698991792277,
+            14.526551007293165,
+            14.39439901150763,
+            14.399430016055703,
+            14.382969005964696,
+            14.35504000983201,
+            14.381829998455942,
+            14.338698994833976,
+            14.409700001124293,
+            14.365209004608914,
+            14.692440978251398,
+            15.492117003304884,
+            16.317091998644173,
+            16.32641101605259,
+            16.06476999586448,
+            15.716177993454039,
+            15.477316977921873,
+            15.26519501931034,
+            15.57069702539593,
+            15.249585005221888
+          ],
+          [
+            15.538355975877494,
+            15.553737001027912,
+            15.555906982626766,
+            15.726537996670231,
+            15.850908996071666,
+            15.454256004886702,
+            15.670418011723086,
+            15.715337998699397,
+            15.498516004299745,
+            15.496177016757429,
+            15.550336975138634,
+            15.525955997873098,
+            15.570367017062381,
+            15.564166998956352,
+            15.566276997560635,
+            15.529426978901029,
+            15.788988006534055,
+            15.45786700444296,
+            15.470485988771543,
+            15.471096005057916
+          ],
+          [
+            15.503847011132166,
+            15.515336999669671,
+            15.523075999226421,
+            15.515126986429095,
+            15.530806995229796,
+            15.507835982134566,
+            15.540816995780915,
+            15.529116994002834,
+            15.562507003778592,
+            15.52803599042818,
+            15.53346699802205,
+            15.518347005126998,
+            15.532896009972319,
+            15.53636699100025,
+            15.550887008430436,
+            15.535076992819086,
+            15.80836798530072,
+            15.509026998188347,
+            15.540847001830116,
+            15.511985984630883
+          ]
+        ],
+        "round_median_ms": [
+          14.609495992772281,
+          15.552036988083273,
+          15.529961994616315
+        ],
+        "median_ms": 15.526995994150639,
+        "sample_rows_checked": 32,
+        "max_abs_error": 5.552954105425556e-07,
+        "status": "passed",
+        "jit_cache_unchanged": true
+      }
+    ],
+    "topology": [
+      {
+        "name": "grid2mesh",
+        "senders": 1038240,
+        "receivers": 40962,
+        "edges": 1618745,
+        "sender_sha256": "05e395204a4da82bdf16f756aa8f8a7105537cd9a2b6a275dbf466b23b870826",
+        "receiver_sha256": "a2c251abdcb79ac1ac8cbe35fef034af03c37fed4eafbe3889eb83aef2821f9b"
+      },
+      {
+        "name": "mesh",
+        "senders": 40962,
+        "receivers": 40962,
+        "edges": 327660,
+        "sender_sha256": "c0e347c93170d1c5291b30ec8fb8563ae86becc4ee46bcf6baa83ce43e78f522",
+        "receiver_sha256": "f91c5061f868a234cb0f0e8cc3651f856c4cfe37967b9e50ac92a2a211819b5a"
+      },
+      {
+        "name": "mesh2grid",
+        "senders": 40962,
+        "receivers": 1038240,
+        "edges": 3114720,
+        "sender_sha256": "6cd05fdc853440aa84996aa4262dc9f238ad4d347b3139734f6802422d01e3d2",
+        "receiver_sha256": "04ec627476847b94b07587ec8f5b39d4107be574f8c70ec646b14d5c4a8f0970"
+      }
+    ],
+    "input_policy": "Official graph indices; seeded JAX normal FP32 features, affine LayerNorm parameters synthesized. Batch=1 is flattened.",
+    "timing_scope": "Synchronized JAX wall time; compile, input generation/transfer and validation excluded. Independent operations do not reproduce the model's fused kernels."
+  },
+  "code_and_data_unchanged": true
+}

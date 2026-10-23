@@ -2,3 +2,5 @@
 evidence/**/*.csv -text whitespace=cr-at-eol
 third_party/** -text whitespace=-blank-at-eof
 kernels/** -text
+# Keep archived measured sources byte-identical, including upstream EOF style.
+experiments/** -text whitespace=-blank-at-eof

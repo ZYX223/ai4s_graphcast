@@ -1,0 +1,20 @@
+{
+  "kind": "storage#object",
+  "id": "dm_graphcast/dataset/source-hres_date-2022-01-01_res-0.25_levels-13_steps-12.nc/1690801292345024",
+  "selfLink": "https://www.googleapis.com/storage/v1/b/dm_graphcast/o/dataset%2Fsource-hres_date-2022-01-01_res-0.25_levels-13_steps-12.nc",
+  "mediaLink": "https://storage.googleapis.com/download/storage/v1/b/dm_graphcast/o/dataset%2Fsource-hres_date-2022-01-01_res-0.25_levels-13_steps-12.nc?generation=1690801292345024&alt=media",
+  "name": "dataset/source-hres_date-2022-01-01_res-0.25_levels-13_steps-12.nc",
+  "bucket": "dm_graphcast",
+  "generation": "1690801292345024",
+  "metageneration": "1",
+  "contentType": "application/octet-stream",
+  "storageClass": "STANDARD",
+  "size": "4892198052",
+  "md5Hash": "RENaPYOlIcMJ4J0bEs0/0A==",
+  "crc32c": "HwRWCg==",
+  "etag": "CMD9qdPluIADEAE=",
+  "timeCreated": "2023-07-31T11:01:32.403Z",
+  "updated": "2023-07-31T11:01:32.403Z",
+  "timeStorageClassUpdated": "2023-07-31T11:01:32.403Z",
+  "timeFinalized": "2023-07-31T11:01:32.403Z"
+}

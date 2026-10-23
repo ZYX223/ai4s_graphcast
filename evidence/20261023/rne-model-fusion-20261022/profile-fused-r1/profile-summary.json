@@ -1,0 +1,675 @@
+{
+  "gpu_kernel_count": 479,
+  "gpu_kernel_sum_ms": 724.3945179999998,
+  "gpu_kernel_busy_union_ms": 724.3928609992713,
+  "gpu_kernel_span_ms": 988.830351000011,
+  "host_api_count": 1725,
+  "host_api_sum_ms": 249.69770899999955,
+  "device_copy_count": 25,
+  "device_copy_sum_ms": 67.888185,
+  "categories": {
+    "gemm": {
+      "calls": 84,
+      "total_ms": 326.08783199999993,
+      "percent_of_kernel_sum": 45.015226357635136
+    },
+    "layer_norm_fusion": {
+      "calls": 200,
+      "total_ms": 118.89834400000001,
+      "percent_of_kernel_sum": 16.413479263795317
+    },
+    "scatter_fusion": {
+      "calls": 18,
+      "total_ms": 107.098028,
+      "percent_of_kernel_sum": 14.784489023424666
+    },
+    "other_device_kernel": {
+      "calls": 70,
+      "total_ms": 102.166672,
+      "percent_of_kernel_sum": 14.103733457574291
+    },
+    "gather_fusion": {
+      "calls": 18,
+      "total_ms": 56.144452,
+      "percent_of_kernel_sum": 7.750535185579636
+    },
+    "rne": {
+      "calls": 89,
+      "total_ms": 13.99919,
+      "percent_of_kernel_sum": 1.9325367119909656
+    }
+  },
+  "kernels": [
+    {
+      "name": "Cijk_Ailk_Bljk_SB_MX_MT256x256x16_SE_AMAS3_BW_DTL0_BL1_DRB16_ALT_KME0_ETN_EPS0_FL0_GRVW4_GSU1_ISA938_IU1_KME_GRCMn2_K1_KLA_LDL1_LRVW4_MAC_MMAC_BW1_MMAC_KM0_MMAC_KME1_NLCA1_NLCB1_OLDSR0_PGR2_PLR1_RK1_SU0_SUM0_SUS256_SVW4_TT8_16_TLM0_ULDSWM0_USFGRO0_USSB0_VAW1_VSn1_VW4_WG32_16_1_WGM1",
+      "category": "gemm",
+      "hlo_tags": [],
+      "calls": 80,
+      "total_ms": 313.066558,
+      "percent_of_kernel_sum": 43.217687354171844
+    },
+    {
+      "name": "input_scatter_fusion_16",
+      "category": "scatter_fusion",
+      "hlo_tags": [
+        "scatter",
+        "layer_norm"
+      ],
+      "calls": 15,
+      "total_ms": 53.14909399999999,
+      "percent_of_kernel_sum": 7.337037026003557
+    },
+    {
+      "name": "input_scatter_fusion",
+      "category": "scatter_fusion",
+      "hlo_tags": [
+        "scatter",
+        "layer_norm"
+      ],
+      "calls": 1,
+      "total_ms": 30.933745,
+      "percent_of_kernel_sum": 4.270289770470074
+    },
+    {
+      "name": "loop_bitcast_convert_fusion_1",
+      "category": "other_device_kernel",
+      "hlo_tags": [],
+      "calls": 2,
+      "total_ms": 26.591028,
+      "percent_of_kernel_sum": 3.670793654459987
+    },
+    {
+      "name": "loop_concatenate_fusion_4",
+      "category": "gather_fusion",
+      "hlo_tags": [
+        "gather"
+      ],
+      "calls": 14,
+      "total_ms": 25.823507000000003,
+      "percent_of_kernel_sum": 3.564840202172818
+    },
+    {
+      "name": "loop_bitcast_convert_fusion_8",
+      "category": "other_device_kernel",
+      "hlo_tags": [],
+      "calls": 17,
+      "total_ms": 21.153748999999998,
+      "percent_of_kernel_sum": 2.920197278466981
+    },
+    {
+      "name": "input_scatter_fusion_17",
+      "category": "scatter_fusion",
+      "hlo_tags": [
+        "scatter",
+        "layer_norm"
+      ],
+      "calls": 1,
+      "total_ms": 19.181751,
+      "percent_of_kernel_sum": 2.6479702045453637
+    },
+    {
+      "name": "loop_concatenate_fusion",
+      "category": "gather_fusion",
+      "hlo_tags": [
+        "gather"
+      ],
+      "calls": 1,
+      "total_ms": 16.422072,
+      "percent_of_kernel_sum": 2.267006664454079
+    },
+    {
+      "name": "loop_add_fusion_18",
+      "category": "layer_norm_fusion",
+      "hlo_tags": [
+        "layer_norm"
+      ],
+      "calls": 13,
+      "total_ms": 16.290394,
+      "percent_of_kernel_sum": 2.2488290006634206
+    },
+    {
+      "name": "loop_bitcast_convert_fusion_7",
+      "category": "other_device_kernel",
+      "hlo_tags": [],
+      "calls": 4,
+      "total_ms": 15.543832000000002,
+      "percent_of_kernel_sum": 2.1457688612712564
+    },
+    {
+      "name": "round_rne(float const*, float*, int, int, int)",
+      "category": "rne",
+      "hlo_tags": [],
+      "calls": 89,
+      "total_ms": 13.99919,
+      "percent_of_kernel_sum": 1.9325367119909656
+    },
+    {
+      "name": "input_reduce_fusion_38",
+      "category": "layer_norm_fusion",
+      "hlo_tags": [
+        "layer_norm",
+        "reduction"
+      ],
+      "calls": 2,
+      "total_ms": 12.779193,
+      "percent_of_kernel_sum": 1.7641206114152292
+    },
+    {
+      "name": "loop_bitcast_convert_fusion_3",
+      "category": "other_device_kernel",
+      "hlo_tags": [],
+      "calls": 2,
+      "total_ms": 12.767674,
+      "percent_of_kernel_sum": 1.7625304558144106
+    },
+    {
+      "name": "input_reduce_fusion_41",
+      "category": "layer_norm_fusion",
+      "hlo_tags": [
+        "layer_norm",
+        "reduction"
+      ],
+      "calls": 2,
+      "total_ms": 12.412954000000001,
+      "percent_of_kernel_sum": 1.713562663929492
+    },
+    {
+      "name": "input_reduce_fusion_34",
+      "category": "layer_norm_fusion",
+      "hlo_tags": [
+        "layer_norm",
+        "reduction"
+      ],
+      "calls": 17,
+      "total_ms": 11.329593000000001,
+      "percent_of_kernel_sum": 1.564008660816509
+    },
+    {
+      "name": "input_reduce_fusion_48",
+      "category": "layer_norm_fusion",
+      "hlo_tags": [
+        "layer_norm",
+        "reduction"
+      ],
+      "calls": 17,
+      "total_ms": 10.987035,
+      "percent_of_kernel_sum": 1.5167197883184427
+    },
+    {
+      "name": "loop_concatenate_fusion_1",
+      "category": "gather_fusion",
+      "hlo_tags": [
+        "gather",
+        "layer_norm"
+      ],
+      "calls": 1,
+      "total_ms": 9.659995,
+      "percent_of_kernel_sum": 1.3335267951323733
+    },
+    {
+      "name": "Cijk_Ailk_Bljk_SB_MT128x128x16_SE_AMAS3_BW_DTL0_BL1_DRB16_ALT_KME0_ETN_EPS0_FL0_GRVW4_GSU1_ISA938_IU1_KME_GRCMn1_K1_KLA_LDL1_LRVW4_MAC_MMAC_BW1_MMAC_KM0_MMAC_KME1_NLCA1_NLCB1_OLDSR0_PGR2_PLR1_RK0_SU32_SUM0_SUS256_SVW4_TT4_8_TLM0_ULDSWM0_USFGRO0_USSB0_VAW1_VSn1_VW4_WG32_16_1_WGM8",
+      "category": "gemm",
+      "hlo_tags": [],
+      "calls": 2,
+      "total_ms": 9.344156,
+      "percent_of_kernel_sum": 1.2899263823528828
+    },
+    {
+      "name": "loop_add_fusion_2",
+      "category": "layer_norm_fusion",
+      "hlo_tags": [
+        "layer_norm"
+      ],
+      "calls": 1,
+      "total_ms": 9.038716,
+      "percent_of_kernel_sum": 1.24776151329185
+    },
+    {
+      "name": "loop_add_fusion_4",
+      "category": "layer_norm_fusion",
+      "hlo_tags": [
+        "layer_norm"
+      ],
+      "calls": 2,
+      "total_ms": 8.056156000000001,
+      "percent_of_kernel_sum": 1.1121227176376842
+    },
+    {
+      "name": "loop_concatenate_fusion_19",
+      "category": "other_device_kernel",
+      "hlo_tags": [],
+      "calls": 1,
+      "total_ms": 7.972637,
+      "percent_of_kernel_sum": 1.100593226742227
+    },
+    {
+      "name": "input_reduce_fusion_40",
+      "category": "layer_norm_fusion",
+      "hlo_tags": [
+        "layer_norm",
+        "reduction"
+      ],
+      "calls": 3,
+      "total_ms": 6.1811169999999995,
+      "percent_of_kernel_sum": 0.8532804771998566
+    },
+    {
+      "name": "input_reduce_fusion_37",
+      "category": "layer_norm_fusion",
+      "hlo_tags": [
+        "layer_norm",
+        "reduction"
+      ],
+      "calls": 2,
+      "total_ms": 6.126397,
+      "percent_of_kernel_sum": 0.8457265823759315
+    },
+    {
+      "name": "input_reduce_fusion_43",
+      "category": "layer_norm_fusion",
+      "hlo_tags": [
+        "layer_norm",
+        "reduction"
+      ],
+      "calls": 2,
+      "total_ms": 5.960317,
+      "percent_of_kernel_sum": 0.8227998489629654
+    },
+    {
+      "name": "input_reduce_fusion_45",
+      "category": "layer_norm_fusion",
+      "hlo_tags": [
+        "layer_norm",
+        "reduction"
+      ],
+      "calls": 3,
+      "total_ms": 5.959837,
+      "percent_of_kernel_sum": 0.8227335867276678
+    },
+    {
+      "name": "loop_concatenate_fusion_2",
+      "category": "other_device_kernel",
+      "hlo_tags": [],
+      "calls": 1,
+      "total_ms": 5.297758,
+      "percent_of_kernel_sum": 0.7313360148868494
+    },
+    {
+      "name": "loop_concatenate_fusion_36",
+      "category": "other_device_kernel",
+      "hlo_tags": [],
+      "calls": 17,
+      "total_ms": 4.4687980000000005,
+      "percent_of_kernel_sum": 0.6169011345279123
+    },
+    {
+      "name": "input_scatter_fusion_1",
+      "category": "scatter_fusion",
+      "hlo_tags": [
+        "scatter",
+        "layer_norm"
+      ],
+      "calls": 1,
+      "total_ms": 3.833438,
+      "percent_of_kernel_sum": 0.5291920224056694
+    },
+    {
+      "name": "loop_add_fusion_20",
+      "category": "layer_norm_fusion",
+      "hlo_tags": [
+        "layer_norm"
+      ],
+      "calls": 17,
+      "total_ms": 3.5647990000000003,
+      "percent_of_kernel_sum": 0.49210739609710863
+    },
+    {
+      "name": "loop_bitcast_convert_fusion_41",
+      "category": "other_device_kernel",
+      "hlo_tags": [],
+      "calls": 17,
+      "total_ms": 3.4577580000000006,
+      "percent_of_kernel_sum": 0.47733077957942266
+    },
+    {
+      "name": "Cijk_Ailk_Bljk_SB_MX_MT128x128x8_SE_AMAS3_BW_DTL1_BL1_DRB16_ALT_KME0_ETN_EPS1_FL0_GRVW4_GSU1_ISA938_IU1_KME_GRCMn2_K1_KLA_LDL1_LRVW4_MAC_MMAC_BW1_MMAC_KM0_MMAC_KME1_NLCA1_NLCB1_OLDSR0_PGR1_PLR1_RK0_SU0_SUM0_SUS256_SVW4_TT8_8_TLM1_ULDSWM0_USFGRO0_USSB0_VAW1_VSn1_VW4_WG16_16_1_WGM8",
+      "category": "gemm",
+      "hlo_tags": [],
+      "calls": 1,
+      "total_ms": 3.067518,
+      "percent_of_kernel_sum": 0.42345958228248226
+    },
+    {
+      "name": "loop_add_fusion_3",
+      "category": "layer_norm_fusion",
+      "hlo_tags": [
+        "layer_norm"
+      ],
+      "calls": 1,
+      "total_ms": 2.9283180000000004,
+      "percent_of_kernel_sum": 0.4042435340461813
+    },
+    {
+      "name": "loop_concatenate_fusion_18",
+      "category": "gather_fusion",
+      "hlo_tags": [
+        "gather",
+        "layer_norm"
+      ],
+      "calls": 1,
+      "total_ms": 2.298239,
+      "percent_of_kernel_sum": 0.3172634445585355
+    },
+    {
+      "name": "input_reduce_fusion_35",
+      "category": "layer_norm_fusion",
+      "hlo_tags": [
+        "layer_norm",
+        "reduction"
+      ],
+      "calls": 17,
+      "total_ms": 2.2953599999999996,
+      "percent_of_kernel_sum": 0.31686600919307345
+    },
+    {
+      "name": "input_reduce_fusion_65",
+      "category": "layer_norm_fusion",
+      "hlo_tags": [
+        "layer_norm",
+        "reduction"
+      ],
+      "calls": 17,
+      "total_ms": 2.278559,
+      "percent_of_kernel_sum": 0.31454669291133436
+    },
+    {
+      "name": "loop_broadcast_fusion",
+      "category": "other_device_kernel",
+      "hlo_tags": [],
+      "calls": 1,
+      "total_ms": 2.171999,
+      "percent_of_kernel_sum": 0.29983647667526947
+    },
+    {
+      "name": "loop_concatenate_fusion_3",
+      "category": "gather_fusion",
+      "hlo_tags": [
+        "gather",
+        "layer_norm"
+      ],
+      "calls": 1,
+      "total_ms": 1.940639,
+      "percent_of_kernel_sum": 0.2678980792618313
+    },
+    {
+      "name": "loop_add_fusion_19",
+      "category": "layer_norm_fusion",
+      "hlo_tags": [
+        "layer_norm"
+      ],
+      "calls": 1,
+      "total_ms": 1.5479990000000001,
+      "percent_of_kernel_sum": 0.21369557078840298
+    },
+    {
+      "name": "loop_broadcast_fusion_1",
+      "category": "other_device_kernel",
+      "hlo_tags": [],
+      "calls": 1,
+      "total_ms": 1.2308789999999998,
+      "percent_of_kernel_sum": 0.16991832066846205
+    },
+    {
+      "name": "loop_add_fusion",
+      "category": "other_device_kernel",
+      "hlo_tags": [],
+      "calls": 1,
+      "total_ms": 1.1555199999999999,
+      "percent_of_kernel_sum": 0.15951528777306404
+    },
+    {
+      "name": "Cijk_Ailk_Bljk_SB_MT128x128x16_SE_AMAS3_BW_DTL0_BL1_DRB16_ALT_KME0_ETN_EPS0_FL0_GRVW4_GSU1_ISA938_IU1_KME_GRCMn1_K1_KLA_LDL1_LRVW4_MAC_MMAC_BW1_MMAC_KM0_MMAC_KME1_NLCA1_NLCB1_OLDSR0_PGR2_PLR1_RK0_SU0_SUM0_SUS256_SVW4_TT4_8_TLM0_ULDSWM0_USFGRO0_USSB0_VAW1_VSn1_VW4_WG32_16_1_WGM8",
+      "category": "gemm",
+      "hlo_tags": [],
+      "calls": 1,
+      "total_ms": 0.6096,
+      "percent_of_kernel_sum": 0.08415303882793881
+    },
+    {
+      "name": "loop_add_fusion_1",
+      "category": "other_device_kernel",
+      "hlo_tags": [],
+      "calls": 1,
+      "total_ms": 0.2184,
+      "percent_of_kernel_sum": 0.030149317060403275
+    },
+    {
+      "name": "loop_multiply_fusion",
+      "category": "layer_norm_fusion",
+      "hlo_tags": [
+        "layer_norm"
+      ],
+      "calls": 2,
+      "total_ms": 0.16416,
+      "percent_of_kernel_sum": 0.022661684471775644
+    },
+    {
+      "name": "loop_add_fusion_37",
+      "category": "layer_norm_fusion",
+      "hlo_tags": [
+        "layer_norm"
+      ],
+      "calls": 1,
+      "total_ms": 0.16336,
+      "percent_of_kernel_sum": 0.022551247412946333
+    },
+    {
+      "name": "loop_rsqrt_fusion_1",
+      "category": "layer_norm_fusion",
+      "hlo_tags": [
+        "layer_norm"
+      ],
+      "calls": 2,
+      "total_ms": 0.16255999999999998,
+      "percent_of_kernel_sum": 0.022440810354117012
+    },
+    {
+      "name": "loop_transpose_fusion",
+      "category": "other_device_kernel",
+      "hlo_tags": [],
+      "calls": 1,
+      "total_ms": 0.11888,
+      "percent_of_kernel_sum": 0.016410946942036358
+    },
+    {
+      "name": "loop_multiply_fusion_19",
+      "category": "layer_norm_fusion",
+      "hlo_tags": [
+        "layer_norm"
+      ],
+      "calls": 2,
+      "total_ms": 0.10896,
+      "percent_of_kernel_sum": 0.015041527412552842
+    },
+    {
+      "name": "loop_multiply_fusion_2",
+      "category": "layer_norm_fusion",
+      "hlo_tags": [
+        "layer_norm"
+      ],
+      "calls": 17,
+      "total_ms": 0.10224000000000001,
+      "percent_of_kernel_sum": 0.014113856118386588
+    },
+    {
+      "name": "loop_rsqrt_fusion_23",
+      "category": "layer_norm_fusion",
+      "hlo_tags": [
+        "layer_norm"
+      ],
+      "calls": 17,
+      "total_ms": 0.10224,
+      "percent_of_kernel_sum": 0.014113856118386586
+    },
+    {
+      "name": "loop_multiply_fusion_24",
+      "category": "layer_norm_fusion",
+      "hlo_tags": [
+        "layer_norm"
+      ],
+      "calls": 17,
+      "total_ms": 0.09967999999999999,
+      "percent_of_kernel_sum": 0.013760457530132773
+    },
+    {
+      "name": "loop_rsqrt_fusion_40",
+      "category": "layer_norm_fusion",
+      "hlo_tags": [
+        "layer_norm"
+      ],
+      "calls": 17,
+      "total_ms": 0.09967999999999999,
+      "percent_of_kernel_sum": 0.013760457530132773
+    },
+    {
+      "name": "loop_rsqrt_fusion_6",
+      "category": "layer_norm_fusion",
+      "hlo_tags": [
+        "layer_norm"
+      ],
+      "calls": 3,
+      "total_ms": 0.08592,
+      "percent_of_kernel_sum": 0.01186094011826854
+    },
+    {
+      "name": "loop_rsqrt_fusion_3",
+      "category": "layer_norm_fusion",
+      "hlo_tags": [
+        "layer_norm"
+      ],
+      "calls": 2,
+      "total_ms": 0.0512,
+      "percent_of_kernel_sum": 0.007067971765076226
+    },
+    {
+      "name": "loop_multiply_fusion_21",
+      "category": "layer_norm_fusion",
+      "hlo_tags": [
+        "layer_norm"
+      ],
+      "calls": 3,
+      "total_ms": 0.0216,
+      "percent_of_kernel_sum": 0.0029818005883915327
+    },
+    {
+      "name": "input_concatenate_fusion",
+      "category": "other_device_kernel",
+      "hlo_tags": [],
+      "calls": 2,
+      "total_ms": 0.007520000000000001,
+      "percent_of_kernel_sum": 0.0010381083529955705
+    },
+    {
+      "name": "wrapped_slice_1",
+      "category": "other_device_kernel",
+      "hlo_tags": [],
+      "calls": 1,
+      "total_ms": 0.00544,
+      "percent_of_kernel_sum": 0.0007509720000393489
+    },
+    {
+      "name": "wrapped_slice",
+      "category": "other_device_kernel",
+      "hlo_tags": [],
+      "calls": 1,
+      "total_ms": 0.0048,
+      "percent_of_kernel_sum": 0.0006626223529758961
+    }
+  ],
+  "host_apis": {
+    "hipHostMalloc": {
+      "calls": 1,
+      "total_ms": 198.408887
+    },
+    "hipEventRecord": {
+      "calls": 102,
+      "total_ms": 15.142587999999995
+    },
+    "hipMemcpyHtoDAsync": {
+      "calls": 23,
+      "total_ms": 15.042935000000002
+    },
+    "hipStreamWaitEvent": {
+      "calls": 108,
+      "total_ms": 10.107033999999997
+    },
+    "hipLaunchHostFunc": {
+      "calls": 62,
+      "total_ms": 5.687046000000001
+    },
+    "hipModuleLaunchKernel": {
+      "calls": 306,
+      "total_ms": 2.019021
+    },
+    "hipStreamQuery": {
+      "calls": 84,
+      "total_ms": 1.1970770000000002
+    },
+    "hipLaunchKernel": {
+      "calls": 89,
+      "total_ms": 0.6685909999999999
+    },
+    "hipExtModuleLaunchKernel": {
+      "calls": 84,
+      "total_ms": 0.564184
+    },
+    "hipCtxSetCurrent": {
+      "calls": 250,
+      "total_ms": 0.24733999999999987
+    },
+    "hipStreamIsCapturing": {
+      "calls": 168,
+      "total_ms": 0.19538100000000005
+    },
+    "hipGetDeviceProperties": {
+      "calls": 84,
+      "total_ms": 0.07103200000000001
+    },
+    "hipDeviceSynchronize": {
+      "calls": 1,
+      "total_ms": 0.06989
+    },
+    "__hipPopCallConfiguration": {
+      "calls": 89,
+      "total_ms": 0.06215100000000002
+    },
+    "__hipPushCallConfiguration": {
+      "calls": 89,
+      "total_ms": 0.06142100000000002
+    },
+    "hipGetDevice": {
+      "calls": 84,
+      "total_ms": 0.05526100000000001
+    },
+    "hipGetLastError": {
+      "calls": 89,
+      "total_ms": 0.051629999999999995
+    },
+    "hipMemcpyDtoDAsync": {
+      "calls": 1,
+      "total_ms": 0.027280000000000002
+    },
+    "hipEventQuery": {
+      "calls": 11,
+      "total_ms": 0.01896
+    }
+  },
+  "classification": "Exclusive precedence: GEMM/RNE, then fusion containing scatter, gather, LayerNorm, other reduction, other. Fusion labels include all operations fused into that kernel; HLO tags retain overlapping semantic labels.",
+  "time_units": "Trace timestamps/durations are microseconds; all report times milliseconds.",
+  "limits": "Host API times can overlap device time; never add them. Kernel sum percentages describe GPU kernel work, not end-to-end latency. Busy time is the union across device kernel intervals.",
+  "native_gemm_audit": {
+    "calls": 84,
+    "xf32_mode_verified": true,
+    "activation_rne_skipped": 79
+  }
+}

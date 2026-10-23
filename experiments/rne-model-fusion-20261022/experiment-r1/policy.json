@@ -1,0 +1,879 @@
+{
+  "layers": [
+    {
+      "module": "grid2mesh_gnn/~_networks_builder/encoder_edges_grid2mesh_mlp/~/linear_1",
+      "weight_sha256": "1baff0a7b82483795fea8e265598219d41eb14328f9a53db0199fb8f3af8dc2d",
+      "input_shape": [
+        1618745,
+        1,
+        512
+      ],
+      "producer": "silu",
+      "scope": "jit(<lambda>)/scan_body/grid2mesh_gnn/_embed/grid2mesh_gnn/sequential/encoder_edges_grid2mesh_mlp/linear_1"
+    },
+    {
+      "module": "grid2mesh_gnn/~_networks_builder/encoder_nodes_grid_nodes_mlp/~/linear_0",
+      "weight_sha256": "e1eb308b393fc7c8dd5ee2b94b25c8b79d56ea921f83ea3c351db398f060f979",
+      "input_shape": [
+        1038240,
+        1,
+        184
+      ],
+      "producer": "concatenate",
+      "scope": "jit(<lambda>)/scan_body/grid2mesh_gnn/_embed/grid2mesh_gnn/sequential_1/encoder_nodes_grid_nodes_mlp/linear_0"
+    },
+    {
+      "module": "grid2mesh_gnn/~_networks_builder/encoder_nodes_grid_nodes_mlp/~/linear_1",
+      "weight_sha256": "36061eb05c666d70a1e06fe25555dd5d3bae41dc99dd08023a370be41bcfed9f",
+      "input_shape": [
+        1038240,
+        1,
+        512
+      ],
+      "producer": "silu",
+      "scope": "jit(<lambda>)/scan_body/grid2mesh_gnn/_embed/grid2mesh_gnn/sequential_1/encoder_nodes_grid_nodes_mlp/linear_1"
+    },
+    {
+      "module": "grid2mesh_gnn/~_networks_builder/processor_edges_0_grid2mesh_mlp/~/linear_0",
+      "weight_sha256": "0079cebfa625dee8a96ddf170ed8455e92ca0c96c0ca3b033095f661f8a832dd",
+      "input_shape": [
+        1618745,
+        1,
+        1536
+      ],
+      "producer": "concatenate",
+      "scope": "jit(<lambda>)/scan_body/grid2mesh_gnn/_process/grid2mesh_gnn/_process_step/grid2mesh_gnn/sequential_3/processor_edges_0_grid2mesh_mlp/linear_0"
+    },
+    {
+      "module": "grid2mesh_gnn/~_networks_builder/processor_edges_0_grid2mesh_mlp/~/linear_1",
+      "weight_sha256": "e915c80e1639f16c26bacb1e7ee3ac16b3523dd74033f548e62ea2de3331ddcd",
+      "input_shape": [
+        1618745,
+        1,
+        512
+      ],
+      "producer": "silu",
+      "scope": "jit(<lambda>)/scan_body/grid2mesh_gnn/_process/grid2mesh_gnn/_process_step/grid2mesh_gnn/sequential_3/processor_edges_0_grid2mesh_mlp/linear_1"
+    },
+    {
+      "module": "grid2mesh_gnn/~_networks_builder/processor_nodes_0_grid_nodes_mlp/~/linear_1",
+      "weight_sha256": "1242b165212d71b27fa27bf0cd358bfd7078cb5723b20e342455467d020ea874",
+      "input_shape": [
+        1038240,
+        1,
+        512
+      ],
+      "producer": "silu",
+      "scope": "jit(<lambda>)/scan_body/grid2mesh_gnn/_process/grid2mesh_gnn/_process_step/grid2mesh_gnn/sequential_4/processor_nodes_0_grid_nodes_mlp/linear_1"
+    },
+    {
+      "module": "grid2mesh_gnn/~_networks_builder/processor_nodes_0_mesh_nodes_mlp/~/linear_0",
+      "weight_sha256": "ffd4530fb48d544b52e246a6e551b5edb3d76d39ae7e1f524ad63a0834aea33d",
+      "input_shape": [
+        40962,
+        1,
+        1024
+      ],
+      "producer": "concatenate",
+      "scope": "jit(<lambda>)/scan_body/grid2mesh_gnn/_process/grid2mesh_gnn/_process_step/grid2mesh_gnn/sequential_5/processor_nodes_0_mesh_nodes_mlp/linear_0"
+    },
+    {
+      "module": "grid2mesh_gnn/~_networks_builder/processor_nodes_0_mesh_nodes_mlp/~/linear_1",
+      "weight_sha256": "5304e65c97612a8c48bcfe881a3a6d91478e50395be870d422c47ceeaff7177f",
+      "input_shape": [
+        40962,
+        1,
+        512
+      ],
+      "producer": "silu",
+      "scope": "jit(<lambda>)/scan_body/grid2mesh_gnn/_process/grid2mesh_gnn/_process_step/grid2mesh_gnn/sequential_5/processor_nodes_0_mesh_nodes_mlp/linear_1"
+    },
+    {
+      "module": "mesh_gnn/~_networks_builder/encoder_edges_mesh_mlp/~/linear_1",
+      "weight_sha256": "96568ac7c796fd44b66bac9ecc68b05afe1d8b31650feb075dde5c5945ca0169",
+      "input_shape": [
+        327660,
+        1,
+        512
+      ],
+      "producer": "silu",
+      "scope": "jit(<lambda>)/scan_body/mesh_gnn/_embed/mesh_gnn/sequential/encoder_edges_mesh_mlp/linear_1"
+    },
+    {
+      "module": "mesh_gnn/~_networks_builder/processor_edges_0_mesh_mlp/~/linear_0",
+      "weight_sha256": "3c3a5c7d6bd2c471c58480fc0af91817a2d9ef4e0cee9895c4e558f0c0bb49f2",
+      "input_shape": [
+        327660,
+        1,
+        1536
+      ],
+      "producer": "concatenate",
+      "scope": "jit(<lambda>)/scan_body/mesh_gnn/_process/mesh_gnn/_process_step/mesh_gnn/sequential_1/processor_edges_0_mesh_mlp/linear_0"
+    },
+    {
+      "module": "mesh_gnn/~_networks_builder/processor_edges_0_mesh_mlp/~/linear_1",
+      "weight_sha256": "282537c385d881d6863687f705dfc5d605875359b06d179c59c3f91c4eabc274",
+      "input_shape": [
+        327660,
+        1,
+        512
+      ],
+      "producer": "silu",
+      "scope": "jit(<lambda>)/scan_body/mesh_gnn/_process/mesh_gnn/_process_step/mesh_gnn/sequential_1/processor_edges_0_mesh_mlp/linear_1"
+    },
+    {
+      "module": "mesh_gnn/~_networks_builder/processor_nodes_0_mesh_nodes_mlp/~/linear_0",
+      "weight_sha256": "a612537b7b2473305e8ad70a59a0a83ae6953c34716dcdbe75a78042a688d091",
+      "input_shape": [
+        40962,
+        1,
+        1024
+      ],
+      "producer": "concatenate",
+      "scope": "jit(<lambda>)/scan_body/mesh_gnn/_process/mesh_gnn/_process_step/mesh_gnn/sequential_2/processor_nodes_0_mesh_nodes_mlp/linear_0"
+    },
+    {
+      "module": "mesh_gnn/~_networks_builder/processor_nodes_0_mesh_nodes_mlp/~/linear_1",
+      "weight_sha256": "1e052c5169561a414ddd24efe0a8f506ceaa730b6330ce481b5a2c011fe4418b",
+      "input_shape": [
+        40962,
+        1,
+        512
+      ],
+      "producer": "silu",
+      "scope": "jit(<lambda>)/scan_body/mesh_gnn/_process/mesh_gnn/_process_step/mesh_gnn/sequential_2/processor_nodes_0_mesh_nodes_mlp/linear_1"
+    },
+    {
+      "module": "mesh_gnn/~_networks_builder/processor_edges_1_mesh_mlp/~/linear_0",
+      "weight_sha256": "b6e9a717c0d73c876dfad333a3c1e92b9185f9305894a275132fa0770cac164d",
+      "input_shape": [
+        327660,
+        1,
+        1536
+      ],
+      "producer": "concatenate",
+      "scope": "jit(<lambda>)/scan_body/mesh_gnn/_process/mesh_gnn/_process_step/mesh_gnn/sequential_3/processor_edges_1_mesh_mlp/linear_0"
+    },
+    {
+      "module": "mesh_gnn/~_networks_builder/processor_edges_1_mesh_mlp/~/linear_1",
+      "weight_sha256": "725ce509750f444a44300aec2ce70e6306ca16db32f896c4026751a483f62cf6",
+      "input_shape": [
+        327660,
+        1,
+        512
+      ],
+      "producer": "silu",
+      "scope": "jit(<lambda>)/scan_body/mesh_gnn/_process/mesh_gnn/_process_step/mesh_gnn/sequential_3/processor_edges_1_mesh_mlp/linear_1"
+    },
+    {
+      "module": "mesh_gnn/~_networks_builder/processor_nodes_1_mesh_nodes_mlp/~/linear_0",
+      "weight_sha256": "d77fb737795ec34cec5f98cade93824b5b98cfe14e4cc0d6ae68e950a067fd27",
+      "input_shape": [
+        40962,
+        1,
+        1024
+      ],
+      "producer": "concatenate",
+      "scope": "jit(<lambda>)/scan_body/mesh_gnn/_process/mesh_gnn/_process_step/mesh_gnn/sequential_4/processor_nodes_1_mesh_nodes_mlp/linear_0"
+    },
+    {
+      "module": "mesh_gnn/~_networks_builder/processor_nodes_1_mesh_nodes_mlp/~/linear_1",
+      "weight_sha256": "229dc4dfdbf45ff3a9569c1039d8509746c16f4de72de38298d87bd656baaac0",
+      "input_shape": [
+        40962,
+        1,
+        512
+      ],
+      "producer": "silu",
+      "scope": "jit(<lambda>)/scan_body/mesh_gnn/_process/mesh_gnn/_process_step/mesh_gnn/sequential_4/processor_nodes_1_mesh_nodes_mlp/linear_1"
+    },
+    {
+      "module": "mesh_gnn/~_networks_builder/processor_edges_2_mesh_mlp/~/linear_0",
+      "weight_sha256": "ea6787334feeef86d29168e5d8475e753c74bcfda56841600f452d3978a20b73",
+      "input_shape": [
+        327660,
+        1,
+        1536
+      ],
+      "producer": "concatenate",
+      "scope": "jit(<lambda>)/scan_body/mesh_gnn/_process/mesh_gnn/_process_step/mesh_gnn/sequential_5/processor_edges_2_mesh_mlp/linear_0"
+    },
+    {
+      "module": "mesh_gnn/~_networks_builder/processor_edges_2_mesh_mlp/~/linear_1",
+      "weight_sha256": "67c50c3037d106a1604fea9122b85bec0fc23dba265f94a35270c9fbad5b3066",
+      "input_shape": [
+        327660,
+        1,
+        512
+      ],
+      "producer": "silu",
+      "scope": "jit(<lambda>)/scan_body/mesh_gnn/_process/mesh_gnn/_process_step/mesh_gnn/sequential_5/processor_edges_2_mesh_mlp/linear_1"
+    },
+    {
+      "module": "mesh_gnn/~_networks_builder/processor_nodes_2_mesh_nodes_mlp/~/linear_0",
+      "weight_sha256": "83a07e3a2329403f4f8b34c3b88b50ac67d63d1127acb58345e5cd91772a35ea",
+      "input_shape": [
+        40962,
+        1,
+        1024
+      ],
+      "producer": "concatenate",
+      "scope": "jit(<lambda>)/scan_body/mesh_gnn/_process/mesh_gnn/_process_step/mesh_gnn/sequential_6/processor_nodes_2_mesh_nodes_mlp/linear_0"
+    },
+    {
+      "module": "mesh_gnn/~_networks_builder/processor_nodes_2_mesh_nodes_mlp/~/linear_1",
+      "weight_sha256": "1dbdec4f34fdcf075aa32d49b0cc1371a821aeafcf849297effe6e70b8c57418",
+      "input_shape": [
+        40962,
+        1,
+        512
+      ],
+      "producer": "silu",
+      "scope": "jit(<lambda>)/scan_body/mesh_gnn/_process/mesh_gnn/_process_step/mesh_gnn/sequential_6/processor_nodes_2_mesh_nodes_mlp/linear_1"
+    },
+    {
+      "module": "mesh_gnn/~_networks_builder/processor_edges_3_mesh_mlp/~/linear_0",
+      "weight_sha256": "b801e25f6a5b01bf0b77e490720f44b6c1c2df92b252df5224338ad7a6b90b9f",
+      "input_shape": [
+        327660,
+        1,
+        1536
+      ],
+      "producer": "concatenate",
+      "scope": "jit(<lambda>)/scan_body/mesh_gnn/_process/mesh_gnn/_process_step/mesh_gnn/sequential_7/processor_edges_3_mesh_mlp/linear_0"
+    },
+    {
+      "module": "mesh_gnn/~_networks_builder/processor_edges_3_mesh_mlp/~/linear_1",
+      "weight_sha256": "1202b107ff59b1626ec8ea934fcea8bbded2940592ffb5e529b1eafd0fefb4d5",
+      "input_shape": [
+        327660,
+        1,
+        512
+      ],
+      "producer": "silu",
+      "scope": "jit(<lambda>)/scan_body/mesh_gnn/_process/mesh_gnn/_process_step/mesh_gnn/sequential_7/processor_edges_3_mesh_mlp/linear_1"
+    },
+    {
+      "module": "mesh_gnn/~_networks_builder/processor_nodes_3_mesh_nodes_mlp/~/linear_0",
+      "weight_sha256": "4c8e5e9773b23388a03c571712f91f7a244d2aa5b00efe27a1436c854b76ae98",
+      "input_shape": [
+        40962,
+        1,
+        1024
+      ],
+      "producer": "concatenate",
+      "scope": "jit(<lambda>)/scan_body/mesh_gnn/_process/mesh_gnn/_process_step/mesh_gnn/sequential_8/processor_nodes_3_mesh_nodes_mlp/linear_0"
+    },
+    {
+      "module": "mesh_gnn/~_networks_builder/processor_nodes_3_mesh_nodes_mlp/~/linear_1",
+      "weight_sha256": "e998ac6b0cfbd0b9cab0b016314733732792117d6d32f588751461e11499ebb4",
+      "input_shape": [
+        40962,
+        1,
+        512
+      ],
+      "producer": "silu",
+      "scope": "jit(<lambda>)/scan_body/mesh_gnn/_process/mesh_gnn/_process_step/mesh_gnn/sequential_8/processor_nodes_3_mesh_nodes_mlp/linear_1"
+    },
+    {
+      "module": "mesh_gnn/~_networks_builder/processor_edges_4_mesh_mlp/~/linear_0",
+      "weight_sha256": "cf6e99d80f1f313538adfc3bd8c682fd764ce06230dc3394c71ecab623bebd35",
+      "input_shape": [
+        327660,
+        1,
+        1536
+      ],
+      "producer": "concatenate",
+      "scope": "jit(<lambda>)/scan_body/mesh_gnn/_process/mesh_gnn/_process_step/mesh_gnn/sequential_9/processor_edges_4_mesh_mlp/linear_0"
+    },
+    {
+      "module": "mesh_gnn/~_networks_builder/processor_edges_4_mesh_mlp/~/linear_1",
+      "weight_sha256": "ec19fcc0f84b7b5769e1da30b4e0ac87dc7e275ebb4ce283b873687a61ee9ad8",
+      "input_shape": [
+        327660,
+        1,
+        512
+      ],
+      "producer": "silu",
+      "scope": "jit(<lambda>)/scan_body/mesh_gnn/_process/mesh_gnn/_process_step/mesh_gnn/sequential_9/processor_edges_4_mesh_mlp/linear_1"
+    },
+    {
+      "module": "mesh_gnn/~_networks_builder/processor_nodes_4_mesh_nodes_mlp/~/linear_0",
+      "weight_sha256": "29080c6763e84202195c5e742d950f7db224fb3bf5d77af8e066a277f3005888",
+      "input_shape": [
+        40962,
+        1,
+        1024
+      ],
+      "producer": "concatenate",
+      "scope": "jit(<lambda>)/scan_body/mesh_gnn/_process/mesh_gnn/_process_step/mesh_gnn/sequential_10/processor_nodes_4_mesh_nodes_mlp/linear_0"
+    },
+    {
+      "module": "mesh_gnn/~_networks_builder/processor_nodes_4_mesh_nodes_mlp/~/linear_1",
+      "weight_sha256": "275c3112443cd57ac934b5dd7a2738bc00085a1448e4de1500264cab7ecb574c",
+      "input_shape": [
+        40962,
+        1,
+        512
+      ],
+      "producer": "silu",
+      "scope": "jit(<lambda>)/scan_body/mesh_gnn/_process/mesh_gnn/_process_step/mesh_gnn/sequential_10/processor_nodes_4_mesh_nodes_mlp/linear_1"
+    },
+    {
+      "module": "mesh_gnn/~_networks_builder/processor_edges_5_mesh_mlp/~/linear_0",
+      "weight_sha256": "5779b4a26bdc47f606932fa53b4e540932488034fa685c54973b76c05e501161",
+      "input_shape": [
+        327660,
+        1,
+        1536
+      ],
+      "producer": "concatenate",
+      "scope": "jit(<lambda>)/scan_body/mesh_gnn/_process/mesh_gnn/_process_step/mesh_gnn/sequential_11/processor_edges_5_mesh_mlp/linear_0"
+    },
+    {
+      "module": "mesh_gnn/~_networks_builder/processor_edges_5_mesh_mlp/~/linear_1",
+      "weight_sha256": "d5314c443e5d773646bcac0d5172e43f736136cd81e54ee2a60caf33ec1abf40",
+      "input_shape": [
+        327660,
+        1,
+        512
+      ],
+      "producer": "silu",
+      "scope": "jit(<lambda>)/scan_body/mesh_gnn/_process/mesh_gnn/_process_step/mesh_gnn/sequential_11/processor_edges_5_mesh_mlp/linear_1"
+    },
+    {
+      "module": "mesh_gnn/~_networks_builder/processor_nodes_5_mesh_nodes_mlp/~/linear_0",
+      "weight_sha256": "ce5ab81abe03b5e8273267e86db5ce9281203b69238b1a6af579d644d34d733e",
+      "input_shape": [
+        40962,
+        1,
+        1024
+      ],
+      "producer": "concatenate",
+      "scope": "jit(<lambda>)/scan_body/mesh_gnn/_process/mesh_gnn/_process_step/mesh_gnn/sequential_12/processor_nodes_5_mesh_nodes_mlp/linear_0"
+    },
+    {
+      "module": "mesh_gnn/~_networks_builder/processor_nodes_5_mesh_nodes_mlp/~/linear_1",
+      "weight_sha256": "4157804564ddf956c74b4787dbe06dbe4d0498422758e2caf7b28769d20d1f9e",
+      "input_shape": [
+        40962,
+        1,
+        512
+      ],
+      "producer": "silu",
+      "scope": "jit(<lambda>)/scan_body/mesh_gnn/_process/mesh_gnn/_process_step/mesh_gnn/sequential_12/processor_nodes_5_mesh_nodes_mlp/linear_1"
+    },
+    {
+      "module": "mesh_gnn/~_networks_builder/processor_edges_6_mesh_mlp/~/linear_0",
+      "weight_sha256": "84f010fbe3e1cf9a0a0dcf7e9a520aed7e4af7d494e8e11a157a74300b58e70b",
+      "input_shape": [
+        327660,
+        1,
+        1536
+      ],
+      "producer": "concatenate",
+      "scope": "jit(<lambda>)/scan_body/mesh_gnn/_process/mesh_gnn/_process_step/mesh_gnn/sequential_13/processor_edges_6_mesh_mlp/linear_0"
+    },
+    {
+      "module": "mesh_gnn/~_networks_builder/processor_edges_6_mesh_mlp/~/linear_1",
+      "weight_sha256": "1ebb93fcfc97d4928f9dfa7101ebdfe1a1e18f3c98d8cac3b04412601efff466",
+      "input_shape": [
+        327660,
+        1,
+        512
+      ],
+      "producer": "silu",
+      "scope": "jit(<lambda>)/scan_body/mesh_gnn/_process/mesh_gnn/_process_step/mesh_gnn/sequential_13/processor_edges_6_mesh_mlp/linear_1"
+    },
+    {
+      "module": "mesh_gnn/~_networks_builder/processor_nodes_6_mesh_nodes_mlp/~/linear_0",
+      "weight_sha256": "cbac7c058245db67f2109f7fdc0e5bf6f359f97e6d18ea37eac19e46aa254f62",
+      "input_shape": [
+        40962,
+        1,
+        1024
+      ],
+      "producer": "concatenate",
+      "scope": "jit(<lambda>)/scan_body/mesh_gnn/_process/mesh_gnn/_process_step/mesh_gnn/sequential_14/processor_nodes_6_mesh_nodes_mlp/linear_0"
+    },
+    {
+      "module": "mesh_gnn/~_networks_builder/processor_nodes_6_mesh_nodes_mlp/~/linear_1",
+      "weight_sha256": "fbd36e559bb3ff504b1b08584bbf54aaa84583f5bd387a60627469bc2680ded8",
+      "input_shape": [
+        40962,
+        1,
+        512
+      ],
+      "producer": "silu",
+      "scope": "jit(<lambda>)/scan_body/mesh_gnn/_process/mesh_gnn/_process_step/mesh_gnn/sequential_14/processor_nodes_6_mesh_nodes_mlp/linear_1"
+    },
+    {
+      "module": "mesh_gnn/~_networks_builder/processor_edges_7_mesh_mlp/~/linear_0",
+      "weight_sha256": "ed8690193905ba0e9356180ff6ed238a3176c0252270866b6808720d1285158a",
+      "input_shape": [
+        327660,
+        1,
+        1536
+      ],
+      "producer": "concatenate",
+      "scope": "jit(<lambda>)/scan_body/mesh_gnn/_process/mesh_gnn/_process_step/mesh_gnn/sequential_15/processor_edges_7_mesh_mlp/linear_0"
+    },
+    {
+      "module": "mesh_gnn/~_networks_builder/processor_edges_7_mesh_mlp/~/linear_1",
+      "weight_sha256": "70b6060f0e3be40824ec27b858b79db13282a5869fd4747dedba0552e9cae2f4",
+      "input_shape": [
+        327660,
+        1,
+        512
+      ],
+      "producer": "silu",
+      "scope": "jit(<lambda>)/scan_body/mesh_gnn/_process/mesh_gnn/_process_step/mesh_gnn/sequential_15/processor_edges_7_mesh_mlp/linear_1"
+    },
+    {
+      "module": "mesh_gnn/~_networks_builder/processor_nodes_7_mesh_nodes_mlp/~/linear_0",
+      "weight_sha256": "0d1ed30e4c5970e19b0045062a06fafd17999ac3f5188154e0450eedecaec18e",
+      "input_shape": [
+        40962,
+        1,
+        1024
+      ],
+      "producer": "concatenate",
+      "scope": "jit(<lambda>)/scan_body/mesh_gnn/_process/mesh_gnn/_process_step/mesh_gnn/sequential_16/processor_nodes_7_mesh_nodes_mlp/linear_0"
+    },
+    {
+      "module": "mesh_gnn/~_networks_builder/processor_nodes_7_mesh_nodes_mlp/~/linear_1",
+      "weight_sha256": "7a56bd2c574138339f17593d5a80414a8f0904636a8342401637215267f72e22",
+      "input_shape": [
+        40962,
+        1,
+        512
+      ],
+      "producer": "silu",
+      "scope": "jit(<lambda>)/scan_body/mesh_gnn/_process/mesh_gnn/_process_step/mesh_gnn/sequential_16/processor_nodes_7_mesh_nodes_mlp/linear_1"
+    },
+    {
+      "module": "mesh_gnn/~_networks_builder/processor_edges_8_mesh_mlp/~/linear_0",
+      "weight_sha256": "c69276aff1e8595cbdadba7ea6ff8e311288a47b181a0d42dc45b501cdbb02ef",
+      "input_shape": [
+        327660,
+        1,
+        1536
+      ],
+      "producer": "concatenate",
+      "scope": "jit(<lambda>)/scan_body/mesh_gnn/_process/mesh_gnn/_process_step/mesh_gnn/sequential_17/processor_edges_8_mesh_mlp/linear_0"
+    },
+    {
+      "module": "mesh_gnn/~_networks_builder/processor_edges_8_mesh_mlp/~/linear_1",
+      "weight_sha256": "9e46ae63db8592da30d1d0a4b5decdeae1b251e95c650786ca48c9c5af9b9a02",
+      "input_shape": [
+        327660,
+        1,
+        512
+      ],
+      "producer": "silu",
+      "scope": "jit(<lambda>)/scan_body/mesh_gnn/_process/mesh_gnn/_process_step/mesh_gnn/sequential_17/processor_edges_8_mesh_mlp/linear_1"
+    },
+    {
+      "module": "mesh_gnn/~_networks_builder/processor_nodes_8_mesh_nodes_mlp/~/linear_0",
+      "weight_sha256": "17a9af53d55782d0a93567991d6d78eda5f94847edf704d1e29e7c1ed2c32607",
+      "input_shape": [
+        40962,
+        1,
+        1024
+      ],
+      "producer": "concatenate",
+      "scope": "jit(<lambda>)/scan_body/mesh_gnn/_process/mesh_gnn/_process_step/mesh_gnn/sequential_18/processor_nodes_8_mesh_nodes_mlp/linear_0"
+    },
+    {
+      "module": "mesh_gnn/~_networks_builder/processor_nodes_8_mesh_nodes_mlp/~/linear_1",
+      "weight_sha256": "23518f435e3128ecbe002fa21d9e8bf76cf47c6f0072d62f9feb015229d3ed58",
+      "input_shape": [
+        40962,
+        1,
+        512
+      ],
+      "producer": "silu",
+      "scope": "jit(<lambda>)/scan_body/mesh_gnn/_process/mesh_gnn/_process_step/mesh_gnn/sequential_18/processor_nodes_8_mesh_nodes_mlp/linear_1"
+    },
+    {
+      "module": "mesh_gnn/~_networks_builder/processor_edges_9_mesh_mlp/~/linear_0",
+      "weight_sha256": "622d3a4675fa4f6e6c71e2850266d361f9bb617102f25935f70706c916c4ace1",
+      "input_shape": [
+        327660,
+        1,
+        1536
+      ],
+      "producer": "concatenate",
+      "scope": "jit(<lambda>)/scan_body/mesh_gnn/_process/mesh_gnn/_process_step/mesh_gnn/sequential_19/processor_edges_9_mesh_mlp/linear_0"
+    },
+    {
+      "module": "mesh_gnn/~_networks_builder/processor_edges_9_mesh_mlp/~/linear_1",
+      "weight_sha256": "12d8f6b2dac7cbd10fbae0965b361915010c772ddf1a25a6649fb53973e21ce7",
+      "input_shape": [
+        327660,
+        1,
+        512
+      ],
+      "producer": "silu",
+      "scope": "jit(<lambda>)/scan_body/mesh_gnn/_process/mesh_gnn/_process_step/mesh_gnn/sequential_19/processor_edges_9_mesh_mlp/linear_1"
+    },
+    {
+      "module": "mesh_gnn/~_networks_builder/processor_nodes_9_mesh_nodes_mlp/~/linear_0",
+      "weight_sha256": "e2870124fcf1ebcba43f5ce84cab9ca4af7e436347ae998fd71a83564c9f33f8",
+      "input_shape": [
+        40962,
+        1,
+        1024
+      ],
+      "producer": "concatenate",
+      "scope": "jit(<lambda>)/scan_body/mesh_gnn/_process/mesh_gnn/_process_step/mesh_gnn/sequential_20/processor_nodes_9_mesh_nodes_mlp/linear_0"
+    },
+    {
+      "module": "mesh_gnn/~_networks_builder/processor_nodes_9_mesh_nodes_mlp/~/linear_1",
+      "weight_sha256": "a42ad9ea0427838444a723d6c8b1f60b327b30e3a1ec6e352e8171489ea03b45",
+      "input_shape": [
+        40962,
+        1,
+        512
+      ],
+      "producer": "silu",
+      "scope": "jit(<lambda>)/scan_body/mesh_gnn/_process/mesh_gnn/_process_step/mesh_gnn/sequential_20/processor_nodes_9_mesh_nodes_mlp/linear_1"
+    },
+    {
+      "module": "mesh_gnn/~_networks_builder/processor_edges_10_mesh_mlp/~/linear_0",
+      "weight_sha256": "81f115999cbe96dce1527ae876411e527c0260765e33ad22ce91223e3432d8ca",
+      "input_shape": [
+        327660,
+        1,
+        1536
+      ],
+      "producer": "concatenate",
+      "scope": "jit(<lambda>)/scan_body/mesh_gnn/_process/mesh_gnn/_process_step/mesh_gnn/sequential_21/processor_edges_10_mesh_mlp/linear_0"
+    },
+    {
+      "module": "mesh_gnn/~_networks_builder/processor_edges_10_mesh_mlp/~/linear_1",
+      "weight_sha256": "b0a5791ff37fcffd78d9e17d6cb328b46be668c9876b93c4c67873422d41b7c0",
+      "input_shape": [
+        327660,
+        1,
+        512
+      ],
+      "producer": "silu",
+      "scope": "jit(<lambda>)/scan_body/mesh_gnn/_process/mesh_gnn/_process_step/mesh_gnn/sequential_21/processor_edges_10_mesh_mlp/linear_1"
+    },
+    {
+      "module": "mesh_gnn/~_networks_builder/processor_nodes_10_mesh_nodes_mlp/~/linear_0",
+      "weight_sha256": "9ab8dff8d1ef8a5f03b6f1102ff3f9666ccee256c705448e19e871fc8841c786",
+      "input_shape": [
+        40962,
+        1,
+        1024
+      ],
+      "producer": "concatenate",
+      "scope": "jit(<lambda>)/scan_body/mesh_gnn/_process/mesh_gnn/_process_step/mesh_gnn/sequential_22/processor_nodes_10_mesh_nodes_mlp/linear_0"
+    },
+    {
+      "module": "mesh_gnn/~_networks_builder/processor_nodes_10_mesh_nodes_mlp/~/linear_1",
+      "weight_sha256": "3e206daba356d715b2eb3a93de73842da8ef4550203064793e4498bbc226a466",
+      "input_shape": [
+        40962,
+        1,
+        512
+      ],
+      "producer": "silu",
+      "scope": "jit(<lambda>)/scan_body/mesh_gnn/_process/mesh_gnn/_process_step/mesh_gnn/sequential_22/processor_nodes_10_mesh_nodes_mlp/linear_1"
+    },
+    {
+      "module": "mesh_gnn/~_networks_builder/processor_edges_11_mesh_mlp/~/linear_0",
+      "weight_sha256": "49c329cff3a71a8aa192065df721fb3cff03587fb534545a3743dd4656db5e87",
+      "input_shape": [
+        327660,
+        1,
+        1536
+      ],
+      "producer": "concatenate",
+      "scope": "jit(<lambda>)/scan_body/mesh_gnn/_process/mesh_gnn/_process_step/mesh_gnn/sequential_23/processor_edges_11_mesh_mlp/linear_0"
+    },
+    {
+      "module": "mesh_gnn/~_networks_builder/processor_edges_11_mesh_mlp/~/linear_1",
+      "weight_sha256": "9379701e27074e5543419cbac9f5936cd205340653e6975d3dd96714ef255226",
+      "input_shape": [
+        327660,
+        1,
+        512
+      ],
+      "producer": "silu",
+      "scope": "jit(<lambda>)/scan_body/mesh_gnn/_process/mesh_gnn/_process_step/mesh_gnn/sequential_23/processor_edges_11_mesh_mlp/linear_1"
+    },
+    {
+      "module": "mesh_gnn/~_networks_builder/processor_nodes_11_mesh_nodes_mlp/~/linear_0",
+      "weight_sha256": "af14cc413969db88efc5dae3e22530a3afbcbeea4597d26d586bfa510184d583",
+      "input_shape": [
+        40962,
+        1,
+        1024
+      ],
+      "producer": "concatenate",
+      "scope": "jit(<lambda>)/scan_body/mesh_gnn/_process/mesh_gnn/_process_step/mesh_gnn/sequential_24/processor_nodes_11_mesh_nodes_mlp/linear_0"
+    },
+    {
+      "module": "mesh_gnn/~_networks_builder/processor_nodes_11_mesh_nodes_mlp/~/linear_1",
+      "weight_sha256": "ca1fcd814326ae45895b83b9cf2138f16d974c2bb82d0684ba0af6005f065fb7",
+      "input_shape": [
+        40962,
+        1,
+        512
+      ],
+      "producer": "silu",
+      "scope": "jit(<lambda>)/scan_body/mesh_gnn/_process/mesh_gnn/_process_step/mesh_gnn/sequential_24/processor_nodes_11_mesh_nodes_mlp/linear_1"
+    },
+    {
+      "module": "mesh_gnn/~_networks_builder/processor_edges_12_mesh_mlp/~/linear_0",
+      "weight_sha256": "1a5e1587e639de73d411d7975cddd0f56180a5f447d6e0f0b46c82bbb947bd9d",
+      "input_shape": [
+        327660,
+        1,
+        1536
+      ],
+      "producer": "concatenate",
+      "scope": "jit(<lambda>)/scan_body/mesh_gnn/_process/mesh_gnn/_process_step/mesh_gnn/sequential_25/processor_edges_12_mesh_mlp/linear_0"
+    },
+    {
+      "module": "mesh_gnn/~_networks_builder/processor_edges_12_mesh_mlp/~/linear_1",
+      "weight_sha256": "6d2f25deef1d3fa4be2fbc791d01f15c8475f4c82210928985372e8bd3d3138d",
+      "input_shape": [
+        327660,
+        1,
+        512
+      ],
+      "producer": "silu",
+      "scope": "jit(<lambda>)/scan_body/mesh_gnn/_process/mesh_gnn/_process_step/mesh_gnn/sequential_25/processor_edges_12_mesh_mlp/linear_1"
+    },
+    {
+      "module": "mesh_gnn/~_networks_builder/processor_nodes_12_mesh_nodes_mlp/~/linear_0",
+      "weight_sha256": "12ddcaa5e964ceadad703f9b5f990cfd10466411322fa192fdd380674a52771e",
+      "input_shape": [
+        40962,
+        1,
+        1024
+      ],
+      "producer": "concatenate",
+      "scope": "jit(<lambda>)/scan_body/mesh_gnn/_process/mesh_gnn/_process_step/mesh_gnn/sequential_26/processor_nodes_12_mesh_nodes_mlp/linear_0"
+    },
+    {
+      "module": "mesh_gnn/~_networks_builder/processor_nodes_12_mesh_nodes_mlp/~/linear_1",
+      "weight_sha256": "d0d095fde09710c2c390103396fdf6a42f2b22650edf535805e16b59425d2252",
+      "input_shape": [
+        40962,
+        1,
+        512
+      ],
+      "producer": "silu",
+      "scope": "jit(<lambda>)/scan_body/mesh_gnn/_process/mesh_gnn/_process_step/mesh_gnn/sequential_26/processor_nodes_12_mesh_nodes_mlp/linear_1"
+    },
+    {
+      "module": "mesh_gnn/~_networks_builder/processor_edges_13_mesh_mlp/~/linear_0",
+      "weight_sha256": "4f032522681b7ced1130da89d24f1f253b5b1c70c05bcd667fd03f7967cdd770",
+      "input_shape": [
+        327660,
+        1,
+        1536
+      ],
+      "producer": "concatenate",
+      "scope": "jit(<lambda>)/scan_body/mesh_gnn/_process/mesh_gnn/_process_step/mesh_gnn/sequential_27/processor_edges_13_mesh_mlp/linear_0"
+    },
+    {
+      "module": "mesh_gnn/~_networks_builder/processor_edges_13_mesh_mlp/~/linear_1",
+      "weight_sha256": "623c8cdf3319ca9bc2662a7562baa4cf2cd47c7e884f67086123a388f6df572f",
+      "input_shape": [
+        327660,
+        1,
+        512
+      ],
+      "producer": "silu",
+      "scope": "jit(<lambda>)/scan_body/mesh_gnn/_process/mesh_gnn/_process_step/mesh_gnn/sequential_27/processor_edges_13_mesh_mlp/linear_1"
+    },
+    {
+      "module": "mesh_gnn/~_networks_builder/processor_nodes_13_mesh_nodes_mlp/~/linear_0",
+      "weight_sha256": "620c902325ecaddaee7564667c4da792e9d83161ce3fc454cc4ff08627d3ae9a",
+      "input_shape": [
+        40962,
+        1,
+        1024
+      ],
+      "producer": "concatenate",
+      "scope": "jit(<lambda>)/scan_body/mesh_gnn/_process/mesh_gnn/_process_step/mesh_gnn/sequential_28/processor_nodes_13_mesh_nodes_mlp/linear_0"
+    },
+    {
+      "module": "mesh_gnn/~_networks_builder/processor_nodes_13_mesh_nodes_mlp/~/linear_1",
+      "weight_sha256": "9b554c4934a63389b5449a9e25afe47f67ec2adf85c0a4f2a2c308e34aa0c169",
+      "input_shape": [
+        40962,
+        1,
+        512
+      ],
+      "producer": "silu",
+      "scope": "jit(<lambda>)/scan_body/mesh_gnn/_process/mesh_gnn/_process_step/mesh_gnn/sequential_28/processor_nodes_13_mesh_nodes_mlp/linear_1"
+    },
+    {
+      "module": "mesh_gnn/~_networks_builder/processor_edges_14_mesh_mlp/~/linear_0",
+      "weight_sha256": "df78cf26b8b3b3a61bbafaf85679faf70438816025a7bfd33fda61058855d1d0",
+      "input_shape": [
+        327660,
+        1,
+        1536
+      ],
+      "producer": "concatenate",
+      "scope": "jit(<lambda>)/scan_body/mesh_gnn/_process/mesh_gnn/_process_step/mesh_gnn/sequential_29/processor_edges_14_mesh_mlp/linear_0"
+    },
+    {
+      "module": "mesh_gnn/~_networks_builder/processor_edges_14_mesh_mlp/~/linear_1",
+      "weight_sha256": "d30f761f72898d713511b606f22306822aec625448f42c5445c59288788813d7",
+      "input_shape": [
+        327660,
+        1,
+        512
+      ],
+      "producer": "silu",
+      "scope": "jit(<lambda>)/scan_body/mesh_gnn/_process/mesh_gnn/_process_step/mesh_gnn/sequential_29/processor_edges_14_mesh_mlp/linear_1"
+    },
+    {
+      "module": "mesh_gnn/~_networks_builder/processor_nodes_14_mesh_nodes_mlp/~/linear_0",
+      "weight_sha256": "2cc80db7e52b13cc52823992126d4c689472be1026c4737add4d81ea53662063",
+      "input_shape": [
+        40962,
+        1,
+        1024
+      ],
+      "producer": "concatenate",
+      "scope": "jit(<lambda>)/scan_body/mesh_gnn/_process/mesh_gnn/_process_step/mesh_gnn/sequential_30/processor_nodes_14_mesh_nodes_mlp/linear_0"
+    },
+    {
+      "module": "mesh_gnn/~_networks_builder/processor_nodes_14_mesh_nodes_mlp/~/linear_1",
+      "weight_sha256": "87350eec86cc05bf9fae774771ee2f9ce775dd2b0fc969d4ce7ee3dcde13c31e",
+      "input_shape": [
+        40962,
+        1,
+        512
+      ],
+      "producer": "silu",
+      "scope": "jit(<lambda>)/scan_body/mesh_gnn/_process/mesh_gnn/_process_step/mesh_gnn/sequential_30/processor_nodes_14_mesh_nodes_mlp/linear_1"
+    },
+    {
+      "module": "mesh_gnn/~_networks_builder/processor_edges_15_mesh_mlp/~/linear_0",
+      "weight_sha256": "f0c605e80f72eccfcd9f82b978b25a2d9cdb24be944bfb1011944aa70bf32a19",
+      "input_shape": [
+        327660,
+        1,
+        1536
+      ],
+      "producer": "concatenate",
+      "scope": "jit(<lambda>)/scan_body/mesh_gnn/_process/mesh_gnn/_process_step/mesh_gnn/sequential_31/processor_edges_15_mesh_mlp/linear_0"
+    },
+    {
+      "module": "mesh_gnn/~_networks_builder/processor_edges_15_mesh_mlp/~/linear_1",
+      "weight_sha256": "c9dbb9e612354a40e0cbd89db5ccd6404abc2eeb764bf988bdb197b8425170b3",
+      "input_shape": [
+        327660,
+        1,
+        512
+      ],
+      "producer": "silu",
+      "scope": "jit(<lambda>)/scan_body/mesh_gnn/_process/mesh_gnn/_process_step/mesh_gnn/sequential_31/processor_edges_15_mesh_mlp/linear_1"
+    },
+    {
+      "module": "mesh_gnn/~_networks_builder/processor_nodes_15_mesh_nodes_mlp/~/linear_0",
+      "weight_sha256": "6f56eb264d9f9a156d764769081507b3999b7849ed6543057879c591db4ff134",
+      "input_shape": [
+        40962,
+        1,
+        1024
+      ],
+      "producer": "concatenate",
+      "scope": "jit(<lambda>)/scan_body/mesh_gnn/_process/mesh_gnn/_process_step/mesh_gnn/sequential_32/processor_nodes_15_mesh_nodes_mlp/linear_0"
+    },
+    {
+      "module": "mesh_gnn/~_networks_builder/processor_nodes_15_mesh_nodes_mlp/~/linear_1",
+      "weight_sha256": "56e1eef740967a46b6756ff52ee156dea86a62cbd354c1b4c77196db7187d797",
+      "input_shape": [
+        40962,
+        1,
+        512
+      ],
+      "producer": "silu",
+      "scope": "jit(<lambda>)/scan_body/mesh_gnn/_process/mesh_gnn/_process_step/mesh_gnn/sequential_32/processor_nodes_15_mesh_nodes_mlp/linear_1"
+    },
+    {
+      "module": "mesh2grid_gnn/~_networks_builder/encoder_edges_mesh2grid_mlp/~/linear_1",
+      "weight_sha256": "1ac41f43e1d898b06f341c7ec98b4fa9a5a3d56382926c24ef783b06ef51ce8c",
+      "input_shape": [
+        3114720,
+        1,
+        512
+      ],
+      "producer": "silu",
+      "scope": "jit(<lambda>)/scan_body/mesh2grid_gnn/_embed/mesh2grid_gnn/sequential/encoder_edges_mesh2grid_mlp/linear_1"
+    },
+    {
+      "module": "mesh2grid_gnn/~_networks_builder/processor_edges_0_mesh2grid_mlp/~/linear_0",
+      "weight_sha256": "59aceb1aa13654508937e8e8f32895665431fdcb4078a0731d519a218beb2f6c",
+      "input_shape": [
+        3114720,
+        1,
+        1536
+      ],
+      "producer": "concatenate",
+      "scope": "jit(<lambda>)/scan_body/mesh2grid_gnn/_process/mesh2grid_gnn/_process_step/mesh2grid_gnn/sequential_1/processor_edges_0_mesh2grid_mlp/linear_0"
+    },
+    {
+      "module": "mesh2grid_gnn/~_networks_builder/processor_edges_0_mesh2grid_mlp/~/linear_1",
+      "weight_sha256": "eb4e862968f5ae8dcb75812fa562898a7c7a68f92bdd5a777c1596684073a2bd",
+      "input_shape": [
+        3114720,
+        1,
+        512
+      ],
+      "producer": "silu",
+      "scope": "jit(<lambda>)/scan_body/mesh2grid_gnn/_process/mesh2grid_gnn/_process_step/mesh2grid_gnn/sequential_1/processor_edges_0_mesh2grid_mlp/linear_1"
+    },
+    {
+      "module": "mesh2grid_gnn/~_networks_builder/processor_nodes_0_grid_nodes_mlp/~/linear_0",
+      "weight_sha256": "23944474456efacf37093c6a7f24e91b024c578397f9efbdeb308d90ea2356c8",
+      "input_shape": [
+        1038240,
+        1,
+        1024
+      ],
+      "producer": "concatenate",
+      "scope": "jit(<lambda>)/scan_body/mesh2grid_gnn/_process/mesh2grid_gnn/_process_step/mesh2grid_gnn/sequential_3/processor_nodes_0_grid_nodes_mlp/linear_0"
+    },
+    {
+      "module": "mesh2grid_gnn/~_networks_builder/processor_nodes_0_grid_nodes_mlp/~/linear_1",
+      "weight_sha256": "e99d1d1f4da3f4aa8d4eaae362d7cd0eb77e5ce83d086200a722b31205417984",
+      "input_shape": [
+        1038240,
+        1,
+        512
+      ],
+      "producer": "silu",
+      "scope": "jit(<lambda>)/scan_body/mesh2grid_gnn/_process/mesh2grid_gnn/_process_step/mesh2grid_gnn/sequential_3/processor_nodes_0_grid_nodes_mlp/linear_1"
+    },
+    {
+      "module": "mesh2grid_gnn/~_networks_builder/decoder_nodes_grid_nodes_mlp/~/linear_1",
+      "weight_sha256": "e140dfc0b146ff853b0bf6b04b9bcb5c66b8b7501365882762da481d298da3ea",
+      "input_shape": [
+        1038240,
+        1,
+        512
+      ],
+      "producer": "silu",
+      "scope": "jit(<lambda>)/scan_body/mesh2grid_gnn/_output/mesh2grid_gnn/decoder_nodes_grid_nodes_mlp/linear_1"
+    }
+  ],
+  "scope": "Only the 79 runtime Linear inputs directly produced by Concat or SiLU.",
+  "sources": {
+    "/home/zhangyuxin/zyx/graphcast/outputs/logical-operators-20261022/capture-r3/run/logical/inventory.json": "c903990a7eef73953225194427e7b72de3573d9f9f0a4ec8d17f4528b8b8cf04",
+    "/home/zhangyuxin/zyx/graphcast/outputs/logical-operators-20261022/capture-r3/run/logical/constants.npz": "f47973224d1c50c01566b23a6e1aae4a27d918c2e29f1b9d86b5b1dfc57c76e6",
+    "/home/zhangyuxin/zyx/graphcast-sugon/kernels/xf32_rne/weights.json": "bd9ad13385c662f316e7ea5dadf94184b237146c9ed6243d99e0725083f8d379"
+  }
+}

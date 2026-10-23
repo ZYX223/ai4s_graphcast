@@ -1,0 +1,22 @@
+{
+  "fp32": {
+    "exit_code": 0,
+    "all_runtime_math_modes_verified": true,
+    "checkpoint_sha256": "6ab5a80ba9d571fd850710e69e75b7158d5d09791e7e0f3353d5d9f30cba2c57",
+    "forecast_gemm_calls": 3360,
+    "warmup_gemm_calls": 420,
+    "source_snapshots_verified": true,
+    "no_bf16_or_f16_hlo_arrays": true
+  },
+  "rne_xf32": {
+    "exit_code": 0,
+    "all_runtime_math_modes_verified": true,
+    "checkpoint_sha256": "c91ad0a8a2e23ff5628b11acc00b1f8f9ddeafd1322625a38236a82d77422d9c",
+    "forecast_gemm_calls": 3360,
+    "warmup_gemm_calls": 420,
+    "source_snapshots_verified": true,
+    "no_bf16_or_f16_hlo_arrays": true
+  },
+  "evidence_validation_passed": true,
+  "accuracy_acceptance_passed": false
+}

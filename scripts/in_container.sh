@@ -34,6 +34,10 @@ case "$action" in
     export JAX_PLATFORMS=cpu
     "$py" /repo/scripts/compare.py --candidate /candidate.nc --reference "/reference$GRAPHCAST_REFERENCE_SUFFIX" --data /data --output /output/comparison.json
     exit ;;
+  operators)
+    [[ "$GRAPHCAST_PLATFORM" == hygon ]]
+    "$py" /repo/scripts/operator_bench.py --data /data --output /output/operators "$@"
+    exit ;;
 esac
 if [[ "$GRAPHCAST_PLATFORM" == hygon ]]; then
   "$py" /repo/scripts/build_kernel.py --output /output/native
@@ -41,6 +45,9 @@ if [[ "$GRAPHCAST_PLATFORM" == hygon ]]; then
   export LD_PRELOAD="$GRAPHCAST_ROUTER_LIBRARY:$LD_PRELOAD"
   export GRAPHCAST_STAGE_WEIGHTS=/repo/kernels/xf32_rne/weights.tsv
   export GRAPHCAST_STAGE_LOG=/dev/null
+  if [[ "$action" == profile ]]; then
+    export GRAPHCAST_STAGE_LOG=/output/model-gemm.jsonl
+  fi
 fi
 case "$action" in
   probe)
@@ -51,10 +58,21 @@ case "$action" in
     fi ;;
   benchmark)
     "$py" /repo/scripts/entry.py --platform "$GRAPHCAST_PLATFORM" --data /data --output /output/run "$@" ;;
+  logical-catalog)
+    "$py" /repo/scripts/entry.py --platform "$GRAPHCAST_PLATFORM" --data /data --output /output/run --logical-catalog "$@" ;;
+  logical-bench)
+    "$py" /repo/scripts/logical_bench.py --inventory "$GRAPHCAST_LOGICAL_FOLDER" --data /data --output /output/logical "$@" ;;
   profile)
-    [[ "$GRAPHCAST_PLATFORM" == h100 ]]
-    nsys profile --trace=cuda,cublas,nvtx --sample=none --cpuctxsw=none \
-      --capture-range=cudaProfilerApi --capture-range-end=stop --output=/output/model-trace \
-      "$py" /repo/scripts/entry.py --platform h100 --data /data --output /output/run --profile "$@" ;;
+    if [[ "$GRAPHCAST_PLATFORM" == h100 ]]; then
+      nsys profile --trace=cuda,cublas,nvtx --sample=none --cpuctxsw=none \
+        --capture-range=cudaProfilerApi --capture-range-end=stop --output=/output/model-trace \
+        "$py" /repo/scripts/entry.py --platform h100 --data /data --output /output/run --profile "$@"
+    else
+      /opt/dtk/bin/hipprof --hip-trace --trace-off --output-type 0 -o /output/model-trace \
+        "$py" /repo/scripts/entry.py --platform hygon --data /data --output /output/run --profile "$@"
+      # hipprof can exit zero after its child fails: validate completed model
+      # evidence and real device kernels before accepting the launcher result.
+      "$py" /repo/scripts/summarize_profile.py --run /output --output /output/summary
+    fi ;;
   *) exit 2 ;;
 esac

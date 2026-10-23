@@ -1,0 +1,203 @@
+{
+  "status": "completed",
+  "stages": [
+    {
+      "mode": "fp32",
+      "rollout": 1,
+      "updates": 16,
+      "static_gemm_calls": 402,
+      "runtime_gemm_calls_per_update": 804,
+      "mean_rounding_gpu_seconds": 0.0
+    },
+    {
+      "mode": "rne_xf32",
+      "rollout": 1,
+      "updates": 16,
+      "static_gemm_calls": 402,
+      "runtime_gemm_calls_per_update": 804,
+      "mean_rounding_gpu_seconds": 2.9654458333125
+    },
+    {
+      "mode": "fp32",
+      "rollout": 2,
+      "updates": 2,
+      "static_gemm_calls": 489,
+      "runtime_gemm_calls_per_update": 1956,
+      "mean_rounding_gpu_seconds": 0.0
+    },
+    {
+      "mode": "rne_xf32",
+      "rollout": 2,
+      "updates": 2,
+      "static_gemm_calls": 489,
+      "runtime_gemm_calls_per_update": 1956,
+      "mean_rounding_gpu_seconds": 6.9413573535
+    },
+    {
+      "mode": "fp32",
+      "rollout": 3,
+      "updates": 2,
+      "static_gemm_calls": 489,
+      "runtime_gemm_calls_per_update": 2934,
+      "mean_rounding_gpu_seconds": 0.0
+    },
+    {
+      "mode": "rne_xf32",
+      "rollout": 3,
+      "updates": 2,
+      "static_gemm_calls": 489,
+      "runtime_gemm_calls_per_update": 2934,
+      "mean_rounding_gpu_seconds": 10.3793978345
+    },
+    {
+      "mode": "fp32",
+      "rollout": 4,
+      "updates": 2,
+      "static_gemm_calls": 489,
+      "runtime_gemm_calls_per_update": 3912,
+      "mean_rounding_gpu_seconds": 0.0
+    },
+    {
+      "mode": "rne_xf32",
+      "rollout": 4,
+      "updates": 2,
+      "static_gemm_calls": 489,
+      "runtime_gemm_calls_per_update": 3912,
+      "mean_rounding_gpu_seconds": 13.940556243
+    },
+    {
+      "mode": "fp32",
+      "rollout": 5,
+      "updates": 2,
+      "static_gemm_calls": 489,
+      "runtime_gemm_calls_per_update": 4890,
+      "mean_rounding_gpu_seconds": 0.0
+    },
+    {
+      "mode": "rne_xf32",
+      "rollout": 5,
+      "updates": 2,
+      "static_gemm_calls": 489,
+      "runtime_gemm_calls_per_update": 4890,
+      "mean_rounding_gpu_seconds": 17.149403388
+    },
+    {
+      "mode": "fp32",
+      "rollout": 6,
+      "updates": 2,
+      "static_gemm_calls": 489,
+      "runtime_gemm_calls_per_update": 5868,
+      "mean_rounding_gpu_seconds": 0.0
+    },
+    {
+      "mode": "rne_xf32",
+      "rollout": 6,
+      "updates": 2,
+      "static_gemm_calls": 489,
+      "runtime_gemm_calls_per_update": 5868,
+      "mean_rounding_gpu_seconds": 20.7118653355
+    },
+    {
+      "mode": "fp32",
+      "rollout": 7,
+      "updates": 2,
+      "static_gemm_calls": 489,
+      "runtime_gemm_calls_per_update": 6846,
+      "mean_rounding_gpu_seconds": 0.0
+    },
+    {
+      "mode": "rne_xf32",
+      "rollout": 7,
+      "updates": 2,
+      "static_gemm_calls": 489,
+      "runtime_gemm_calls_per_update": 6846,
+      "mean_rounding_gpu_seconds": 24.393066355
+    },
+    {
+      "mode": "fp32",
+      "rollout": 8,
+      "updates": 2,
+      "static_gemm_calls": 489,
+      "runtime_gemm_calls_per_update": 7824,
+      "mean_rounding_gpu_seconds": 0.0
+    },
+    {
+      "mode": "rne_xf32",
+      "rollout": 8,
+      "updates": 2,
+      "static_gemm_calls": 489,
+      "runtime_gemm_calls_per_update": 7824,
+      "mean_rounding_gpu_seconds": 28.436542421
+    },
+    {
+      "mode": "fp32",
+      "rollout": 9,
+      "updates": 2,
+      "static_gemm_calls": 489,
+      "runtime_gemm_calls_per_update": 8802,
+      "mean_rounding_gpu_seconds": 0.0
+    },
+    {
+      "mode": "rne_xf32",
+      "rollout": 9,
+      "updates": 2,
+      "static_gemm_calls": 489,
+      "runtime_gemm_calls_per_update": 8802,
+      "mean_rounding_gpu_seconds": 31.031846555
+    },
+    {
+      "mode": "fp32",
+      "rollout": 10,
+      "updates": 2,
+      "static_gemm_calls": 489,
+      "runtime_gemm_calls_per_update": 9780,
+      "mean_rounding_gpu_seconds": 0.0
+    },
+    {
+      "mode": "rne_xf32",
+      "rollout": 10,
+      "updates": 2,
+      "static_gemm_calls": 489,
+      "runtime_gemm_calls_per_update": 9780,
+      "mean_rounding_gpu_seconds": 34.789254729
+    },
+    {
+      "mode": "fp32",
+      "rollout": 11,
+      "updates": 2,
+      "static_gemm_calls": 489,
+      "runtime_gemm_calls_per_update": 10758,
+      "mean_rounding_gpu_seconds": 0.0
+    },
+    {
+      "mode": "rne_xf32",
+      "rollout": 11,
+      "updates": 2,
+      "static_gemm_calls": 489,
+      "runtime_gemm_calls_per_update": 10758,
+      "mean_rounding_gpu_seconds": 37.672707834
+    },
+    {
+      "mode": "fp32",
+      "rollout": 12,
+      "updates": 2,
+      "static_gemm_calls": 489,
+      "runtime_gemm_calls_per_update": 11736,
+      "mean_rounding_gpu_seconds": 0.0
+    },
+    {
+      "mode": "rne_xf32",
+      "rollout": 12,
+      "updates": 2,
+      "static_gemm_calls": 489,
+      "runtime_gemm_calls_per_update": 11736,
+      "mean_rounding_gpu_seconds": 41.462523555
+    }
+  ],
+  "checks": [
+    "Frozen source manifests match across stages and files",
+    "All HLO custom calls are GEMM, with expected static/runtime counts",
+    "Runtime precision modes and operand rounding flags match",
+    "Exactly two traced RNE kernels per rounded GEMM"
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "verified_utc": "2026-10-23T06:04:37.990552",
+  "paired_updates": 38,
+  "horizons": 12,
+  "completed_stages": 24,
+  "all_formal_source_manifests_identical": true,
+  "known_teardown_warnings": 24,
+  "files": {
+    "README.md": "271062bcea983154a131dea4d31cb42255086b31fdab71fcbc0aceabeb0f1895",
+    "summary.json": "02c4f784c2bf80638636e7dcc44932ff07ef87f5c09e08066ad5b7a962ecd556",
+    "by-update.csv": "b7a422e04a1d57714f8f1e000632951ec3f9ec4a021fcb28c8b2ef0b7ae6d3bf",
+    "by-horizon.csv": "c8c307ac4f82ac23cb623a617c8a28683df3aa59b31e9d1ffe09ffb9d2074cda",
+    "evidence-audit.json": "1748e877bf49e3a514ff3dd1f9885b7d8fc956eb92c0cef5826b0ea1e5a1cccb",
+    "runtime-warnings.json": "e92d1ef6d27f571d764dc07f4ddf4ff94f19607d653357f3e87667b296b24b15"
+  }
+}

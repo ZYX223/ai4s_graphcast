@@ -1,0 +1,57 @@
+name,category,hlo_tags,calls,total_ms,percent_of_kernel_sum
+Cijk_Ailk_Bljk_SB_MX_MT256x256x16_SE_AMAS3_BW_DTL0_BL1_DRB16_ALT_KME0_ETN_EPS0_FL0_GRVW4_GSU1_ISA938_IU1_KME_GRCMn2_K1_KLA_LDL1_LRVW4_MAC_MMAC_BW1_MMAC_KM0_MMAC_KME1_NLCA1_NLCB1_OLDSR0_PGR2_PLR1_RK1_SU0_SUM0_SUS256_SVW4_TT8_16_TLM0_ULDSWM0_USFGRO0_USSB0_VAW1_VSn1_VW4_WG32_16_1_WGM1,gemm,[],80,308.46328399999993,31.8323191751033
+"round_rne(float const*, float*, int, int, int)",rne,[],168,284.46887799999996,29.356181398495135
+input_scatter_fusion_16,scatter_fusion,"['scatter', 'layer_norm']",15,52.98155899999999,5.4675093729552815
+input_scatter_fusion,scatter_fusion,"['scatter', 'layer_norm']",1,30.442377,3.141545562721896
+loop_multiply_fusion_39,other_device_kernel,[],2,23.204303,2.3946019433930656
+input_scatter_fusion_17,scatter_fusion,"['scatter', 'layer_norm']",1,18.903826000000002,1.9508079375262586
+loop_multiply_fusion_35,other_device_kernel,[],17,18.681908,1.9279067853531506
+input_concatenate_fusion,gather_fusion,"['gather', 'layer_norm']",3,18.585106,1.9179171615612038
+input_concatenate_fusion_14,gather_fusion,"['gather', 'layer_norm']",7,15.694707999999999,1.619638317849353
+loop_multiply_fusion_41,other_device_kernel,[],4,13.520631,1.3952812660867482
+input_reduce_fusion_38,layer_norm_fusion,"['layer_norm', 'reduction']",2,12.672150000000002,1.3077210298869328
+input_reduce_fusion_41,layer_norm_fusion,"['layer_norm', 'reduction']",2,12.238230000000001,1.2629420216453529
+input_concatenate_fusion_15,gather_fusion,['gather'],7,11.928792,1.231009115228829
+loop_add_fusion_10,layer_norm_fusion,['layer_norm'],6,11.885589,1.2265507185357496
+input_reduce_fusion_34,layer_norm_fusion,"['layer_norm', 'reduction']",17,11.341752,1.1704286649197002
+loop_multiply_fusion_38,other_device_kernel,[],2,11.066551,1.142028895729317
+input_reduce_fusion_48,layer_norm_fusion,"['layer_norm', 'reduction']",17,11.00415,1.1355893333830713
+input_concatenate_fusion_17,gather_fusion,"['gather', 'layer_norm']",1,9.608633,0.9915769180893192
+Cijk_Ailk_Bljk_SB_MT128x128x16_SE_AMAS3_BW_DTL0_BL1_DRB16_ALT_KME0_ETN_EPS0_FL0_GRVW4_GSU1_ISA938_IU1_KME_GRCMn1_K1_KLA_LDL1_LRVW4_MAC_MMAC_BW1_MMAC_KM0_MMAC_KME1_NLCA1_NLCB1_OLDSR0_PGR2_PLR1_RK0_SU32_SUM0_SUS256_SVW4_TT4_8_TLM0_ULDSWM0_USFGRO0_USSB0_VAW1_VSn1_VW4_WG32_16_1_WGM8,gemm,[],2,9.164152999999999,0.9457081552223909
+input_concatenate_fusion_18,other_device_kernel,[],1,7.807354,0.8056913004953274
+loop_add_fusion_3,layer_norm_fusion,['layer_norm'],2,7.652154,0.7896752097894526
+input_reduce_fusion_37,layer_norm_fusion,"['layer_norm', 'reduction']",2,6.295995,0.6497244007972584
+input_reduce_fusion_40,layer_norm_fusion,"['layer_norm', 'reduction']",3,6.123994999999999,0.6319746095510569
+input_reduce_fusion_43,layer_norm_fusion,"['layer_norm', 'reduction']",2,6.031516,0.6224311040588624
+input_reduce_fusion_45,layer_norm_fusion,"['layer_norm', 'reduction']",3,5.893437,0.6081818399572096
+wrapped_concatenate_17,other_device_kernel,[],1,5.233276,0.5400555612427699
+wrapped_concatenate,other_device_kernel,[],17,4.339357,0.447806284260135
+input_scatter_fusion_1,scatter_fusion,"['scatter', 'layer_norm']",1,3.502878,0.36148461198204557
+loop_add_fusion_12,layer_norm_fusion,['layer_norm'],17,3.4401560000000004,0.35501192357190464
+loop_multiply_fusion_36,other_device_kernel,[],17,3.165598000000001,0.32667850970577333
+Cijk_Ailk_Bljk_SB_MX_MT128x128x8_SE_AMAS3_BW_DTL1_BL1_DRB16_ALT_KME0_ETN_EPS1_FL0_GRVW4_GSU1_ISA938_IU1_KME_GRCMn2_K1_KLA_LDL1_LRVW4_MAC_MMAC_BW1_MMAC_KM0_MMAC_KME1_NLCA1_NLCB1_OLDSR0_PGR1_PLR1_RK0_SU0_SUM0_SUS256_SVW4_TT8_8_TLM1_ULDSWM0_USFGRO0_USSB0_VAW1_VSn1_VW4_WG16_16_1_WGM8,gemm,[],1,3.066718,0.31647444366842203
+input_concatenate_fusion_1,gather_fusion,"['gather', 'layer_norm']",1,2.9217579999999996,0.3015150847204605
+loop_add_fusion_2,layer_norm_fusion,['layer_norm'],1,2.864798,0.29563701431706735
+input_reduce_fusion_35,layer_norm_fusion,"['layer_norm', 'reduction']",17,2.3060779999999994,0.23797908777591784
+input_reduce_fusion_65,layer_norm_fusion,"['layer_norm', 'reduction']",17,2.2953600000000005,0.23687302810977384
+loop_broadcast_fusion,other_device_kernel,[],1,2.020799,0.20853930465426018
+input_concatenate_fusion_16,gather_fusion,"['gather', 'layer_norm']",1,1.789759,0.18469679436633932
+loop_add_fusion_11,layer_norm_fusion,['layer_norm'],1,1.6127989999999999,0.1664351486748985
+loop_broadcast_fusion_1,other_device_kernel,[],1,1.328799,0.13712735382651928
+loop_add_fusion,other_device_kernel,[],1,1.145279,0.1181887393526652
+Cijk_Ailk_Bljk_SB_MT128x128x16_SE_AMAS3_BW_DTL0_BL1_DRB16_ALT_KME0_ETN_EPS0_FL0_GRVW4_GSU1_ISA938_IU1_KME_GRCMn1_K1_KLA_LDL1_LRVW4_MAC_MMAC_BW1_MMAC_KM0_MMAC_KME1_NLCA1_NLCB1_OLDSR0_PGR2_PLR1_RK0_SU0_SUM0_SUS256_SVW4_TT4_8_TLM0_ULDSWM0_USFGRO0_USSB0_VAW1_VSn1_VW4_WG32_16_1_WGM8,gemm,[],1,0.6407999999999999,0.06612829203817398
+loop_add_fusion_1,other_device_kernel,[],1,0.19824,0.020457666375854573
+loop_rsqrt_fusion_3,layer_norm_fusion,['layer_norm'],2,0.168319,0.017369925074240646
+loop_add_fusion_29,layer_norm_fusion,['layer_norm'],1,0.16176,0.016693059488288114
+loop_multiply_fusion_42,layer_norm_fusion,['layer_norm'],2,0.16016,0.016527945151114148
+loop_rsqrt_fusion_1,layer_norm_fusion,['layer_norm'],2,0.16,0.01651143371739675
+loop_rsqrt_fusion_6,layer_norm_fusion,['layer_norm'],3,0.13984000000000002,0.014430993069004762
+loop_multiply_fusion_63,layer_norm_fusion,['layer_norm'],3,0.139679,0.014414378438826628
+loop_transpose_fusion,other_device_kernel,[],1,0.11023999999999999,0.01137637783128636
+loop_multiply_fusion_66,layer_norm_fusion,['layer_norm'],17,0.10064,0.010385691808242553
+loop_rsqrt_fusion_23,layer_norm_fusion,['layer_norm'],17,0.09839999999999999,0.010154531736199
+loop_multiply_fusion_44,layer_norm_fusion,['layer_norm'],17,0.09839999999999997,0.010154531736198999
+loop_rsqrt_fusion_40,layer_norm_fusion,['layer_norm'],17,0.09791999999999998,0.010104997435046809
+loop_multiply_fusion_61,layer_norm_fusion,['layer_norm'],2,0.05104,0.005267147355849563
+wrapped_slice_1,other_device_kernel,[],1,0.0028799999999999997,0.0002972058069131415
+wrapped_slice,other_device_kernel,[],1,0.00272,0.00028069437319574477

@@ -1,0 +1,24 @@
+{
+  "status": "passed",
+  "gpu_run": "/home/zhangyuxin/zyx/graphcast/outputs/logical-operators-20261022/bench-full-r2",
+  "tests": {
+    "count": 32,
+    "exit_code": 0,
+    "path": "/home/zhangyuxin/zyx/graphcast/outputs/logical-operators-20261022/check-review-green"
+  },
+  "logical_types": 16,
+  "cases": 108,
+  "logical_calls": 549,
+  "code_matches_measured_snapshot": true,
+  "capture_hashes_match": true,
+  "workbook_validation": "/home/zhangyuxin/zyx/graphcast/outputs/logical-operators-20261022/workbook/validation.json",
+  "excluded_runs": [
+    "bench-full-r1",
+    "bench-smoke-r1",
+    "capture-r1",
+    "capture-r2"
+  ],
+  "workbook_sheets": 4,
+  "retained_measurement_cells_unchanged": true,
+  "flaggems_timing_cells_empty": true
+}

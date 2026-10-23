@@ -1,0 +1,13 @@
+{
+  "status": "passed",
+  "workbook_sha256": "209701197d66fc5f10586dcfc9f70fa8a8204768fa96e3f12f876f4ec472dbd5",
+  "sheets": 4,
+  "logical_types": 16,
+  "cases": 108,
+  "logical_calls": 549,
+  "raw_timings_and_oracles_rechecked": true,
+  "all_attachment_cells_preserved": false,
+  "retained_measurement_cells_unchanged": true,
+  "rendered_visual_check": false,
+  "flaggems_timing_cells_empty": true
+}

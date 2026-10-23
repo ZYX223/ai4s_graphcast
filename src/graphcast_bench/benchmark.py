@@ -34,6 +34,7 @@ def main():
     p.add_argument("--output", type=Path, required=True)
     p.add_argument("--repeats", type=int, default=3)
     p.add_argument("--profile", action="store_true")
+    p.add_argument("--logical-catalog", action="store_true")
     args = p.parse_args()
     if (
         args.repeats < 1
@@ -117,8 +118,9 @@ def main():
         "pci": bus.value.decode(),
         "profile_only": args.profile,
         "warmup_steps": 5,
-        "measured_steps": 1 if args.profile else 40,
-        "repeats": 1 if args.profile else args.repeats,
+        "logical_catalog_only": args.logical_catalog,
+        "measured_steps": 1 if args.profile or args.logical_catalog else 40,
+        "repeats": 1 if args.profile or args.logical_catalog else args.repeats,
         "rows": rows,
         "warmups": warmups,
         "router_build": router.build if router else None,
@@ -209,14 +211,30 @@ def main():
                     (args.output / "optimized-hlo.txt").write_text(
                         apply.lower(**kwargs).compile().as_text()
                     )
+                    if args.logical_catalog:
+                        from .logical_inventory import export_jaxpr
+
+                        export_jaxpr(jax.make_jaxpr(apply)(**kwargs), args.output / "logical")
                 cache = apply._cache_size()
                 before = telemetry()
                 if args.profile:
-                    runtime = C.CDLL("libcudart.so")
-                    assert runtime.cudaProfilerStart() == 0
-                times, wall, last, _ = execute(mode, name, report["measured_steps"])
-                if args.profile:
-                    assert runtime.cudaProfilerStop() == 0
+                    runtime = C.CDLL(
+                        "libcudart.so" if args.platform == "h100" else "libamdhip64.so"
+                    )
+                    start_profile = getattr(
+                        runtime,
+                        "cudaProfilerStart" if args.platform == "h100" else "hipProfilerStart",
+                    )
+                    stop_profile = getattr(
+                        runtime,
+                        "cudaProfilerStop" if args.platform == "h100" else "hipProfilerStop",
+                    )
+                    assert start_profile() == 0
+                try:
+                    times, wall, last, _ = execute(mode, name, report["measured_steps"])
+                finally:
+                    if args.profile:
+                        assert stop_profile() == 0
                 after = telemetry()
                 if apply._cache_size() != cache:
                     raise RuntimeError("Compilation occurred during measurement")
@@ -235,7 +253,7 @@ def main():
                 }
                 folder = args.output / name
                 folder.mkdir()
-                if not args.profile:
+                if not (args.profile or args.logical_catalog):
                     host = xr.Dataset(
                         {
                             k: (

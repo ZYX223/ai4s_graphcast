@@ -1,0 +1,58 @@
+name,category,hlo_tags,calls,total_ms,percent_of_kernel_sum
+Cijk_Ailk_Bljk_SB_MX_MT256x256x16_SE_AMAS3_BW_DTL0_BL1_DRB16_ALT_KME0_ETN_EPS0_FL0_GRVW4_GSU1_ISA938_IU1_KME_GRCMn2_K1_KLA_LDL1_LRVW4_MAC_MMAC_BW1_MMAC_KM0_MMAC_KME1_NLCA1_NLCB1_OLDSR0_PGR2_PLR1_RK1_SU0_SUM0_SUS256_SVW4_TT8_16_TLM0_ULDSWM0_USFGRO0_USSB0_VAW1_VSn1_VW4_WG32_16_1_WGM1,gemm,[],80,313.066558,43.217687354171844
+input_scatter_fusion_16,scatter_fusion,"['scatter', 'layer_norm']",15,53.14909399999999,7.337037026003557
+input_scatter_fusion,scatter_fusion,"['scatter', 'layer_norm']",1,30.933745,4.270289770470074
+loop_bitcast_convert_fusion_1,other_device_kernel,[],2,26.591028,3.670793654459987
+loop_concatenate_fusion_4,gather_fusion,['gather'],14,25.823507000000003,3.564840202172818
+loop_bitcast_convert_fusion_8,other_device_kernel,[],17,21.153748999999998,2.920197278466981
+input_scatter_fusion_17,scatter_fusion,"['scatter', 'layer_norm']",1,19.181751,2.6479702045453637
+loop_concatenate_fusion,gather_fusion,['gather'],1,16.422072,2.267006664454079
+loop_add_fusion_18,layer_norm_fusion,['layer_norm'],13,16.290394,2.2488290006634206
+loop_bitcast_convert_fusion_7,other_device_kernel,[],4,15.543832000000002,2.1457688612712564
+"round_rne(float const*, float*, int, int, int)",rne,[],89,13.99919,1.9325367119909656
+input_reduce_fusion_38,layer_norm_fusion,"['layer_norm', 'reduction']",2,12.779193,1.7641206114152292
+loop_bitcast_convert_fusion_3,other_device_kernel,[],2,12.767674,1.7625304558144106
+input_reduce_fusion_41,layer_norm_fusion,"['layer_norm', 'reduction']",2,12.412954000000001,1.713562663929492
+input_reduce_fusion_34,layer_norm_fusion,"['layer_norm', 'reduction']",17,11.329593000000001,1.564008660816509
+input_reduce_fusion_48,layer_norm_fusion,"['layer_norm', 'reduction']",17,10.987035,1.5167197883184427
+loop_concatenate_fusion_1,gather_fusion,"['gather', 'layer_norm']",1,9.659995,1.3335267951323733
+Cijk_Ailk_Bljk_SB_MT128x128x16_SE_AMAS3_BW_DTL0_BL1_DRB16_ALT_KME0_ETN_EPS0_FL0_GRVW4_GSU1_ISA938_IU1_KME_GRCMn1_K1_KLA_LDL1_LRVW4_MAC_MMAC_BW1_MMAC_KM0_MMAC_KME1_NLCA1_NLCB1_OLDSR0_PGR2_PLR1_RK0_SU32_SUM0_SUS256_SVW4_TT4_8_TLM0_ULDSWM0_USFGRO0_USSB0_VAW1_VSn1_VW4_WG32_16_1_WGM8,gemm,[],2,9.344156,1.2899263823528828
+loop_add_fusion_2,layer_norm_fusion,['layer_norm'],1,9.038716,1.24776151329185
+loop_add_fusion_4,layer_norm_fusion,['layer_norm'],2,8.056156000000001,1.1121227176376842
+loop_concatenate_fusion_19,other_device_kernel,[],1,7.972637,1.100593226742227
+input_reduce_fusion_40,layer_norm_fusion,"['layer_norm', 'reduction']",3,6.1811169999999995,0.8532804771998566
+input_reduce_fusion_37,layer_norm_fusion,"['layer_norm', 'reduction']",2,6.126397,0.8457265823759315
+input_reduce_fusion_43,layer_norm_fusion,"['layer_norm', 'reduction']",2,5.960317,0.8227998489629654
+input_reduce_fusion_45,layer_norm_fusion,"['layer_norm', 'reduction']",3,5.959837,0.8227335867276678
+loop_concatenate_fusion_2,other_device_kernel,[],1,5.297758,0.7313360148868494
+loop_concatenate_fusion_36,other_device_kernel,[],17,4.4687980000000005,0.6169011345279123
+input_scatter_fusion_1,scatter_fusion,"['scatter', 'layer_norm']",1,3.833438,0.5291920224056694
+loop_add_fusion_20,layer_norm_fusion,['layer_norm'],17,3.5647990000000003,0.49210739609710863
+loop_bitcast_convert_fusion_41,other_device_kernel,[],17,3.4577580000000006,0.47733077957942266
+Cijk_Ailk_Bljk_SB_MX_MT128x128x8_SE_AMAS3_BW_DTL1_BL1_DRB16_ALT_KME0_ETN_EPS1_FL0_GRVW4_GSU1_ISA938_IU1_KME_GRCMn2_K1_KLA_LDL1_LRVW4_MAC_MMAC_BW1_MMAC_KM0_MMAC_KME1_NLCA1_NLCB1_OLDSR0_PGR1_PLR1_RK0_SU0_SUM0_SUS256_SVW4_TT8_8_TLM1_ULDSWM0_USFGRO0_USSB0_VAW1_VSn1_VW4_WG16_16_1_WGM8,gemm,[],1,3.067518,0.42345958228248226
+loop_add_fusion_3,layer_norm_fusion,['layer_norm'],1,2.9283180000000004,0.4042435340461813
+loop_concatenate_fusion_18,gather_fusion,"['gather', 'layer_norm']",1,2.298239,0.3172634445585355
+input_reduce_fusion_35,layer_norm_fusion,"['layer_norm', 'reduction']",17,2.2953599999999996,0.31686600919307345
+input_reduce_fusion_65,layer_norm_fusion,"['layer_norm', 'reduction']",17,2.278559,0.31454669291133436
+loop_broadcast_fusion,other_device_kernel,[],1,2.171999,0.29983647667526947
+loop_concatenate_fusion_3,gather_fusion,"['gather', 'layer_norm']",1,1.940639,0.2678980792618313
+loop_add_fusion_19,layer_norm_fusion,['layer_norm'],1,1.5479990000000001,0.21369557078840298
+loop_broadcast_fusion_1,other_device_kernel,[],1,1.2308789999999998,0.16991832066846205
+loop_add_fusion,other_device_kernel,[],1,1.1555199999999999,0.15951528777306404
+Cijk_Ailk_Bljk_SB_MT128x128x16_SE_AMAS3_BW_DTL0_BL1_DRB16_ALT_KME0_ETN_EPS0_FL0_GRVW4_GSU1_ISA938_IU1_KME_GRCMn1_K1_KLA_LDL1_LRVW4_MAC_MMAC_BW1_MMAC_KM0_MMAC_KME1_NLCA1_NLCB1_OLDSR0_PGR2_PLR1_RK0_SU0_SUM0_SUS256_SVW4_TT4_8_TLM0_ULDSWM0_USFGRO0_USSB0_VAW1_VSn1_VW4_WG32_16_1_WGM8,gemm,[],1,0.6096,0.08415303882793881
+loop_add_fusion_1,other_device_kernel,[],1,0.2184,0.030149317060403275
+loop_multiply_fusion,layer_norm_fusion,['layer_norm'],2,0.16416,0.022661684471775644
+loop_add_fusion_37,layer_norm_fusion,['layer_norm'],1,0.16336,0.022551247412946333
+loop_rsqrt_fusion_1,layer_norm_fusion,['layer_norm'],2,0.16255999999999998,0.022440810354117012
+loop_transpose_fusion,other_device_kernel,[],1,0.11888,0.016410946942036358
+loop_multiply_fusion_19,layer_norm_fusion,['layer_norm'],2,0.10896,0.015041527412552842
+loop_multiply_fusion_2,layer_norm_fusion,['layer_norm'],17,0.10224000000000001,0.014113856118386588
+loop_rsqrt_fusion_23,layer_norm_fusion,['layer_norm'],17,0.10224,0.014113856118386586
+loop_multiply_fusion_24,layer_norm_fusion,['layer_norm'],17,0.09967999999999999,0.013760457530132773
+loop_rsqrt_fusion_40,layer_norm_fusion,['layer_norm'],17,0.09967999999999999,0.013760457530132773
+loop_rsqrt_fusion_6,layer_norm_fusion,['layer_norm'],3,0.08592,0.01186094011826854
+loop_rsqrt_fusion_3,layer_norm_fusion,['layer_norm'],2,0.0512,0.007067971765076226
+loop_multiply_fusion_21,layer_norm_fusion,['layer_norm'],3,0.0216,0.0029818005883915327
+input_concatenate_fusion,other_device_kernel,[],2,0.007520000000000001,0.0010381083529955705
+wrapped_slice_1,other_device_kernel,[],1,0.00544,0.0007509720000393489
+wrapped_slice,other_device_kernel,[],1,0.0048,0.0006626223529758961

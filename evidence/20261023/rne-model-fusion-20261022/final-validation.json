@@ -1,0 +1,17 @@
+{
+  "status": "passed",
+  "verified_at": "2026-10-22T14:31:58.212152Z",
+  "baseline_files_unchanged": 115,
+  "experiment_files_verified": 13,
+  "profile_and_benchmark_runs_verified": 4,
+  "model_steps_audited": 282,
+  "tests_passed": 39,
+  "all_6_fp32_comparisons_within_limits": true,
+  "all_3_fusion_comparisons_within_limits": true,
+  "same_native_gemm_kernels": true,
+  "limitations": [
+    "No bitwise equivalence: both variants have run-to-run output differences",
+    "Sequential blocks of 3 benchmark repeats, no counterbalancing",
+    "Only the fixed inference case; no training or new H100 run"
+  ]
+}

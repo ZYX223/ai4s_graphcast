@@ -1,0 +1,206 @@
+{
+  "status": "completed",
+  "run": "/home/zhangyuxin/zyx/graphcast/outputs/jax-first-update-replay-20261023/run-preallocated",
+  "report_sha256": "020fe18a699552801580b86987eed22c476e3df627cdc0006ce94e679f111ecd",
+  "fixed_starts": [
+    2,
+    3
+  ],
+  "initial_params_sha256": "6c3649b38d962e1420d5b16220200af2a47ff8c98dc7622a8c8193fbe102050b",
+  "initial_optimizer_sha256": "17b3f61f56992a227e9ddcb5bfc8bd381d7d1b88815d876eaebe73989e67a3d2",
+  "batch_sha256": "e22768a1ff61a6fbeacbb3da8c0d1d842195e60e743533ad9a6c745514186fb9",
+  "optimizer_state_origin": "Shared historical FP32 step-1 gradient reconstructed into Adam state at count=1; original RNE step-1 state intentionally excluded.",
+  "pre_loss": {
+    "fp32": {
+      "mean": 1.3054049015045166,
+      "micro_losses": [
+        1.3788635730743408,
+        1.2319462299346924
+      ]
+    },
+    "rne_xf32": {
+      "mean": 1.3054240942001343,
+      "micro_losses": [
+        1.3788671493530273,
+        1.2319810390472412
+      ]
+    }
+  },
+  "rows": [
+    {
+      "learning_rate": 0.0,
+      "pre_loss_common_fp32": 1.3054049015045166,
+      "fp32_update_post_loss_fp32_eval": 1.3054049015045166,
+      "rne_update_post_loss_fp32_eval": 1.3054049015045166,
+      "fp32_loss_change_percent": 0.0,
+      "rne_loss_change_percent": 0.0,
+      "post_loss_between_precisions_relative_percent": 0.0,
+      "fp32_parameter_delta_norm": 0.0,
+      "rne_parameter_delta_norm": 0.0,
+      "delta_relative_difference": null,
+      "full_parameter_relative_difference": 0.0
+    },
+    {
+      "learning_rate": 3e-07,
+      "pre_loss_common_fp32": 1.3054049015045166,
+      "fp32_update_post_loss_fp32_eval": 1.3009633421897888,
+      "rne_update_post_loss_fp32_eval": 1.3009623885154724,
+      "fp32_loss_change_percent": -0.340243805550966,
+      "rne_loss_change_percent": -0.34031686137565575,
+      "post_loss_between_precisions_relative_percent": 7.330524123769852e-05,
+      "fp32_parameter_delta_norm": 0.001340709717713219,
+      "rne_parameter_delta_norm": 0.001340505835291832,
+      "delta_relative_difference": 0.017596057297651777,
+      "full_parameter_relative_difference": 1.3837056174622275e-07
+    },
+    {
+      "learning_rate": 2e-06,
+      "pre_loss_common_fp32": 1.3054049015045166,
+      "fp32_update_post_loss_fp32_eval": 1.2905751466751099,
+      "rne_update_post_loss_fp32_eval": 1.2905498147010803,
+      "fp32_loss_change_percent": -1.1360272059891208,
+      "rne_loss_change_percent": -1.1379677513325803,
+      "post_loss_between_precisions_relative_percent": 0.0019628437828516543,
+      "fp32_parameter_delta_norm": 0.008937971443057476,
+      "rne_parameter_delta_norm": 0.008936615661790612,
+      "delta_relative_difference": 0.01741541456750574,
+      "full_parameter_relative_difference": 9.129908480553397e-07
+    },
+    {
+      "learning_rate": 2e-05,
+      "pre_loss_common_fp32": 1.3054049015045166,
+      "fp32_update_post_loss_fp32_eval": 1.8134338855743408,
+      "rne_update_post_loss_fp32_eval": 1.8138928413391113,
+      "fp32_loss_change_percent": 38.91734920592884,
+      "rne_loss_change_percent": 38.95250732156343,
+      "post_loss_between_precisions_relative_percent": 0.025308657151575716,
+      "fp32_parameter_delta_norm": 0.08937968843132697,
+      "rne_parameter_delta_norm": 0.08936613088374312,
+      "delta_relative_difference": 0.017407969711478146,
+      "full_parameter_relative_difference": 9.126016194098451e-06
+    },
+    {
+      "learning_rate": 0.0002,
+      "pre_loss_common_fp32": 1.3054049015045166,
+      "fp32_update_post_loss_fp32_eval": 28.483627319335938,
+      "rne_update_post_loss_fp32_eval": 28.495508193969727,
+      "fp32_loss_change_percent": 2081.9764340173488,
+      "rne_loss_change_percent": 2082.8865634814024,
+      "post_loss_between_precisions_relative_percent": 0.04171124169190278,
+      "fp32_parameter_delta_norm": 0.8937968587915966,
+      "rne_parameter_delta_norm": 0.8936612949602846,
+      "delta_relative_difference": 0.01740785165367864,
+      "full_parameter_relative_difference": 9.125975216361328e-05
+    }
+  ],
+  "gradient_trials": [
+    {
+      "mode": "fp32",
+      "repeat": 1,
+      "loss": 1.3054049015045166,
+      "micro_losses": [
+        1.3788635730743408,
+        1.2319462299346924
+      ],
+      "gradient_norm": 20.50952340573147,
+      "gradient_sha256": "807b243c4901389fad216ad17779741c557a2b40f7ede3edb013b61b3d0a541e",
+      "seconds": 13.841187463025562,
+      "optimizer_direction_norm": 4468.984405394094
+    },
+    {
+      "mode": "fp32",
+      "repeat": 2,
+      "loss": 1.3054049015045166,
+      "micro_losses": [
+        1.3788635730743408,
+        1.2319462299346924
+      ],
+      "gradient_norm": 20.509533943762687,
+      "gradient_sha256": "716332b3f14660e6f4bc45e27562644abb4ba27be840849c8ccd150ce1b660c9",
+      "seconds": 12.037679633009247
+    },
+    {
+      "mode": "rne_xf32",
+      "repeat": 1,
+      "loss": 1.3054232597351074,
+      "micro_losses": [
+        1.3788707256317139,
+        1.231975793838501
+      ],
+      "gradient_norm": 20.59209226405551,
+      "gradient_sha256": "1a943cd813a8cf061d453da390290e7d54a0013b8e7fbada59a5b9bfd21e30c5",
+      "seconds": 9.897941082017496,
+      "optimizer_direction_norm": 4468.306585304262
+    },
+    {
+      "mode": "rne_xf32",
+      "repeat": 2,
+      "loss": 1.3054134845733643,
+      "micro_losses": [
+        1.3788492679595947,
+        1.2319777011871338
+      ],
+      "gradient_norm": 20.600761789862613,
+      "gradient_sha256": "817279aafe706f5a903da8e9e782a6e08b3008b70d3fdb7b31af31b33c829dd2",
+      "seconds": 9.934595821017865
+    }
+  ],
+  "comparisons": {
+    "gradient_rne_vs_fp32": {
+      "relative_l2": 0.03507320061290178,
+      "relative_l1": 0.013336858976217253,
+      "rmse": 0.0001198560191313283,
+      "max_abs": 0.0439373254776001,
+      "actual_norm": 20.59209226405551,
+      "reference_norm": 20.50952340573147,
+      "cosine": 0.9993954729029076,
+      "sign_difference_fraction": 0.0036484512218082034
+    },
+    "gradient_fp32_repeat_floor": {
+      "relative_l2": 9.44560162055139e-06,
+      "relative_l1": 7.84384055599543e-06,
+      "rmse": 3.22785542452964e-08,
+      "max_abs": 2.2232532501220703e-05,
+      "actual_norm": 20.509533943762687,
+      "reference_norm": 20.50952340573147,
+      "cosine": 0.9999999999555217,
+      "sign_difference_fraction": 3.365547277157711e-06
+    },
+    "gradient_rne_repeat_floor": {
+      "relative_l2": 0.0034922966309267767,
+      "relative_l1": 0.002771319742433292,
+      "rmse": 1.1982308080558257e-05,
+      "max_abs": 0.0076712965965271,
+      "actual_norm": 20.600761789862613,
+      "reference_norm": 20.59209226405551,
+      "cosine": 0.999993993086818,
+      "sign_difference_fraction": 0.0009208872679960691
+    },
+    "gradient_fp32_vs_historical_update2": {
+      "relative_l2": 1.0246716219164288e-05,
+      "relative_l1": 8.739574085306376e-06,
+      "rmse": 3.501620380509988e-08,
+      "max_abs": 1.8775463104248047e-05,
+      "actual_norm": 20.50952340573147,
+      "reference_norm": 20.509518822659057,
+      "cosine": 0.9999999999475279,
+      "sign_difference_fraction": 2.799909079316079e-06
+    },
+    "optimizer_direction_rne_vs_fp32": {
+      "relative_l2": 0.017407852129852578,
+      "relative_l1": 0.005938113049982598,
+      "rmse": 0.012962325095237164,
+      "max_abs": 1.6903573274612427,
+      "actual_norm": 4468.306585304262,
+      "reference_norm": 4468.984405394094,
+      "cosine": 0.9998484718617351,
+      "sign_difference_fraction": 0.0020190324508637366
+    }
+  },
+  "scope": "Single update on one fixed two-microbatch sample. Primary loss always FP32-evaluated. Does not establish a safe long-run learning rate, convergence, or 40-step forecast acceptance.",
+  "evidence_validation_passed": true,
+  "initial_failed_attempt": {
+    "path": "/home/zhangyuxin/zyx/graphcast/outputs/jax-first-update-replay-20261023/run",
+    "reason": "Lazy BFC allocation failed on 72GiB backward temporary after forward evaluations; retained raw record. Completed rerun preallocates 70% VRAM; model math and starting conditions unchanged."
+  }
+}

@@ -1,5 +1,7 @@
 # 复现说明
 
+2026-10-22～23新增的RNE融合、MFU、38次训练和精度诊断入口见[本轮完整复现说明](EXPERIMENTS_20261023.md)。本页继续保留原推理baseline及算子profile入口。
+
 ## 固定环境
 
 H100 使用 `configs/h100.json` 的不可变镜像 ID：JAX/jaxlib/CUDA12 plugin/PJRT 0.4.34、Python 3.12。海光使用 `configs/hygon.json`：厂商 JAX 0.6.0+das.opt1.dtk2604、Python 3.10、DTK 26.04、gfx938。详细依赖在 `environment/`。主机启动器只需要 Python 3.6+、Docker 和设备管理工具。
@@ -81,6 +83,38 @@ python3 scripts/run.py profile --platform h100 --device 7 \
 ```
 
 预热后只跟踪一个模型步骤，输出 `model-trace.nsys-rep`；它不计入正式性能统计。解析 trace 应使用运行镜像内相同版本的 Nsight Systems；旧版宿主工具可能无法读取。
+
+## BW1100 的 RNE＋XF32 模型跟踪与独立算子
+
+本轮海光 profile 和独立算子入口固定 `rne_xf32`；完整推理的 `benchmark` 仍保留原有各模式。先选择空闲卡，以下使用本次验证的 GPU11，启动器会重新检查占用并核对 PCI 和配置设备名。原始驱动名 `BW1200` 与项目型号 BW1100 分开记录。
+
+```bash
+# 整模型：预热 5 步后重置初始输入，只捕获一个 +6h 推理步
+python3 scripts/run.py profile --platform hygon --device 11 --mode rne_xf32 \
+  --data /home/zhangyuxin/zyx/graphcast/outputs/jax-reorganization-20261016/prepared/data \
+  --output /absolute/path/model-profile-new
+
+# 独立算子：15 种 GEMM 尺寸 + 14 项图操作，每项三轮
+python3 scripts/run.py operators --platform hygon --device 11 --mode rne_xf32 \
+  --data /home/zhangyuxin/zyx/graphcast/outputs/jax-reorganization-20261016/prepared/data \
+  --output /absolute/path/operators-new
+```
+
+若旧登录会话尚未继承已恢复的 docker 组权限，可把整条启动命令放在 `sg docker -c '…'` 中；新登录会话通常无需此包装。不要修改 Docker 套接字或共享机器全局设置。
+
+运行期间保持源码、配置、数据不变；建议使用冻结的独立源码副本。执行结束会再次校验源码和数据，新增分析脚本也会触发代码快照变化检查。所有输出目录必须是新目录。
+
+模型 profile 输出：`model-trace.json` / `.db`、`model-gemm.jsonl`、`run/optimized-hlo.txt`、`run/report.json`、`run/step-audit.json` 和 `summary/{summary.json,kernels.csv,layers.csv}`。脚本验证模型成功完成、无区间内编译、84 次 GEMM 与 168 次 RNE，以及逐层权重指纹和设备事件关联，不能只看 hipprof 的退出码。已经保存的 profile 也可在宿主离线汇总：
+
+```bash
+python3 scripts/summarize_profile.py \
+  --run /absolute/path/model-profile-new \
+  --output /absolute/path/separate-summary-new
+```
+
+独立算子输出在 `operators/`：每种矩阵尺寸的 JSON、构建日志/二进制校验值、`gemm-timings.csv`、总 `report.json`，以及 `graph/` 中的真实图索引、索引校验值、输出抽样及参考、优化 HLO 和逐次时间。原生 GEMM 使用 HIP event，图操作使用同步 JAX 调用墙钟，两类时间口径不同。生成输入和正确性检查不计时；图操作独立执行，不重建模型中的融合 kernel。
+
+不依赖 H100 连接即可复现本节。结果与历史周报的 40 步性能、误差分别查看，详见 [本轮测量结果与限制](INFERENCE_PROFILE_20261022.md)。
 
 ## 当前整理结果的位置
 

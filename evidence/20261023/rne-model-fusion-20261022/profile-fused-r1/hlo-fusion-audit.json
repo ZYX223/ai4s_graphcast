@@ -1,0 +1,2471 @@
+{
+  "groups": [
+    {
+      "kernel_aliases": [
+        "loop_bitcast_convert_fusion_2",
+        "loop_bitcast_convert_fusion_3"
+      ],
+      "selected_modules": [
+        "grid2mesh_gnn/~_networks_builder/encoder_edges_grid2mesh_mlp/~/linear_1",
+        "grid2mesh_gnn/~_networks_builder/processor_edges_0_grid2mesh_mlp/~/linear_1"
+      ],
+      "expected": 2,
+      "observed": 2
+    },
+    {
+      "kernel_aliases": [
+        "loop_concatenate_fusion_19"
+      ],
+      "selected_modules": [
+        "grid2mesh_gnn/~_networks_builder/encoder_nodes_grid_nodes_mlp/~/linear_0"
+      ],
+      "expected": 1,
+      "observed": 1
+    },
+    {
+      "kernel_aliases": [
+        "loop_bitcast_convert_fusion_4",
+        "loop_bitcast_convert_fusion_5",
+        "loop_bitcast_convert_fusion_6",
+        "loop_bitcast_convert_fusion_7"
+      ],
+      "selected_modules": [
+        "grid2mesh_gnn/~_networks_builder/encoder_nodes_grid_nodes_mlp/~/linear_1",
+        "grid2mesh_gnn/~_networks_builder/processor_nodes_0_grid_nodes_mlp/~/linear_1",
+        "mesh2grid_gnn/~_networks_builder/processor_nodes_0_grid_nodes_mlp/~/linear_1",
+        "mesh2grid_gnn/~_networks_builder/decoder_nodes_grid_nodes_mlp/~/linear_1"
+      ],
+      "expected": 4,
+      "observed": 4
+    },
+    {
+      "kernel_aliases": [
+        "loop_concatenate_fusion_1"
+      ],
+      "selected_modules": [
+        "grid2mesh_gnn/~_networks_builder/processor_edges_0_grid2mesh_mlp/~/linear_0"
+      ],
+      "expected": 1,
+      "observed": 1
+    },
+    {
+      "kernel_aliases": [
+        "loop_concatenate_fusion_20",
+        "loop_concatenate_fusion_21",
+        "loop_concatenate_fusion_22",
+        "loop_concatenate_fusion_23",
+        "loop_concatenate_fusion_24",
+        "loop_concatenate_fusion_25",
+        "loop_concatenate_fusion_26",
+        "loop_concatenate_fusion_27",
+        "loop_concatenate_fusion_28",
+        "loop_concatenate_fusion_29",
+        "loop_concatenate_fusion_30",
+        "loop_concatenate_fusion_31",
+        "loop_concatenate_fusion_32",
+        "loop_concatenate_fusion_33",
+        "loop_concatenate_fusion_34",
+        "loop_concatenate_fusion_35",
+        "loop_concatenate_fusion_36"
+      ],
+      "selected_modules": [
+        "grid2mesh_gnn/~_networks_builder/processor_nodes_0_mesh_nodes_mlp/~/linear_0",
+        "mesh_gnn/~_networks_builder/processor_nodes_0_mesh_nodes_mlp/~/linear_0",
+        "mesh_gnn/~_networks_builder/processor_nodes_1_mesh_nodes_mlp/~/linear_0",
+        "mesh_gnn/~_networks_builder/processor_nodes_2_mesh_nodes_mlp/~/linear_0",
+        "mesh_gnn/~_networks_builder/processor_nodes_3_mesh_nodes_mlp/~/linear_0",
+        "mesh_gnn/~_networks_builder/processor_nodes_4_mesh_nodes_mlp/~/linear_0",
+        "mesh_gnn/~_networks_builder/processor_nodes_5_mesh_nodes_mlp/~/linear_0",
+        "mesh_gnn/~_networks_builder/processor_nodes_6_mesh_nodes_mlp/~/linear_0",
+        "mesh_gnn/~_networks_builder/processor_nodes_7_mesh_nodes_mlp/~/linear_0",
+        "mesh_gnn/~_networks_builder/processor_nodes_8_mesh_nodes_mlp/~/linear_0",
+        "mesh_gnn/~_networks_builder/processor_nodes_9_mesh_nodes_mlp/~/linear_0",
+        "mesh_gnn/~_networks_builder/processor_nodes_10_mesh_nodes_mlp/~/linear_0",
+        "mesh_gnn/~_networks_builder/processor_nodes_11_mesh_nodes_mlp/~/linear_0",
+        "mesh_gnn/~_networks_builder/processor_nodes_12_mesh_nodes_mlp/~/linear_0",
+        "mesh_gnn/~_networks_builder/processor_nodes_13_mesh_nodes_mlp/~/linear_0",
+        "mesh_gnn/~_networks_builder/processor_nodes_14_mesh_nodes_mlp/~/linear_0",
+        "mesh_gnn/~_networks_builder/processor_nodes_15_mesh_nodes_mlp/~/linear_0"
+      ],
+      "expected": 17,
+      "observed": 17
+    },
+    {
+      "kernel_aliases": [
+        "loop_bitcast_convert_fusion_25",
+        "loop_bitcast_convert_fusion_26",
+        "loop_bitcast_convert_fusion_27",
+        "loop_bitcast_convert_fusion_28",
+        "loop_bitcast_convert_fusion_29",
+        "loop_bitcast_convert_fusion_30",
+        "loop_bitcast_convert_fusion_31",
+        "loop_bitcast_convert_fusion_32",
+        "loop_bitcast_convert_fusion_33",
+        "loop_bitcast_convert_fusion_34",
+        "loop_bitcast_convert_fusion_35",
+        "loop_bitcast_convert_fusion_36",
+        "loop_bitcast_convert_fusion_37",
+        "loop_bitcast_convert_fusion_38",
+        "loop_bitcast_convert_fusion_39",
+        "loop_bitcast_convert_fusion_40",
+        "loop_bitcast_convert_fusion_41"
+      ],
+      "selected_modules": [
+        "grid2mesh_gnn/~_networks_builder/processor_nodes_0_mesh_nodes_mlp/~/linear_1",
+        "mesh_gnn/~_networks_builder/processor_nodes_0_mesh_nodes_mlp/~/linear_1",
+        "mesh_gnn/~_networks_builder/processor_nodes_1_mesh_nodes_mlp/~/linear_1",
+        "mesh_gnn/~_networks_builder/processor_nodes_2_mesh_nodes_mlp/~/linear_1",
+        "mesh_gnn/~_networks_builder/processor_nodes_3_mesh_nodes_mlp/~/linear_1",
+        "mesh_gnn/~_networks_builder/processor_nodes_4_mesh_nodes_mlp/~/linear_1",
+        "mesh_gnn/~_networks_builder/processor_nodes_5_mesh_nodes_mlp/~/linear_1",
+        "mesh_gnn/~_networks_builder/processor_nodes_6_mesh_nodes_mlp/~/linear_1",
+        "mesh_gnn/~_networks_builder/processor_nodes_7_mesh_nodes_mlp/~/linear_1",
+        "mesh_gnn/~_networks_builder/processor_nodes_8_mesh_nodes_mlp/~/linear_1",
+        "mesh_gnn/~_networks_builder/processor_nodes_9_mesh_nodes_mlp/~/linear_1",
+        "mesh_gnn/~_networks_builder/processor_nodes_10_mesh_nodes_mlp/~/linear_1",
+        "mesh_gnn/~_networks_builder/processor_nodes_11_mesh_nodes_mlp/~/linear_1",
+        "mesh_gnn/~_networks_builder/processor_nodes_12_mesh_nodes_mlp/~/linear_1",
+        "mesh_gnn/~_networks_builder/processor_nodes_13_mesh_nodes_mlp/~/linear_1",
+        "mesh_gnn/~_networks_builder/processor_nodes_14_mesh_nodes_mlp/~/linear_1",
+        "mesh_gnn/~_networks_builder/processor_nodes_15_mesh_nodes_mlp/~/linear_1"
+      ],
+      "expected": 17,
+      "observed": 17
+    },
+    {
+      "kernel_aliases": [
+        "loop_bitcast_convert_fusion_10",
+        "loop_bitcast_convert_fusion_11",
+        "loop_bitcast_convert_fusion_12",
+        "loop_bitcast_convert_fusion_13",
+        "loop_bitcast_convert_fusion_14",
+        "loop_bitcast_convert_fusion_15",
+        "loop_bitcast_convert_fusion_16",
+        "loop_bitcast_convert_fusion_17",
+        "loop_bitcast_convert_fusion_18",
+        "loop_bitcast_convert_fusion_19",
+        "loop_bitcast_convert_fusion_20",
+        "loop_bitcast_convert_fusion_21",
+        "loop_bitcast_convert_fusion_22",
+        "loop_bitcast_convert_fusion_23",
+        "loop_bitcast_convert_fusion_24",
+        "loop_bitcast_convert_fusion_8",
+        "loop_bitcast_convert_fusion_9"
+      ],
+      "selected_modules": [
+        "mesh_gnn/~_networks_builder/encoder_edges_mesh_mlp/~/linear_1",
+        "mesh_gnn/~_networks_builder/processor_edges_0_mesh_mlp/~/linear_1",
+        "mesh_gnn/~_networks_builder/processor_edges_1_mesh_mlp/~/linear_1",
+        "mesh_gnn/~_networks_builder/processor_edges_2_mesh_mlp/~/linear_1",
+        "mesh_gnn/~_networks_builder/processor_edges_3_mesh_mlp/~/linear_1",
+        "mesh_gnn/~_networks_builder/processor_edges_4_mesh_mlp/~/linear_1",
+        "mesh_gnn/~_networks_builder/processor_edges_5_mesh_mlp/~/linear_1",
+        "mesh_gnn/~_networks_builder/processor_edges_6_mesh_mlp/~/linear_1",
+        "mesh_gnn/~_networks_builder/processor_edges_7_mesh_mlp/~/linear_1",
+        "mesh_gnn/~_networks_builder/processor_edges_8_mesh_mlp/~/linear_1",
+        "mesh_gnn/~_networks_builder/processor_edges_9_mesh_mlp/~/linear_1",
+        "mesh_gnn/~_networks_builder/processor_edges_10_mesh_mlp/~/linear_1",
+        "mesh_gnn/~_networks_builder/processor_edges_11_mesh_mlp/~/linear_1",
+        "mesh_gnn/~_networks_builder/processor_edges_12_mesh_mlp/~/linear_1",
+        "mesh_gnn/~_networks_builder/processor_edges_13_mesh_mlp/~/linear_1",
+        "mesh_gnn/~_networks_builder/processor_edges_14_mesh_mlp/~/linear_1",
+        "mesh_gnn/~_networks_builder/processor_edges_15_mesh_mlp/~/linear_1"
+      ],
+      "expected": 17,
+      "observed": 17
+    },
+    {
+      "kernel_aliases": [
+        "loop_concatenate_fusion_3"
+      ],
+      "selected_modules": [
+        "mesh_gnn/~_networks_builder/processor_edges_0_mesh_mlp/~/linear_0"
+      ],
+      "expected": 1,
+      "observed": 1
+    },
+    {
+      "kernel_aliases": [
+        "loop_concatenate_fusion_10",
+        "loop_concatenate_fusion_11",
+        "loop_concatenate_fusion_12",
+        "loop_concatenate_fusion_13",
+        "loop_concatenate_fusion_14",
+        "loop_concatenate_fusion_15",
+        "loop_concatenate_fusion_16",
+        "loop_concatenate_fusion_17",
+        "loop_concatenate_fusion_4",
+        "loop_concatenate_fusion_5",
+        "loop_concatenate_fusion_6",
+        "loop_concatenate_fusion_7",
+        "loop_concatenate_fusion_8",
+        "loop_concatenate_fusion_9"
+      ],
+      "selected_modules": [
+        "mesh_gnn/~_networks_builder/processor_edges_1_mesh_mlp/~/linear_0",
+        "mesh_gnn/~_networks_builder/processor_edges_2_mesh_mlp/~/linear_0",
+        "mesh_gnn/~_networks_builder/processor_edges_3_mesh_mlp/~/linear_0",
+        "mesh_gnn/~_networks_builder/processor_edges_4_mesh_mlp/~/linear_0",
+        "mesh_gnn/~_networks_builder/processor_edges_5_mesh_mlp/~/linear_0",
+        "mesh_gnn/~_networks_builder/processor_edges_6_mesh_mlp/~/linear_0",
+        "mesh_gnn/~_networks_builder/processor_edges_7_mesh_mlp/~/linear_0",
+        "mesh_gnn/~_networks_builder/processor_edges_8_mesh_mlp/~/linear_0",
+        "mesh_gnn/~_networks_builder/processor_edges_9_mesh_mlp/~/linear_0",
+        "mesh_gnn/~_networks_builder/processor_edges_10_mesh_mlp/~/linear_0",
+        "mesh_gnn/~_networks_builder/processor_edges_11_mesh_mlp/~/linear_0",
+        "mesh_gnn/~_networks_builder/processor_edges_12_mesh_mlp/~/linear_0",
+        "mesh_gnn/~_networks_builder/processor_edges_13_mesh_mlp/~/linear_0",
+        "mesh_gnn/~_networks_builder/processor_edges_14_mesh_mlp/~/linear_0"
+      ],
+      "expected": 14,
+      "observed": 14
+    },
+    {
+      "kernel_aliases": [
+        "loop_concatenate_fusion_18"
+      ],
+      "selected_modules": [
+        "mesh_gnn/~_networks_builder/processor_edges_15_mesh_mlp/~/linear_0"
+      ],
+      "expected": 1,
+      "observed": 1
+    },
+    {
+      "kernel_aliases": [
+        "loop_bitcast_convert_fusion",
+        "loop_bitcast_convert_fusion_1"
+      ],
+      "selected_modules": [
+        "mesh2grid_gnn/~_networks_builder/encoder_edges_mesh2grid_mlp/~/linear_1",
+        "mesh2grid_gnn/~_networks_builder/processor_edges_0_mesh2grid_mlp/~/linear_1"
+      ],
+      "expected": 2,
+      "observed": 2
+    },
+    {
+      "kernel_aliases": [
+        "loop_concatenate_fusion"
+      ],
+      "selected_modules": [
+        "mesh2grid_gnn/~_networks_builder/processor_edges_0_mesh2grid_mlp/~/linear_0"
+      ],
+      "expected": 1,
+      "observed": 1
+    },
+    {
+      "kernel_aliases": [
+        "loop_concatenate_fusion_2"
+      ],
+      "selected_modules": [
+        "mesh2grid_gnn/~_networks_builder/processor_nodes_0_grid_nodes_mlp/~/linear_0"
+      ],
+      "expected": 1,
+      "observed": 1
+    }
+  ],
+  "selected_runtime_calls": 79,
+  "selected_count": 79,
+  "same_fusion_count": 79,
+  "runtime_seen_count": 79,
+  "rows": [
+    {
+      "module": "grid2mesh_gnn/~_networks_builder/encoder_edges_grid2mesh_mlp/~/linear_1",
+      "producer": "silu",
+      "fusion": "loop_bitcast_convert_fusion.3",
+      "computation": "fused_bitcast_convert.3",
+      "rne_and_producer_in_same_fusion": true,
+      "captured_equivalent_kernel_calls": 2,
+      "kernel_aliases": [
+        "loop_bitcast_convert_fusion_3",
+        "loop_bitcast_convert_fusion_2"
+      ],
+      "chain": [
+        "  %bitcast.14860.0 = f32[1618745,512]{1,0} bitcast(%loop_bitcast_convert_fusion.3)",
+        "  %loop_bitcast_convert_fusion.3 = f32[1,1618745,512]{2,1,0} fusion(%get-tuple-element.29.0, %constant_775_0), kind=kLoop, calls=%fused_bitcast_convert.3, metadata={op_name=\"jit(<lambda>)/jit(main)/while/body/grid2mesh_gnn/_embed/grid2mesh_gnn/sequential/encoder_edges_grid2mesh_mlp/linear_1/bitcast_convert_type\" source_file=\"/experiment/rne_ops.py\" source_line=11 deduplicated_name=\"loop_bitcast_convert_fusion.2\"}"
+      ]
+    },
+    {
+      "module": "grid2mesh_gnn/~_networks_builder/encoder_nodes_grid_nodes_mlp/~/linear_0",
+      "producer": "concatenate",
+      "fusion": "loop_concatenate_fusion.19",
+      "computation": "fused_concatenate.19",
+      "rne_and_producer_in_same_fusion": true,
+      "captured_equivalent_kernel_calls": 1,
+      "kernel_aliases": [
+        "loop_concatenate_fusion_19"
+      ],
+      "chain": [
+        "  %bitcast.14469.0 = f32[1038240,184]{1,0} bitcast(%loop_concatenate_fusion.19)",
+        "  %loop_concatenate_fusion.19 = f32[1,1038240,184]{2,1,0} fusion(%constant_676_0, %get-tuple-element.118, %get-tuple-element.119, %get-tuple-element.120, %get-tuple-element.121, /*index=5*/%get-tuple-element.122, %get-tuple-element.123, %get-tuple-element.124, %get-tuple-element.125, %get-tuple-element.126, /*index=10*/%constant_2047_0, %Arg_10.11, %constant_2117_0, %constant_2052_0, %Arg_14.15, /*index=15*/%constant_2121_0, %constant_2053_0, %Arg_15.16, %constant_2122_0, %constant_2055_0, /*index=20*/%Arg_17.18, %constant_2124_0, %constant_2056_0, %Arg_18.19, %constant_2125_0, /*index=25*/%constant_2057_0, %Arg_19.20, %constant_2126_0, %Arg_11.12, %Arg_12.13, /*index=30*/%Arg_2.3, %Arg_3.4, %Arg_4.5, %Arg_1.2, %Arg_0.1), kind=kLoop, calls=%fused_concatenate.19, metadata={op_name=\"jit(<lambda>)/jit(main)/while/body/grid2mesh_gnn/_embed/grid2mesh_gnn/sequential_1/encoder_nodes_grid_nodes_mlp/linear_0/bitcast_convert_type\" source_file=\"/experiment/rne_ops.py\" source_line=11}"
+      ]
+    },
+    {
+      "module": "grid2mesh_gnn/~_networks_builder/encoder_nodes_grid_nodes_mlp/~/linear_1",
+      "producer": "silu",
+      "fusion": "loop_bitcast_convert_fusion.7",
+      "computation": "fused_bitcast_convert.7",
+      "rne_and_producer_in_same_fusion": true,
+      "captured_equivalent_kernel_calls": 4,
+      "kernel_aliases": [
+        "loop_bitcast_convert_fusion_7",
+        "loop_bitcast_convert_fusion_6",
+        "loop_bitcast_convert_fusion_5",
+        "loop_bitcast_convert_fusion_4"
+      ],
+      "chain": [
+        "  %bitcast.14523.0 = f32[1038240,512]{1,0} bitcast(%loop_bitcast_convert_fusion.7)",
+        "  %loop_bitcast_convert_fusion.7 = f32[1,1038240,512]{2,1,0} fusion(%get-tuple-element.23.0, %constant_687_0), kind=kLoop, calls=%fused_bitcast_convert.7, metadata={op_name=\"jit(<lambda>)/jit(main)/while/body/grid2mesh_gnn/_embed/grid2mesh_gnn/sequential_1/encoder_nodes_grid_nodes_mlp/linear_1/bitcast_convert_type\" source_file=\"/experiment/rne_ops.py\" source_line=11 deduplicated_name=\"loop_bitcast_convert_fusion.4\"}"
+      ]
+    },
+    {
+      "module": "grid2mesh_gnn/~_networks_builder/processor_edges_0_grid2mesh_mlp/~/linear_0",
+      "producer": "concatenate",
+      "fusion": "loop_concatenate_fusion.1",
+      "computation": "fused_concatenate.1",
+      "rne_and_producer_in_same_fusion": true,
+      "captured_equivalent_kernel_calls": 1,
+      "kernel_aliases": [
+        "loop_concatenate_fusion_1"
+      ],
+      "chain": [
+        "  %bitcast.14954.0 = f32[1618745,1536]{1,0} bitcast(%loop_concatenate_fusion.1)",
+        "  %loop_concatenate_fusion.1 = f32[1618745,1,1536]{2,1,0} fusion(%loop_add_fusion.37, %constant_1487_0, %loop_add_fusion.3, %constant_1508_0, %constant_1503_0, /*index=5*/%loop_multiply_fusion.19, %get-tuple-element.30.0, %constant_783_0, %loop_rsqrt_fusion.3, %constant_1496_0), kind=kLoop, calls=%fused_concatenate.1, metadata={op_name=\"jit(<lambda>)/jit(main)/while/body/grid2mesh_gnn/_process/grid2mesh_gnn/_process_step/grid2mesh_gnn/sequential_3/processor_edges_0_grid2mesh_mlp/linear_0/bitcast_convert_type\" source_file=\"/experiment/rne_ops.py\" source_line=11}"
+      ]
+    },
+    {
+      "module": "grid2mesh_gnn/~_networks_builder/processor_edges_0_grid2mesh_mlp/~/linear_1",
+      "producer": "silu",
+      "fusion": "loop_bitcast_convert_fusion.2",
+      "computation": "fused_bitcast_convert.2",
+      "rne_and_producer_in_same_fusion": true,
+      "captured_equivalent_kernel_calls": 2,
+      "kernel_aliases": [
+        "loop_bitcast_convert_fusion_3",
+        "loop_bitcast_convert_fusion_2"
+      ],
+      "chain": [
+        "  %bitcast.15009.0 = f32[1618745,512]{1,0} bitcast(%loop_bitcast_convert_fusion.2)",
+        "  %loop_bitcast_convert_fusion.2 = f32[1,1618745,512]{2,1,0} fusion(%get-tuple-element.31.0, %constant_799_0), kind=kLoop, calls=%fused_bitcast_convert.2, metadata={op_name=\"jit(<lambda>)/jit(main)/while/body/grid2mesh_gnn/_process/grid2mesh_gnn/_process_step/grid2mesh_gnn/sequential_3/processor_edges_0_grid2mesh_mlp/linear_1/bitcast_convert_type\" source_file=\"/experiment/rne_ops.py\" source_line=11 deduplicated_name=\"loop_bitcast_convert_fusion.2\"}"
+      ]
+    },
+    {
+      "module": "grid2mesh_gnn/~_networks_builder/processor_nodes_0_grid_nodes_mlp/~/linear_1",
+      "producer": "silu",
+      "fusion": "loop_bitcast_convert_fusion.6",
+      "computation": "fused_bitcast_convert.6",
+      "rne_and_producer_in_same_fusion": true,
+      "captured_equivalent_kernel_calls": 4,
+      "kernel_aliases": [
+        "loop_bitcast_convert_fusion_7",
+        "loop_bitcast_convert_fusion_6",
+        "loop_bitcast_convert_fusion_5",
+        "loop_bitcast_convert_fusion_4"
+      ],
+      "chain": [
+        "  %bitcast.14625.0 = f32[1038240,512]{1,0} bitcast(%loop_bitcast_convert_fusion.6)",
+        "  %loop_bitcast_convert_fusion.6 = f32[1,1038240,512]{2,1,0} fusion(%get-tuple-element.25.0, %constant_707_0), kind=kLoop, calls=%fused_bitcast_convert.6, metadata={op_name=\"jit(<lambda>)/jit(main)/while/body/grid2mesh_gnn/_process/grid2mesh_gnn/_process_step/grid2mesh_gnn/sequential_4/processor_nodes_0_grid_nodes_mlp/linear_1/bitcast_convert_type\" source_file=\"/experiment/rne_ops.py\" source_line=11 deduplicated_name=\"loop_bitcast_convert_fusion.4\"}"
+      ]
+    },
+    {
+      "module": "grid2mesh_gnn/~_networks_builder/processor_nodes_0_mesh_nodes_mlp/~/linear_0",
+      "producer": "concatenate",
+      "fusion": "loop_concatenate_fusion.36",
+      "computation": "fused_concatenate.36",
+      "rne_and_producer_in_same_fusion": true,
+      "captured_equivalent_kernel_calls": 17,
+      "kernel_aliases": [
+        "loop_concatenate_fusion_36",
+        "loop_concatenate_fusion_35",
+        "loop_concatenate_fusion_34",
+        "loop_concatenate_fusion_33",
+        "loop_concatenate_fusion_32",
+        "loop_concatenate_fusion_31",
+        "loop_concatenate_fusion_30",
+        "loop_concatenate_fusion_29",
+        "loop_concatenate_fusion_28",
+        "loop_concatenate_fusion_27",
+        "loop_concatenate_fusion_26",
+        "loop_concatenate_fusion_25",
+        "loop_concatenate_fusion_24",
+        "loop_concatenate_fusion_23",
+        "loop_concatenate_fusion_22",
+        "loop_concatenate_fusion_21",
+        "loop_concatenate_fusion_20"
+      ],
+      "chain": [
+        "  %bitcast.15091.0 = f32[40962,1024]{1,0} bitcast(%loop_concatenate_fusion.36)",
+        "  %loop_concatenate_fusion.36 = f32[40962,1,1024]{2,1,0} fusion(%loop_add_fusion.37, %input_scatter_fusion.17), kind=kLoop, calls=%fused_concatenate.36, metadata={op_name=\"jit(<lambda>)/jit(main)/while/body/grid2mesh_gnn/_process/grid2mesh_gnn/_process_step/grid2mesh_gnn/sequential_5/processor_nodes_0_mesh_nodes_mlp/linear_0/bitcast_convert_type\" source_file=\"/experiment/rne_ops.py\" source_line=11 deduplicated_name=\"loop_concatenate_fusion.20\"}"
+      ]
+    },
+    {
+      "module": "grid2mesh_gnn/~_networks_builder/processor_nodes_0_mesh_nodes_mlp/~/linear_1",
+      "producer": "silu",
+      "fusion": "loop_bitcast_convert_fusion.41",
+      "computation": "fused_bitcast_convert.41",
+      "rne_and_producer_in_same_fusion": true,
+      "captured_equivalent_kernel_calls": 17,
+      "kernel_aliases": [
+        "loop_bitcast_convert_fusion_41",
+        "loop_bitcast_convert_fusion_40",
+        "loop_bitcast_convert_fusion_39",
+        "loop_bitcast_convert_fusion_38",
+        "loop_bitcast_convert_fusion_37",
+        "loop_bitcast_convert_fusion_36",
+        "loop_bitcast_convert_fusion_35",
+        "loop_bitcast_convert_fusion_34",
+        "loop_bitcast_convert_fusion_33",
+        "loop_bitcast_convert_fusion_32",
+        "loop_bitcast_convert_fusion_31",
+        "loop_bitcast_convert_fusion_30",
+        "loop_bitcast_convert_fusion_29",
+        "loop_bitcast_convert_fusion_28",
+        "loop_bitcast_convert_fusion_27",
+        "loop_bitcast_convert_fusion_26",
+        "loop_bitcast_convert_fusion_25"
+      ],
+      "chain": [
+        "  %bitcast.15146.0 = f32[40962,512]{1,0} bitcast(%loop_bitcast_convert_fusion.41)",
+        "  %loop_bitcast_convert_fusion.41 = f32[1,40962,512]{2,1,0} fusion(%get-tuple-element.33.0, %constant_817_0), kind=kLoop, calls=%fused_bitcast_convert.41, metadata={op_name=\"jit(<lambda>)/jit(main)/while/body/grid2mesh_gnn/_process/grid2mesh_gnn/_process_step/grid2mesh_gnn/sequential_5/processor_nodes_0_mesh_nodes_mlp/linear_1/bitcast_convert_type\" source_file=\"/experiment/rne_ops.py\" source_line=11 deduplicated_name=\"loop_bitcast_convert_fusion.25\"}"
+      ]
+    },
+    {
+      "module": "mesh_gnn/~_networks_builder/encoder_edges_mesh_mlp/~/linear_1",
+      "producer": "silu",
+      "fusion": "loop_bitcast_convert_fusion.8",
+      "computation": "fused_bitcast_convert.8",
+      "rne_and_producer_in_same_fusion": true,
+      "captured_equivalent_kernel_calls": 17,
+      "kernel_aliases": [
+        "loop_bitcast_convert_fusion_8",
+        "loop_bitcast_convert_fusion_9",
+        "loop_bitcast_convert_fusion_10",
+        "loop_bitcast_convert_fusion_11",
+        "loop_bitcast_convert_fusion_12",
+        "loop_bitcast_convert_fusion_13",
+        "loop_bitcast_convert_fusion_14",
+        "loop_bitcast_convert_fusion_15",
+        "loop_bitcast_convert_fusion_16",
+        "loop_bitcast_convert_fusion_17",
+        "loop_bitcast_convert_fusion_18",
+        "loop_bitcast_convert_fusion_19",
+        "loop_bitcast_convert_fusion_20",
+        "loop_bitcast_convert_fusion_21",
+        "loop_bitcast_convert_fusion_22",
+        "loop_bitcast_convert_fusion_23",
+        "loop_bitcast_convert_fusion_24"
+      ],
+      "chain": [
+        "  %bitcast.15259.0 = f32[327660,512]{1,0} bitcast(%loop_bitcast_convert_fusion.8)",
+        "  %loop_bitcast_convert_fusion.8 = f32[1,327660,512]{2,1,0} fusion(%get-tuple-element.35.0, %constant_843_0), kind=kLoop, calls=%fused_bitcast_convert.8, metadata={op_name=\"jit(<lambda>)/jit(main)/while/body/mesh_gnn/_embed/mesh_gnn/sequential/encoder_edges_mesh_mlp/linear_1/bitcast_convert_type\" source_file=\"/experiment/rne_ops.py\" source_line=11 deduplicated_name=\"loop_bitcast_convert_fusion.8\"}"
+      ]
+    },
+    {
+      "module": "mesh_gnn/~_networks_builder/processor_edges_0_mesh_mlp/~/linear_0",
+      "producer": "concatenate",
+      "fusion": "loop_concatenate_fusion.3",
+      "computation": "fused_concatenate.3",
+      "rne_and_producer_in_same_fusion": true,
+      "captured_equivalent_kernel_calls": 1,
+      "kernel_aliases": [
+        "loop_concatenate_fusion_3"
+      ],
+      "chain": [
+        "  %bitcast.15353.0 = f32[327660,1536]{1,0} bitcast(%loop_concatenate_fusion.3)",
+        "  %loop_concatenate_fusion.3 = f32[327660,1,1536]{2,1,0} fusion(%loop_add_fusion.20, %constant_1528_0, %constant_1549_0, %constant_1545_0, %loop_multiply_fusion.2, /*index=5*/%get-tuple-element.36.0, %constant_851_0, %loop_rsqrt_fusion.23, %constant_1537_0), kind=kLoop, calls=%fused_concatenate.3, metadata={op_name=\"jit(<lambda>)/jit(main)/while/body/mesh_gnn/_process/mesh_gnn/_process_step/mesh_gnn/sequential_1/processor_edges_0_mesh_mlp/linear_0/bitcast_convert_type\" source_file=\"/experiment/rne_ops.py\" source_line=11}"
+      ]
+    },
+    {
+      "module": "mesh_gnn/~_networks_builder/processor_edges_0_mesh_mlp/~/linear_1",
+      "producer": "silu",
+      "fusion": "loop_bitcast_convert_fusion.9",
+      "computation": "fused_bitcast_convert.9",
+      "rne_and_producer_in_same_fusion": true,
+      "captured_equivalent_kernel_calls": 17,
+      "kernel_aliases": [
+        "loop_bitcast_convert_fusion_8",
+        "loop_bitcast_convert_fusion_9",
+        "loop_bitcast_convert_fusion_10",
+        "loop_bitcast_convert_fusion_11",
+        "loop_bitcast_convert_fusion_12",
+        "loop_bitcast_convert_fusion_13",
+        "loop_bitcast_convert_fusion_14",
+        "loop_bitcast_convert_fusion_15",
+        "loop_bitcast_convert_fusion_16",
+        "loop_bitcast_convert_fusion_17",
+        "loop_bitcast_convert_fusion_18",
+        "loop_bitcast_convert_fusion_19",
+        "loop_bitcast_convert_fusion_20",
+        "loop_bitcast_convert_fusion_21",
+        "loop_bitcast_convert_fusion_22",
+        "loop_bitcast_convert_fusion_23",
+        "loop_bitcast_convert_fusion_24"
+      ],
+      "chain": [
+        "  %bitcast.15408.0 = f32[327660,512]{1,0} bitcast(%loop_bitcast_convert_fusion.9)",
+        "  %loop_bitcast_convert_fusion.9 = f32[1,327660,512]{2,1,0} fusion(%get-tuple-element.37.0, %constant_866_0), kind=kLoop, calls=%fused_bitcast_convert.9, metadata={op_name=\"jit(<lambda>)/jit(main)/while/body/mesh_gnn/_process/mesh_gnn/_process_step/mesh_gnn/sequential_1/processor_edges_0_mesh_mlp/linear_1/bitcast_convert_type\" source_file=\"/experiment/rne_ops.py\" source_line=11 deduplicated_name=\"loop_bitcast_convert_fusion.8\"}"
+      ]
+    },
+    {
+      "module": "mesh_gnn/~_networks_builder/processor_nodes_0_mesh_nodes_mlp/~/linear_0",
+      "producer": "concatenate",
+      "fusion": "loop_concatenate_fusion.35",
+      "computation": "fused_concatenate.35",
+      "rne_and_producer_in_same_fusion": true,
+      "captured_equivalent_kernel_calls": 17,
+      "kernel_aliases": [
+        "loop_concatenate_fusion_36",
+        "loop_concatenate_fusion_35",
+        "loop_concatenate_fusion_34",
+        "loop_concatenate_fusion_33",
+        "loop_concatenate_fusion_32",
+        "loop_concatenate_fusion_31",
+        "loop_concatenate_fusion_30",
+        "loop_concatenate_fusion_29",
+        "loop_concatenate_fusion_28",
+        "loop_concatenate_fusion_27",
+        "loop_concatenate_fusion_26",
+        "loop_concatenate_fusion_25",
+        "loop_concatenate_fusion_24",
+        "loop_concatenate_fusion_23",
+        "loop_concatenate_fusion_22",
+        "loop_concatenate_fusion_21",
+        "loop_concatenate_fusion_20"
+      ],
+      "chain": [
+        "  %bitcast.15490.0 = f32[40962,1024]{1,0} bitcast(%loop_concatenate_fusion.35)",
+        "  %loop_concatenate_fusion.35 = f32[40962,1,1024]{2,1,0} fusion(%loop_add_fusion.20, %input_scatter_fusion.16), kind=kLoop, calls=%fused_concatenate.35, metadata={op_name=\"jit(<lambda>)/jit(main)/while/body/mesh_gnn/_process/mesh_gnn/_process_step/mesh_gnn/sequential_2/processor_nodes_0_mesh_nodes_mlp/linear_0/bitcast_convert_type\" source_file=\"/experiment/rne_ops.py\" source_line=11 deduplicated_name=\"loop_concatenate_fusion.20\"}"
+      ]
+    },
+    {
+      "module": "mesh_gnn/~_networks_builder/processor_nodes_0_mesh_nodes_mlp/~/linear_1",
+      "producer": "silu",
+      "fusion": "loop_bitcast_convert_fusion.40",
+      "computation": "fused_bitcast_convert.40",
+      "rne_and_producer_in_same_fusion": true,
+      "captured_equivalent_kernel_calls": 17,
+      "kernel_aliases": [
+        "loop_bitcast_convert_fusion_41",
+        "loop_bitcast_convert_fusion_40",
+        "loop_bitcast_convert_fusion_39",
+        "loop_bitcast_convert_fusion_38",
+        "loop_bitcast_convert_fusion_37",
+        "loop_bitcast_convert_fusion_36",
+        "loop_bitcast_convert_fusion_35",
+        "loop_bitcast_convert_fusion_34",
+        "loop_bitcast_convert_fusion_33",
+        "loop_bitcast_convert_fusion_32",
+        "loop_bitcast_convert_fusion_31",
+        "loop_bitcast_convert_fusion_30",
+        "loop_bitcast_convert_fusion_29",
+        "loop_bitcast_convert_fusion_28",
+        "loop_bitcast_convert_fusion_27",
+        "loop_bitcast_convert_fusion_26",
+        "loop_bitcast_convert_fusion_25"
+      ],
+      "chain": [
+        "  %bitcast.15545.0 = f32[40962,512]{1,0} bitcast(%loop_bitcast_convert_fusion.40)",
+        "  %loop_bitcast_convert_fusion.40 = f32[1,40962,512]{2,1,0} fusion(%get-tuple-element.39.0, %constant_879_0), kind=kLoop, calls=%fused_bitcast_convert.40, metadata={op_name=\"jit(<lambda>)/jit(main)/while/body/mesh_gnn/_process/mesh_gnn/_process_step/mesh_gnn/sequential_2/processor_nodes_0_mesh_nodes_mlp/linear_1/bitcast_convert_type\" source_file=\"/experiment/rne_ops.py\" source_line=11 deduplicated_name=\"loop_bitcast_convert_fusion.25\"}"
+      ]
+    },
+    {
+      "module": "mesh_gnn/~_networks_builder/processor_edges_1_mesh_mlp/~/linear_0",
+      "producer": "concatenate",
+      "fusion": "loop_concatenate_fusion.4",
+      "computation": "fused_concatenate.4",
+      "rne_and_producer_in_same_fusion": true,
+      "captured_equivalent_kernel_calls": 14,
+      "kernel_aliases": [
+        "loop_concatenate_fusion_4",
+        "loop_concatenate_fusion_5",
+        "loop_concatenate_fusion_6",
+        "loop_concatenate_fusion_7",
+        "loop_concatenate_fusion_8",
+        "loop_concatenate_fusion_9",
+        "loop_concatenate_fusion_10",
+        "loop_concatenate_fusion_11",
+        "loop_concatenate_fusion_12",
+        "loop_concatenate_fusion_13",
+        "loop_concatenate_fusion_14",
+        "loop_concatenate_fusion_15",
+        "loop_concatenate_fusion_16",
+        "loop_concatenate_fusion_17"
+      ],
+      "chain": [
+        "  %bitcast.15657.0 = f32[327660,1536]{1,0} bitcast(%loop_concatenate_fusion.4)",
+        "  %loop_concatenate_fusion.4 = f32[327660,1,1536]{2,1,0} fusion(%loop_add_fusion.19, %loop_add_fusion.21, %constant_1528_0, %constant_1549_0), kind=kLoop, calls=%fused_concatenate.4, metadata={op_name=\"jit(<lambda>)/jit(main)/while/body/mesh_gnn/_process/mesh_gnn/_process_step/mesh_gnn/sequential_3/processor_edges_1_mesh_mlp/linear_0/bitcast_convert_type\" source_file=\"/experiment/rne_ops.py\" source_line=11 deduplicated_name=\"loop_concatenate_fusion.4\"}"
+      ]
+    },
+    {
+      "module": "mesh_gnn/~_networks_builder/processor_edges_1_mesh_mlp/~/linear_1",
+      "producer": "silu",
+      "fusion": "loop_bitcast_convert_fusion.10",
+      "computation": "fused_bitcast_convert.10",
+      "rne_and_producer_in_same_fusion": true,
+      "captured_equivalent_kernel_calls": 17,
+      "kernel_aliases": [
+        "loop_bitcast_convert_fusion_8",
+        "loop_bitcast_convert_fusion_9",
+        "loop_bitcast_convert_fusion_10",
+        "loop_bitcast_convert_fusion_11",
+        "loop_bitcast_convert_fusion_12",
+        "loop_bitcast_convert_fusion_13",
+        "loop_bitcast_convert_fusion_14",
+        "loop_bitcast_convert_fusion_15",
+        "loop_bitcast_convert_fusion_16",
+        "loop_bitcast_convert_fusion_17",
+        "loop_bitcast_convert_fusion_18",
+        "loop_bitcast_convert_fusion_19",
+        "loop_bitcast_convert_fusion_20",
+        "loop_bitcast_convert_fusion_21",
+        "loop_bitcast_convert_fusion_22",
+        "loop_bitcast_convert_fusion_23",
+        "loop_bitcast_convert_fusion_24"
+      ],
+      "chain": [
+        "  %bitcast.15712.0 = f32[327660,512]{1,0} bitcast(%loop_bitcast_convert_fusion.10)",
+        "  %loop_bitcast_convert_fusion.10 = f32[1,327660,512]{2,1,0} fusion(%get-tuple-element.41.0, %constant_894_0), kind=kLoop, calls=%fused_bitcast_convert.10, metadata={op_name=\"jit(<lambda>)/jit(main)/while/body/mesh_gnn/_process/mesh_gnn/_process_step/mesh_gnn/sequential_3/processor_edges_1_mesh_mlp/linear_1/bitcast_convert_type\" source_file=\"/experiment/rne_ops.py\" source_line=11 deduplicated_name=\"loop_bitcast_convert_fusion.8\"}"
+      ]
+    },
+    {
+      "module": "mesh_gnn/~_networks_builder/processor_nodes_1_mesh_nodes_mlp/~/linear_0",
+      "producer": "concatenate",
+      "fusion": "loop_concatenate_fusion.34",
+      "computation": "fused_concatenate.34",
+      "rne_and_producer_in_same_fusion": true,
+      "captured_equivalent_kernel_calls": 17,
+      "kernel_aliases": [
+        "loop_concatenate_fusion_36",
+        "loop_concatenate_fusion_35",
+        "loop_concatenate_fusion_34",
+        "loop_concatenate_fusion_33",
+        "loop_concatenate_fusion_32",
+        "loop_concatenate_fusion_31",
+        "loop_concatenate_fusion_30",
+        "loop_concatenate_fusion_29",
+        "loop_concatenate_fusion_28",
+        "loop_concatenate_fusion_27",
+        "loop_concatenate_fusion_26",
+        "loop_concatenate_fusion_25",
+        "loop_concatenate_fusion_24",
+        "loop_concatenate_fusion_23",
+        "loop_concatenate_fusion_22",
+        "loop_concatenate_fusion_21",
+        "loop_concatenate_fusion_20"
+      ],
+      "chain": [
+        "  %bitcast.15794.0 = f32[40962,1024]{1,0} bitcast(%loop_concatenate_fusion.34)",
+        "  %loop_concatenate_fusion.34 = f32[40962,1,1024]{2,1,0} fusion(%loop_add_fusion.21, %input_scatter_fusion.15), kind=kLoop, calls=%fused_concatenate.34, metadata={op_name=\"jit(<lambda>)/jit(main)/while/body/mesh_gnn/_process/mesh_gnn/_process_step/mesh_gnn/sequential_4/processor_nodes_1_mesh_nodes_mlp/linear_0/bitcast_convert_type\" source_file=\"/experiment/rne_ops.py\" source_line=11 deduplicated_name=\"loop_concatenate_fusion.20\"}"
+      ]
+    },
+    {
+      "module": "mesh_gnn/~_networks_builder/processor_nodes_1_mesh_nodes_mlp/~/linear_1",
+      "producer": "silu",
+      "fusion": "loop_bitcast_convert_fusion.39",
+      "computation": "fused_bitcast_convert.39",
+      "rne_and_producer_in_same_fusion": true,
+      "captured_equivalent_kernel_calls": 17,
+      "kernel_aliases": [
+        "loop_bitcast_convert_fusion_41",
+        "loop_bitcast_convert_fusion_40",
+        "loop_bitcast_convert_fusion_39",
+        "loop_bitcast_convert_fusion_38",
+        "loop_bitcast_convert_fusion_37",
+        "loop_bitcast_convert_fusion_36",
+        "loop_bitcast_convert_fusion_35",
+        "loop_bitcast_convert_fusion_34",
+        "loop_bitcast_convert_fusion_33",
+        "loop_bitcast_convert_fusion_32",
+        "loop_bitcast_convert_fusion_31",
+        "loop_bitcast_convert_fusion_30",
+        "loop_bitcast_convert_fusion_29",
+        "loop_bitcast_convert_fusion_28",
+        "loop_bitcast_convert_fusion_27",
+        "loop_bitcast_convert_fusion_26",
+        "loop_bitcast_convert_fusion_25"
+      ],
+      "chain": [
+        "  %bitcast.15849.0 = f32[40962,512]{1,0} bitcast(%loop_bitcast_convert_fusion.39)",
+        "  %loop_bitcast_convert_fusion.39 = f32[1,40962,512]{2,1,0} fusion(%get-tuple-element.43.0, %constant_904_0), kind=kLoop, calls=%fused_bitcast_convert.39, metadata={op_name=\"jit(<lambda>)/jit(main)/while/body/mesh_gnn/_process/mesh_gnn/_process_step/mesh_gnn/sequential_4/processor_nodes_1_mesh_nodes_mlp/linear_1/bitcast_convert_type\" source_file=\"/experiment/rne_ops.py\" source_line=11 deduplicated_name=\"loop_bitcast_convert_fusion.25\"}"
+      ]
+    },
+    {
+      "module": "mesh_gnn/~_networks_builder/processor_edges_2_mesh_mlp/~/linear_0",
+      "producer": "concatenate",
+      "fusion": "loop_concatenate_fusion.5",
+      "computation": "fused_concatenate.5",
+      "rne_and_producer_in_same_fusion": true,
+      "captured_equivalent_kernel_calls": 14,
+      "kernel_aliases": [
+        "loop_concatenate_fusion_4",
+        "loop_concatenate_fusion_5",
+        "loop_concatenate_fusion_6",
+        "loop_concatenate_fusion_7",
+        "loop_concatenate_fusion_8",
+        "loop_concatenate_fusion_9",
+        "loop_concatenate_fusion_10",
+        "loop_concatenate_fusion_11",
+        "loop_concatenate_fusion_12",
+        "loop_concatenate_fusion_13",
+        "loop_concatenate_fusion_14",
+        "loop_concatenate_fusion_15",
+        "loop_concatenate_fusion_16",
+        "loop_concatenate_fusion_17"
+      ],
+      "chain": [
+        "  %bitcast.15961.0 = f32[327660,1536]{1,0} bitcast(%loop_concatenate_fusion.5)",
+        "  %loop_concatenate_fusion.5 = f32[327660,1,1536]{2,1,0} fusion(%loop_add_fusion.18, %loop_add_fusion.22, %constant_1528_0, %constant_1549_0), kind=kLoop, calls=%fused_concatenate.5, metadata={op_name=\"jit(<lambda>)/jit(main)/while/body/mesh_gnn/_process/mesh_gnn/_process_step/mesh_gnn/sequential_5/processor_edges_2_mesh_mlp/linear_0/bitcast_convert_type\" source_file=\"/experiment/rne_ops.py\" source_line=11 deduplicated_name=\"loop_concatenate_fusion.4\"}"
+      ]
+    },
+    {
+      "module": "mesh_gnn/~_networks_builder/processor_edges_2_mesh_mlp/~/linear_1",
+      "producer": "silu",
+      "fusion": "loop_bitcast_convert_fusion.11",
+      "computation": "fused_bitcast_convert.11",
+      "rne_and_producer_in_same_fusion": true,
+      "captured_equivalent_kernel_calls": 17,
+      "kernel_aliases": [
+        "loop_bitcast_convert_fusion_8",
+        "loop_bitcast_convert_fusion_9",
+        "loop_bitcast_convert_fusion_10",
+        "loop_bitcast_convert_fusion_11",
+        "loop_bitcast_convert_fusion_12",
+        "loop_bitcast_convert_fusion_13",
+        "loop_bitcast_convert_fusion_14",
+        "loop_bitcast_convert_fusion_15",
+        "loop_bitcast_convert_fusion_16",
+        "loop_bitcast_convert_fusion_17",
+        "loop_bitcast_convert_fusion_18",
+        "loop_bitcast_convert_fusion_19",
+        "loop_bitcast_convert_fusion_20",
+        "loop_bitcast_convert_fusion_21",
+        "loop_bitcast_convert_fusion_22",
+        "loop_bitcast_convert_fusion_23",
+        "loop_bitcast_convert_fusion_24"
+      ],
+      "chain": [
+        "  %bitcast.16016.0 = f32[327660,512]{1,0} bitcast(%loop_bitcast_convert_fusion.11)",
+        "  %loop_bitcast_convert_fusion.11 = f32[1,327660,512]{2,1,0} fusion(%get-tuple-element.45.0, %constant_919_0), kind=kLoop, calls=%fused_bitcast_convert.11, metadata={op_name=\"jit(<lambda>)/jit(main)/while/body/mesh_gnn/_process/mesh_gnn/_process_step/mesh_gnn/sequential_5/processor_edges_2_mesh_mlp/linear_1/bitcast_convert_type\" source_file=\"/experiment/rne_ops.py\" source_line=11 deduplicated_name=\"loop_bitcast_convert_fusion.8\"}"
+      ]
+    },
+    {
+      "module": "mesh_gnn/~_networks_builder/processor_nodes_2_mesh_nodes_mlp/~/linear_0",
+      "producer": "concatenate",
+      "fusion": "loop_concatenate_fusion.33",
+      "computation": "fused_concatenate.33",
+      "rne_and_producer_in_same_fusion": true,
+      "captured_equivalent_kernel_calls": 17,
+      "kernel_aliases": [
+        "loop_concatenate_fusion_36",
+        "loop_concatenate_fusion_35",
+        "loop_concatenate_fusion_34",
+        "loop_concatenate_fusion_33",
+        "loop_concatenate_fusion_32",
+        "loop_concatenate_fusion_31",
+        "loop_concatenate_fusion_30",
+        "loop_concatenate_fusion_29",
+        "loop_concatenate_fusion_28",
+        "loop_concatenate_fusion_27",
+        "loop_concatenate_fusion_26",
+        "loop_concatenate_fusion_25",
+        "loop_concatenate_fusion_24",
+        "loop_concatenate_fusion_23",
+        "loop_concatenate_fusion_22",
+        "loop_concatenate_fusion_21",
+        "loop_concatenate_fusion_20"
+      ],
+      "chain": [
+        "  %bitcast.16098.0 = f32[40962,1024]{1,0} bitcast(%loop_concatenate_fusion.33)",
+        "  %loop_concatenate_fusion.33 = f32[40962,1,1024]{2,1,0} fusion(%loop_add_fusion.22, %input_scatter_fusion.14), kind=kLoop, calls=%fused_concatenate.33, metadata={op_name=\"jit(<lambda>)/jit(main)/while/body/mesh_gnn/_process/mesh_gnn/_process_step/mesh_gnn/sequential_6/processor_nodes_2_mesh_nodes_mlp/linear_0/bitcast_convert_type\" source_file=\"/experiment/rne_ops.py\" source_line=11 deduplicated_name=\"loop_concatenate_fusion.20\"}"
+      ]
+    },
+    {
+      "module": "mesh_gnn/~_networks_builder/processor_nodes_2_mesh_nodes_mlp/~/linear_1",
+      "producer": "silu",
+      "fusion": "loop_bitcast_convert_fusion.38",
+      "computation": "fused_bitcast_convert.38",
+      "rne_and_producer_in_same_fusion": true,
+      "captured_equivalent_kernel_calls": 17,
+      "kernel_aliases": [
+        "loop_bitcast_convert_fusion_41",
+        "loop_bitcast_convert_fusion_40",
+        "loop_bitcast_convert_fusion_39",
+        "loop_bitcast_convert_fusion_38",
+        "loop_bitcast_convert_fusion_37",
+        "loop_bitcast_convert_fusion_36",
+        "loop_bitcast_convert_fusion_35",
+        "loop_bitcast_convert_fusion_34",
+        "loop_bitcast_convert_fusion_33",
+        "loop_bitcast_convert_fusion_32",
+        "loop_bitcast_convert_fusion_31",
+        "loop_bitcast_convert_fusion_30",
+        "loop_bitcast_convert_fusion_29",
+        "loop_bitcast_convert_fusion_28",
+        "loop_bitcast_convert_fusion_27",
+        "loop_bitcast_convert_fusion_26",
+        "loop_bitcast_convert_fusion_25"
+      ],
+      "chain": [
+        "  %bitcast.16153.0 = f32[40962,512]{1,0} bitcast(%loop_bitcast_convert_fusion.38)",
+        "  %loop_bitcast_convert_fusion.38 = f32[1,40962,512]{2,1,0} fusion(%get-tuple-element.47.0, %constant_928_0), kind=kLoop, calls=%fused_bitcast_convert.38, metadata={op_name=\"jit(<lambda>)/jit(main)/while/body/mesh_gnn/_process/mesh_gnn/_process_step/mesh_gnn/sequential_6/processor_nodes_2_mesh_nodes_mlp/linear_1/bitcast_convert_type\" source_file=\"/experiment/rne_ops.py\" source_line=11 deduplicated_name=\"loop_bitcast_convert_fusion.25\"}"
+      ]
+    },
+    {
+      "module": "mesh_gnn/~_networks_builder/processor_edges_3_mesh_mlp/~/linear_0",
+      "producer": "concatenate",
+      "fusion": "loop_concatenate_fusion.6",
+      "computation": "fused_concatenate.6",
+      "rne_and_producer_in_same_fusion": true,
+      "captured_equivalent_kernel_calls": 14,
+      "kernel_aliases": [
+        "loop_concatenate_fusion_4",
+        "loop_concatenate_fusion_5",
+        "loop_concatenate_fusion_6",
+        "loop_concatenate_fusion_7",
+        "loop_concatenate_fusion_8",
+        "loop_concatenate_fusion_9",
+        "loop_concatenate_fusion_10",
+        "loop_concatenate_fusion_11",
+        "loop_concatenate_fusion_12",
+        "loop_concatenate_fusion_13",
+        "loop_concatenate_fusion_14",
+        "loop_concatenate_fusion_15",
+        "loop_concatenate_fusion_16",
+        "loop_concatenate_fusion_17"
+      ],
+      "chain": [
+        "  %bitcast.16265.0 = f32[327660,1536]{1,0} bitcast(%loop_concatenate_fusion.6)",
+        "  %loop_concatenate_fusion.6 = f32[327660,1,1536]{2,1,0} fusion(%loop_add_fusion.17, %loop_add_fusion.23, %constant_1528_0, %constant_1549_0), kind=kLoop, calls=%fused_concatenate.6, metadata={op_name=\"jit(<lambda>)/jit(main)/while/body/mesh_gnn/_process/mesh_gnn/_process_step/mesh_gnn/sequential_7/processor_edges_3_mesh_mlp/linear_0/bitcast_convert_type\" source_file=\"/experiment/rne_ops.py\" source_line=11 deduplicated_name=\"loop_concatenate_fusion.4\"}"
+      ]
+    },
+    {
+      "module": "mesh_gnn/~_networks_builder/processor_edges_3_mesh_mlp/~/linear_1",
+      "producer": "silu",
+      "fusion": "loop_bitcast_convert_fusion.12",
+      "computation": "fused_bitcast_convert.12",
+      "rne_and_producer_in_same_fusion": true,
+      "captured_equivalent_kernel_calls": 17,
+      "kernel_aliases": [
+        "loop_bitcast_convert_fusion_8",
+        "loop_bitcast_convert_fusion_9",
+        "loop_bitcast_convert_fusion_10",
+        "loop_bitcast_convert_fusion_11",
+        "loop_bitcast_convert_fusion_12",
+        "loop_bitcast_convert_fusion_13",
+        "loop_bitcast_convert_fusion_14",
+        "loop_bitcast_convert_fusion_15",
+        "loop_bitcast_convert_fusion_16",
+        "loop_bitcast_convert_fusion_17",
+        "loop_bitcast_convert_fusion_18",
+        "loop_bitcast_convert_fusion_19",
+        "loop_bitcast_convert_fusion_20",
+        "loop_bitcast_convert_fusion_21",
+        "loop_bitcast_convert_fusion_22",
+        "loop_bitcast_convert_fusion_23",
+        "loop_bitcast_convert_fusion_24"
+      ],
+      "chain": [
+        "  %bitcast.16320.0 = f32[327660,512]{1,0} bitcast(%loop_bitcast_convert_fusion.12)",
+        "  %loop_bitcast_convert_fusion.12 = f32[1,327660,512]{2,1,0} fusion(%get-tuple-element.49.0, %constant_947_0), kind=kLoop, calls=%fused_bitcast_convert.12, metadata={op_name=\"jit(<lambda>)/jit(main)/while/body/mesh_gnn/_process/mesh_gnn/_process_step/mesh_gnn/sequential_7/processor_edges_3_mesh_mlp/linear_1/bitcast_convert_type\" source_file=\"/experiment/rne_ops.py\" source_line=11 deduplicated_name=\"loop_bitcast_convert_fusion.8\"}"
+      ]
+    },
+    {
+      "module": "mesh_gnn/~_networks_builder/processor_nodes_3_mesh_nodes_mlp/~/linear_0",
+      "producer": "concatenate",
+      "fusion": "loop_concatenate_fusion.32",
+      "computation": "fused_concatenate.32",
+      "rne_and_producer_in_same_fusion": true,
+      "captured_equivalent_kernel_calls": 17,
+      "kernel_aliases": [
+        "loop_concatenate_fusion_36",
+        "loop_concatenate_fusion_35",
+        "loop_concatenate_fusion_34",
+        "loop_concatenate_fusion_33",
+        "loop_concatenate_fusion_32",
+        "loop_concatenate_fusion_31",
+        "loop_concatenate_fusion_30",
+        "loop_concatenate_fusion_29",
+        "loop_concatenate_fusion_28",
+        "loop_concatenate_fusion_27",
+        "loop_concatenate_fusion_26",
+        "loop_concatenate_fusion_25",
+        "loop_concatenate_fusion_24",
+        "loop_concatenate_fusion_23",
+        "loop_concatenate_fusion_22",
+        "loop_concatenate_fusion_21",
+        "loop_concatenate_fusion_20"
+      ],
+      "chain": [
+        "  %bitcast.16402.0 = f32[40962,1024]{1,0} bitcast(%loop_concatenate_fusion.32)",
+        "  %loop_concatenate_fusion.32 = f32[40962,1,1024]{2,1,0} fusion(%loop_add_fusion.23, %input_scatter_fusion.13), kind=kLoop, calls=%fused_concatenate.32, metadata={op_name=\"jit(<lambda>)/jit(main)/while/body/mesh_gnn/_process/mesh_gnn/_process_step/mesh_gnn/sequential_8/processor_nodes_3_mesh_nodes_mlp/linear_0/bitcast_convert_type\" source_file=\"/experiment/rne_ops.py\" source_line=11 deduplicated_name=\"loop_concatenate_fusion.20\"}"
+      ]
+    },
+    {
+      "module": "mesh_gnn/~_networks_builder/processor_nodes_3_mesh_nodes_mlp/~/linear_1",
+      "producer": "silu",
+      "fusion": "loop_bitcast_convert_fusion.37",
+      "computation": "fused_bitcast_convert.37",
+      "rne_and_producer_in_same_fusion": true,
+      "captured_equivalent_kernel_calls": 17,
+      "kernel_aliases": [
+        "loop_bitcast_convert_fusion_41",
+        "loop_bitcast_convert_fusion_40",
+        "loop_bitcast_convert_fusion_39",
+        "loop_bitcast_convert_fusion_38",
+        "loop_bitcast_convert_fusion_37",
+        "loop_bitcast_convert_fusion_36",
+        "loop_bitcast_convert_fusion_35",
+        "loop_bitcast_convert_fusion_34",
+        "loop_bitcast_convert_fusion_33",
+        "loop_bitcast_convert_fusion_32",
+        "loop_bitcast_convert_fusion_31",
+        "loop_bitcast_convert_fusion_30",
+        "loop_bitcast_convert_fusion_29",
+        "loop_bitcast_convert_fusion_28",
+        "loop_bitcast_convert_fusion_27",
+        "loop_bitcast_convert_fusion_26",
+        "loop_bitcast_convert_fusion_25"
+      ],
+      "chain": [
+        "  %bitcast.16457.0 = f32[40962,512]{1,0} bitcast(%loop_bitcast_convert_fusion.37)",
+        "  %loop_bitcast_convert_fusion.37 = f32[1,40962,512]{2,1,0} fusion(%get-tuple-element.51.0, %constant_956_0), kind=kLoop, calls=%fused_bitcast_convert.37, metadata={op_name=\"jit(<lambda>)/jit(main)/while/body/mesh_gnn/_process/mesh_gnn/_process_step/mesh_gnn/sequential_8/processor_nodes_3_mesh_nodes_mlp/linear_1/bitcast_convert_type\" source_file=\"/experiment/rne_ops.py\" source_line=11 deduplicated_name=\"loop_bitcast_convert_fusion.25\"}"
+      ]
+    },
+    {
+      "module": "mesh_gnn/~_networks_builder/processor_edges_4_mesh_mlp/~/linear_0",
+      "producer": "concatenate",
+      "fusion": "loop_concatenate_fusion.7",
+      "computation": "fused_concatenate.7",
+      "rne_and_producer_in_same_fusion": true,
+      "captured_equivalent_kernel_calls": 14,
+      "kernel_aliases": [
+        "loop_concatenate_fusion_4",
+        "loop_concatenate_fusion_5",
+        "loop_concatenate_fusion_6",
+        "loop_concatenate_fusion_7",
+        "loop_concatenate_fusion_8",
+        "loop_concatenate_fusion_9",
+        "loop_concatenate_fusion_10",
+        "loop_concatenate_fusion_11",
+        "loop_concatenate_fusion_12",
+        "loop_concatenate_fusion_13",
+        "loop_concatenate_fusion_14",
+        "loop_concatenate_fusion_15",
+        "loop_concatenate_fusion_16",
+        "loop_concatenate_fusion_17"
+      ],
+      "chain": [
+        "  %bitcast.16569.0 = f32[327660,1536]{1,0} bitcast(%loop_concatenate_fusion.7)",
+        "  %loop_concatenate_fusion.7 = f32[327660,1,1536]{2,1,0} fusion(%loop_add_fusion.16, %loop_add_fusion.24, %constant_1528_0, %constant_1549_0), kind=kLoop, calls=%fused_concatenate.7, metadata={op_name=\"jit(<lambda>)/jit(main)/while/body/mesh_gnn/_process/mesh_gnn/_process_step/mesh_gnn/sequential_9/processor_edges_4_mesh_mlp/linear_0/bitcast_convert_type\" source_file=\"/experiment/rne_ops.py\" source_line=11 deduplicated_name=\"loop_concatenate_fusion.4\"}"
+      ]
+    },
+    {
+      "module": "mesh_gnn/~_networks_builder/processor_edges_4_mesh_mlp/~/linear_1",
+      "producer": "silu",
+      "fusion": "loop_bitcast_convert_fusion.13",
+      "computation": "fused_bitcast_convert.13",
+      "rne_and_producer_in_same_fusion": true,
+      "captured_equivalent_kernel_calls": 17,
+      "kernel_aliases": [
+        "loop_bitcast_convert_fusion_8",
+        "loop_bitcast_convert_fusion_9",
+        "loop_bitcast_convert_fusion_10",
+        "loop_bitcast_convert_fusion_11",
+        "loop_bitcast_convert_fusion_12",
+        "loop_bitcast_convert_fusion_13",
+        "loop_bitcast_convert_fusion_14",
+        "loop_bitcast_convert_fusion_15",
+        "loop_bitcast_convert_fusion_16",
+        "loop_bitcast_convert_fusion_17",
+        "loop_bitcast_convert_fusion_18",
+        "loop_bitcast_convert_fusion_19",
+        "loop_bitcast_convert_fusion_20",
+        "loop_bitcast_convert_fusion_21",
+        "loop_bitcast_convert_fusion_22",
+        "loop_bitcast_convert_fusion_23",
+        "loop_bitcast_convert_fusion_24"
+      ],
+      "chain": [
+        "  %bitcast.16624.0 = f32[327660,512]{1,0} bitcast(%loop_bitcast_convert_fusion.13)",
+        "  %loop_bitcast_convert_fusion.13 = f32[1,327660,512]{2,1,0} fusion(%get-tuple-element.53.0, %constant_972_0), kind=kLoop, calls=%fused_bitcast_convert.13, metadata={op_name=\"jit(<lambda>)/jit(main)/while/body/mesh_gnn/_process/mesh_gnn/_process_step/mesh_gnn/sequential_9/processor_edges_4_mesh_mlp/linear_1/bitcast_convert_type\" source_file=\"/experiment/rne_ops.py\" source_line=11 deduplicated_name=\"loop_bitcast_convert_fusion.8\"}"
+      ]
+    },
+    {
+      "module": "mesh_gnn/~_networks_builder/processor_nodes_4_mesh_nodes_mlp/~/linear_0",
+      "producer": "concatenate",
+      "fusion": "loop_concatenate_fusion.31",
+      "computation": "fused_concatenate.31",
+      "rne_and_producer_in_same_fusion": true,
+      "captured_equivalent_kernel_calls": 17,
+      "kernel_aliases": [
+        "loop_concatenate_fusion_36",
+        "loop_concatenate_fusion_35",
+        "loop_concatenate_fusion_34",
+        "loop_concatenate_fusion_33",
+        "loop_concatenate_fusion_32",
+        "loop_concatenate_fusion_31",
+        "loop_concatenate_fusion_30",
+        "loop_concatenate_fusion_29",
+        "loop_concatenate_fusion_28",
+        "loop_concatenate_fusion_27",
+        "loop_concatenate_fusion_26",
+        "loop_concatenate_fusion_25",
+        "loop_concatenate_fusion_24",
+        "loop_concatenate_fusion_23",
+        "loop_concatenate_fusion_22",
+        "loop_concatenate_fusion_21",
+        "loop_concatenate_fusion_20"
+      ],
+      "chain": [
+        "  %bitcast.16706.0 = f32[40962,1024]{1,0} bitcast(%loop_concatenate_fusion.31)",
+        "  %loop_concatenate_fusion.31 = f32[40962,1,1024]{2,1,0} fusion(%loop_add_fusion.24, %input_scatter_fusion.12), kind=kLoop, calls=%fused_concatenate.31, metadata={op_name=\"jit(<lambda>)/jit(main)/while/body/mesh_gnn/_process/mesh_gnn/_process_step/mesh_gnn/sequential_10/processor_nodes_4_mesh_nodes_mlp/linear_0/bitcast_convert_type\" source_file=\"/experiment/rne_ops.py\" source_line=11 deduplicated_name=\"loop_concatenate_fusion.20\"}"
+      ]
+    },
+    {
+      "module": "mesh_gnn/~_networks_builder/processor_nodes_4_mesh_nodes_mlp/~/linear_1",
+      "producer": "silu",
+      "fusion": "loop_bitcast_convert_fusion.36",
+      "computation": "fused_bitcast_convert.36",
+      "rne_and_producer_in_same_fusion": true,
+      "captured_equivalent_kernel_calls": 17,
+      "kernel_aliases": [
+        "loop_bitcast_convert_fusion_41",
+        "loop_bitcast_convert_fusion_40",
+        "loop_bitcast_convert_fusion_39",
+        "loop_bitcast_convert_fusion_38",
+        "loop_bitcast_convert_fusion_37",
+        "loop_bitcast_convert_fusion_36",
+        "loop_bitcast_convert_fusion_35",
+        "loop_bitcast_convert_fusion_34",
+        "loop_bitcast_convert_fusion_33",
+        "loop_bitcast_convert_fusion_32",
+        "loop_bitcast_convert_fusion_31",
+        "loop_bitcast_convert_fusion_30",
+        "loop_bitcast_convert_fusion_29",
+        "loop_bitcast_convert_fusion_28",
+        "loop_bitcast_convert_fusion_27",
+        "loop_bitcast_convert_fusion_26",
+        "loop_bitcast_convert_fusion_25"
+      ],
+      "chain": [
+        "  %bitcast.16761.0 = f32[40962,512]{1,0} bitcast(%loop_bitcast_convert_fusion.36)",
+        "  %loop_bitcast_convert_fusion.36 = f32[1,40962,512]{2,1,0} fusion(%get-tuple-element.55.0, %constant_981_0), kind=kLoop, calls=%fused_bitcast_convert.36, metadata={op_name=\"jit(<lambda>)/jit(main)/while/body/mesh_gnn/_process/mesh_gnn/_process_step/mesh_gnn/sequential_10/processor_nodes_4_mesh_nodes_mlp/linear_1/bitcast_convert_type\" source_file=\"/experiment/rne_ops.py\" source_line=11 deduplicated_name=\"loop_bitcast_convert_fusion.25\"}"
+      ]
+    },
+    {
+      "module": "mesh_gnn/~_networks_builder/processor_edges_5_mesh_mlp/~/linear_0",
+      "producer": "concatenate",
+      "fusion": "loop_concatenate_fusion.8",
+      "computation": "fused_concatenate.8",
+      "rne_and_producer_in_same_fusion": true,
+      "captured_equivalent_kernel_calls": 14,
+      "kernel_aliases": [
+        "loop_concatenate_fusion_4",
+        "loop_concatenate_fusion_5",
+        "loop_concatenate_fusion_6",
+        "loop_concatenate_fusion_7",
+        "loop_concatenate_fusion_8",
+        "loop_concatenate_fusion_9",
+        "loop_concatenate_fusion_10",
+        "loop_concatenate_fusion_11",
+        "loop_concatenate_fusion_12",
+        "loop_concatenate_fusion_13",
+        "loop_concatenate_fusion_14",
+        "loop_concatenate_fusion_15",
+        "loop_concatenate_fusion_16",
+        "loop_concatenate_fusion_17"
+      ],
+      "chain": [
+        "  %bitcast.16873.0 = f32[327660,1536]{1,0} bitcast(%loop_concatenate_fusion.8)",
+        "  %loop_concatenate_fusion.8 = f32[327660,1,1536]{2,1,0} fusion(%loop_add_fusion.15, %loop_add_fusion.25, %constant_1528_0, %constant_1549_0), kind=kLoop, calls=%fused_concatenate.8, metadata={op_name=\"jit(<lambda>)/jit(main)/while/body/mesh_gnn/_process/mesh_gnn/_process_step/mesh_gnn/sequential_11/processor_edges_5_mesh_mlp/linear_0/bitcast_convert_type\" source_file=\"/experiment/rne_ops.py\" source_line=11 deduplicated_name=\"loop_concatenate_fusion.4\"}"
+      ]
+    },
+    {
+      "module": "mesh_gnn/~_networks_builder/processor_edges_5_mesh_mlp/~/linear_1",
+      "producer": "silu",
+      "fusion": "loop_bitcast_convert_fusion.14",
+      "computation": "fused_bitcast_convert.14",
+      "rne_and_producer_in_same_fusion": true,
+      "captured_equivalent_kernel_calls": 17,
+      "kernel_aliases": [
+        "loop_bitcast_convert_fusion_8",
+        "loop_bitcast_convert_fusion_9",
+        "loop_bitcast_convert_fusion_10",
+        "loop_bitcast_convert_fusion_11",
+        "loop_bitcast_convert_fusion_12",
+        "loop_bitcast_convert_fusion_13",
+        "loop_bitcast_convert_fusion_14",
+        "loop_bitcast_convert_fusion_15",
+        "loop_bitcast_convert_fusion_16",
+        "loop_bitcast_convert_fusion_17",
+        "loop_bitcast_convert_fusion_18",
+        "loop_bitcast_convert_fusion_19",
+        "loop_bitcast_convert_fusion_20",
+        "loop_bitcast_convert_fusion_21",
+        "loop_bitcast_convert_fusion_22",
+        "loop_bitcast_convert_fusion_23",
+        "loop_bitcast_convert_fusion_24"
+      ],
+      "chain": [
+        "  %bitcast.16928.0 = f32[327660,512]{1,0} bitcast(%loop_bitcast_convert_fusion.14)",
+        "  %loop_bitcast_convert_fusion.14 = f32[1,327660,512]{2,1,0} fusion(%get-tuple-element.57.0, %constant_1000_0), kind=kLoop, calls=%fused_bitcast_convert.14, metadata={op_name=\"jit(<lambda>)/jit(main)/while/body/mesh_gnn/_process/mesh_gnn/_process_step/mesh_gnn/sequential_11/processor_edges_5_mesh_mlp/linear_1/bitcast_convert_type\" source_file=\"/experiment/rne_ops.py\" source_line=11 deduplicated_name=\"loop_bitcast_convert_fusion.8\"}"
+      ]
+    },
+    {
+      "module": "mesh_gnn/~_networks_builder/processor_nodes_5_mesh_nodes_mlp/~/linear_0",
+      "producer": "concatenate",
+      "fusion": "loop_concatenate_fusion.30",
+      "computation": "fused_concatenate.30",
+      "rne_and_producer_in_same_fusion": true,
+      "captured_equivalent_kernel_calls": 17,
+      "kernel_aliases": [
+        "loop_concatenate_fusion_36",
+        "loop_concatenate_fusion_35",
+        "loop_concatenate_fusion_34",
+        "loop_concatenate_fusion_33",
+        "loop_concatenate_fusion_32",
+        "loop_concatenate_fusion_31",
+        "loop_concatenate_fusion_30",
+        "loop_concatenate_fusion_29",
+        "loop_concatenate_fusion_28",
+        "loop_concatenate_fusion_27",
+        "loop_concatenate_fusion_26",
+        "loop_concatenate_fusion_25",
+        "loop_concatenate_fusion_24",
+        "loop_concatenate_fusion_23",
+        "loop_concatenate_fusion_22",
+        "loop_concatenate_fusion_21",
+        "loop_concatenate_fusion_20"
+      ],
+      "chain": [
+        "  %bitcast.17010.0 = f32[40962,1024]{1,0} bitcast(%loop_concatenate_fusion.30)",
+        "  %loop_concatenate_fusion.30 = f32[40962,1,1024]{2,1,0} fusion(%loop_add_fusion.25, %input_scatter_fusion.11), kind=kLoop, calls=%fused_concatenate.30, metadata={op_name=\"jit(<lambda>)/jit(main)/while/body/mesh_gnn/_process/mesh_gnn/_process_step/mesh_gnn/sequential_12/processor_nodes_5_mesh_nodes_mlp/linear_0/bitcast_convert_type\" source_file=\"/experiment/rne_ops.py\" source_line=11 deduplicated_name=\"loop_concatenate_fusion.20\"}"
+      ]
+    },
+    {
+      "module": "mesh_gnn/~_networks_builder/processor_nodes_5_mesh_nodes_mlp/~/linear_1",
+      "producer": "silu",
+      "fusion": "loop_bitcast_convert_fusion.35",
+      "computation": "fused_bitcast_convert.35",
+      "rne_and_producer_in_same_fusion": true,
+      "captured_equivalent_kernel_calls": 17,
+      "kernel_aliases": [
+        "loop_bitcast_convert_fusion_41",
+        "loop_bitcast_convert_fusion_40",
+        "loop_bitcast_convert_fusion_39",
+        "loop_bitcast_convert_fusion_38",
+        "loop_bitcast_convert_fusion_37",
+        "loop_bitcast_convert_fusion_36",
+        "loop_bitcast_convert_fusion_35",
+        "loop_bitcast_convert_fusion_34",
+        "loop_bitcast_convert_fusion_33",
+        "loop_bitcast_convert_fusion_32",
+        "loop_bitcast_convert_fusion_31",
+        "loop_bitcast_convert_fusion_30",
+        "loop_bitcast_convert_fusion_29",
+        "loop_bitcast_convert_fusion_28",
+        "loop_bitcast_convert_fusion_27",
+        "loop_bitcast_convert_fusion_26",
+        "loop_bitcast_convert_fusion_25"
+      ],
+      "chain": [
+        "  %bitcast.17065.0 = f32[40962,512]{1,0} bitcast(%loop_bitcast_convert_fusion.35)",
+        "  %loop_bitcast_convert_fusion.35 = f32[1,40962,512]{2,1,0} fusion(%get-tuple-element.59.0, %constant_1009_0), kind=kLoop, calls=%fused_bitcast_convert.35, metadata={op_name=\"jit(<lambda>)/jit(main)/while/body/mesh_gnn/_process/mesh_gnn/_process_step/mesh_gnn/sequential_12/processor_nodes_5_mesh_nodes_mlp/linear_1/bitcast_convert_type\" source_file=\"/experiment/rne_ops.py\" source_line=11 deduplicated_name=\"loop_bitcast_convert_fusion.25\"}"
+      ]
+    },
+    {
+      "module": "mesh_gnn/~_networks_builder/processor_edges_6_mesh_mlp/~/linear_0",
+      "producer": "concatenate",
+      "fusion": "loop_concatenate_fusion.9",
+      "computation": "fused_concatenate.9",
+      "rne_and_producer_in_same_fusion": true,
+      "captured_equivalent_kernel_calls": 14,
+      "kernel_aliases": [
+        "loop_concatenate_fusion_4",
+        "loop_concatenate_fusion_5",
+        "loop_concatenate_fusion_6",
+        "loop_concatenate_fusion_7",
+        "loop_concatenate_fusion_8",
+        "loop_concatenate_fusion_9",
+        "loop_concatenate_fusion_10",
+        "loop_concatenate_fusion_11",
+        "loop_concatenate_fusion_12",
+        "loop_concatenate_fusion_13",
+        "loop_concatenate_fusion_14",
+        "loop_concatenate_fusion_15",
+        "loop_concatenate_fusion_16",
+        "loop_concatenate_fusion_17"
+      ],
+      "chain": [
+        "  %bitcast.17177.0 = f32[327660,1536]{1,0} bitcast(%loop_concatenate_fusion.9)",
+        "  %loop_concatenate_fusion.9 = f32[327660,1,1536]{2,1,0} fusion(%loop_add_fusion.14, %loop_add_fusion.26, %constant_1528_0, %constant_1549_0), kind=kLoop, calls=%fused_concatenate.9, metadata={op_name=\"jit(<lambda>)/jit(main)/while/body/mesh_gnn/_process/mesh_gnn/_process_step/mesh_gnn/sequential_13/processor_edges_6_mesh_mlp/linear_0/bitcast_convert_type\" source_file=\"/experiment/rne_ops.py\" source_line=11 deduplicated_name=\"loop_concatenate_fusion.4\"}"
+      ]
+    },
+    {
+      "module": "mesh_gnn/~_networks_builder/processor_edges_6_mesh_mlp/~/linear_1",
+      "producer": "silu",
+      "fusion": "loop_bitcast_convert_fusion.15",
+      "computation": "fused_bitcast_convert.15",
+      "rne_and_producer_in_same_fusion": true,
+      "captured_equivalent_kernel_calls": 17,
+      "kernel_aliases": [
+        "loop_bitcast_convert_fusion_8",
+        "loop_bitcast_convert_fusion_9",
+        "loop_bitcast_convert_fusion_10",
+        "loop_bitcast_convert_fusion_11",
+        "loop_bitcast_convert_fusion_12",
+        "loop_bitcast_convert_fusion_13",
+        "loop_bitcast_convert_fusion_14",
+        "loop_bitcast_convert_fusion_15",
+        "loop_bitcast_convert_fusion_16",
+        "loop_bitcast_convert_fusion_17",
+        "loop_bitcast_convert_fusion_18",
+        "loop_bitcast_convert_fusion_19",
+        "loop_bitcast_convert_fusion_20",
+        "loop_bitcast_convert_fusion_21",
+        "loop_bitcast_convert_fusion_22",
+        "loop_bitcast_convert_fusion_23",
+        "loop_bitcast_convert_fusion_24"
+      ],
+      "chain": [
+        "  %bitcast.17232.0 = f32[327660,512]{1,0} bitcast(%loop_bitcast_convert_fusion.15)",
+        "  %loop_bitcast_convert_fusion.15 = f32[1,327660,512]{2,1,0} fusion(%get-tuple-element.61.0, %constant_1024_0), kind=kLoop, calls=%fused_bitcast_convert.15, metadata={op_name=\"jit(<lambda>)/jit(main)/while/body/mesh_gnn/_process/mesh_gnn/_process_step/mesh_gnn/sequential_13/processor_edges_6_mesh_mlp/linear_1/bitcast_convert_type\" source_file=\"/experiment/rne_ops.py\" source_line=11 deduplicated_name=\"loop_bitcast_convert_fusion.8\"}"
+      ]
+    },
+    {
+      "module": "mesh_gnn/~_networks_builder/processor_nodes_6_mesh_nodes_mlp/~/linear_0",
+      "producer": "concatenate",
+      "fusion": "loop_concatenate_fusion.29",
+      "computation": "fused_concatenate.29",
+      "rne_and_producer_in_same_fusion": true,
+      "captured_equivalent_kernel_calls": 17,
+      "kernel_aliases": [
+        "loop_concatenate_fusion_36",
+        "loop_concatenate_fusion_35",
+        "loop_concatenate_fusion_34",
+        "loop_concatenate_fusion_33",
+        "loop_concatenate_fusion_32",
+        "loop_concatenate_fusion_31",
+        "loop_concatenate_fusion_30",
+        "loop_concatenate_fusion_29",
+        "loop_concatenate_fusion_28",
+        "loop_concatenate_fusion_27",
+        "loop_concatenate_fusion_26",
+        "loop_concatenate_fusion_25",
+        "loop_concatenate_fusion_24",
+        "loop_concatenate_fusion_23",
+        "loop_concatenate_fusion_22",
+        "loop_concatenate_fusion_21",
+        "loop_concatenate_fusion_20"
+      ],
+      "chain": [
+        "  %bitcast.17314.0 = f32[40962,1024]{1,0} bitcast(%loop_concatenate_fusion.29)",
+        "  %loop_concatenate_fusion.29 = f32[40962,1,1024]{2,1,0} fusion(%loop_add_fusion.26, %input_scatter_fusion.10), kind=kLoop, calls=%fused_concatenate.29, metadata={op_name=\"jit(<lambda>)/jit(main)/while/body/mesh_gnn/_process/mesh_gnn/_process_step/mesh_gnn/sequential_14/processor_nodes_6_mesh_nodes_mlp/linear_0/bitcast_convert_type\" source_file=\"/experiment/rne_ops.py\" source_line=11 deduplicated_name=\"loop_concatenate_fusion.20\"}"
+      ]
+    },
+    {
+      "module": "mesh_gnn/~_networks_builder/processor_nodes_6_mesh_nodes_mlp/~/linear_1",
+      "producer": "silu",
+      "fusion": "loop_bitcast_convert_fusion.34",
+      "computation": "fused_bitcast_convert.34",
+      "rne_and_producer_in_same_fusion": true,
+      "captured_equivalent_kernel_calls": 17,
+      "kernel_aliases": [
+        "loop_bitcast_convert_fusion_41",
+        "loop_bitcast_convert_fusion_40",
+        "loop_bitcast_convert_fusion_39",
+        "loop_bitcast_convert_fusion_38",
+        "loop_bitcast_convert_fusion_37",
+        "loop_bitcast_convert_fusion_36",
+        "loop_bitcast_convert_fusion_35",
+        "loop_bitcast_convert_fusion_34",
+        "loop_bitcast_convert_fusion_33",
+        "loop_bitcast_convert_fusion_32",
+        "loop_bitcast_convert_fusion_31",
+        "loop_bitcast_convert_fusion_30",
+        "loop_bitcast_convert_fusion_29",
+        "loop_bitcast_convert_fusion_28",
+        "loop_bitcast_convert_fusion_27",
+        "loop_bitcast_convert_fusion_26",
+        "loop_bitcast_convert_fusion_25"
+      ],
+      "chain": [
+        "  %bitcast.17369.0 = f32[40962,512]{1,0} bitcast(%loop_bitcast_convert_fusion.34)",
+        "  %loop_bitcast_convert_fusion.34 = f32[1,40962,512]{2,1,0} fusion(%get-tuple-element.63.0, %constant_1034_0), kind=kLoop, calls=%fused_bitcast_convert.34, metadata={op_name=\"jit(<lambda>)/jit(main)/while/body/mesh_gnn/_process/mesh_gnn/_process_step/mesh_gnn/sequential_14/processor_nodes_6_mesh_nodes_mlp/linear_1/bitcast_convert_type\" source_file=\"/experiment/rne_ops.py\" source_line=11 deduplicated_name=\"loop_bitcast_convert_fusion.25\"}"
+      ]
+    },
+    {
+      "module": "mesh_gnn/~_networks_builder/processor_edges_7_mesh_mlp/~/linear_0",
+      "producer": "concatenate",
+      "fusion": "loop_concatenate_fusion.10",
+      "computation": "fused_concatenate.10",
+      "rne_and_producer_in_same_fusion": true,
+      "captured_equivalent_kernel_calls": 14,
+      "kernel_aliases": [
+        "loop_concatenate_fusion_4",
+        "loop_concatenate_fusion_5",
+        "loop_concatenate_fusion_6",
+        "loop_concatenate_fusion_7",
+        "loop_concatenate_fusion_8",
+        "loop_concatenate_fusion_9",
+        "loop_concatenate_fusion_10",
+        "loop_concatenate_fusion_11",
+        "loop_concatenate_fusion_12",
+        "loop_concatenate_fusion_13",
+        "loop_concatenate_fusion_14",
+        "loop_concatenate_fusion_15",
+        "loop_concatenate_fusion_16",
+        "loop_concatenate_fusion_17"
+      ],
+      "chain": [
+        "  %bitcast.17481.0 = f32[327660,1536]{1,0} bitcast(%loop_concatenate_fusion.10)",
+        "  %loop_concatenate_fusion.10 = f32[327660,1,1536]{2,1,0} fusion(%loop_add_fusion.13, %loop_add_fusion.27, %constant_1528_0, %constant_1549_0), kind=kLoop, calls=%fused_concatenate.10, metadata={op_name=\"jit(<lambda>)/jit(main)/while/body/mesh_gnn/_process/mesh_gnn/_process_step/mesh_gnn/sequential_15/processor_edges_7_mesh_mlp/linear_0/bitcast_convert_type\" source_file=\"/experiment/rne_ops.py\" source_line=11 deduplicated_name=\"loop_concatenate_fusion.4\"}"
+      ]
+    },
+    {
+      "module": "mesh_gnn/~_networks_builder/processor_edges_7_mesh_mlp/~/linear_1",
+      "producer": "silu",
+      "fusion": "loop_bitcast_convert_fusion.16",
+      "computation": "fused_bitcast_convert.16",
+      "rne_and_producer_in_same_fusion": true,
+      "captured_equivalent_kernel_calls": 17,
+      "kernel_aliases": [
+        "loop_bitcast_convert_fusion_8",
+        "loop_bitcast_convert_fusion_9",
+        "loop_bitcast_convert_fusion_10",
+        "loop_bitcast_convert_fusion_11",
+        "loop_bitcast_convert_fusion_12",
+        "loop_bitcast_convert_fusion_13",
+        "loop_bitcast_convert_fusion_14",
+        "loop_bitcast_convert_fusion_15",
+        "loop_bitcast_convert_fusion_16",
+        "loop_bitcast_convert_fusion_17",
+        "loop_bitcast_convert_fusion_18",
+        "loop_bitcast_convert_fusion_19",
+        "loop_bitcast_convert_fusion_20",
+        "loop_bitcast_convert_fusion_21",
+        "loop_bitcast_convert_fusion_22",
+        "loop_bitcast_convert_fusion_23",
+        "loop_bitcast_convert_fusion_24"
+      ],
+      "chain": [
+        "  %bitcast.17536.0 = f32[327660,512]{1,0} bitcast(%loop_bitcast_convert_fusion.16)",
+        "  %loop_bitcast_convert_fusion.16 = f32[1,327660,512]{2,1,0} fusion(%get-tuple-element.65.0, %constant_1049_0), kind=kLoop, calls=%fused_bitcast_convert.16, metadata={op_name=\"jit(<lambda>)/jit(main)/while/body/mesh_gnn/_process/mesh_gnn/_process_step/mesh_gnn/sequential_15/processor_edges_7_mesh_mlp/linear_1/bitcast_convert_type\" source_file=\"/experiment/rne_ops.py\" source_line=11 deduplicated_name=\"loop_bitcast_convert_fusion.8\"}"
+      ]
+    },
+    {
+      "module": "mesh_gnn/~_networks_builder/processor_nodes_7_mesh_nodes_mlp/~/linear_0",
+      "producer": "concatenate",
+      "fusion": "loop_concatenate_fusion.28",
+      "computation": "fused_concatenate.28",
+      "rne_and_producer_in_same_fusion": true,
+      "captured_equivalent_kernel_calls": 17,
+      "kernel_aliases": [
+        "loop_concatenate_fusion_36",
+        "loop_concatenate_fusion_35",
+        "loop_concatenate_fusion_34",
+        "loop_concatenate_fusion_33",
+        "loop_concatenate_fusion_32",
+        "loop_concatenate_fusion_31",
+        "loop_concatenate_fusion_30",
+        "loop_concatenate_fusion_29",
+        "loop_concatenate_fusion_28",
+        "loop_concatenate_fusion_27",
+        "loop_concatenate_fusion_26",
+        "loop_concatenate_fusion_25",
+        "loop_concatenate_fusion_24",
+        "loop_concatenate_fusion_23",
+        "loop_concatenate_fusion_22",
+        "loop_concatenate_fusion_21",
+        "loop_concatenate_fusion_20"
+      ],
+      "chain": [
+        "  %bitcast.17618.0 = f32[40962,1024]{1,0} bitcast(%loop_concatenate_fusion.28)",
+        "  %loop_concatenate_fusion.28 = f32[40962,1,1024]{2,1,0} fusion(%loop_add_fusion.27, %input_scatter_fusion.9), kind=kLoop, calls=%fused_concatenate.28, metadata={op_name=\"jit(<lambda>)/jit(main)/while/body/mesh_gnn/_process/mesh_gnn/_process_step/mesh_gnn/sequential_16/processor_nodes_7_mesh_nodes_mlp/linear_0/bitcast_convert_type\" source_file=\"/experiment/rne_ops.py\" source_line=11 deduplicated_name=\"loop_concatenate_fusion.20\"}"
+      ]
+    },
+    {
+      "module": "mesh_gnn/~_networks_builder/processor_nodes_7_mesh_nodes_mlp/~/linear_1",
+      "producer": "silu",
+      "fusion": "loop_bitcast_convert_fusion.33",
+      "computation": "fused_bitcast_convert.33",
+      "rne_and_producer_in_same_fusion": true,
+      "captured_equivalent_kernel_calls": 17,
+      "kernel_aliases": [
+        "loop_bitcast_convert_fusion_41",
+        "loop_bitcast_convert_fusion_40",
+        "loop_bitcast_convert_fusion_39",
+        "loop_bitcast_convert_fusion_38",
+        "loop_bitcast_convert_fusion_37",
+        "loop_bitcast_convert_fusion_36",
+        "loop_bitcast_convert_fusion_35",
+        "loop_bitcast_convert_fusion_34",
+        "loop_bitcast_convert_fusion_33",
+        "loop_bitcast_convert_fusion_32",
+        "loop_bitcast_convert_fusion_31",
+        "loop_bitcast_convert_fusion_30",
+        "loop_bitcast_convert_fusion_29",
+        "loop_bitcast_convert_fusion_28",
+        "loop_bitcast_convert_fusion_27",
+        "loop_bitcast_convert_fusion_26",
+        "loop_bitcast_convert_fusion_25"
+      ],
+      "chain": [
+        "  %bitcast.17673.0 = f32[40962,512]{1,0} bitcast(%loop_bitcast_convert_fusion.33)",
+        "  %loop_bitcast_convert_fusion.33 = f32[1,40962,512]{2,1,0} fusion(%get-tuple-element.67.0, %constant_1058_0), kind=kLoop, calls=%fused_bitcast_convert.33, metadata={op_name=\"jit(<lambda>)/jit(main)/while/body/mesh_gnn/_process/mesh_gnn/_process_step/mesh_gnn/sequential_16/processor_nodes_7_mesh_nodes_mlp/linear_1/bitcast_convert_type\" source_file=\"/experiment/rne_ops.py\" source_line=11 deduplicated_name=\"loop_bitcast_convert_fusion.25\"}"
+      ]
+    },
+    {
+      "module": "mesh_gnn/~_networks_builder/processor_edges_8_mesh_mlp/~/linear_0",
+      "producer": "concatenate",
+      "fusion": "loop_concatenate_fusion.11",
+      "computation": "fused_concatenate.11",
+      "rne_and_producer_in_same_fusion": true,
+      "captured_equivalent_kernel_calls": 14,
+      "kernel_aliases": [
+        "loop_concatenate_fusion_4",
+        "loop_concatenate_fusion_5",
+        "loop_concatenate_fusion_6",
+        "loop_concatenate_fusion_7",
+        "loop_concatenate_fusion_8",
+        "loop_concatenate_fusion_9",
+        "loop_concatenate_fusion_10",
+        "loop_concatenate_fusion_11",
+        "loop_concatenate_fusion_12",
+        "loop_concatenate_fusion_13",
+        "loop_concatenate_fusion_14",
+        "loop_concatenate_fusion_15",
+        "loop_concatenate_fusion_16",
+        "loop_concatenate_fusion_17"
+      ],
+      "chain": [
+        "  %bitcast.17785.0 = f32[327660,1536]{1,0} bitcast(%loop_concatenate_fusion.11)",
+        "  %loop_concatenate_fusion.11 = f32[327660,1,1536]{2,1,0} fusion(%loop_add_fusion.12, %loop_add_fusion.28, %constant_1528_0, %constant_1549_0), kind=kLoop, calls=%fused_concatenate.11, metadata={op_name=\"jit(<lambda>)/jit(main)/while/body/mesh_gnn/_process/mesh_gnn/_process_step/mesh_gnn/sequential_17/processor_edges_8_mesh_mlp/linear_0/bitcast_convert_type\" source_file=\"/experiment/rne_ops.py\" source_line=11 deduplicated_name=\"loop_concatenate_fusion.4\"}"
+      ]
+    },
+    {
+      "module": "mesh_gnn/~_networks_builder/processor_edges_8_mesh_mlp/~/linear_1",
+      "producer": "silu",
+      "fusion": "loop_bitcast_convert_fusion.17",
+      "computation": "fused_bitcast_convert.17",
+      "rne_and_producer_in_same_fusion": true,
+      "captured_equivalent_kernel_calls": 17,
+      "kernel_aliases": [
+        "loop_bitcast_convert_fusion_8",
+        "loop_bitcast_convert_fusion_9",
+        "loop_bitcast_convert_fusion_10",
+        "loop_bitcast_convert_fusion_11",
+        "loop_bitcast_convert_fusion_12",
+        "loop_bitcast_convert_fusion_13",
+        "loop_bitcast_convert_fusion_14",
+        "loop_bitcast_convert_fusion_15",
+        "loop_bitcast_convert_fusion_16",
+        "loop_bitcast_convert_fusion_17",
+        "loop_bitcast_convert_fusion_18",
+        "loop_bitcast_convert_fusion_19",
+        "loop_bitcast_convert_fusion_20",
+        "loop_bitcast_convert_fusion_21",
+        "loop_bitcast_convert_fusion_22",
+        "loop_bitcast_convert_fusion_23",
+        "loop_bitcast_convert_fusion_24"
+      ],
+      "chain": [
+        "  %bitcast.17840.0 = f32[327660,512]{1,0} bitcast(%loop_bitcast_convert_fusion.17)",
+        "  %loop_bitcast_convert_fusion.17 = f32[1,327660,512]{2,1,0} fusion(%get-tuple-element.69.0, %constant_1077_0), kind=kLoop, calls=%fused_bitcast_convert.17, metadata={op_name=\"jit(<lambda>)/jit(main)/while/body/mesh_gnn/_process/mesh_gnn/_process_step/mesh_gnn/sequential_17/processor_edges_8_mesh_mlp/linear_1/bitcast_convert_type\" source_file=\"/experiment/rne_ops.py\" source_line=11 deduplicated_name=\"loop_bitcast_convert_fusion.8\"}"
+      ]
+    },
+    {
+      "module": "mesh_gnn/~_networks_builder/processor_nodes_8_mesh_nodes_mlp/~/linear_0",
+      "producer": "concatenate",
+      "fusion": "loop_concatenate_fusion.27",
+      "computation": "fused_concatenate.27",
+      "rne_and_producer_in_same_fusion": true,
+      "captured_equivalent_kernel_calls": 17,
+      "kernel_aliases": [
+        "loop_concatenate_fusion_36",
+        "loop_concatenate_fusion_35",
+        "loop_concatenate_fusion_34",
+        "loop_concatenate_fusion_33",
+        "loop_concatenate_fusion_32",
+        "loop_concatenate_fusion_31",
+        "loop_concatenate_fusion_30",
+        "loop_concatenate_fusion_29",
+        "loop_concatenate_fusion_28",
+        "loop_concatenate_fusion_27",
+        "loop_concatenate_fusion_26",
+        "loop_concatenate_fusion_25",
+        "loop_concatenate_fusion_24",
+        "loop_concatenate_fusion_23",
+        "loop_concatenate_fusion_22",
+        "loop_concatenate_fusion_21",
+        "loop_concatenate_fusion_20"
+      ],
+      "chain": [
+        "  %bitcast.17922.0 = f32[40962,1024]{1,0} bitcast(%loop_concatenate_fusion.27)",
+        "  %loop_concatenate_fusion.27 = f32[40962,1,1024]{2,1,0} fusion(%loop_add_fusion.28, %input_scatter_fusion.8), kind=kLoop, calls=%fused_concatenate.27, metadata={op_name=\"jit(<lambda>)/jit(main)/while/body/mesh_gnn/_process/mesh_gnn/_process_step/mesh_gnn/sequential_18/processor_nodes_8_mesh_nodes_mlp/linear_0/bitcast_convert_type\" source_file=\"/experiment/rne_ops.py\" source_line=11 deduplicated_name=\"loop_concatenate_fusion.20\"}"
+      ]
+    },
+    {
+      "module": "mesh_gnn/~_networks_builder/processor_nodes_8_mesh_nodes_mlp/~/linear_1",
+      "producer": "silu",
+      "fusion": "loop_bitcast_convert_fusion.32",
+      "computation": "fused_bitcast_convert.32",
+      "rne_and_producer_in_same_fusion": true,
+      "captured_equivalent_kernel_calls": 17,
+      "kernel_aliases": [
+        "loop_bitcast_convert_fusion_41",
+        "loop_bitcast_convert_fusion_40",
+        "loop_bitcast_convert_fusion_39",
+        "loop_bitcast_convert_fusion_38",
+        "loop_bitcast_convert_fusion_37",
+        "loop_bitcast_convert_fusion_36",
+        "loop_bitcast_convert_fusion_35",
+        "loop_bitcast_convert_fusion_34",
+        "loop_bitcast_convert_fusion_33",
+        "loop_bitcast_convert_fusion_32",
+        "loop_bitcast_convert_fusion_31",
+        "loop_bitcast_convert_fusion_30",
+        "loop_bitcast_convert_fusion_29",
+        "loop_bitcast_convert_fusion_28",
+        "loop_bitcast_convert_fusion_27",
+        "loop_bitcast_convert_fusion_26",
+        "loop_bitcast_convert_fusion_25"
+      ],
+      "chain": [
+        "  %bitcast.17977.0 = f32[40962,512]{1,0} bitcast(%loop_bitcast_convert_fusion.32)",
+        "  %loop_bitcast_convert_fusion.32 = f32[1,40962,512]{2,1,0} fusion(%get-tuple-element.71.0, %constant_1086_0), kind=kLoop, calls=%fused_bitcast_convert.32, metadata={op_name=\"jit(<lambda>)/jit(main)/while/body/mesh_gnn/_process/mesh_gnn/_process_step/mesh_gnn/sequential_18/processor_nodes_8_mesh_nodes_mlp/linear_1/bitcast_convert_type\" source_file=\"/experiment/rne_ops.py\" source_line=11 deduplicated_name=\"loop_bitcast_convert_fusion.25\"}"
+      ]
+    },
+    {
+      "module": "mesh_gnn/~_networks_builder/processor_edges_9_mesh_mlp/~/linear_0",
+      "producer": "concatenate",
+      "fusion": "loop_concatenate_fusion.12",
+      "computation": "fused_concatenate.12",
+      "rne_and_producer_in_same_fusion": true,
+      "captured_equivalent_kernel_calls": 14,
+      "kernel_aliases": [
+        "loop_concatenate_fusion_4",
+        "loop_concatenate_fusion_5",
+        "loop_concatenate_fusion_6",
+        "loop_concatenate_fusion_7",
+        "loop_concatenate_fusion_8",
+        "loop_concatenate_fusion_9",
+        "loop_concatenate_fusion_10",
+        "loop_concatenate_fusion_11",
+        "loop_concatenate_fusion_12",
+        "loop_concatenate_fusion_13",
+        "loop_concatenate_fusion_14",
+        "loop_concatenate_fusion_15",
+        "loop_concatenate_fusion_16",
+        "loop_concatenate_fusion_17"
+      ],
+      "chain": [
+        "  %bitcast.18089.0 = f32[327660,1536]{1,0} bitcast(%loop_concatenate_fusion.12)",
+        "  %loop_concatenate_fusion.12 = f32[327660,1,1536]{2,1,0} fusion(%loop_add_fusion.11, %loop_add_fusion.29, %constant_1528_0, %constant_1549_0), kind=kLoop, calls=%fused_concatenate.12, metadata={op_name=\"jit(<lambda>)/jit(main)/while/body/mesh_gnn/_process/mesh_gnn/_process_step/mesh_gnn/sequential_19/processor_edges_9_mesh_mlp/linear_0/bitcast_convert_type\" source_file=\"/experiment/rne_ops.py\" source_line=11 deduplicated_name=\"loop_concatenate_fusion.4\"}"
+      ]
+    },
+    {
+      "module": "mesh_gnn/~_networks_builder/processor_edges_9_mesh_mlp/~/linear_1",
+      "producer": "silu",
+      "fusion": "loop_bitcast_convert_fusion.18",
+      "computation": "fused_bitcast_convert.18",
+      "rne_and_producer_in_same_fusion": true,
+      "captured_equivalent_kernel_calls": 17,
+      "kernel_aliases": [
+        "loop_bitcast_convert_fusion_8",
+        "loop_bitcast_convert_fusion_9",
+        "loop_bitcast_convert_fusion_10",
+        "loop_bitcast_convert_fusion_11",
+        "loop_bitcast_convert_fusion_12",
+        "loop_bitcast_convert_fusion_13",
+        "loop_bitcast_convert_fusion_14",
+        "loop_bitcast_convert_fusion_15",
+        "loop_bitcast_convert_fusion_16",
+        "loop_bitcast_convert_fusion_17",
+        "loop_bitcast_convert_fusion_18",
+        "loop_bitcast_convert_fusion_19",
+        "loop_bitcast_convert_fusion_20",
+        "loop_bitcast_convert_fusion_21",
+        "loop_bitcast_convert_fusion_22",
+        "loop_bitcast_convert_fusion_23",
+        "loop_bitcast_convert_fusion_24"
+      ],
+      "chain": [
+        "  %bitcast.18144.0 = f32[327660,512]{1,0} bitcast(%loop_bitcast_convert_fusion.18)",
+        "  %loop_bitcast_convert_fusion.18 = f32[1,327660,512]{2,1,0} fusion(%get-tuple-element.73.0, %constant_1102_0), kind=kLoop, calls=%fused_bitcast_convert.18, metadata={op_name=\"jit(<lambda>)/jit(main)/while/body/mesh_gnn/_process/mesh_gnn/_process_step/mesh_gnn/sequential_19/processor_edges_9_mesh_mlp/linear_1/bitcast_convert_type\" source_file=\"/experiment/rne_ops.py\" source_line=11 deduplicated_name=\"loop_bitcast_convert_fusion.8\"}"
+      ]
+    },
+    {
+      "module": "mesh_gnn/~_networks_builder/processor_nodes_9_mesh_nodes_mlp/~/linear_0",
+      "producer": "concatenate",
+      "fusion": "loop_concatenate_fusion.26",
+      "computation": "fused_concatenate.26",
+      "rne_and_producer_in_same_fusion": true,
+      "captured_equivalent_kernel_calls": 17,
+      "kernel_aliases": [
+        "loop_concatenate_fusion_36",
+        "loop_concatenate_fusion_35",
+        "loop_concatenate_fusion_34",
+        "loop_concatenate_fusion_33",
+        "loop_concatenate_fusion_32",
+        "loop_concatenate_fusion_31",
+        "loop_concatenate_fusion_30",
+        "loop_concatenate_fusion_29",
+        "loop_concatenate_fusion_28",
+        "loop_concatenate_fusion_27",
+        "loop_concatenate_fusion_26",
+        "loop_concatenate_fusion_25",
+        "loop_concatenate_fusion_24",
+        "loop_concatenate_fusion_23",
+        "loop_concatenate_fusion_22",
+        "loop_concatenate_fusion_21",
+        "loop_concatenate_fusion_20"
+      ],
+      "chain": [
+        "  %bitcast.18226.0 = f32[40962,1024]{1,0} bitcast(%loop_concatenate_fusion.26)",
+        "  %loop_concatenate_fusion.26 = f32[40962,1,1024]{2,1,0} fusion(%loop_add_fusion.29, %input_scatter_fusion.7), kind=kLoop, calls=%fused_concatenate.26, metadata={op_name=\"jit(<lambda>)/jit(main)/while/body/mesh_gnn/_process/mesh_gnn/_process_step/mesh_gnn/sequential_20/processor_nodes_9_mesh_nodes_mlp/linear_0/bitcast_convert_type\" source_file=\"/experiment/rne_ops.py\" source_line=11 deduplicated_name=\"loop_concatenate_fusion.20\"}"
+      ]
+    },
+    {
+      "module": "mesh_gnn/~_networks_builder/processor_nodes_9_mesh_nodes_mlp/~/linear_1",
+      "producer": "silu",
+      "fusion": "loop_bitcast_convert_fusion.31",
+      "computation": "fused_bitcast_convert.31",
+      "rne_and_producer_in_same_fusion": true,
+      "captured_equivalent_kernel_calls": 17,
+      "kernel_aliases": [
+        "loop_bitcast_convert_fusion_41",
+        "loop_bitcast_convert_fusion_40",
+        "loop_bitcast_convert_fusion_39",
+        "loop_bitcast_convert_fusion_38",
+        "loop_bitcast_convert_fusion_37",
+        "loop_bitcast_convert_fusion_36",
+        "loop_bitcast_convert_fusion_35",
+        "loop_bitcast_convert_fusion_34",
+        "loop_bitcast_convert_fusion_33",
+        "loop_bitcast_convert_fusion_32",
+        "loop_bitcast_convert_fusion_31",
+        "loop_bitcast_convert_fusion_30",
+        "loop_bitcast_convert_fusion_29",
+        "loop_bitcast_convert_fusion_28",
+        "loop_bitcast_convert_fusion_27",
+        "loop_bitcast_convert_fusion_26",
+        "loop_bitcast_convert_fusion_25"
+      ],
+      "chain": [
+        "  %bitcast.18281.0 = f32[40962,512]{1,0} bitcast(%loop_bitcast_convert_fusion.31)",
+        "  %loop_bitcast_convert_fusion.31 = f32[1,40962,512]{2,1,0} fusion(%get-tuple-element.75.0, %constant_1111_0), kind=kLoop, calls=%fused_bitcast_convert.31, metadata={op_name=\"jit(<lambda>)/jit(main)/while/body/mesh_gnn/_process/mesh_gnn/_process_step/mesh_gnn/sequential_20/processor_nodes_9_mesh_nodes_mlp/linear_1/bitcast_convert_type\" source_file=\"/experiment/rne_ops.py\" source_line=11 deduplicated_name=\"loop_bitcast_convert_fusion.25\"}"
+      ]
+    },
+    {
+      "module": "mesh_gnn/~_networks_builder/processor_edges_10_mesh_mlp/~/linear_0",
+      "producer": "concatenate",
+      "fusion": "loop_concatenate_fusion.13",
+      "computation": "fused_concatenate.13",
+      "rne_and_producer_in_same_fusion": true,
+      "captured_equivalent_kernel_calls": 14,
+      "kernel_aliases": [
+        "loop_concatenate_fusion_4",
+        "loop_concatenate_fusion_5",
+        "loop_concatenate_fusion_6",
+        "loop_concatenate_fusion_7",
+        "loop_concatenate_fusion_8",
+        "loop_concatenate_fusion_9",
+        "loop_concatenate_fusion_10",
+        "loop_concatenate_fusion_11",
+        "loop_concatenate_fusion_12",
+        "loop_concatenate_fusion_13",
+        "loop_concatenate_fusion_14",
+        "loop_concatenate_fusion_15",
+        "loop_concatenate_fusion_16",
+        "loop_concatenate_fusion_17"
+      ],
+      "chain": [
+        "  %bitcast.18393.0 = f32[327660,1536]{1,0} bitcast(%loop_concatenate_fusion.13)",
+        "  %loop_concatenate_fusion.13 = f32[327660,1,1536]{2,1,0} fusion(%loop_add_fusion.10, %loop_add_fusion.30, %constant_1528_0, %constant_1549_0), kind=kLoop, calls=%fused_concatenate.13, metadata={op_name=\"jit(<lambda>)/jit(main)/while/body/mesh_gnn/_process/mesh_gnn/_process_step/mesh_gnn/sequential_21/processor_edges_10_mesh_mlp/linear_0/bitcast_convert_type\" source_file=\"/experiment/rne_ops.py\" source_line=11 deduplicated_name=\"loop_concatenate_fusion.4\"}"
+      ]
+    },
+    {
+      "module": "mesh_gnn/~_networks_builder/processor_edges_10_mesh_mlp/~/linear_1",
+      "producer": "silu",
+      "fusion": "loop_bitcast_convert_fusion.19",
+      "computation": "fused_bitcast_convert.19",
+      "rne_and_producer_in_same_fusion": true,
+      "captured_equivalent_kernel_calls": 17,
+      "kernel_aliases": [
+        "loop_bitcast_convert_fusion_8",
+        "loop_bitcast_convert_fusion_9",
+        "loop_bitcast_convert_fusion_10",
+        "loop_bitcast_convert_fusion_11",
+        "loop_bitcast_convert_fusion_12",
+        "loop_bitcast_convert_fusion_13",
+        "loop_bitcast_convert_fusion_14",
+        "loop_bitcast_convert_fusion_15",
+        "loop_bitcast_convert_fusion_16",
+        "loop_bitcast_convert_fusion_17",
+        "loop_bitcast_convert_fusion_18",
+        "loop_bitcast_convert_fusion_19",
+        "loop_bitcast_convert_fusion_20",
+        "loop_bitcast_convert_fusion_21",
+        "loop_bitcast_convert_fusion_22",
+        "loop_bitcast_convert_fusion_23",
+        "loop_bitcast_convert_fusion_24"
+      ],
+      "chain": [
+        "  %bitcast.18448.0 = f32[327660,512]{1,0} bitcast(%loop_bitcast_convert_fusion.19)",
+        "  %loop_bitcast_convert_fusion.19 = f32[1,327660,512]{2,1,0} fusion(%get-tuple-element.77.0, %constant_1130_0), kind=kLoop, calls=%fused_bitcast_convert.19, metadata={op_name=\"jit(<lambda>)/jit(main)/while/body/mesh_gnn/_process/mesh_gnn/_process_step/mesh_gnn/sequential_21/processor_edges_10_mesh_mlp/linear_1/bitcast_convert_type\" source_file=\"/experiment/rne_ops.py\" source_line=11 deduplicated_name=\"loop_bitcast_convert_fusion.8\"}"
+      ]
+    },
+    {
+      "module": "mesh_gnn/~_networks_builder/processor_nodes_10_mesh_nodes_mlp/~/linear_0",
+      "producer": "concatenate",
+      "fusion": "loop_concatenate_fusion.25",
+      "computation": "fused_concatenate.25",
+      "rne_and_producer_in_same_fusion": true,
+      "captured_equivalent_kernel_calls": 17,
+      "kernel_aliases": [
+        "loop_concatenate_fusion_36",
+        "loop_concatenate_fusion_35",
+        "loop_concatenate_fusion_34",
+        "loop_concatenate_fusion_33",
+        "loop_concatenate_fusion_32",
+        "loop_concatenate_fusion_31",
+        "loop_concatenate_fusion_30",
+        "loop_concatenate_fusion_29",
+        "loop_concatenate_fusion_28",
+        "loop_concatenate_fusion_27",
+        "loop_concatenate_fusion_26",
+        "loop_concatenate_fusion_25",
+        "loop_concatenate_fusion_24",
+        "loop_concatenate_fusion_23",
+        "loop_concatenate_fusion_22",
+        "loop_concatenate_fusion_21",
+        "loop_concatenate_fusion_20"
+      ],
+      "chain": [
+        "  %bitcast.18530.0 = f32[40962,1024]{1,0} bitcast(%loop_concatenate_fusion.25)",
+        "  %loop_concatenate_fusion.25 = f32[40962,1,1024]{2,1,0} fusion(%loop_add_fusion.30, %input_scatter_fusion.6), kind=kLoop, calls=%fused_concatenate.25, metadata={op_name=\"jit(<lambda>)/jit(main)/while/body/mesh_gnn/_process/mesh_gnn/_process_step/mesh_gnn/sequential_22/processor_nodes_10_mesh_nodes_mlp/linear_0/bitcast_convert_type\" source_file=\"/experiment/rne_ops.py\" source_line=11 deduplicated_name=\"loop_concatenate_fusion.20\"}"
+      ]
+    },
+    {
+      "module": "mesh_gnn/~_networks_builder/processor_nodes_10_mesh_nodes_mlp/~/linear_1",
+      "producer": "silu",
+      "fusion": "loop_bitcast_convert_fusion.30",
+      "computation": "fused_bitcast_convert.30",
+      "rne_and_producer_in_same_fusion": true,
+      "captured_equivalent_kernel_calls": 17,
+      "kernel_aliases": [
+        "loop_bitcast_convert_fusion_41",
+        "loop_bitcast_convert_fusion_40",
+        "loop_bitcast_convert_fusion_39",
+        "loop_bitcast_convert_fusion_38",
+        "loop_bitcast_convert_fusion_37",
+        "loop_bitcast_convert_fusion_36",
+        "loop_bitcast_convert_fusion_35",
+        "loop_bitcast_convert_fusion_34",
+        "loop_bitcast_convert_fusion_33",
+        "loop_bitcast_convert_fusion_32",
+        "loop_bitcast_convert_fusion_31",
+        "loop_bitcast_convert_fusion_30",
+        "loop_bitcast_convert_fusion_29",
+        "loop_bitcast_convert_fusion_28",
+        "loop_bitcast_convert_fusion_27",
+        "loop_bitcast_convert_fusion_26",
+        "loop_bitcast_convert_fusion_25"
+      ],
+      "chain": [
+        "  %bitcast.18585.0 = f32[40962,512]{1,0} bitcast(%loop_bitcast_convert_fusion.30)",
+        "  %loop_bitcast_convert_fusion.30 = f32[1,40962,512]{2,1,0} fusion(%get-tuple-element.79.0, %constant_1139_0), kind=kLoop, calls=%fused_bitcast_convert.30, metadata={op_name=\"jit(<lambda>)/jit(main)/while/body/mesh_gnn/_process/mesh_gnn/_process_step/mesh_gnn/sequential_22/processor_nodes_10_mesh_nodes_mlp/linear_1/bitcast_convert_type\" source_file=\"/experiment/rne_ops.py\" source_line=11 deduplicated_name=\"loop_bitcast_convert_fusion.25\"}"
+      ]
+    },
+    {
+      "module": "mesh_gnn/~_networks_builder/processor_edges_11_mesh_mlp/~/linear_0",
+      "producer": "concatenate",
+      "fusion": "loop_concatenate_fusion.14",
+      "computation": "fused_concatenate.14",
+      "rne_and_producer_in_same_fusion": true,
+      "captured_equivalent_kernel_calls": 14,
+      "kernel_aliases": [
+        "loop_concatenate_fusion_4",
+        "loop_concatenate_fusion_5",
+        "loop_concatenate_fusion_6",
+        "loop_concatenate_fusion_7",
+        "loop_concatenate_fusion_8",
+        "loop_concatenate_fusion_9",
+        "loop_concatenate_fusion_10",
+        "loop_concatenate_fusion_11",
+        "loop_concatenate_fusion_12",
+        "loop_concatenate_fusion_13",
+        "loop_concatenate_fusion_14",
+        "loop_concatenate_fusion_15",
+        "loop_concatenate_fusion_16",
+        "loop_concatenate_fusion_17"
+      ],
+      "chain": [
+        "  %bitcast.18697.0 = f32[327660,1536]{1,0} bitcast(%loop_concatenate_fusion.14)",
+        "  %loop_concatenate_fusion.14 = f32[327660,1,1536]{2,1,0} fusion(%loop_add_fusion.9, %loop_add_fusion.31, %constant_1528_0, %constant_1549_0), kind=kLoop, calls=%fused_concatenate.14, metadata={op_name=\"jit(<lambda>)/jit(main)/while/body/mesh_gnn/_process/mesh_gnn/_process_step/mesh_gnn/sequential_23/processor_edges_11_mesh_mlp/linear_0/bitcast_convert_type\" source_file=\"/experiment/rne_ops.py\" source_line=11 deduplicated_name=\"loop_concatenate_fusion.4\"}"
+      ]
+    },
+    {
+      "module": "mesh_gnn/~_networks_builder/processor_edges_11_mesh_mlp/~/linear_1",
+      "producer": "silu",
+      "fusion": "loop_bitcast_convert_fusion.20",
+      "computation": "fused_bitcast_convert.20",
+      "rne_and_producer_in_same_fusion": true,
+      "captured_equivalent_kernel_calls": 17,
+      "kernel_aliases": [
+        "loop_bitcast_convert_fusion_8",
+        "loop_bitcast_convert_fusion_9",
+        "loop_bitcast_convert_fusion_10",
+        "loop_bitcast_convert_fusion_11",
+        "loop_bitcast_convert_fusion_12",
+        "loop_bitcast_convert_fusion_13",
+        "loop_bitcast_convert_fusion_14",
+        "loop_bitcast_convert_fusion_15",
+        "loop_bitcast_convert_fusion_16",
+        "loop_bitcast_convert_fusion_17",
+        "loop_bitcast_convert_fusion_18",
+        "loop_bitcast_convert_fusion_19",
+        "loop_bitcast_convert_fusion_20",
+        "loop_bitcast_convert_fusion_21",
+        "loop_bitcast_convert_fusion_22",
+        "loop_bitcast_convert_fusion_23",
+        "loop_bitcast_convert_fusion_24"
+      ],
+      "chain": [
+        "  %bitcast.18752.0 = f32[327660,512]{1,0} bitcast(%loop_bitcast_convert_fusion.20)",
+        "  %loop_bitcast_convert_fusion.20 = f32[1,327660,512]{2,1,0} fusion(%get-tuple-element.81.0, %constant_1154_0), kind=kLoop, calls=%fused_bitcast_convert.20, metadata={op_name=\"jit(<lambda>)/jit(main)/while/body/mesh_gnn/_process/mesh_gnn/_process_step/mesh_gnn/sequential_23/processor_edges_11_mesh_mlp/linear_1/bitcast_convert_type\" source_file=\"/experiment/rne_ops.py\" source_line=11 deduplicated_name=\"loop_bitcast_convert_fusion.8\"}"
+      ]
+    },
+    {
+      "module": "mesh_gnn/~_networks_builder/processor_nodes_11_mesh_nodes_mlp/~/linear_0",
+      "producer": "concatenate",
+      "fusion": "loop_concatenate_fusion.24",
+      "computation": "fused_concatenate.24",
+      "rne_and_producer_in_same_fusion": true,
+      "captured_equivalent_kernel_calls": 17,
+      "kernel_aliases": [
+        "loop_concatenate_fusion_36",
+        "loop_concatenate_fusion_35",
+        "loop_concatenate_fusion_34",
+        "loop_concatenate_fusion_33",
+        "loop_concatenate_fusion_32",
+        "loop_concatenate_fusion_31",
+        "loop_concatenate_fusion_30",
+        "loop_concatenate_fusion_29",
+        "loop_concatenate_fusion_28",
+        "loop_concatenate_fusion_27",
+        "loop_concatenate_fusion_26",
+        "loop_concatenate_fusion_25",
+        "loop_concatenate_fusion_24",
+        "loop_concatenate_fusion_23",
+        "loop_concatenate_fusion_22",
+        "loop_concatenate_fusion_21",
+        "loop_concatenate_fusion_20"
+      ],
+      "chain": [
+        "  %bitcast.18834.0 = f32[40962,1024]{1,0} bitcast(%loop_concatenate_fusion.24)",
+        "  %loop_concatenate_fusion.24 = f32[40962,1,1024]{2,1,0} fusion(%loop_add_fusion.31, %input_scatter_fusion.5), kind=kLoop, calls=%fused_concatenate.24, metadata={op_name=\"jit(<lambda>)/jit(main)/while/body/mesh_gnn/_process/mesh_gnn/_process_step/mesh_gnn/sequential_24/processor_nodes_11_mesh_nodes_mlp/linear_0/bitcast_convert_type\" source_file=\"/experiment/rne_ops.py\" source_line=11 deduplicated_name=\"loop_concatenate_fusion.20\"}"
+      ]
+    },
+    {
+      "module": "mesh_gnn/~_networks_builder/processor_nodes_11_mesh_nodes_mlp/~/linear_1",
+      "producer": "silu",
+      "fusion": "loop_bitcast_convert_fusion.29",
+      "computation": "fused_bitcast_convert.29",
+      "rne_and_producer_in_same_fusion": true,
+      "captured_equivalent_kernel_calls": 17,
+      "kernel_aliases": [
+        "loop_bitcast_convert_fusion_41",
+        "loop_bitcast_convert_fusion_40",
+        "loop_bitcast_convert_fusion_39",
+        "loop_bitcast_convert_fusion_38",
+        "loop_bitcast_convert_fusion_37",
+        "loop_bitcast_convert_fusion_36",
+        "loop_bitcast_convert_fusion_35",
+        "loop_bitcast_convert_fusion_34",
+        "loop_bitcast_convert_fusion_33",
+        "loop_bitcast_convert_fusion_32",
+        "loop_bitcast_convert_fusion_31",
+        "loop_bitcast_convert_fusion_30",
+        "loop_bitcast_convert_fusion_29",
+        "loop_bitcast_convert_fusion_28",
+        "loop_bitcast_convert_fusion_27",
+        "loop_bitcast_convert_fusion_26",
+        "loop_bitcast_convert_fusion_25"
+      ],
+      "chain": [
+        "  %bitcast.18889.0 = f32[40962,512]{1,0} bitcast(%loop_bitcast_convert_fusion.29)",
+        "  %loop_bitcast_convert_fusion.29 = f32[1,40962,512]{2,1,0} fusion(%get-tuple-element.83.0, %constant_1164_0), kind=kLoop, calls=%fused_bitcast_convert.29, metadata={op_name=\"jit(<lambda>)/jit(main)/while/body/mesh_gnn/_process/mesh_gnn/_process_step/mesh_gnn/sequential_24/processor_nodes_11_mesh_nodes_mlp/linear_1/bitcast_convert_type\" source_file=\"/experiment/rne_ops.py\" source_line=11 deduplicated_name=\"loop_bitcast_convert_fusion.25\"}"
+      ]
+    },
+    {
+      "module": "mesh_gnn/~_networks_builder/processor_edges_12_mesh_mlp/~/linear_0",
+      "producer": "concatenate",
+      "fusion": "loop_concatenate_fusion.15",
+      "computation": "fused_concatenate.15",
+      "rne_and_producer_in_same_fusion": true,
+      "captured_equivalent_kernel_calls": 14,
+      "kernel_aliases": [
+        "loop_concatenate_fusion_4",
+        "loop_concatenate_fusion_5",
+        "loop_concatenate_fusion_6",
+        "loop_concatenate_fusion_7",
+        "loop_concatenate_fusion_8",
+        "loop_concatenate_fusion_9",
+        "loop_concatenate_fusion_10",
+        "loop_concatenate_fusion_11",
+        "loop_concatenate_fusion_12",
+        "loop_concatenate_fusion_13",
+        "loop_concatenate_fusion_14",
+        "loop_concatenate_fusion_15",
+        "loop_concatenate_fusion_16",
+        "loop_concatenate_fusion_17"
+      ],
+      "chain": [
+        "  %bitcast.19001.0 = f32[327660,1536]{1,0} bitcast(%loop_concatenate_fusion.15)",
+        "  %loop_concatenate_fusion.15 = f32[327660,1,1536]{2,1,0} fusion(%loop_add_fusion.8, %loop_add_fusion.32, %constant_1528_0, %constant_1549_0), kind=kLoop, calls=%fused_concatenate.15, metadata={op_name=\"jit(<lambda>)/jit(main)/while/body/mesh_gnn/_process/mesh_gnn/_process_step/mesh_gnn/sequential_25/processor_edges_12_mesh_mlp/linear_0/bitcast_convert_type\" source_file=\"/experiment/rne_ops.py\" source_line=11 deduplicated_name=\"loop_concatenate_fusion.4\"}"
+      ]
+    },
+    {
+      "module": "mesh_gnn/~_networks_builder/processor_edges_12_mesh_mlp/~/linear_1",
+      "producer": "silu",
+      "fusion": "loop_bitcast_convert_fusion.21",
+      "computation": "fused_bitcast_convert.21",
+      "rne_and_producer_in_same_fusion": true,
+      "captured_equivalent_kernel_calls": 17,
+      "kernel_aliases": [
+        "loop_bitcast_convert_fusion_8",
+        "loop_bitcast_convert_fusion_9",
+        "loop_bitcast_convert_fusion_10",
+        "loop_bitcast_convert_fusion_11",
+        "loop_bitcast_convert_fusion_12",
+        "loop_bitcast_convert_fusion_13",
+        "loop_bitcast_convert_fusion_14",
+        "loop_bitcast_convert_fusion_15",
+        "loop_bitcast_convert_fusion_16",
+        "loop_bitcast_convert_fusion_17",
+        "loop_bitcast_convert_fusion_18",
+        "loop_bitcast_convert_fusion_19",
+        "loop_bitcast_convert_fusion_20",
+        "loop_bitcast_convert_fusion_21",
+        "loop_bitcast_convert_fusion_22",
+        "loop_bitcast_convert_fusion_23",
+        "loop_bitcast_convert_fusion_24"
+      ],
+      "chain": [
+        "  %bitcast.19056.0 = f32[327660,512]{1,0} bitcast(%loop_bitcast_convert_fusion.21)",
+        "  %loop_bitcast_convert_fusion.21 = f32[1,327660,512]{2,1,0} fusion(%get-tuple-element.85.0, %constant_1179_0), kind=kLoop, calls=%fused_bitcast_convert.21, metadata={op_name=\"jit(<lambda>)/jit(main)/while/body/mesh_gnn/_process/mesh_gnn/_process_step/mesh_gnn/sequential_25/processor_edges_12_mesh_mlp/linear_1/bitcast_convert_type\" source_file=\"/experiment/rne_ops.py\" source_line=11 deduplicated_name=\"loop_bitcast_convert_fusion.8\"}"
+      ]
+    },
+    {
+      "module": "mesh_gnn/~_networks_builder/processor_nodes_12_mesh_nodes_mlp/~/linear_0",
+      "producer": "concatenate",
+      "fusion": "loop_concatenate_fusion.23",
+      "computation": "fused_concatenate.23",
+      "rne_and_producer_in_same_fusion": true,
+      "captured_equivalent_kernel_calls": 17,
+      "kernel_aliases": [
+        "loop_concatenate_fusion_36",
+        "loop_concatenate_fusion_35",
+        "loop_concatenate_fusion_34",
+        "loop_concatenate_fusion_33",
+        "loop_concatenate_fusion_32",
+        "loop_concatenate_fusion_31",
+        "loop_concatenate_fusion_30",
+        "loop_concatenate_fusion_29",
+        "loop_concatenate_fusion_28",
+        "loop_concatenate_fusion_27",
+        "loop_concatenate_fusion_26",
+        "loop_concatenate_fusion_25",
+        "loop_concatenate_fusion_24",
+        "loop_concatenate_fusion_23",
+        "loop_concatenate_fusion_22",
+        "loop_concatenate_fusion_21",
+        "loop_concatenate_fusion_20"
+      ],
+      "chain": [
+        "  %bitcast.19138.0 = f32[40962,1024]{1,0} bitcast(%loop_concatenate_fusion.23)",
+        "  %loop_concatenate_fusion.23 = f32[40962,1,1024]{2,1,0} fusion(%loop_add_fusion.32, %input_scatter_fusion.4), kind=kLoop, calls=%fused_concatenate.23, metadata={op_name=\"jit(<lambda>)/jit(main)/while/body/mesh_gnn/_process/mesh_gnn/_process_step/mesh_gnn/sequential_26/processor_nodes_12_mesh_nodes_mlp/linear_0/bitcast_convert_type\" source_file=\"/experiment/rne_ops.py\" source_line=11 deduplicated_name=\"loop_concatenate_fusion.20\"}"
+      ]
+    },
+    {
+      "module": "mesh_gnn/~_networks_builder/processor_nodes_12_mesh_nodes_mlp/~/linear_1",
+      "producer": "silu",
+      "fusion": "loop_bitcast_convert_fusion.28",
+      "computation": "fused_bitcast_convert.28",
+      "rne_and_producer_in_same_fusion": true,
+      "captured_equivalent_kernel_calls": 17,
+      "kernel_aliases": [
+        "loop_bitcast_convert_fusion_41",
+        "loop_bitcast_convert_fusion_40",
+        "loop_bitcast_convert_fusion_39",
+        "loop_bitcast_convert_fusion_38",
+        "loop_bitcast_convert_fusion_37",
+        "loop_bitcast_convert_fusion_36",
+        "loop_bitcast_convert_fusion_35",
+        "loop_bitcast_convert_fusion_34",
+        "loop_bitcast_convert_fusion_33",
+        "loop_bitcast_convert_fusion_32",
+        "loop_bitcast_convert_fusion_31",
+        "loop_bitcast_convert_fusion_30",
+        "loop_bitcast_convert_fusion_29",
+        "loop_bitcast_convert_fusion_28",
+        "loop_bitcast_convert_fusion_27",
+        "loop_bitcast_convert_fusion_26",
+        "loop_bitcast_convert_fusion_25"
+      ],
+      "chain": [
+        "  %bitcast.19193.0 = f32[40962,512]{1,0} bitcast(%loop_bitcast_convert_fusion.28)",
+        "  %loop_bitcast_convert_fusion.28 = f32[1,40962,512]{2,1,0} fusion(%get-tuple-element.87.0, %constant_1188_0), kind=kLoop, calls=%fused_bitcast_convert.28, metadata={op_name=\"jit(<lambda>)/jit(main)/while/body/mesh_gnn/_process/mesh_gnn/_process_step/mesh_gnn/sequential_26/processor_nodes_12_mesh_nodes_mlp/linear_1/bitcast_convert_type\" source_file=\"/experiment/rne_ops.py\" source_line=11 deduplicated_name=\"loop_bitcast_convert_fusion.25\"}"
+      ]
+    },
+    {
+      "module": "mesh_gnn/~_networks_builder/processor_edges_13_mesh_mlp/~/linear_0",
+      "producer": "concatenate",
+      "fusion": "loop_concatenate_fusion.16",
+      "computation": "fused_concatenate.16",
+      "rne_and_producer_in_same_fusion": true,
+      "captured_equivalent_kernel_calls": 14,
+      "kernel_aliases": [
+        "loop_concatenate_fusion_4",
+        "loop_concatenate_fusion_5",
+        "loop_concatenate_fusion_6",
+        "loop_concatenate_fusion_7",
+        "loop_concatenate_fusion_8",
+        "loop_concatenate_fusion_9",
+        "loop_concatenate_fusion_10",
+        "loop_concatenate_fusion_11",
+        "loop_concatenate_fusion_12",
+        "loop_concatenate_fusion_13",
+        "loop_concatenate_fusion_14",
+        "loop_concatenate_fusion_15",
+        "loop_concatenate_fusion_16",
+        "loop_concatenate_fusion_17"
+      ],
+      "chain": [
+        "  %bitcast.19305.0 = f32[327660,1536]{1,0} bitcast(%loop_concatenate_fusion.16)",
+        "  %loop_concatenate_fusion.16 = f32[327660,1,1536]{2,1,0} fusion(%loop_add_fusion.7, %loop_add_fusion.33, %constant_1528_0, %constant_1549_0), kind=kLoop, calls=%fused_concatenate.16, metadata={op_name=\"jit(<lambda>)/jit(main)/while/body/mesh_gnn/_process/mesh_gnn/_process_step/mesh_gnn/sequential_27/processor_edges_13_mesh_mlp/linear_0/bitcast_convert_type\" source_file=\"/experiment/rne_ops.py\" source_line=11 deduplicated_name=\"loop_concatenate_fusion.4\"}"
+      ]
+    },
+    {
+      "module": "mesh_gnn/~_networks_builder/processor_edges_13_mesh_mlp/~/linear_1",
+      "producer": "silu",
+      "fusion": "loop_bitcast_convert_fusion.22",
+      "computation": "fused_bitcast_convert.22",
+      "rne_and_producer_in_same_fusion": true,
+      "captured_equivalent_kernel_calls": 17,
+      "kernel_aliases": [
+        "loop_bitcast_convert_fusion_8",
+        "loop_bitcast_convert_fusion_9",
+        "loop_bitcast_convert_fusion_10",
+        "loop_bitcast_convert_fusion_11",
+        "loop_bitcast_convert_fusion_12",
+        "loop_bitcast_convert_fusion_13",
+        "loop_bitcast_convert_fusion_14",
+        "loop_bitcast_convert_fusion_15",
+        "loop_bitcast_convert_fusion_16",
+        "loop_bitcast_convert_fusion_17",
+        "loop_bitcast_convert_fusion_18",
+        "loop_bitcast_convert_fusion_19",
+        "loop_bitcast_convert_fusion_20",
+        "loop_bitcast_convert_fusion_21",
+        "loop_bitcast_convert_fusion_22",
+        "loop_bitcast_convert_fusion_23",
+        "loop_bitcast_convert_fusion_24"
+      ],
+      "chain": [
+        "  %bitcast.19360.0 = f32[327660,512]{1,0} bitcast(%loop_bitcast_convert_fusion.22)",
+        "  %loop_bitcast_convert_fusion.22 = f32[1,327660,512]{2,1,0} fusion(%get-tuple-element.89.0, %constant_1207_0), kind=kLoop, calls=%fused_bitcast_convert.22, metadata={op_name=\"jit(<lambda>)/jit(main)/while/body/mesh_gnn/_process/mesh_gnn/_process_step/mesh_gnn/sequential_27/processor_edges_13_mesh_mlp/linear_1/bitcast_convert_type\" source_file=\"/experiment/rne_ops.py\" source_line=11 deduplicated_name=\"loop_bitcast_convert_fusion.8\"}"
+      ]
+    },
+    {
+      "module": "mesh_gnn/~_networks_builder/processor_nodes_13_mesh_nodes_mlp/~/linear_0",
+      "producer": "concatenate",
+      "fusion": "loop_concatenate_fusion.22",
+      "computation": "fused_concatenate.22",
+      "rne_and_producer_in_same_fusion": true,
+      "captured_equivalent_kernel_calls": 17,
+      "kernel_aliases": [
+        "loop_concatenate_fusion_36",
+        "loop_concatenate_fusion_35",
+        "loop_concatenate_fusion_34",
+        "loop_concatenate_fusion_33",
+        "loop_concatenate_fusion_32",
+        "loop_concatenate_fusion_31",
+        "loop_concatenate_fusion_30",
+        "loop_concatenate_fusion_29",
+        "loop_concatenate_fusion_28",
+        "loop_concatenate_fusion_27",
+        "loop_concatenate_fusion_26",
+        "loop_concatenate_fusion_25",
+        "loop_concatenate_fusion_24",
+        "loop_concatenate_fusion_23",
+        "loop_concatenate_fusion_22",
+        "loop_concatenate_fusion_21",
+        "loop_concatenate_fusion_20"
+      ],
+      "chain": [
+        "  %bitcast.19442.0 = f32[40962,1024]{1,0} bitcast(%loop_concatenate_fusion.22)",
+        "  %loop_concatenate_fusion.22 = f32[40962,1,1024]{2,1,0} fusion(%loop_add_fusion.33, %input_scatter_fusion.3), kind=kLoop, calls=%fused_concatenate.22, metadata={op_name=\"jit(<lambda>)/jit(main)/while/body/mesh_gnn/_process/mesh_gnn/_process_step/mesh_gnn/sequential_28/processor_nodes_13_mesh_nodes_mlp/linear_0/bitcast_convert_type\" source_file=\"/experiment/rne_ops.py\" source_line=11 deduplicated_name=\"loop_concatenate_fusion.20\"}"
+      ]
+    },
+    {
+      "module": "mesh_gnn/~_networks_builder/processor_nodes_13_mesh_nodes_mlp/~/linear_1",
+      "producer": "silu",
+      "fusion": "loop_bitcast_convert_fusion.27",
+      "computation": "fused_bitcast_convert.27",
+      "rne_and_producer_in_same_fusion": true,
+      "captured_equivalent_kernel_calls": 17,
+      "kernel_aliases": [
+        "loop_bitcast_convert_fusion_41",
+        "loop_bitcast_convert_fusion_40",
+        "loop_bitcast_convert_fusion_39",
+        "loop_bitcast_convert_fusion_38",
+        "loop_bitcast_convert_fusion_37",
+        "loop_bitcast_convert_fusion_36",
+        "loop_bitcast_convert_fusion_35",
+        "loop_bitcast_convert_fusion_34",
+        "loop_bitcast_convert_fusion_33",
+        "loop_bitcast_convert_fusion_32",
+        "loop_bitcast_convert_fusion_31",
+        "loop_bitcast_convert_fusion_30",
+        "loop_bitcast_convert_fusion_29",
+        "loop_bitcast_convert_fusion_28",
+        "loop_bitcast_convert_fusion_27",
+        "loop_bitcast_convert_fusion_26",
+        "loop_bitcast_convert_fusion_25"
+      ],
+      "chain": [
+        "  %bitcast.19497.0 = f32[40962,512]{1,0} bitcast(%loop_bitcast_convert_fusion.27)",
+        "  %loop_bitcast_convert_fusion.27 = f32[1,40962,512]{2,1,0} fusion(%get-tuple-element.91.0, %constant_1216_0), kind=kLoop, calls=%fused_bitcast_convert.27, metadata={op_name=\"jit(<lambda>)/jit(main)/while/body/mesh_gnn/_process/mesh_gnn/_process_step/mesh_gnn/sequential_28/processor_nodes_13_mesh_nodes_mlp/linear_1/bitcast_convert_type\" source_file=\"/experiment/rne_ops.py\" source_line=11 deduplicated_name=\"loop_bitcast_convert_fusion.25\"}"
+      ]
+    },
+    {
+      "module": "mesh_gnn/~_networks_builder/processor_edges_14_mesh_mlp/~/linear_0",
+      "producer": "concatenate",
+      "fusion": "loop_concatenate_fusion.17",
+      "computation": "fused_concatenate.17",
+      "rne_and_producer_in_same_fusion": true,
+      "captured_equivalent_kernel_calls": 14,
+      "kernel_aliases": [
+        "loop_concatenate_fusion_4",
+        "loop_concatenate_fusion_5",
+        "loop_concatenate_fusion_6",
+        "loop_concatenate_fusion_7",
+        "loop_concatenate_fusion_8",
+        "loop_concatenate_fusion_9",
+        "loop_concatenate_fusion_10",
+        "loop_concatenate_fusion_11",
+        "loop_concatenate_fusion_12",
+        "loop_concatenate_fusion_13",
+        "loop_concatenate_fusion_14",
+        "loop_concatenate_fusion_15",
+        "loop_concatenate_fusion_16",
+        "loop_concatenate_fusion_17"
+      ],
+      "chain": [
+        "  %bitcast.19609.0 = f32[327660,1536]{1,0} bitcast(%loop_concatenate_fusion.17)",
+        "  %loop_concatenate_fusion.17 = f32[327660,1,1536]{2,1,0} fusion(%loop_add_fusion.6, %loop_add_fusion.34, %constant_1528_0, %constant_1549_0), kind=kLoop, calls=%fused_concatenate.17, metadata={op_name=\"jit(<lambda>)/jit(main)/while/body/mesh_gnn/_process/mesh_gnn/_process_step/mesh_gnn/sequential_29/processor_edges_14_mesh_mlp/linear_0/bitcast_convert_type\" source_file=\"/experiment/rne_ops.py\" source_line=11 deduplicated_name=\"loop_concatenate_fusion.4\"}"
+      ]
+    },
+    {
+      "module": "mesh_gnn/~_networks_builder/processor_edges_14_mesh_mlp/~/linear_1",
+      "producer": "silu",
+      "fusion": "loop_bitcast_convert_fusion.23",
+      "computation": "fused_bitcast_convert.23",
+      "rne_and_producer_in_same_fusion": true,
+      "captured_equivalent_kernel_calls": 17,
+      "kernel_aliases": [
+        "loop_bitcast_convert_fusion_8",
+        "loop_bitcast_convert_fusion_9",
+        "loop_bitcast_convert_fusion_10",
+        "loop_bitcast_convert_fusion_11",
+        "loop_bitcast_convert_fusion_12",
+        "loop_bitcast_convert_fusion_13",
+        "loop_bitcast_convert_fusion_14",
+        "loop_bitcast_convert_fusion_15",
+        "loop_bitcast_convert_fusion_16",
+        "loop_bitcast_convert_fusion_17",
+        "loop_bitcast_convert_fusion_18",
+        "loop_bitcast_convert_fusion_19",
+        "loop_bitcast_convert_fusion_20",
+        "loop_bitcast_convert_fusion_21",
+        "loop_bitcast_convert_fusion_22",
+        "loop_bitcast_convert_fusion_23",
+        "loop_bitcast_convert_fusion_24"
+      ],
+      "chain": [
+        "  %bitcast.19664.0 = f32[327660,512]{1,0} bitcast(%loop_bitcast_convert_fusion.23)",
+        "  %loop_bitcast_convert_fusion.23 = f32[1,327660,512]{2,1,0} fusion(%get-tuple-element.93.0, %constant_1232_0), kind=kLoop, calls=%fused_bitcast_convert.23, metadata={op_name=\"jit(<lambda>)/jit(main)/while/body/mesh_gnn/_process/mesh_gnn/_process_step/mesh_gnn/sequential_29/processor_edges_14_mesh_mlp/linear_1/bitcast_convert_type\" source_file=\"/experiment/rne_ops.py\" source_line=11 deduplicated_name=\"loop_bitcast_convert_fusion.8\"}"
+      ]
+    },
+    {
+      "module": "mesh_gnn/~_networks_builder/processor_nodes_14_mesh_nodes_mlp/~/linear_0",
+      "producer": "concatenate",
+      "fusion": "loop_concatenate_fusion.21",
+      "computation": "fused_concatenate.21",
+      "rne_and_producer_in_same_fusion": true,
+      "captured_equivalent_kernel_calls": 17,
+      "kernel_aliases": [
+        "loop_concatenate_fusion_36",
+        "loop_concatenate_fusion_35",
+        "loop_concatenate_fusion_34",
+        "loop_concatenate_fusion_33",
+        "loop_concatenate_fusion_32",
+        "loop_concatenate_fusion_31",
+        "loop_concatenate_fusion_30",
+        "loop_concatenate_fusion_29",
+        "loop_concatenate_fusion_28",
+        "loop_concatenate_fusion_27",
+        "loop_concatenate_fusion_26",
+        "loop_concatenate_fusion_25",
+        "loop_concatenate_fusion_24",
+        "loop_concatenate_fusion_23",
+        "loop_concatenate_fusion_22",
+        "loop_concatenate_fusion_21",
+        "loop_concatenate_fusion_20"
+      ],
+      "chain": [
+        "  %bitcast.19746.0 = f32[40962,1024]{1,0} bitcast(%loop_concatenate_fusion.21)",
+        "  %loop_concatenate_fusion.21 = f32[40962,1,1024]{2,1,0} fusion(%loop_add_fusion.34, %input_scatter_fusion.2), kind=kLoop, calls=%fused_concatenate.21, metadata={op_name=\"jit(<lambda>)/jit(main)/while/body/mesh_gnn/_process/mesh_gnn/_process_step/mesh_gnn/sequential_30/processor_nodes_14_mesh_nodes_mlp/linear_0/bitcast_convert_type\" source_file=\"/experiment/rne_ops.py\" source_line=11 deduplicated_name=\"loop_concatenate_fusion.20\"}"
+      ]
+    },
+    {
+      "module": "mesh_gnn/~_networks_builder/processor_nodes_14_mesh_nodes_mlp/~/linear_1",
+      "producer": "silu",
+      "fusion": "loop_bitcast_convert_fusion.26",
+      "computation": "fused_bitcast_convert.26",
+      "rne_and_producer_in_same_fusion": true,
+      "captured_equivalent_kernel_calls": 17,
+      "kernel_aliases": [
+        "loop_bitcast_convert_fusion_41",
+        "loop_bitcast_convert_fusion_40",
+        "loop_bitcast_convert_fusion_39",
+        "loop_bitcast_convert_fusion_38",
+        "loop_bitcast_convert_fusion_37",
+        "loop_bitcast_convert_fusion_36",
+        "loop_bitcast_convert_fusion_35",
+        "loop_bitcast_convert_fusion_34",
+        "loop_bitcast_convert_fusion_33",
+        "loop_bitcast_convert_fusion_32",
+        "loop_bitcast_convert_fusion_31",
+        "loop_bitcast_convert_fusion_30",
+        "loop_bitcast_convert_fusion_29",
+        "loop_bitcast_convert_fusion_28",
+        "loop_bitcast_convert_fusion_27",
+        "loop_bitcast_convert_fusion_26",
+        "loop_bitcast_convert_fusion_25"
+      ],
+      "chain": [
+        "  %bitcast.19801.0 = f32[40962,512]{1,0} bitcast(%loop_bitcast_convert_fusion.26)",
+        "  %loop_bitcast_convert_fusion.26 = f32[1,40962,512]{2,1,0} fusion(%get-tuple-element.95.0, %constant_1241_0), kind=kLoop, calls=%fused_bitcast_convert.26, metadata={op_name=\"jit(<lambda>)/jit(main)/while/body/mesh_gnn/_process/mesh_gnn/_process_step/mesh_gnn/sequential_30/processor_nodes_14_mesh_nodes_mlp/linear_1/bitcast_convert_type\" source_file=\"/experiment/rne_ops.py\" source_line=11 deduplicated_name=\"loop_bitcast_convert_fusion.25\"}"
+      ]
+    },
+    {
+      "module": "mesh_gnn/~_networks_builder/processor_edges_15_mesh_mlp/~/linear_0",
+      "producer": "concatenate",
+      "fusion": "loop_concatenate_fusion.18",
+      "computation": "fused_concatenate.18",
+      "rne_and_producer_in_same_fusion": true,
+      "captured_equivalent_kernel_calls": 1,
+      "kernel_aliases": [
+        "loop_concatenate_fusion_18"
+      ],
+      "chain": [
+        "  %bitcast.19913.0 = f32[327660,1536]{1,0} bitcast(%loop_concatenate_fusion.18)",
+        "  %loop_concatenate_fusion.18 = f32[327660,1,1536]{2,1,0} fusion(%loop_add_fusion.35, %constant_1528_0, %constant_1549_0, %loop_add_fusion.6, %constant_1968_0, /*index=5*/%loop_multiply_fusion.17, %get-tuple-element.94.0, %constant_1235_0, %loop_rsqrt_fusion.8, %constant_1950_0), kind=kLoop, calls=%fused_concatenate.18, metadata={op_name=\"jit(<lambda>)/jit(main)/while/body/mesh_gnn/_process/mesh_gnn/_process_step/mesh_gnn/sequential_31/processor_edges_15_mesh_mlp/linear_0/bitcast_convert_type\" source_file=\"/experiment/rne_ops.py\" source_line=11}"
+      ]
+    },
+    {
+      "module": "mesh_gnn/~_networks_builder/processor_edges_15_mesh_mlp/~/linear_1",
+      "producer": "silu",
+      "fusion": "loop_bitcast_convert_fusion.24",
+      "computation": "fused_bitcast_convert.24",
+      "rne_and_producer_in_same_fusion": true,
+      "captured_equivalent_kernel_calls": 17,
+      "kernel_aliases": [
+        "loop_bitcast_convert_fusion_8",
+        "loop_bitcast_convert_fusion_9",
+        "loop_bitcast_convert_fusion_10",
+        "loop_bitcast_convert_fusion_11",
+        "loop_bitcast_convert_fusion_12",
+        "loop_bitcast_convert_fusion_13",
+        "loop_bitcast_convert_fusion_14",
+        "loop_bitcast_convert_fusion_15",
+        "loop_bitcast_convert_fusion_16",
+        "loop_bitcast_convert_fusion_17",
+        "loop_bitcast_convert_fusion_18",
+        "loop_bitcast_convert_fusion_19",
+        "loop_bitcast_convert_fusion_20",
+        "loop_bitcast_convert_fusion_21",
+        "loop_bitcast_convert_fusion_22",
+        "loop_bitcast_convert_fusion_23",
+        "loop_bitcast_convert_fusion_24"
+      ],
+      "chain": [
+        "  %bitcast.19968.0 = f32[327660,512]{1,0} bitcast(%loop_bitcast_convert_fusion.24)",
+        "  %loop_bitcast_convert_fusion.24 = f32[1,327660,512]{2,1,0} fusion(%get-tuple-element.97.0, %constant_1260_0), kind=kLoop, calls=%fused_bitcast_convert.24, metadata={op_name=\"jit(<lambda>)/jit(main)/while/body/mesh_gnn/_process/mesh_gnn/_process_step/mesh_gnn/sequential_31/processor_edges_15_mesh_mlp/linear_1/bitcast_convert_type\" source_file=\"/experiment/rne_ops.py\" source_line=11 deduplicated_name=\"loop_bitcast_convert_fusion.8\"}"
+      ]
+    },
+    {
+      "module": "mesh_gnn/~_networks_builder/processor_nodes_15_mesh_nodes_mlp/~/linear_0",
+      "producer": "concatenate",
+      "fusion": "loop_concatenate_fusion.20",
+      "computation": "fused_concatenate.20",
+      "rne_and_producer_in_same_fusion": true,
+      "captured_equivalent_kernel_calls": 17,
+      "kernel_aliases": [
+        "loop_concatenate_fusion_36",
+        "loop_concatenate_fusion_35",
+        "loop_concatenate_fusion_34",
+        "loop_concatenate_fusion_33",
+        "loop_concatenate_fusion_32",
+        "loop_concatenate_fusion_31",
+        "loop_concatenate_fusion_30",
+        "loop_concatenate_fusion_29",
+        "loop_concatenate_fusion_28",
+        "loop_concatenate_fusion_27",
+        "loop_concatenate_fusion_26",
+        "loop_concatenate_fusion_25",
+        "loop_concatenate_fusion_24",
+        "loop_concatenate_fusion_23",
+        "loop_concatenate_fusion_22",
+        "loop_concatenate_fusion_21",
+        "loop_concatenate_fusion_20"
+      ],
+      "chain": [
+        "  %bitcast.20050.0 = f32[40962,1024]{1,0} bitcast(%loop_concatenate_fusion.20)",
+        "  %loop_concatenate_fusion.20 = f32[40962,1,1024]{2,1,0} fusion(%loop_add_fusion.35, %input_scatter_fusion.1), kind=kLoop, calls=%fused_concatenate.20, metadata={op_name=\"jit(<lambda>)/jit(main)/while/body/mesh_gnn/_process/mesh_gnn/_process_step/mesh_gnn/sequential_32/processor_nodes_15_mesh_nodes_mlp/linear_0/bitcast_convert_type\" source_file=\"/experiment/rne_ops.py\" source_line=11 deduplicated_name=\"loop_concatenate_fusion.20\"}"
+      ]
+    },
+    {
+      "module": "mesh_gnn/~_networks_builder/processor_nodes_15_mesh_nodes_mlp/~/linear_1",
+      "producer": "silu",
+      "fusion": "loop_bitcast_convert_fusion.25",
+      "computation": "fused_bitcast_convert.25",
+      "rne_and_producer_in_same_fusion": true,
+      "captured_equivalent_kernel_calls": 17,
+      "kernel_aliases": [
+        "loop_bitcast_convert_fusion_41",
+        "loop_bitcast_convert_fusion_40",
+        "loop_bitcast_convert_fusion_39",
+        "loop_bitcast_convert_fusion_38",
+        "loop_bitcast_convert_fusion_37",
+        "loop_bitcast_convert_fusion_36",
+        "loop_bitcast_convert_fusion_35",
+        "loop_bitcast_convert_fusion_34",
+        "loop_bitcast_convert_fusion_33",
+        "loop_bitcast_convert_fusion_32",
+        "loop_bitcast_convert_fusion_31",
+        "loop_bitcast_convert_fusion_30",
+        "loop_bitcast_convert_fusion_29",
+        "loop_bitcast_convert_fusion_28",
+        "loop_bitcast_convert_fusion_27",
+        "loop_bitcast_convert_fusion_26",
+        "loop_bitcast_convert_fusion_25"
+      ],
+      "chain": [
+        "  %bitcast.20105.0 = f32[40962,512]{1,0} bitcast(%loop_bitcast_convert_fusion.25)",
+        "  %loop_bitcast_convert_fusion.25 = f32[1,40962,512]{2,1,0} fusion(%get-tuple-element.99.0, %constant_1269_0), kind=kLoop, calls=%fused_bitcast_convert.25, metadata={op_name=\"jit(<lambda>)/jit(main)/while/body/mesh_gnn/_process/mesh_gnn/_process_step/mesh_gnn/sequential_32/processor_nodes_15_mesh_nodes_mlp/linear_1/bitcast_convert_type\" source_file=\"/experiment/rne_ops.py\" source_line=11 deduplicated_name=\"loop_bitcast_convert_fusion.25\"}"
+      ]
+    },
+    {
+      "module": "mesh2grid_gnn/~_networks_builder/encoder_edges_mesh2grid_mlp/~/linear_1",
+      "producer": "silu",
+      "fusion": "loop_bitcast_convert_fusion.1",
+      "computation": "fused_bitcast_convert.1",
+      "rne_and_producer_in_same_fusion": true,
+      "captured_equivalent_kernel_calls": 2,
+      "kernel_aliases": [
+        "loop_bitcast_convert_fusion_1",
+        "loop_bitcast_convert_fusion"
+      ],
+      "chain": [
+        "  %bitcast.14738.0 = f32[3114720,512]{1,0} bitcast(%loop_bitcast_convert_fusion.1)",
+        "  %loop_bitcast_convert_fusion.1 = f32[1,3114720,512]{2,1,0} fusion(%get-tuple-element.27.0, %constant_728_0), kind=kLoop, calls=%fused_bitcast_convert.1, metadata={op_name=\"jit(<lambda>)/jit(main)/while/body/mesh2grid_gnn/_embed/mesh2grid_gnn/sequential/encoder_edges_mesh2grid_mlp/linear_1/bitcast_convert_type\" source_file=\"/experiment/rne_ops.py\" source_line=11 deduplicated_name=\"loop_bitcast_convert_fusion\"}"
+      ]
+    },
+    {
+      "module": "mesh2grid_gnn/~_networks_builder/processor_edges_0_mesh2grid_mlp/~/linear_0",
+      "producer": "concatenate",
+      "fusion": "loop_concatenate_fusion",
+      "computation": "fused_concatenate",
+      "rne_and_producer_in_same_fusion": true,
+      "captured_equivalent_kernel_calls": 1,
+      "kernel_aliases": [
+        "loop_concatenate_fusion"
+      ],
+      "chain": [
+        "  %bitcast.20198.0 = f32[3114720,1536]{1,0} bitcast(%loop_concatenate_fusion)",
+        "  %loop_concatenate_fusion = f32[3114720,1,1536]{2,1,0} fusion(%loop_add_fusion.2, %loop_add_fusion.36, %constant_2003_0, %loop_add_fusion.4, %constant_1446_0), kind=kLoop, calls=%fused_concatenate, metadata={op_name=\"jit(<lambda>)/jit(main)/while/body/mesh2grid_gnn/_process/mesh2grid_gnn/_process_step/mesh2grid_gnn/sequential_1/processor_edges_0_mesh2grid_mlp/linear_0/bitcast_convert_type\" source_file=\"/experiment/rne_ops.py\" source_line=11}"
+      ]
+    },
+    {
+      "module": "mesh2grid_gnn/~_networks_builder/processor_edges_0_mesh2grid_mlp/~/linear_1",
+      "producer": "silu",
+      "fusion": "loop_bitcast_convert_fusion",
+      "computation": "fused_bitcast_convert",
+      "rne_and_producer_in_same_fusion": true,
+      "captured_equivalent_kernel_calls": 2,
+      "kernel_aliases": [
+        "loop_bitcast_convert_fusion_1",
+        "loop_bitcast_convert_fusion"
+      ],
+      "chain": [
+        "  %bitcast.20253.0 = f32[3114720,512]{1,0} bitcast(%loop_bitcast_convert_fusion)",
+        "  %loop_bitcast_convert_fusion = f32[1,3114720,512]{2,1,0} fusion(%get-tuple-element.101.0, %constant_1288_0), kind=kLoop, calls=%fused_bitcast_convert, metadata={op_name=\"jit(<lambda>)/jit(main)/while/body/mesh2grid_gnn/_process/mesh2grid_gnn/_process_step/mesh2grid_gnn/sequential_1/processor_edges_0_mesh2grid_mlp/linear_1/bitcast_convert_type\" source_file=\"/experiment/rne_ops.py\" source_line=11 deduplicated_name=\"loop_bitcast_convert_fusion\"}"
+      ]
+    },
+    {
+      "module": "mesh2grid_gnn/~_networks_builder/processor_nodes_0_grid_nodes_mlp/~/linear_0",
+      "producer": "concatenate",
+      "fusion": "loop_concatenate_fusion.2",
+      "computation": "fused_concatenate.2",
+      "rne_and_producer_in_same_fusion": true,
+      "captured_equivalent_kernel_calls": 1,
+      "kernel_aliases": [
+        "loop_concatenate_fusion_2"
+      ],
+      "chain": [
+        "  %bitcast.20335.0 = f32[1038240,1024]{1,0} bitcast(%loop_concatenate_fusion.2)",
+        "  %loop_concatenate_fusion.2 = f32[1038240,1,1024]{2,1,0} fusion(%loop_add_fusion.4, %input_scatter_fusion), kind=kLoop, calls=%fused_concatenate.2, metadata={op_name=\"jit(<lambda>)/jit(main)/while/body/mesh2grid_gnn/_process/mesh2grid_gnn/_process_step/mesh2grid_gnn/sequential_3/processor_nodes_0_grid_nodes_mlp/linear_0/bitcast_convert_type\" source_file=\"/experiment/rne_ops.py\" source_line=11}"
+      ]
+    },
+    {
+      "module": "mesh2grid_gnn/~_networks_builder/processor_nodes_0_grid_nodes_mlp/~/linear_1",
+      "producer": "silu",
+      "fusion": "loop_bitcast_convert_fusion.5",
+      "computation": "fused_bitcast_convert.5",
+      "rne_and_producer_in_same_fusion": true,
+      "captured_equivalent_kernel_calls": 4,
+      "kernel_aliases": [
+        "loop_bitcast_convert_fusion_7",
+        "loop_bitcast_convert_fusion_6",
+        "loop_bitcast_convert_fusion_5",
+        "loop_bitcast_convert_fusion_4"
+      ],
+      "chain": [
+        "  %bitcast.20390.0 = f32[1038240,512]{1,0} bitcast(%loop_bitcast_convert_fusion.5)",
+        "  %loop_bitcast_convert_fusion.5 = f32[1,1038240,512]{2,1,0} fusion(%get-tuple-element.103.0, %constant_1302_0), kind=kLoop, calls=%fused_bitcast_convert.5, metadata={op_name=\"jit(<lambda>)/jit(main)/while/body/mesh2grid_gnn/_process/mesh2grid_gnn/_process_step/mesh2grid_gnn/sequential_3/processor_nodes_0_grid_nodes_mlp/linear_1/bitcast_convert_type\" source_file=\"/experiment/rne_ops.py\" source_line=11 deduplicated_name=\"loop_bitcast_convert_fusion.4\"}"
+      ]
+    },
+    {
+      "module": "mesh2grid_gnn/~_networks_builder/decoder_nodes_grid_nodes_mlp/~/linear_1",
+      "producer": "silu",
+      "fusion": "loop_bitcast_convert_fusion.4",
+      "computation": "fused_bitcast_convert.4",
+      "rne_and_producer_in_same_fusion": true,
+      "captured_equivalent_kernel_calls": 4,
+      "kernel_aliases": [
+        "loop_bitcast_convert_fusion_7",
+        "loop_bitcast_convert_fusion_6",
+        "loop_bitcast_convert_fusion_5",
+        "loop_bitcast_convert_fusion_4"
+      ],
+      "chain": [
+        "  %bitcast.20492.0 = f32[1038240,512]{1,0} bitcast(%loop_bitcast_convert_fusion.4)",
+        "  %loop_bitcast_convert_fusion.4 = f32[1,1038240,512]{2,1,0} fusion(%get-tuple-element.105.0, %constant_1311_0), kind=kLoop, calls=%fused_bitcast_convert.4, metadata={op_name=\"jit(<lambda>)/jit(main)/while/body/mesh2grid_gnn/_output/mesh2grid_gnn/decoder_nodes_grid_nodes_mlp/linear_1/bitcast_convert_type\" source_file=\"/experiment/rne_ops.py\" source_line=11 deduplicated_name=\"loop_bitcast_convert_fusion.4\"}"
+      ]
+    }
+  ]
+}

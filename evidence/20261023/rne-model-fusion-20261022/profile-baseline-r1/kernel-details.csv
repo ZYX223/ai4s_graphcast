@@ -1,0 +1,57 @@
+name,category,hlo_tags,calls,total_ms,percent_of_kernel_sum
+Cijk_Ailk_Bljk_SB_MX_MT256x256x16_SE_AMAS3_BW_DTL0_BL1_DRB16_ALT_KME0_ETN_EPS0_FL0_GRVW4_GSU1_ISA938_IU1_KME_GRCMn2_K1_KLA_LDL1_LRVW4_MAC_MMAC_BW1_MMAC_KM0_MMAC_KME1_NLCA1_NLCB1_OLDSR0_PGR2_PLR1_RK1_SU0_SUM0_SUS256_SVW4_TT8_16_TLM0_ULDSWM0_USFGRO0_USSB0_VAW1_VSn1_VW4_WG32_16_1_WGM1,gemm,[],80,309.528972,31.58225385864043
+"round_rne(float const*, float*, int, int, int)",rne,[],168,287.15711899999997,29.29958049152768
+input_scatter_fusion_16,scatter_fusion,"['scatter', 'layer_norm']",15,53.195812,5.427742766517219
+input_scatter_fusion,scatter_fusion,"['scatter', 'layer_norm']",1,31.580304,3.2222417546782594
+loop_multiply_fusion_39,other_device_kernel,[],2,23.717909,2.4200158653779673
+input_scatter_fusion_17,scatter_fusion,"['scatter', 'layer_norm']",1,18.951031,1.9336357047861887
+loop_multiply_fusion_35,other_device_kernel,[],17,18.825751,1.9208529764430387
+input_concatenate_fusion,gather_fusion,"['gather', 'layer_norm']",3,18.749271,1.9130494717840019
+input_concatenate_fusion_14,gather_fusion,"['gather', 'layer_norm']",7,16.851832,1.7194475617848153
+input_concatenate_fusion_15,gather_fusion,['gather'],7,14.074873,1.436105348206707
+loop_multiply_fusion_41,other_device_kernel,[],4,13.632152999999999,1.3909331779314884
+input_reduce_fusion_38,layer_norm_fusion,"['layer_norm', 'reduction']",2,12.653113000000001,1.291038523101687
+input_reduce_fusion_41,layer_norm_fusion,"['layer_norm', 'reduction']",2,12.242394,1.2491315195706347
+loop_add_fusion_10,layer_norm_fusion,['layer_norm'],6,12.109434,1.2355651756968702
+input_reduce_fusion_34,layer_norm_fusion,"['layer_norm', 'reduction']",17,11.317598,1.1547715575588873
+loop_multiply_fusion_38,other_device_kernel,[],2,11.055035,1.1279813955061855
+input_reduce_fusion_48,layer_norm_fusion,"['layer_norm', 'reduction']",17,10.950709,1.1173366723490377
+input_concatenate_fusion_17,gather_fusion,"['gather', 'layer_norm']",1,9.987356,1.0190426134604798
+Cijk_Ailk_Bljk_SB_MT128x128x16_SE_AMAS3_BW_DTL0_BL1_DRB16_ALT_KME0_ETN_EPS0_FL0_GRVW4_GSU1_ISA938_IU1_KME_GRCMn1_K1_KLA_LDL1_LRVW4_MAC_MMAC_BW1_MMAC_KM0_MMAC_KME1_NLCA1_NLCB1_OLDSR0_PGR2_PLR1_RK0_SU32_SUM0_SUS256_SVW4_TT4_8_TLM0_ULDSWM0_USFGRO0_USSB0_VAW1_VSn1_VW4_WG32_16_1_WGM8,gemm,[],2,9.345756,0.9535780660070553
+loop_add_fusion_3,layer_norm_fusion,['layer_norm'],2,8.084316,0.824869215103614
+input_concatenate_fusion_18,other_device_kernel,[],1,7.748317,0.7905861376724995
+input_reduce_fusion_37,layer_norm_fusion,"['layer_norm', 'reduction']",2,6.186878,0.6312674071376996
+input_reduce_fusion_40,layer_norm_fusion,"['layer_norm', 'reduction']",3,6.134877,0.6259615749492246
+input_reduce_fusion_43,layer_norm_fusion,"['layer_norm', 'reduction']",2,5.973756,0.6095218720966011
+input_reduce_fusion_45,layer_norm_fusion,"['layer_norm', 'reduction']",3,5.928797,0.6049345582110673
+wrapped_concatenate_17,other_device_kernel,[],1,5.376318,0.5485633180107548
+wrapped_concatenate,other_device_kernel,[],17,4.391999,0.4481300295369278
+input_scatter_fusion_1,scatter_fusion,"['scatter', 'layer_norm']",1,3.744158,0.3820286924316068
+loop_add_fusion_12,layer_norm_fusion,['layer_norm'],17,3.581118,0.36539318772960194
+loop_multiply_fusion_36,other_device_kernel,[],17,3.2057569999999997,0.3270938766375432
+Cijk_Ailk_Bljk_SB_MX_MT128x128x8_SE_AMAS3_BW_DTL1_BL1_DRB16_ALT_KME0_ETN_EPS1_FL0_GRVW4_GSU1_ISA938_IU1_KME_GRCMn2_K1_KLA_LDL1_LRVW4_MAC_MMAC_BW1_MMAC_KM0_MMAC_KME1_NLCA1_NLCB1_OLDSR0_PGR1_PLR1_RK0_SU0_SUM0_SUS256_SVW4_TT8_8_TLM1_ULDSWM0_USFGRO0_USSB0_VAW1_VSn1_VW4_WG16_16_1_WGM8,gemm,[],1,3.070718,0.3133154055908428
+input_concatenate_fusion_1,gather_fusion,"['gather', 'layer_norm']",1,3.045439,0.31073610650250877
+loop_add_fusion_2,layer_norm_fusion,['layer_norm'],1,2.9339180000000002,0.29935725395177104
+input_reduce_fusion_35,layer_norm_fusion,"['layer_norm', 'reduction']",17,2.3087969999999998,0.23557411279118468
+input_reduce_fusion_65,layer_norm_fusion,"['layer_norm', 'reduction']",17,2.29824,0.2344969475364063
+loop_broadcast_fusion,other_device_kernel,[],1,2.0420789999999998,0.20836000249242773
+input_concatenate_fusion_16,gather_fusion,"['gather', 'layer_norm']",1,1.939519,0.19789547009401248
+loop_add_fusion_11,layer_norm_fusion,['layer_norm'],1,1.628479,0.1661590411041229
+loop_broadcast_fusion_1,other_device_kernel,[],1,1.245759,0.12710886716183079
+loop_add_fusion,other_device_kernel,[],1,1.12928,0.11522413364744889
+Cijk_Ailk_Bljk_SB_MT128x128x16_SE_AMAS3_BW_DTL0_BL1_DRB16_ALT_KME0_ETN_EPS0_FL0_GRVW4_GSU1_ISA938_IU1_KME_GRCMn1_K1_KLA_LDL1_LRVW4_MAC_MMAC_BW1_MMAC_KM0_MMAC_KME1_NLCA1_NLCB1_OLDSR0_PGR2_PLR1_RK0_SU0_SUM0_SUS256_SVW4_TT4_8_TLM0_ULDSWM0_USFGRO0_USSB0_VAW1_VSn1_VW4_WG32_16_1_WGM8,gemm,[],1,0.62864,0.06414219624551243
+loop_add_fusion_1,other_device_kernel,[],1,0.19952,0.020357678472424024
+loop_add_fusion_29,layer_norm_fusion,['layer_norm'],1,0.162879,0.01661907734517819
+loop_rsqrt_fusion_1,layer_norm_fusion,['layer_norm'],2,0.16176,0.016504902113569118
+loop_multiply_fusion_42,layer_norm_fusion,['layer_norm'],2,0.16048,0.01637429952513336
+loop_rsqrt_fusion_3,layer_norm_fusion,['layer_norm'],2,0.11008,0.011231822605475323
+loop_transpose_fusion,other_device_kernel,[],1,0.105119,0.01072563554201454
+loop_multiply_fusion_44,layer_norm_fusion,['layer_norm'],17,0.10255999999999998,0.010464532398415235
+loop_rsqrt_fusion_23,layer_norm_fusion,['layer_norm'],17,0.10143999999999999,0.010350255133533945
+loop_rsqrt_fusion_40,layer_norm_fusion,['layer_norm'],17,0.0992,0.010121700603771367
+loop_multiply_fusion_66,layer_norm_fusion,['layer_norm'],17,0.09807999999999999,0.010007423338890077
+loop_multiply_fusion_63,layer_norm_fusion,['layer_norm'],3,0.08095999999999999,0.008260613718561793
+loop_rsqrt_fusion_6,layer_norm_fusion,['layer_norm'],3,0.08048000000000001,0.008211637747898385
+loop_multiply_fusion_61,layer_norm_fusion,['layer_norm'],2,0.05072,0.0051751275667669735
+wrapped_slice_1,other_device_kernel,[],1,0.0028799999999999997,0.00029385582398045904
+wrapped_slice,other_device_kernel,[],1,0.00272,0.0002775305004259891

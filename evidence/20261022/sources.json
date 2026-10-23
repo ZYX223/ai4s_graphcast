@@ -1,0 +1,30 @@
+{
+  "audit.json": {
+    "source": "/home/zhangyuxin/zyx/graphcast/outputs/inference-operators-20261022/audit-r2/audit.json",
+    "sha256": "6c8beaac968085ef6ee947fade045f2a078cc8a06600285f0e6ca4aec4ad7754"
+  },
+  "profile-summary.json": {
+    "source": "/home/zhangyuxin/zyx/graphcast/outputs/inference-operators-20261022/profile-summary-r3/summary.json",
+    "sha256": "138b9c5d1addc115400a09f2af109fb6d117cc87658773ca4ad9f6a1db71a163"
+  },
+  "profile-kernels.csv": {
+    "source": "/home/zhangyuxin/zyx/graphcast/outputs/inference-operators-20261022/profile-summary-r3/kernels.csv",
+    "sha256": "8e0dd8e688284df77a8fe102610a2e493fc94df31d710ded7bed837f12325cdd"
+  },
+  "profile-layers.csv": {
+    "source": "/home/zhangyuxin/zyx/graphcast/outputs/inference-operators-20261022/profile-summary-r3/layers.csv",
+    "sha256": "3c9b33d41c55d1f92923c9198faaa8de68208d655b51f0602cd3608d27d7ea57"
+  },
+  "operator-report.json": {
+    "source": "/home/zhangyuxin/zyx/graphcast/outputs/inference-operators-20261022/operators-r1/operators/report.json",
+    "sha256": "6a8a9c9e3b2aa1210329f3ff21dea7780ab319e7d590fa64d46573264377e1ab"
+  },
+  "gemm-timings.csv": {
+    "source": "/home/zhangyuxin/zyx/graphcast/outputs/inference-operators-20261022/operators-r1/operators/gemm-timings.csv",
+    "sha256": "d2171aacfb4689b5c5032c5af6bce7ddbb4c82da72ef917daa2beee57cf4f5cf"
+  },
+  "graph-topology.json": {
+    "source": "/home/zhangyuxin/zyx/graphcast/outputs/inference-operators-20261022/operators-r1/operators/graph/topology.json",
+    "sha256": "f618f1ac0054eec0e8a0e44f3aa59b6270dd6d0f247e5bf9c2aa4b1b58887e2c"
+  }
+}
