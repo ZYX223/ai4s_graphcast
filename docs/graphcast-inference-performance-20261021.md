@@ -2,6 +2,8 @@
 
 主表数据采集：2026-10-20；910C FlagGems 行更新为 2026-10-21 官方新版 Mul 的实测结果，其他行不变。910C 官方 Cat 隔离试验单列，不混入主表。配套见[算子接入与覆盖率表](graphcast-inference-operator-coverage-20261021.md)。
 
+另附[算子耗时与覆盖率 Excel 合并版（2026-10-23）](graphcast-operators-and-coverage-20261023.xlsx)，按推理、覆盖率、训练和证据分 sheet；其中算子累计耗时不同于本页模型 E2E。本次表格整理未改动本页性能数据。
+
 ## 性能结果
 
 单设备、单样本、40 步连续自回归，三次独立运行取 E2E 中位数。执行模式为 eager，请求 TF32/HF32（fast-FP32），参数、输入输出和自回归状态为 FP32；没有使用 BF16 autocast、torch.compile 或图捕获。
