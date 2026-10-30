@@ -1,0 +1,10 @@
+{
+  "origin": "Validated 2026-10-16 Hygon experiment",
+  "sources": {
+    "rne_kernel.h": "62e4ad9ce6cb7e27df9e41dbdfe6353241b810c11c92f0aa5e29618d494efd4d",
+    "rne_kernel.hip": "6e1ceda3230760855460a09bc3c8d5f173f223a649311bd32ef893b34cf7a690",
+    "xf32_rne_router.cc": "f9177d33c82c842461a43af95f371fd5b32a259ba3e6283b31aa61256a86b8e8"
+  },
+  "original_library_sha256": "d2725c734d8949d3d6377d405353ad2661d1a2821e3a4150290b682119440d41",
+  "checkpoint_sha256": "8f485e84343072785522f6d0696c198c7712e9f0f14070a88c26a9ff35db75a9"
+}

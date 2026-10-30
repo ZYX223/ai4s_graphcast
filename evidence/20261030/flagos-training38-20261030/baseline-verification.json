@@ -1,0 +1,52 @@
+{
+  "outputs/training-minimal-20261030/experiment/train.py": {
+    "expected": "827902564e2a61d7db96ae15c79461f7468b7d25a2a4f10e9facbe3ea56b91c4",
+    "actual": "827902564e2a61d7db96ae15c79461f7468b7d25a2a4f10e9facbe3ea56b91c4",
+    "unchanged": true
+  },
+  "outputs/training-minimal-20261030/experiment/recipe.py": {
+    "expected": "394fce0216edac1577689e0170ad1e5d7b835c0b3256db0e4ede3b2e0d3cb5a7",
+    "actual": "394fce0216edac1577689e0170ad1e5d7b835c0b3256db0e4ede3b2e0d3cb5a7",
+    "unchanged": true
+  },
+  "outputs/training-minimal-20261030/experiment/model.py": {
+    "expected": "e1ac6210cbb78c413d125abd00321f7345e62f013ef7c18e3ad674875750b272",
+    "actual": "e1ac6210cbb78c413d125abd00321f7345e62f013ef7c18e3ad674875750b272",
+    "unchanged": true
+  },
+  "outputs/training-minimal-20261030/experiment/remat_policy.py": {
+    "expected": "c0edb0448b0b0a0e0d3137fa8416d8542624fedf1775c88e065a83a1ba65819d",
+    "actual": "c0edb0448b0b0a0e0d3137fa8416d8542624fedf1775c88e065a83a1ba65819d",
+    "unchanged": true
+  },
+  "outputs/training-minimal-20261030/experiment/data_transfer.py": {
+    "expected": "bd878c6149dc429a15707013ea2ca4928cb8b26d402374a2c6affefa85f58e98",
+    "actual": "bd878c6149dc429a15707013ea2ca4928cb8b26d402374a2c6affefa85f58e98",
+    "unchanged": true
+  },
+  "outputs/training-minimal-20261030/experiment/precision.py": {
+    "expected": "447b0ec1b2efffb74b1bad14eca8296a2836f31d85020f8ed15af7eabdd354d6",
+    "actual": "447b0ec1b2efffb74b1bad14eca8296a2836f31d85020f8ed15af7eabdd354d6",
+    "unchanged": true
+  },
+  "outputs/training-minimal-20261030/experiment/runtime.py": {
+    "expected": "d7ab33baccc2fd6f59e778b5625734c06351426e14269344dedcc0aa5fda8667",
+    "actual": "d7ab33baccc2fd6f59e778b5625734c06351426e14269344dedcc0aa5fda8667",
+    "unchanged": true
+  },
+  "outputs/training-minimal-20261030/experiment/test_recipe.py": {
+    "expected": "931bc22358e703077f152884136ebb320b311633ddc3de28f677050ae3618dfc",
+    "actual": "931bc22358e703077f152884136ebb320b311633ddc3de28f677050ae3618dfc",
+    "unchanged": true
+  },
+  "outputs/training-minimal-20261030/experiment/test_data_transfer.py": {
+    "expected": "76d168900f477d147407c9b83e4e89e9fc9ab17dfab6eac636951db37381a7f7",
+    "actual": "76d168900f477d147407c9b83e4e89e9fc9ab17dfab6eac636951db37381a7f7",
+    "unchanged": true
+  },
+  "outputs/training-minimal-20261030/experiment/entry.py": {
+    "expected": "790ebe752d40e3a2bf854a975bef948ede5207cff93530ba18654ec98b87f158",
+    "actual": "790ebe752d40e3a2bf854a975bef948ede5207cff93530ba18654ec98b87f158",
+    "unchanged": true
+  }
+}

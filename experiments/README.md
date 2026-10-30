@@ -5,3 +5,7 @@
 这里保存实际测量时的源码字节。`shared/baseline`供融合和诊断共用，`shared/training-official`包含固定版本官方训练数据处理模块及许可证。`PROVENANCE.json`提供原文件位置和SHA256；通过`python3 scripts/prepare_experiments.py --verify-only`核验。
 
 使用仓库中的准备器建立独立工作目录后再运行。不要直接在归档目录生成结果，也不要将固定权重的融合推理路由用于训练。历史审计脚本中的绝对路径属于原始记录，新运行的推荐入口以复现说明为准。
+
+## 2026-10-30 增量
+
+本周训推、H100启动器、算子和MFU的归档入口见[本周复现说明](../docs/EXPERIMENTS_20261030.md)。新增归档使用独立清单 `evidence/20261030/SOURCE_MANIFEST.json`，运行 `python3 scripts/verify_release_20261030.py` 校验；上面的旧清单与旧实验保持原样。

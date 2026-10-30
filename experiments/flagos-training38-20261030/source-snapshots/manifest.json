@@ -1,0 +1,11 @@
+{
+  "train-v1.py": "8a3dcfd6aeb33029cd36b171a94d198352d2e2b88dd3edefc79de50671b89c9b",
+  "train-v2.py": "77df16253040abf114c6ca24cd024d907e5489de29a8a7800671a0c5b09e1969",
+  "v1_scope": "H100 horizons1-10 and failed11; FlagOS horizons1-6",
+  "v2_scope": "H100 retry11,12; FlagOS horizons7-12, loaded at new process startup",
+  "change": "Drop g0/g1 Python references after each optimizer update; no math change",
+  "final_guarded_scope": "Post-review reproduction guard only; NOT staged to running training container; actual experiment remains train-v1/v2 with runtime-used.py. Measured checkpoint chains independently validated.",
+  "runtime-used.py": "57c378c88a5ef0a3c3da87a1d585f107a7c5d23ac8f987cd49c8f9a30593ba43",
+  "final-guarded-train.py": "a35b32cf8522a51361e964c746c0aca872f8e9eaa024fe0ae5932207b181ece5",
+  "final-guarded-runtime.py": "ca51511c2845793628cc1ea8f93d7ed3009def1052ea320fb9a4d1b98df89d6c"
+}

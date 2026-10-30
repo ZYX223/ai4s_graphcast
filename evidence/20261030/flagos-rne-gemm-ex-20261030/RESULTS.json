@@ -1,0 +1,115 @@
+{
+  "date": "2026-10-30",
+  "status": "completed_accuracy_passed_performance_gap_remains",
+  "backend": "BW1100 FlagOS JAX fl_only + existing fused RNE + rocBLAS XF32 requested",
+  "baseline_modified": false,
+  "published_or_synced": false,
+  "physical_gpu": 8,
+  "pci": "0000:85:00.0",
+  "image": "flagos-r6-optimization-test:20261026-c93db685-bw59-hal642",
+  "image_id": "sha256:6d4813ee61bb39a439d96bb28b62371628d9eb0a2e62cc4a84a5218403bb0aad",
+  "versions": {
+    "jax": "0.6.0",
+    "jaxlib": "0.6.0",
+    "dm-haiku": "0.0.14",
+    "numpy": "1.26.4",
+    "xarray": "2025.6.1"
+  },
+  "library_sha256": "27a3966aba19349480bdd30c2f820a230c12494f1a4634b7c83311b352834f5e",
+  "verification": {
+    "linear_cases": 2,
+    "adapter_cases": 24,
+    "model_steps_including_warmups": 135,
+    "gemm_calls": 11340,
+    "api_counts": {
+      "sgemm": 11070,
+      "gemm_ex": 270
+    },
+    "every_step": {
+      "rne_covered": 84,
+      "producer_fused": 79
+    },
+    "measured_single_step": {
+      "sgemm": 82,
+      "gemm_ex": 2,
+      "xf32_mx_kernels": 81,
+      "native_fp32_k4_fallback_kernels": 3
+    }
+  },
+  "precision": {
+    "reference": "gpu41 H100 JAX TF32 without explicit RNE, 20261029",
+    "scope": "Same pretrained weights/input/stats; independent 40-step autoregression; final +240h, 6 upper-air variables x 13 levels equally weighted; Z500 separate; H100 denominator.",
+    "primary_pairs": [
+      {
+        "candidate_round": 1,
+        "h100_round": 1,
+        "primary_pair": true,
+        "reference": "gpu41_H100_JAX_TF32_no_explicit_RNE_20261029",
+        "overall_mean_percent": 0.5154650075564942,
+        "z500_percent": 0.005826997751350947,
+        "z500_mae_m": 0.3205901438189738,
+        "z500_rmse_m": 0.5510658279041205,
+        "internal_under_5_percent": true,
+        "stage_at_most_10_percent": true
+      },
+      {
+        "candidate_round": 2,
+        "h100_round": 2,
+        "primary_pair": true,
+        "reference": "gpu41_H100_JAX_TF32_no_explicit_RNE_20261029",
+        "overall_mean_percent": 0.6006248932745064,
+        "z500_percent": 0.006459924747741123,
+        "z500_mae_m": 0.3554110961712236,
+        "z500_rmse_m": 0.6320138810099332,
+        "internal_under_5_percent": true,
+        "stage_at_most_10_percent": true
+      },
+      {
+        "candidate_round": 3,
+        "h100_round": 3,
+        "primary_pair": true,
+        "reference": "gpu41_H100_JAX_TF32_no_explicit_RNE_20261029",
+        "overall_mean_percent": 0.6036454914421024,
+        "z500_percent": 0.007779347334120952,
+        "z500_mae_m": 0.42799958141628675,
+        "z500_rmse_m": 0.7955304127728067,
+        "internal_under_5_percent": true,
+        "stage_at_most_10_percent": true
+      }
+    ],
+    "all_nine_internal_under5": true,
+    "all_nine_stage_at_most10": true
+  },
+  "performance": {
+    "candidate_rollout_wall_seconds": [
+      58.76636048199725,
+      58.52362256398192,
+      58.616375573998084
+    ],
+    "candidate_wall_median_seconds": 58.616375573998084,
+    "h100_rollout_wall_seconds": [
+      14.472323399037123,
+      14.449050515890121,
+      14.507438756525517
+    ],
+    "h100_wall_median_seconds": 14.472323399037123,
+    "candidate_apply_sum_median_seconds": 54.65813300095033,
+    "h100_apply_sum_median_seconds": 12.718923497013748,
+    "candidate_single_step_gpu_active_ms": 1349.381104998827,
+    "h100_single_step_gpu_active_ms": 315.199329,
+    "candidate_to_h100_raw_wall_throughput_percent": 24.68989809983572,
+    "candidate_to_h100_raw_gpu_active_throughput_percent": 23.358807073282236,
+    "candidate_mfu_single_step_percent": 12.519228321823359,
+    "formal_normalized_efficiency_verdict": null
+  },
+  "limits": [
+    "K=4 uses native FP32 fallback even with XF32 mode; explicit RNE still applied.",
+    "40-step times are preloaded rollout wall times, including transfer/update; GPU active times are single-step profiles only.",
+    "MFU uses GEMM FLOPs approximation and specified 170.3936 TFLOP/s peak; formal equivalent-compute 60% rule is not adjudicated.",
+    "Container hy-smi unavailable (/dev/mkfd/service); host telemetry retained. HIPPROF kernel trace complete.",
+    "Historical native BW1100 33.311 s / 0.724393 s GPU profile are not a fresh same-environment A/B run.",
+    "Training is not covered; no automatic backward-RNE support claimed."
+  ],
+  "code": "/home/zhangyuxin/zyx/graphcast-sugon/experiments/flagos_gemm_ex",
+  "evidence": "/home/zhangyuxin/zyx/graphcast/outputs/flagos-rne-gemm-ex-20261030"
+}

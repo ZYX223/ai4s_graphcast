@@ -1,0 +1,1075 @@
+{
+  "date": "2026-10-30",
+  "baseline_commit": "47129e4b2654bc1c8e99c5b77bb7d54b4a191611",
+  "description": "Measured source archives and selected small result evidence; raw data/checkpoints/traces remain external.",
+  "files": [
+    {
+      "path": "experiments/flagos-training38-20261030/experiment/bench_training_ops.py",
+      "source": "outputs/flagos-training38-20261030/experiment/bench_training_ops.py",
+      "sha256": "d45fa50b0989cd90aacfb15cbd787b267e132b682456ea54aa41b6165a092da9",
+      "bytes": 5876
+    },
+    {
+      "path": "experiments/flagos-training38-20261030/experiment/capture_operators.py",
+      "source": "outputs/flagos-training38-20261030/experiment/capture_operators.py",
+      "sha256": "e562181d96ecc0cc7a4d3039f6abed76021b4bbde48f7a7773464c28c19851f5",
+      "bytes": 1385
+    },
+    {
+      "path": "experiments/flagos-training38-20261030/experiment/check_layernorm_cpu.py",
+      "source": "outputs/flagos-training38-20261030/experiment/check_layernorm_cpu.py",
+      "sha256": "dd7d6f49769504aa967e45164b3dfa7706b88dffdac20e20f724402438a1efd3",
+      "bytes": 3123
+    },
+    {
+      "path": "experiments/flagos-training38-20261030/experiment/count_flops.py",
+      "source": "outputs/flagos-training38-20261030/experiment/count_flops.py",
+      "sha256": "4105373c14b84decfe6dc312906187304887e2cd0c7ab43b1c4ff975106ba7ce",
+      "bytes": 2007
+    },
+    {
+      "path": "experiments/flagos-training38-20261030/experiment/curriculum.py",
+      "source": "outputs/flagos-training38-20261030/experiment/curriculum.py",
+      "sha256": "a9d1e3738a9deb4ffe9facf49113d2ac9b22396bca41bcda329dd5e6041123ba",
+      "bytes": 377
+    },
+    {
+      "path": "experiments/flagos-training38-20261030/experiment/data_transfer.py",
+      "source": "outputs/flagos-training38-20261030/experiment/data_transfer.py",
+      "sha256": "bd878c6149dc429a15707013ea2ca4928cb8b26d402374a2c6affefa85f58e98",
+      "bytes": 222
+    },
+    {
+      "path": "experiments/flagos-training38-20261030/experiment/entry.py",
+      "source": "outputs/flagos-training38-20261030/experiment/entry.py",
+      "sha256": "790ebe752d40e3a2bf854a975bef948ede5207cff93530ba18654ec98b87f158",
+      "bytes": 167
+    },
+    {
+      "path": "experiments/flagos-training38-20261030/experiment/flops.py",
+      "source": "outputs/flagos-training38-20261030/experiment/flops.py",
+      "sha256": "a9410aca2e60a5a0f332ecf6d70f2b5190c71286021419385a138f44933ffe17",
+      "bytes": 1828
+    },
+    {
+      "path": "experiments/flagos-training38-20261030/experiment/model.py",
+      "source": "outputs/flagos-training38-20261030/experiment/model.py",
+      "sha256": "0bbfe6e8b8f5496ec86688c30b0aacc75847ca98c14dfe8345e45e92fd109c1b",
+      "bytes": 1007
+    },
+    {
+      "path": "experiments/flagos-training38-20261030/experiment/operator_replay.py",
+      "source": "outputs/flagos-training38-20261030/experiment/operator_replay.py",
+      "sha256": "a492c60a58735fc8a6bd247b7e0c6ca95f0113f1ec8a2ababa7c178306aa91bd",
+      "bytes": 2431
+    },
+    {
+      "path": "experiments/flagos-training38-20261030/experiment/precision.py",
+      "source": "outputs/flagos-training38-20261030/experiment/precision.py",
+      "sha256": "447b0ec1b2efffb74b1bad14eca8296a2836f31d85020f8ed15af7eabdd354d6",
+      "bytes": 540
+    },
+    {
+      "path": "experiments/flagos-training38-20261030/experiment/recipe.py",
+      "source": "outputs/flagos-training38-20261030/experiment/recipe.py",
+      "sha256": "394fce0216edac1577689e0170ad1e5d7b835c0b3256db0e4ede3b2e0d3cb5a7",
+      "bytes": 1183
+    },
+    {
+      "path": "experiments/flagos-training38-20261030/experiment/remat_policy.py",
+      "source": "outputs/flagos-training38-20261030/experiment/remat_policy.py",
+      "sha256": "c0edb0448b0b0a0e0d3137fa8416d8542624fedf1775c88e065a83a1ba65819d",
+      "bytes": 1751
+    },
+    {
+      "path": "experiments/flagos-training38-20261030/experiment/runtime.py",
+      "source": "outputs/flagos-training38-20261030/experiment/runtime.py",
+      "sha256": "ca51511c2845793628cc1ea8f93d7ed3009def1052ea320fb9a4d1b98df89d6c",
+      "bytes": 3783
+    },
+    {
+      "path": "experiments/flagos-training38-20261030/experiment/supervise_ops.py",
+      "source": "outputs/flagos-training38-20261030/experiment/supervise_ops.py",
+      "sha256": "45de09a1c07b5cb89b2c8a2e66a222203cc178f7477ff7f8c262cfd3f95d13b4",
+      "bytes": 1595
+    },
+    {
+      "path": "experiments/flagos-training38-20261030/experiment/test_curriculum.py",
+      "source": "outputs/flagos-training38-20261030/experiment/test_curriculum.py",
+      "sha256": "e89caa890da309aa4f80cde195bc93c53489708ef3fa8580edaf2e279e496094",
+      "bytes": 1110
+    },
+    {
+      "path": "experiments/flagos-training38-20261030/experiment/test_data_transfer.py",
+      "source": "outputs/flagos-training38-20261030/experiment/test_data_transfer.py",
+      "sha256": "76d168900f477d147407c9b83e4e89e9fc9ab17dfab6eac636951db37381a7f7",
+      "bytes": 591
+    },
+    {
+      "path": "experiments/flagos-training38-20261030/experiment/test_flops.py",
+      "source": "outputs/flagos-training38-20261030/experiment/test_flops.py",
+      "sha256": "2836f9dfbbed365656fbb89826f7c6011f09f30afd65f086c91dcb39d95ef2b5",
+      "bytes": 1149
+    },
+    {
+      "path": "experiments/flagos-training38-20261030/experiment/test_operator_replay.py",
+      "source": "outputs/flagos-training38-20261030/experiment/test_operator_replay.py",
+      "sha256": "6736951eaebc879e84e29282da279ca36f558ab637ffd6c172d102e220aabd52",
+      "bytes": 1262
+    },
+    {
+      "path": "experiments/flagos-training38-20261030/experiment/test_recipe.py",
+      "source": "outputs/flagos-training38-20261030/experiment/test_recipe.py",
+      "sha256": "931bc22358e703077f152884136ebb320b311633ddc3de28f677050ae3618dfc",
+      "bytes": 2322
+    },
+    {
+      "path": "experiments/flagos-training38-20261030/experiment/test_resume_integrity.py",
+      "source": "outputs/flagos-training38-20261030/experiment/test_resume_integrity.py",
+      "sha256": "8eb2c507545cb7e3b14ed6d7125a978f0ddf94688d3e61a1d0cf2c4c724473ba",
+      "bytes": 1297
+    },
+    {
+      "path": "experiments/flagos-training38-20261030/experiment/train.py",
+      "source": "outputs/flagos-training38-20261030/experiment/train.py",
+      "sha256": "a35b32cf8522a51361e964c746c0aca872f8e9eaa024fe0ae5932207b181ece5",
+      "bytes": 13112
+    },
+    {
+      "path": "experiments/flagos-training38-20261030/experiment/validate_linear_retry.py",
+      "source": "outputs/flagos-training38-20261030/experiment/validate_linear_retry.py",
+      "sha256": "59d134028cfeabdefb45f78680f23a4e0d8ea6b4618789c76d60b55f3f2ecc22",
+      "bytes": 1591
+    },
+    {
+      "path": "experiments/flagos-training38-20261030/h100-policy/remat_policy.py",
+      "source": "outputs/flagos-training38-20261030/h100-policy/remat_policy.py",
+      "sha256": "c0edb0448b0b0a0e0d3137fa8416d8542624fedf1775c88e065a83a1ba65819d",
+      "bytes": 1751
+    },
+    {
+      "path": "experiments/flagos-training38-20261030/hygon-policy/remat_policy.py",
+      "source": "outputs/flagos-training38-20261030/hygon-policy/remat_policy.py",
+      "sha256": "28d4a02d1401d154d77e510cedcbf91df126f3a9beaa3d2a0743684b4da49a86",
+      "bytes": 2068
+    },
+    {
+      "path": "experiments/flagos-training38-20261030/analysis/count_flops.py",
+      "source": "outputs/flagos-training38-20261030/analysis/count_flops.py",
+      "sha256": "4105373c14b84decfe6dc312906187304887e2cd0c7ab43b1c4ff975106ba7ce",
+      "bytes": 2007
+    },
+    {
+      "path": "experiments/flagos-training38-20261030/analysis/flops.py",
+      "source": "outputs/flagos-training38-20261030/analysis/flops.py",
+      "sha256": "a9410aca2e60a5a0f332ecf6d70f2b5190c71286021419385a138f44933ffe17",
+      "bytes": 1828
+    },
+    {
+      "path": "experiments/flagos-training38-20261030/analysis/model.py",
+      "source": "outputs/flagos-training38-20261030/analysis/model.py",
+      "sha256": "0bbfe6e8b8f5496ec86688c30b0aacc75847ca98c14dfe8345e45e92fd109c1b",
+      "bytes": 1007
+    },
+    {
+      "path": "experiments/flagos-training38-20261030/source-snapshots/bench_training_ops-first-pass.py",
+      "source": "outputs/flagos-training38-20261030/source-snapshots/bench_training_ops-first-pass.py",
+      "sha256": "a9c813694f1dea87d862643f834625b25d499ba8ef61372e0d3440a0de154ce5",
+      "bytes": 5666
+    },
+    {
+      "path": "experiments/flagos-training38-20261030/source-snapshots/final-guarded-runtime.py",
+      "source": "outputs/flagos-training38-20261030/source-snapshots/final-guarded-runtime.py",
+      "sha256": "ca51511c2845793628cc1ea8f93d7ed3009def1052ea320fb9a4d1b98df89d6c",
+      "bytes": 3783
+    },
+    {
+      "path": "experiments/flagos-training38-20261030/source-snapshots/final-guarded-train.py",
+      "source": "outputs/flagos-training38-20261030/source-snapshots/final-guarded-train.py",
+      "sha256": "a35b32cf8522a51361e964c746c0aca872f8e9eaa024fe0ae5932207b181ece5",
+      "bytes": 13112
+    },
+    {
+      "path": "experiments/flagos-training38-20261030/source-snapshots/manifest.json",
+      "source": "outputs/flagos-training38-20261030/source-snapshots/manifest.json",
+      "sha256": "d284db76d6d8907700d12d2f3f4df100a47b10d29c45c3d6800d1dada5eb98ff",
+      "bytes": 916
+    },
+    {
+      "path": "experiments/flagos-training38-20261030/source-snapshots/run-hygon-pool70.sh",
+      "source": "outputs/flagos-training38-20261030/source-snapshots/run-hygon-pool70.sh",
+      "sha256": "31282b07f374ad4854ce9809f116395e1a8217de6c9853457ab4e3e9c093167c",
+      "bytes": 1618
+    },
+    {
+      "path": "experiments/flagos-training38-20261030/source-snapshots/runtime-used.py",
+      "source": "outputs/flagos-training38-20261030/source-snapshots/runtime-used.py",
+      "sha256": "57c378c88a5ef0a3c3da87a1d585f107a7c5d23ac8f987cd49c8f9a30593ba43",
+      "bytes": 3002
+    },
+    {
+      "path": "experiments/flagos-training38-20261030/source-snapshots/train-v1.py",
+      "source": "outputs/flagos-training38-20261030/source-snapshots/train-v1.py",
+      "sha256": "8a3dcfd6aeb33029cd36b171a94d198352d2e2b88dd3edefc79de50671b89c9b",
+      "bytes": 13061
+    },
+    {
+      "path": "experiments/flagos-training38-20261030/source-snapshots/train-v2.py",
+      "source": "outputs/flagos-training38-20261030/source-snapshots/train-v2.py",
+      "sha256": "77df16253040abf114c6ca24cd024d907e5489de29a8a7800671a0c5b09e1969",
+      "bytes": 13067
+    },
+    {
+      "path": "experiments/flagos-training38-20261030/build_workbook.py",
+      "source": "outputs/flagos-training38-20261030/build_workbook.py",
+      "sha256": "1f386430dad7048b2787b46a61de4d6799b784f67d313925d69fc798b2f90258",
+      "bytes": 5097
+    },
+    {
+      "path": "experiments/flagos-training38-20261030/compare_historical_native.py",
+      "source": "outputs/flagos-training38-20261030/compare_historical_native.py",
+      "sha256": "1474c6beef7b78b2e39a5afd8d02eb94b9552f36266c85e126aec2932989ccd1",
+      "bytes": 7149
+    },
+    {
+      "path": "experiments/flagos-training38-20261030/entry.py",
+      "source": "outputs/flagos-training38-20261030/entry.py",
+      "sha256": "5a95575a8ea34419c9bfa7cfbfbb485cd307d128e9f36958c75fedb3dd2cf7f9",
+      "bytes": 465
+    },
+    {
+      "path": "experiments/flagos-training38-20261030/launch_flops_h100.py",
+      "source": "outputs/flagos-training38-20261030/launch_flops_h100.py",
+      "sha256": "a65cb9f818668ceb682466c25c1738d18b8eb9208cf90c61da8a5a3e3a087029",
+      "bytes": 1137
+    },
+    {
+      "path": "experiments/flagos-training38-20261030/launch_h100.py",
+      "source": "outputs/flagos-training38-20261030/launch_h100.py",
+      "sha256": "a7c18ce3331e608cedaed60f12eb66cce372f79a892bb951bff9dd1209f25cd3",
+      "bytes": 2328
+    },
+    {
+      "path": "experiments/flagos-training38-20261030/launch_h100_r11plus.py",
+      "source": "outputs/flagos-training38-20261030/launch_h100_r11plus.py",
+      "sha256": "7a57c578ba15199bc7fd574a22a8740f3fece8750e5088cba8858e2de4814823",
+      "bytes": 2337
+    },
+    {
+      "path": "experiments/flagos-training38-20261030/launch_hygon.py",
+      "source": "outputs/flagos-training38-20261030/launch_hygon.py",
+      "sha256": "e3c5f185b6bb5e75b6baeb5ad9ca904cd83fa645fc6e8a9268aad7542f1cf54a",
+      "bytes": 1923
+    },
+    {
+      "path": "experiments/flagos-training38-20261030/make_report.py",
+      "source": "outputs/flagos-training38-20261030/make_report.py",
+      "sha256": "a0c1e85509c872cec7b8272bda73f4e4a64c22da37b850049b606289be738129",
+      "bytes": 8558
+    },
+    {
+      "path": "experiments/flagos-training38-20261030/parse_finished_xplanes.py",
+      "source": "outputs/flagos-training38-20261030/parse_finished_xplanes.py",
+      "sha256": "cf9ece2b4c36373895d124bd5988881e95fdabf22c386df0c85b714232bde972",
+      "bytes": 652
+    },
+    {
+      "path": "experiments/flagos-training38-20261030/run-h100-r11plus.sh",
+      "source": "outputs/flagos-training38-20261030/run-h100-r11plus.sh",
+      "sha256": "d1b589c35bd8084da00408feda652fbfed62ebf730398fe033b867131b9b6756",
+      "bytes": 1124
+    },
+    {
+      "path": "experiments/flagos-training38-20261030/run-h100.sh",
+      "source": "outputs/flagos-training38-20261030/run-h100.sh",
+      "sha256": "22b6ace391b9074f37b46f02de21722a4c7d5c098c48b95ae04760244aaa318f",
+      "bytes": 1124
+    },
+    {
+      "path": "experiments/flagos-training38-20261030/run-hygon.sh",
+      "source": "outputs/flagos-training38-20261030/run-hygon.sh",
+      "sha256": "78a6d7517043683cb70e7bad21b8b1a1d699ce48cd9e0f60b9e3e54f222de162",
+      "bytes": 1966
+    },
+    {
+      "path": "experiments/flagos-training38-20261030/run-ops-native-retry.sh",
+      "source": "outputs/flagos-training38-20261030/run-ops-native-retry.sh",
+      "sha256": "ac1b58ce73d5a3ea63f3b6812ebd6b2fe5d1a816672386d67e585822d542615b",
+      "bytes": 1136
+    },
+    {
+      "path": "experiments/flagos-training38-20261030/run-ops-retry.sh",
+      "source": "outputs/flagos-training38-20261030/run-ops-retry.sh",
+      "sha256": "0889933fbae501c6d90176142e8cc336001b3380ddfb81ab924381480c02aa53",
+      "bytes": 1209
+    },
+    {
+      "path": "experiments/flagos-training38-20261030/run-ops-supervised.sh",
+      "source": "outputs/flagos-training38-20261030/run-ops-supervised.sh",
+      "sha256": "9f51ec6e2f99f4c52df4489a55e17c7306ced6a6290e9c19f369c8e239dc485d",
+      "bytes": 847
+    },
+    {
+      "path": "experiments/flagos-training38-20261030/run-ops.sh",
+      "source": "outputs/flagos-training38-20261030/run-ops.sh",
+      "sha256": "edb5618f88638871b652c1b1f2c32ee0e1d26b5e3581e5b3e69a59e41ac83074",
+      "bytes": 1047
+    },
+    {
+      "path": "experiments/flagos-training38-20261030/summarize_operators.py",
+      "source": "outputs/flagos-training38-20261030/summarize_operators.py",
+      "sha256": "29e803cef11bd821dac5eec6b5cbea66542bcc541f5bdfa5759e3ade25d07d72",
+      "bytes": 8206
+    },
+    {
+      "path": "experiments/flagos-training38-20261030/summarize_training.py",
+      "source": "outputs/flagos-training38-20261030/summarize_training.py",
+      "sha256": "5af5743a135d1f4d3a2dc6aa8830d66b81137707b467ffbae2346fddf6945489",
+      "bytes": 7765
+    },
+    {
+      "path": "experiments/flagos-training38-20261030/test_timing.py",
+      "source": "outputs/flagos-training38-20261030/test_timing.py",
+      "sha256": "e27d408d3bfcea1f39f4b0a107479a2b595e05beb8da4230274991984ea13b22",
+      "bytes": 1015
+    },
+    {
+      "path": "experiments/flagos-training38-20261030/test_trajectory.py",
+      "source": "outputs/flagos-training38-20261030/test_trajectory.py",
+      "sha256": "74ab7b6eb56d446ae01208175434984c670c8b2820a52516e6cf95af193f6bb9",
+      "bytes": 1027
+    },
+    {
+      "path": "experiments/flagos-training38-20261030/test_xplane_timing.py",
+      "source": "outputs/flagos-training38-20261030/test_xplane_timing.py",
+      "sha256": "338dd603e08abf67288bd7c5efec79e8223ff2d8bf6a41efe47adf1a709b7c7a",
+      "bytes": 1363
+    },
+    {
+      "path": "experiments/flagos-training38-20261030/timing.py",
+      "source": "outputs/flagos-training38-20261030/timing.py",
+      "sha256": "acbe7e09e5f806de2d15823b5598b8f47943c5e2530b6fc46ed2d165a2ff6ba4",
+      "bytes": 2108
+    },
+    {
+      "path": "experiments/flagos-training38-20261030/trajectory.py",
+      "source": "outputs/flagos-training38-20261030/trajectory.py",
+      "sha256": "73f0ed7c73934f6baf6d5047ffdcb78044aa2e8299f63ea0bd5c3723a6547d3e",
+      "bytes": 1042
+    },
+    {
+      "path": "experiments/flagos-training38-20261030/xplane.proto",
+      "source": "outputs/flagos-training38-20261030/xplane.proto",
+      "sha256": "1491efbb71b645598bda8f7af7d9d1d483eb2be31bdd9465b76ff0ac983c5919",
+      "bytes": 5246
+    },
+    {
+      "path": "experiments/flagos-training38-20261030/xplane_timing.py",
+      "source": "outputs/flagos-training38-20261030/xplane_timing.py",
+      "sha256": "4e5a66f9fe01087433e61c6e1a52a7b63ac5166e6314be13769f0b6cc39b7101",
+      "bytes": 2821
+    },
+    {
+      "path": "experiments/flagos-training38-20261030/router/training_router.cc",
+      "source": "outputs/training-minimal-20261030/experiment/training_router.cc",
+      "sha256": "d9685610f8aa3e584d8ddfdadd92bf2344b895af447bb9ddb83c0ef3ddaea619",
+      "bytes": 5110
+    },
+    {
+      "path": "experiments/flagos-training38-20261030/router/rne_kernel.h",
+      "source": "outputs/training-minimal-20261030/experiment/rne_kernel.h",
+      "sha256": "62e4ad9ce6cb7e27df9e41dbdfe6353241b810c11c92f0aa5e29618d494efd4d",
+      "bytes": 194
+    },
+    {
+      "path": "experiments/flagos-training38-20261030/router/rne_kernel.hip",
+      "source": "outputs/training-minimal-20261030/experiment/rne_kernel.hip",
+      "sha256": "6e1ceda3230760855460a09bc3c8d5f173f223a649311bd32ef893b34cf7a690",
+      "bytes": 2029
+    },
+    {
+      "path": "experiments/flagos-training38-20261030/run-child.sh",
+      "source": "outputs/training-minimal-20261030/run-child.sh",
+      "sha256": "46978b77e4cbb382f795fc193bd56f01ac46493438e64101d7da8869fcfc01a7",
+      "bytes": 135
+    },
+    {
+      "path": "experiments/flagos-training38-20261030/layernorm-debug/STATUS.md",
+      "source": "outputs/flagos-training38-20261030/layernorm-debug/STATUS.md",
+      "sha256": "1a25f3f197920b6bf9c61c2de078362ce1befb3712b56c58bf37d23c3aa8c44e",
+      "bytes": 2279
+    },
+    {
+      "path": "experiments/flagos-training38-20261030/layernorm-debug/minimal_copy.py",
+      "source": "outputs/flagos-training38-20261030/layernorm-debug/minimal_copy.py",
+      "sha256": "d046dd39a8d3bd5a4432993533bf0e2777868d0e457ac38cf810e1e993e38d23",
+      "bytes": 480
+    },
+    {
+      "path": "experiments/flagos-training38-20261030/layernorm-debug/probe.py",
+      "source": "outputs/flagos-training38-20261030/layernorm-debug/probe.py",
+      "sha256": "6dc138bd4861d2eb559d45bee0ddd0f8da197e37173c643b192317a5e96b8e90",
+      "bytes": 1652
+    },
+    {
+      "path": "experiments/flagos-training38-20261030/layernorm-debug/resource_gate.py",
+      "source": "outputs/flagos-training38-20261030/layernorm-debug/resource_gate.py",
+      "sha256": "7f32c43f6d4f3a09005ef87fa15d4928b790986c8bf39be664b059ea3b155351",
+      "bytes": 949
+    },
+    {
+      "path": "experiments/flagos-training38-20261030/layernorm-debug/run-bench.sh",
+      "source": "outputs/flagos-training38-20261030/layernorm-debug/run-bench.sh",
+      "sha256": "46c271b31d414e36a6205bf3b96d8ad09b1d26661e75b43ee23ca76742151858",
+      "bytes": 2099
+    },
+    {
+      "path": "experiments/flagos-training38-20261030/layernorm-debug/run-probe-workaround.sh",
+      "source": "outputs/flagos-training38-20261030/layernorm-debug/run-probe-workaround.sh",
+      "sha256": "8c225f1269bcfb0174c3746e1896ca0fa238f2bcae17ef0f95d4288c80cbed0b",
+      "bytes": 883
+    },
+    {
+      "path": "experiments/flagos-training38-20261030/layernorm-debug/run-probe.sh",
+      "source": "outputs/flagos-training38-20261030/layernorm-debug/run-probe.sh",
+      "sha256": "130b8b40d832e74f1e78b869a850db0406a98f985eb270925d86ee10ee6e0084",
+      "bytes": 826
+    },
+    {
+      "path": "experiments/flagos-training38-20261030/layernorm-debug/test_resource_gate.py",
+      "source": "outputs/flagos-training38-20261030/layernorm-debug/test_resource_gate.py",
+      "sha256": "9ba34366cd72d8e6abe900f4221e500b9cc6d1757fd6e79f60d3cf7fc46b8ff2",
+      "bytes": 916
+    },
+    {
+      "path": "experiments/flagos-inference-20261030/baseline/src/graphcast_bench/__init__.py",
+      "source": "outputs/flagos-rne-inference-20261029/baseline/src/graphcast_bench/__init__.py",
+      "sha256": "0b1f04fd491075770fb44036aff45175fccb0045cb6973d91dbf090b419b6537",
+      "bytes": 71
+    },
+    {
+      "path": "experiments/flagos-inference-20261030/baseline/src/graphcast_bench/assets.py",
+      "source": "outputs/flagos-rne-inference-20261029/baseline/src/graphcast_bench/assets.py",
+      "sha256": "cab87ed8a68ac717bac048046096e6cc3d223a28f3e3b0c1630b4261a4701ce8",
+      "bytes": 2535
+    },
+    {
+      "path": "experiments/flagos-inference-20261030/baseline/src/graphcast_bench/benchmark.py",
+      "source": "outputs/flagos-rne-inference-20261029/baseline/src/graphcast_bench/benchmark.py",
+      "sha256": "c177e5d733dceabfd2d3a6b0b22cc5eaaeefd8e745f985ec268f364d6f39ab6a",
+      "bytes": 12159
+    },
+    {
+      "path": "experiments/flagos-inference-20261030/baseline/src/graphcast_bench/graph_operator_bench.py",
+      "source": "outputs/flagos-rne-inference-20261029/baseline/src/graphcast_bench/graph_operator_bench.py",
+      "sha256": "c088409aeb7b864e4d70e38eafd748ec06a03492b763a50f2717a382f51fe581",
+      "bytes": 8130
+    },
+    {
+      "path": "experiments/flagos-inference-20261030/baseline/src/graphcast_bench/logical_bench.py",
+      "source": "outputs/flagos-rne-inference-20261029/baseline/src/graphcast_bench/logical_bench.py",
+      "sha256": "c8247ccc214f8e7bb84e99a75589e8134c2ecb617ebda2a7743f6f05eb34afc6",
+      "bytes": 19330
+    },
+    {
+      "path": "experiments/flagos-inference-20261030/baseline/src/graphcast_bench/logical_inventory.py",
+      "source": "outputs/flagos-rne-inference-20261029/baseline/src/graphcast_bench/logical_inventory.py",
+      "sha256": "d6cb5d582cfa4d2ef5821d81503c8045ff517c7a5563f6220111d7fc2dbe526f",
+      "bytes": 7244
+    },
+    {
+      "path": "experiments/flagos-inference-20261030/baseline/src/graphcast_bench/metrics.py",
+      "source": "outputs/flagos-rne-inference-20261029/baseline/src/graphcast_bench/metrics.py",
+      "sha256": "a21741b5660b4969e4a8eb34cedd8ca87f71813b7aa334ca912d45b516f72457",
+      "bytes": 5827
+    },
+    {
+      "path": "experiments/flagos-inference-20261030/baseline/src/graphcast_bench/operator_catalog.py",
+      "source": "outputs/flagos-rne-inference-20261029/baseline/src/graphcast_bench/operator_catalog.py",
+      "sha256": "e7f79e0efe00a3d6979e3b651823a314df1fadc0b140814f5135efe836e97157",
+      "bytes": 3593
+    },
+    {
+      "path": "experiments/flagos-inference-20261030/baseline/src/graphcast_bench/profile_summary.py",
+      "source": "outputs/flagos-rne-inference-20261029/baseline/src/graphcast_bench/profile_summary.py",
+      "sha256": "a200bda8ac53dcb2a434280260228b115764c141e39f2e165b3ee8dba2b87e71",
+      "bytes": 5011
+    },
+    {
+      "path": "experiments/flagos-inference-20261030/baseline/src/graphcast_bench/router.py",
+      "source": "outputs/flagos-rne-inference-20261029/baseline/src/graphcast_bench/router.py",
+      "sha256": "78928a6bc98a4b9e9ac9a0321983303d23540f7745fe37d3489e01261bdabe26",
+      "bytes": 2585
+    },
+    {
+      "path": "experiments/flagos-inference-20261030/baseline/configs/case.json",
+      "source": "outputs/flagos-rne-inference-20261029/baseline/configs/case.json",
+      "sha256": "58b0a7c916b65bb165d96b47a864355e42977d2250f7b770e70c11176bd62300",
+      "bytes": 2925
+    },
+    {
+      "path": "experiments/flagos-inference-20261030/baseline/configs/h100.json",
+      "source": "outputs/flagos-rne-inference-20261029/baseline/configs/h100.json",
+      "sha256": "7b600a302129f5a25c64aa24c3eeffe2c96dec759a7ae663e9265dd5c9f91dd7",
+      "bytes": 470
+    },
+    {
+      "path": "experiments/flagos-inference-20261030/baseline/configs/hygon.json",
+      "source": "outputs/flagos-rne-inference-20261029/baseline/configs/hygon.json",
+      "sha256": "0eae537231d43de90eea502b55e006044360d9f47405f192dd8231747be824f6",
+      "bytes": 418
+    },
+    {
+      "path": "experiments/flagos-inference-20261030/baseline/configs/operators.json",
+      "source": "outputs/flagos-rne-inference-20261029/baseline/configs/operators.json",
+      "sha256": "a45ba0d7b442b9949aa90c399f3bf4f664f28ebd01c076325ca19cf040a42226",
+      "bytes": 17536
+    },
+    {
+      "path": "experiments/flagos-inference-20261030/baseline/kernels/xf32_rne/PROVENANCE.json",
+      "source": "outputs/flagos-rne-inference-20261029/baseline/kernels/xf32_rne/PROVENANCE.json",
+      "sha256": "53654a6c6bf652f0018bcd13b02b22127df8b5f77b4c8b0bd915c19d4ba4fcdd",
+      "bytes": 535
+    },
+    {
+      "path": "experiments/flagos-inference-20261030/baseline/kernels/xf32_rne/rne_kernel.h",
+      "source": "outputs/flagos-rne-inference-20261029/baseline/kernels/xf32_rne/rne_kernel.h",
+      "sha256": "62e4ad9ce6cb7e27df9e41dbdfe6353241b810c11c92f0aa5e29618d494efd4d",
+      "bytes": 194
+    },
+    {
+      "path": "experiments/flagos-inference-20261030/baseline/kernels/xf32_rne/rne_kernel.hip",
+      "source": "outputs/flagos-rne-inference-20261029/baseline/kernels/xf32_rne/rne_kernel.hip",
+      "sha256": "6e1ceda3230760855460a09bc3c8d5f173f223a649311bd32ef893b34cf7a690",
+      "bytes": 2029
+    },
+    {
+      "path": "experiments/flagos-inference-20261030/baseline/kernels/xf32_rne/weights.json",
+      "source": "outputs/flagos-rne-inference-20261029/baseline/kernels/xf32_rne/weights.json",
+      "sha256": "bd9ad13385c662f316e7ea5dadf94184b237146c9ed6243d99e0725083f8d379",
+      "bytes": 35163
+    },
+    {
+      "path": "experiments/flagos-inference-20261030/baseline/kernels/xf32_rne/weights.tsv",
+      "source": "outputs/flagos-rne-inference-20261029/baseline/kernels/xf32_rne/weights.tsv",
+      "sha256": "ca4119f77e5df8c8f6609990d4adb594b5102e15de2f72efd0781577bb294fc9",
+      "bytes": 24398
+    },
+    {
+      "path": "experiments/flagos-inference-20261030/baseline/kernels/xf32_rne/xf32_rne_router.cc",
+      "source": "outputs/flagos-rne-inference-20261029/baseline/kernels/xf32_rne/xf32_rne_router.cc",
+      "sha256": "f9177d33c82c842461a43af95f371fd5b32a259ba3e6283b31aa61256a86b8e8",
+      "bytes": 8069
+    },
+    {
+      "path": "experiments/flagos-inference-20261030/baseline/third_party/graphcast/UPSTREAM.json",
+      "source": "outputs/flagos-rne-inference-20261029/baseline/third_party/graphcast/UPSTREAM.json",
+      "sha256": "8878f3fe9ff91123d805859c501cba7ae6229390d100370a7fd7baec22d08b89",
+      "bytes": 1929
+    },
+    {
+      "path": "experiments/flagos-inference-20261030/baseline/third_party/graphcast/graphcast/autoregressive.py",
+      "source": "outputs/flagos-rne-inference-20261029/baseline/third_party/graphcast/graphcast/autoregressive.py",
+      "sha256": "2e44d4505bed0c6a5b6d42fd58d0d0d5414bab2658f02ba2b05e92727887749a",
+      "bytes": 13668
+    },
+    {
+      "path": "experiments/flagos-inference-20261030/baseline/third_party/graphcast/graphcast/checkpoint.py",
+      "source": "outputs/flagos-rne-inference-20261029/baseline/third_party/graphcast/graphcast/checkpoint.py",
+      "sha256": "07dc3521a5ed9e606869246a47f865f524e2fc4c689c745305fcdd3f2e5ab24a",
+      "bytes": 5765
+    },
+    {
+      "path": "experiments/flagos-inference-20261030/baseline/third_party/graphcast/graphcast/deep_typed_graph_net.py",
+      "source": "outputs/flagos-rne-inference-20261029/baseline/third_party/graphcast/graphcast/deep_typed_graph_net.py",
+      "sha256": "7812649e3128a002603b537e61c7eda060b03a7a2d90bd037eeb7791b52cc59a",
+      "bytes": 19206
+    },
+    {
+      "path": "experiments/flagos-inference-20261030/baseline/third_party/graphcast/graphcast/graphcast.py",
+      "source": "outputs/flagos-rne-inference-20261029/baseline/third_party/graphcast/graphcast/graphcast.py",
+      "sha256": "6aeb9cfa2490b0e2dbfa70f255594914ee1765d5e20c3e66ca912b80bc66e953",
+      "bytes": 31479
+    },
+    {
+      "path": "experiments/flagos-inference-20261030/baseline/third_party/graphcast/graphcast/grid_mesh_connectivity.py",
+      "source": "outputs/flagos-rne-inference-20261029/baseline/third_party/graphcast/graphcast/grid_mesh_connectivity.py",
+      "sha256": "914aa71a500a9a3e13cd856a25caffbbba724dda65a30ccf6dbf882e1fe72fc2",
+      "bytes": 5303
+    },
+    {
+      "path": "experiments/flagos-inference-20261030/baseline/third_party/graphcast/graphcast/icosahedral_mesh.py",
+      "source": "outputs/flagos-rne-inference-20261029/baseline/third_party/graphcast/graphcast/icosahedral_mesh.py",
+      "sha256": "bfafc9a3efa272714122963e6b49efe961b3ab1b5d35a7eddd727aa74d693fbe",
+      "bytes": 11414
+    },
+    {
+      "path": "experiments/flagos-inference-20261030/baseline/third_party/graphcast/graphcast/losses.py",
+      "source": "outputs/flagos-rne-inference-20261029/baseline/third_party/graphcast/graphcast/losses.py",
+      "sha256": "520aa2010ddbc441ee0630598c48176a905c3638582e4af6d15887a68b7c7ab8",
+      "bytes": 7255
+    },
+    {
+      "path": "experiments/flagos-inference-20261030/baseline/third_party/graphcast/graphcast/mlp.py",
+      "source": "outputs/flagos-rne-inference-20261029/baseline/third_party/graphcast/graphcast/mlp.py",
+      "sha256": "a0d0cdf91f01817344935ef8b5ffed20902041e386321ed3da45e6a26a92d266",
+      "bytes": 1607
+    },
+    {
+      "path": "experiments/flagos-inference-20261030/baseline/third_party/graphcast/graphcast/model_utils.py",
+      "source": "outputs/flagos-rne-inference-20261029/baseline/third_party/graphcast/graphcast/model_utils.py",
+      "sha256": "bc8006a4454e40eb6c0b4a802b1bbeac77f136af740cafefcb829f5965a9cce0",
+      "bytes": 33815
+    },
+    {
+      "path": "experiments/flagos-inference-20261030/baseline/third_party/graphcast/graphcast/normalization.py",
+      "source": "outputs/flagos-rne-inference-20261029/baseline/third_party/graphcast/graphcast/normalization.py",
+      "sha256": "5b5f95bcf830be1236244fd09cc418caa28c1c970793130e93bccbc98e0e00e7",
+      "bytes": 8306
+    },
+    {
+      "path": "experiments/flagos-inference-20261030/baseline/third_party/graphcast/graphcast/predictor_base.py",
+      "source": "outputs/flagos-rne-inference-20261029/baseline/third_party/graphcast/graphcast/predictor_base.py",
+      "sha256": "ff3f3297e1ec0484d2baf76b4d7e68c96394f17a6f436381f1e181ebbef823b0",
+      "bytes": 7402
+    },
+    {
+      "path": "experiments/flagos-inference-20261030/baseline/third_party/graphcast/graphcast/rollout.py",
+      "source": "outputs/flagos-rne-inference-20261029/baseline/third_party/graphcast/graphcast/rollout.py",
+      "sha256": "0858c305f04c1bc0ecbfc2c2075acc985166eac7a111027dfb354f585cdbf2da",
+      "bytes": 17924
+    },
+    {
+      "path": "experiments/flagos-inference-20261030/baseline/third_party/graphcast/graphcast/typed_graph.py",
+      "source": "outputs/flagos-rne-inference-20261029/baseline/third_party/graphcast/graphcast/typed_graph.py",
+      "sha256": "feebe364b3ef12f0fc56c0f956330c70680297a9c44378d01ae972db504cd6d6",
+      "bytes": 3752
+    },
+    {
+      "path": "experiments/flagos-inference-20261030/baseline/third_party/graphcast/graphcast/typed_graph_net.py",
+      "source": "outputs/flagos-rne-inference-20261029/baseline/third_party/graphcast/graphcast/typed_graph_net.py",
+      "sha256": "58bc7c9b090a65ec83d65f0b3cd48d4a450f57f50b8bba5425f33b25d436e7a4",
+      "bytes": 12610
+    },
+    {
+      "path": "experiments/flagos-inference-20261030/baseline/third_party/graphcast/graphcast/xarray_jax.py",
+      "source": "outputs/flagos-rne-inference-20261029/baseline/third_party/graphcast/graphcast/xarray_jax.py",
+      "sha256": "0203d371ea2029023d2eae90f447020caa3f0858b01b4244f2824611efb34b18",
+      "bytes": 43253
+    },
+    {
+      "path": "experiments/flagos-inference-20261030/baseline/third_party/graphcast/graphcast/xarray_tree.py",
+      "source": "outputs/flagos-rne-inference-20261029/baseline/third_party/graphcast/graphcast/xarray_tree.py",
+      "sha256": "b6c05004109e88175c6e1faee4f864faea652f78fa99065e2e9635039a8c6fae",
+      "bytes": 3168
+    },
+    {
+      "path": "experiments/mfu-40step-20261030/build_tables.py",
+      "source": "outputs/mfu-40step-20261030/build_tables.py",
+      "sha256": "1addd68753cc9975df6e2d3e5e83c045bd0701e1b761b3be20fd210d1c5f17c7",
+      "bytes": 8266
+    },
+    {
+      "path": "experiments/mfu-40step-20261030/calculate.py",
+      "source": "outputs/mfu-40step-20261030/calculate.py",
+      "sha256": "478e3ae6505e24e59e3dc3a0cc08ecdadd7271cd8d306e7d8691c1f612de8d83",
+      "bytes": 18741
+    },
+    {
+      "path": "experiments/mfu-40step-20261030/launch-h100.py",
+      "source": "outputs/mfu-40step-20261030/launch-h100.py",
+      "sha256": "35b6e154db77e48ff374e14c0df3ee72dd34bbe737d3fe95d9ab236ab95280ba",
+      "bytes": 2628
+    },
+    {
+      "path": "experiments/mfu-40step-20261030/launch-native.py",
+      "source": "outputs/mfu-40step-20261030/launch-native.py",
+      "sha256": "6c6e207a400c1b5d1c4d1b759dcbb7d3f7ad01ea1ff9a38ce476b5ddd8b024b4",
+      "bytes": 2908
+    },
+    {
+      "path": "experiments/mfu-40step-20261030/native-profile-entry.sh",
+      "source": "outputs/mfu-40step-20261030/native-profile-entry.sh",
+      "sha256": "4536f7a7cd2d9fa4a54aed9f1684666a12d26fa14c4925f72cff2a948d6cb150",
+      "bytes": 306
+    },
+    {
+      "path": "experiments/mfu-40step-20261030/profile40.py",
+      "source": "outputs/mfu-40step-20261030/profile40.py",
+      "sha256": "a8d5a510e07fc0a051c2d00df42adb1696bcfd49e1817c523adddcc035d4ebef",
+      "bytes": 2967
+    },
+    {
+      "path": "experiments/mfu-40step-20261030/run-h100.sh",
+      "source": "outputs/mfu-40step-20261030/run-h100.sh",
+      "sha256": "37bc43669e41004915c3653e73531af2677aaec95149b642179d44b6b46d75fb",
+      "bytes": 959
+    },
+    {
+      "path": "experiments/mfu-40step-20261030/run-hygon.sh",
+      "source": "outputs/mfu-40step-20261030/run-hygon.sh",
+      "sha256": "0c5636e1677bcf9b2ca86f73fa3834ad9e51674c4818add98c939991344f8e33",
+      "bytes": 1883
+    },
+    {
+      "path": "experiments/mfu-40step-20261030/run-native.sh",
+      "source": "outputs/mfu-40step-20261030/run-native.sh",
+      "sha256": "7697425135c835b8863e754d9802d2eff1277d8ccdbc647cf444313ba34d9577",
+      "bytes": 2733
+    },
+    {
+      "path": "experiments/mfu-40step-20261030/verify_results.py",
+      "source": "outputs/mfu-40step-20261030/verify_results.py",
+      "sha256": "5d624895c09eb34efaa8a18905695a310da6d8c8f00e5f7f780318fdfbd38ba9",
+      "bytes": 2895
+    },
+    {
+      "path": "experiments/flagos-inference-final-20261030/consolidate.py",
+      "source": "outputs/flagos-inference-final-20261030/consolidate.py",
+      "sha256": "4d050cdd7d8e71de51ed6b0f06e7e4174175e729dfc283f9b0012d06c4332801",
+      "bytes": 25385
+    },
+    {
+      "path": "experiments/flagos-inference-final-20261030/replay-linear.py",
+      "source": "outputs/flagos-inference-final-20261030/replay-linear.py",
+      "sha256": "577451281c5ef0fc552d66061def2eb971b502f55e9225545a14c9810e97b39d",
+      "bytes": 2507
+    },
+    {
+      "path": "experiments/flagos-inference-final-20261030/run-linear.sh",
+      "source": "outputs/flagos-inference-final-20261030/run-linear.sh",
+      "sha256": "80fe780d4b01b0b99350768b4b419b71ff63501ad1c39a1065ae858990c8517a",
+      "bytes": 1542
+    },
+    {
+      "path": "evidence/20261030/flagos-training38-20261030/summary.json",
+      "source": "outputs/flagos-training38-20261030/summary.json",
+      "sha256": "9ee4135d8c0f882fc71a36633588cd8497f091da939b1ae4a6db5c2d3fc9dedd",
+      "bytes": 2179
+    },
+    {
+      "path": "evidence/20261030/flagos-training38-20261030/updates.csv",
+      "source": "outputs/flagos-training38-20261030/updates.csv",
+      "sha256": "fab86b538a4ada20616011862c96f3af75a73fc1b8606c461c969396767ec9ee",
+      "bytes": 23051
+    },
+    {
+      "path": "evidence/20261030/flagos-training38-20261030/loss-comparison.csv",
+      "source": "outputs/flagos-training38-20261030/loss-comparison.csv",
+      "sha256": "a68cf6140ca9016c4358e54086a710e8547ac0723c8bc4988b4ee5cbd47b6ee0",
+      "bytes": 2817
+    },
+    {
+      "path": "evidence/20261030/flagos-training38-20261030/horizons.csv",
+      "source": "outputs/flagos-training38-20261030/horizons.csv",
+      "sha256": "e765a53e0a844e631dc54cf2494f4b3157b2c676740703417e465561c31fac66",
+      "bytes": 4854
+    },
+    {
+      "path": "evidence/20261030/flagos-training38-20261030/operator-table.csv",
+      "source": "outputs/flagos-training38-20261030/operator-table.csv",
+      "sha256": "bb05a52b30e7a33929a9913a91c98745e7c5f6c7eb6b193c5d04f2a608b84f7e",
+      "bytes": 2934
+    },
+    {
+      "path": "evidence/20261030/flagos-training38-20261030/operator-phases.csv",
+      "source": "outputs/flagos-training38-20261030/operator-phases.csv",
+      "sha256": "21f708484f74ee7371f2a3ada7848f203015cc26fa6032bf6cc40813a5fc41a6",
+      "bytes": 4550
+    },
+    {
+      "path": "evidence/20261030/flagos-training38-20261030/operators-summary.json",
+      "source": "outputs/flagos-training38-20261030/operators-summary.json",
+      "sha256": "227833630176b3d48234fbf3a56a8cd18dc58e87a3ceb2f6206353c175550312",
+      "bytes": 10896
+    },
+    {
+      "path": "evidence/20261030/flagos-training38-20261030/environment-version.json",
+      "source": "outputs/flagos-training38-20261030/environment-version.json",
+      "sha256": "4be8db8c6288b2e06a1847b39047c3bb5552c90ebf6f6931517cc8befacd05d2",
+      "bytes": 1414
+    },
+    {
+      "path": "evidence/20261030/flagos-training38-20261030/REPORT.md",
+      "source": "outputs/flagos-training38-20261030/REPORT.md",
+      "sha256": "6221ef74a1e59787efdfd1f289fa1f2e2280593366b374070da89a1a8977cb34",
+      "bytes": 7489
+    },
+    {
+      "path": "evidence/20261030/flagos-training38-20261030/OPERATORS.md",
+      "source": "outputs/flagos-training38-20261030/OPERATORS.md",
+      "sha256": "681a0f93143491a67df709542f1c66082695e2b04253805ebc2ac6e02195b27c",
+      "bytes": 3315
+    },
+    {
+      "path": "evidence/20261030/flagos-training38-20261030/baseline-verification.json",
+      "source": "outputs/flagos-training38-20261030/baseline-verification.json",
+      "sha256": "3cf10f071e6ba08f21b08548d8ac2fe8d15b91d0ff4519330d989bf8cd34885a",
+      "bytes": 2584
+    },
+    {
+      "path": "evidence/20261030/flagos-training38-20261030/reproduction-source-hashes.json",
+      "source": "outputs/flagos-training38-20261030/reproduction-source-hashes.json",
+      "sha256": "e0045997defd43df7395bbdf38e3bd7ca92ad38139dfbd8badb18c46ae17d315",
+      "bytes": 4396
+    },
+    {
+      "path": "evidence/20261030/mfu-40step-20261030/summary.json",
+      "source": "outputs/mfu-40step-20261030/summary.json",
+      "sha256": "dc01443482b5708a3d988d2f6ca4cd8626921eb9d122d5b0973ad9bf4e3f7022",
+      "bytes": 15867
+    },
+    {
+      "path": "evidence/20261030/mfu-40step-20261030/mfu-comparison.csv",
+      "source": "outputs/mfu-40step-20261030/mfu-comparison.csv",
+      "sha256": "47881722acac1307176158ce010f81a61df4ea85eae486576dfa5c23cd620744",
+      "bytes": 384
+    },
+    {
+      "path": "evidence/20261030/mfu-40step-20261030/rounds.csv",
+      "source": "outputs/mfu-40step-20261030/rounds.csv",
+      "sha256": "9b46f383a16236d2c3d69f67cb0f90226871c219b17559c6580ff6375808b3ef",
+      "bytes": 1771
+    },
+    {
+      "path": "evidence/20261030/mfu-40step-20261030/operators.csv",
+      "source": "outputs/mfu-40step-20261030/operators.csv",
+      "sha256": "4e0b81e0f546e77f77ea2f29dddf13538959e60adaf34f43501eb78dbeaffdb6",
+      "bytes": 3623
+    },
+    {
+      "path": "evidence/20261030/mfu-40step-20261030/peak-reference.json",
+      "source": "outputs/mfu-40step-20261030/peak-reference.json",
+      "sha256": "efd216be074de48b9a31b55817ff04e1aaf21929e445befff8db5ac9ac8b95cb",
+      "bytes": 1509
+    },
+    {
+      "path": "evidence/20261030/mfu-40step-20261030/REPORT.md",
+      "source": "outputs/mfu-40step-20261030/REPORT.md",
+      "sha256": "66bf088025cfce3532cf6d3343e36278030fd0476a754c0701f8b928554e35ca",
+      "bytes": 7021
+    },
+    {
+      "path": "evidence/20261030/mfu-40step-20261030/validation.json",
+      "source": "outputs/mfu-40step-20261030/validation.json",
+      "sha256": "60d0e2a9fb3af6cda26a32e968dedfff544ec9b5fb92ccb30d45bad2d1f838d7",
+      "bytes": 829
+    },
+    {
+      "path": "evidence/20261030/flagos-inference-final-20261030/operators.csv",
+      "source": "outputs/flagos-inference-final-20261030/operators.csv",
+      "sha256": "7570d6565d7750c66913e917ffb7f5997ed1a5fb91e4ff084798af51bff70229",
+      "bytes": 2237
+    },
+    {
+      "path": "evidence/20261030/flagos-inference-final-20261030/model-rounds.csv",
+      "source": "outputs/flagos-inference-final-20261030/model-rounds.csv",
+      "sha256": "d007af0494cfb6584fbb0a5e480e89fc8d7428eeeccde99b3638bf14f7a3cb48",
+      "bytes": 444
+    },
+    {
+      "path": "evidence/20261030/flagos-inference-final-20261030/kernel-categories.csv",
+      "source": "outputs/flagos-inference-final-20261030/kernel-categories.csv",
+      "sha256": "22873dbf20fe8b0db3d62900135653d4c8270ef7360ad9809104c10b2d1610ed",
+      "bytes": 351
+    },
+    {
+      "path": "evidence/20261030/flagos-inference-final-20261030/REPORT.md",
+      "source": "outputs/flagos-inference-final-20261030/REPORT.md",
+      "sha256": "df597b3055dc3c1b1f7d0f572d26dbd4721512470af6fbe0e8089b732ad88b0d",
+      "bytes": 6065
+    },
+    {
+      "path": "evidence/20261030/flagos-inference-final-20261030/validation.json",
+      "source": "outputs/flagos-inference-final-20261030/validation.json",
+      "sha256": "91f61d204b1b030cb542f44799f17cbae39727734a6b830cf1ff0541c03f1c23",
+      "bytes": 1185
+    },
+    {
+      "path": "evidence/20261030/flagos-rne-gemm-ex-20261030/RESULTS.json",
+      "source": "outputs/flagos-rne-gemm-ex-20261030/RESULTS.json",
+      "sha256": "680dd66883663e87527e959ede55c94ab74c62c720779d4d327db0e8fd89548d",
+      "bytes": 4496
+    },
+    {
+      "path": "evidence/20261030/flagos-rne-gemm-ex-20261030/RESULTS.md",
+      "source": "outputs/flagos-rne-gemm-ex-20261030/RESULTS.md",
+      "sha256": "4f411065e00f5b4780dc1b3c7729f84f321060de72c3bfe9f3103ca8e0b6e7ed",
+      "bytes": 6063
+    },
+    {
+      "path": "evidence/20261030/native-training-comparison/summary.json",
+      "source": "outputs/flagos-training38-20261030/native-comparison/summary.json",
+      "sha256": "9122afe021fc042ce11fc459a5b4d4978bc92f46c0cf77c67645ea7e733c7a70",
+      "bytes": 7953
+    },
+    {
+      "path": "evidence/20261030/native-training-comparison/loss-comparison.csv",
+      "source": "outputs/flagos-training38-20261030/native-comparison/loss-comparison.csv",
+      "sha256": "1c98e6111ed144a50d9967de0ba1458a62f95fd8ba2c690284173b75ae8cbbec",
+      "bytes": 7447
+    },
+    {
+      "path": "evidence/20261030/native-training-comparison/source-equivalence.json",
+      "source": "outputs/flagos-training38-20261030/native-comparison/source-equivalence.json",
+      "sha256": "c963b5110be96495786e1c97561808adb41e54b15877c262a9ce74133dd17c18",
+      "bytes": 4951
+    },
+    {
+      "path": "evidence/20261030/native-training-comparison/verification.json",
+      "source": "outputs/flagos-training38-20261030/native-comparison/verification.json",
+      "sha256": "3df185273192a8277bb017a48b1d540b9e0d75502bcefc8c648b905eee48a170",
+      "bytes": 729
+    },
+    {
+      "path": "experiments/flagos_gemm_ex/PROVENANCE.json",
+      "source": "outputs/flagos-rne-gemm-ex-20261030/candidate-code/PROVENANCE.json",
+      "sha256": "ba1cfb14d710b6b2e4fa0ccd170443adaf95eeffe84dc4acdb0aeb9eceebb0d8",
+      "bytes": 1862
+    },
+    {
+      "path": "experiments/flagos_gemm_ex/README.md",
+      "source": "outputs/flagos-rne-gemm-ex-20261030/candidate-code/README.md",
+      "sha256": "988e0a1562ffef6d220bcaf5e9f00ba37ed9c6d3759f3af552fa27ba218db260",
+      "bytes": 4568
+    },
+    {
+      "path": "experiments/flagos_gemm_ex/adapter_probe.py",
+      "source": "outputs/flagos-rne-gemm-ex-20261030/candidate-code/adapter_probe.py",
+      "sha256": "5d81181b489e862f5c7ab59183c79661a972b90fb58ebf8284c05e9e273343df",
+      "bytes": 4001
+    },
+    {
+      "path": "experiments/flagos_gemm_ex/build.py",
+      "source": "outputs/flagos-rne-gemm-ex-20261030/candidate-code/build.py",
+      "sha256": "2b7201031d4c19a6ca804c328bc7aa078205925e7acecce4c36bcd247a37228a",
+      "bytes": 7297
+    },
+    {
+      "path": "experiments/flagos_gemm_ex/compare_h100.py",
+      "source": "outputs/flagos-rne-gemm-ex-20261030/candidate-code/compare_h100.py",
+      "sha256": "ee904372d3359037a59cf23e88f96ff80d7d08187d845763f9b581cdb874e36a",
+      "bytes": 3576
+    },
+    {
+      "path": "experiments/flagos_gemm_ex/model-experiment/candidate_router.py",
+      "source": "outputs/flagos-rne-gemm-ex-20261030/candidate-code/model-experiment/candidate_router.py",
+      "sha256": "e4400f003a24f1c094f698b532550aac28376502b87ff649a8a4320f33b98715",
+      "bytes": 1538
+    },
+    {
+      "path": "experiments/flagos_gemm_ex/model-experiment/entry.py",
+      "source": "outputs/flagos-rne-gemm-ex-20261030/candidate-code/model-experiment/entry.py",
+      "sha256": "4c770e683ba3dfe5a049258e8ccc078714ab9da8f50d7743b84c576bd6cf825a",
+      "bytes": 305
+    },
+    {
+      "path": "experiments/flagos_gemm_ex/model-experiment/full_model.py",
+      "source": "outputs/flagos-rne-gemm-ex-20261030/candidate-code/model-experiment/full_model.py",
+      "sha256": "c3ea644b3dd00a7fadecd11b53dfd6b9bbc5f76798b693e4d1aa642a1a367af0",
+      "bytes": 14540
+    },
+    {
+      "path": "experiments/flagos_gemm_ex/model-experiment/fused_layers.txt",
+      "source": "outputs/flagos-rne-gemm-ex-20261030/candidate-code/model-experiment/fused_layers.txt",
+      "sha256": "7c7406e013bc41cfc48ccbd4a99f20f0542d908d2c1b44651da367d2ff6552ff",
+      "bytes": 5554
+    },
+    {
+      "path": "experiments/flagos_gemm_ex/model-experiment/model_hook.py",
+      "source": "outputs/flagos-rne-gemm-ex-20261030/candidate-code/model-experiment/model_hook.py",
+      "sha256": "e6a8f23ba3c8889d71878bbe3734cc6020698c492ca0ccb4b96efadb645b7514",
+      "bytes": 1204
+    },
+    {
+      "path": "experiments/flagos_gemm_ex/model-experiment/policy.json",
+      "source": "outputs/flagos-rne-gemm-ex-20261030/candidate-code/model-experiment/policy.json",
+      "sha256": "f8091e16844e75ea1a5c18976f9a2bfe8d6b937f22adb12de159dbaf672b397d",
+      "bytes": 35224
+    },
+    {
+      "path": "experiments/flagos_gemm_ex/model-experiment/rne_ops.py",
+      "source": "outputs/flagos-rne-gemm-ex-20261030/candidate-code/model-experiment/rne_ops.py",
+      "sha256": "328c6b020c26ed389e6fee9267f20aad5488c737364b4606bb620a9544167927",
+      "bytes": 614
+    },
+    {
+      "path": "experiments/flagos_gemm_ex/native_probe.py",
+      "source": "outputs/flagos-rne-gemm-ex-20261030/candidate-code/native_probe.py",
+      "sha256": "a122c705703dd1dc9e0a6bedfa3d1f675b82b2f4d1f522ada0dec7451f3f1ec1",
+      "bytes": 2979
+    },
+    {
+      "path": "experiments/flagos_gemm_ex/replay-candidate.py",
+      "source": "outputs/flagos-rne-gemm-ex-20261030/candidate-code/replay-candidate.py",
+      "sha256": "74cf4df41586fdf1bf0520289b0366ac16c0008a4ebface4f1c023912cec277e",
+      "bytes": 1860
+    },
+    {
+      "path": "experiments/flagos_gemm_ex/run-candidate.sh",
+      "source": "outputs/flagos-rne-gemm-ex-20261030/candidate-code/run-candidate.sh",
+      "sha256": "eff2b82039856617e910cefc945ab4e8fdebf837de036b03d985b8ee3ba9f54c",
+      "bytes": 1519
+    },
+    {
+      "path": "experiments/flagos_gemm_ex/run-model.sh",
+      "source": "outputs/flagos-rne-gemm-ex-20261030/candidate-code/run-model.sh",
+      "sha256": "f95737afe21a8068e20da650ae8ae9903155868dab54db93fbfd40e6d6364a0c",
+      "bytes": 2126
+    },
+    {
+      "path": "experiments/flagos_gemm_ex/summarize_profile.py",
+      "source": "outputs/flagos-rne-gemm-ex-20261030/candidate-code/summarize_profile.py",
+      "sha256": "2753566ff9d740a2b84d91314b111f746a2df101f762d3d7629a6b72f115515f",
+      "bytes": 2936
+    },
+    {
+      "path": "experiments/flagos-inference-20261030/baseline/third_party/graphcast/LICENSE",
+      "source": "outputs/flagos-rne-inference-20261029/baseline/third_party/graphcast/LICENSE",
+      "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+      "bytes": 11358
+    },
+    {
+      "path": "experiments/h100-gpu41-tf32-20261029/launch.py",
+      "source": "outputs/h100-gpu41-tf32-20261029/launch.py",
+      "sha256": "0f9ec738aef0b8ba5f4ca3c8a5df21238e7bbb7d29d9ea747b08d4ce9b6b63e1",
+      "bytes": 3744
+    },
+    {
+      "path": "experiments/h100-gpu41-tf32-20261029/verify_results.py",
+      "source": "outputs/h100-gpu41-tf32-20261029/verify_results.py",
+      "sha256": "aaa03a2caf3873d4458471a3af87562b461b155d41b84360b773a6eed84b6093",
+      "bytes": 3405
+    },
+    {
+      "path": "experiments/h100-gpu41-tf32-20261029/profile_summary.py",
+      "source": "outputs/h100-gpu41-tf32-20261029/profile_summary.py",
+      "sha256": "745bade3e7dad7ec17e12d65cc69533c00433a7b5eb3d5717980b11ad2735b13",
+      "bytes": 1630
+    },
+    {
+      "path": "experiments/h100-gpu41-tf32-20261029/stream_scnet_archive.py",
+      "source": "outputs/h100-gpu41-tf32-20261029/stream_scnet_archive.py",
+      "sha256": "5f08155e94698859af557f5fbd6c71c9d9433e887b9bbbf0c1a4cbf4fd399f08",
+      "bytes": 1788
+    },
+    {
+      "path": "experiments/h100-gpu41-tf32-20261029/runner/clone3_compat_exec.py",
+      "source": "outputs/h100-gpu41-tf32-20261029/runner/clone3_compat_exec.py",
+      "sha256": "2ee9e5ff019214d3b4a9227209e75f9989ea932090eab58b9a11cdcc89af8ebd",
+      "bytes": 3427
+    },
+    {
+      "path": "experiments/h100-gpu41-tf32-20261029/RUN_RECORD.json",
+      "source": "outputs/h100-gpu41-tf32-20261029/RUN_RECORD.json",
+      "sha256": "9392408ed5fe4425cdffca3efc7e75f21f5143177252d3d95740a6f6750cc861",
+      "bytes": 1216
+    },
+    {
+      "path": "experiments/h100-gpu41-tf32-20261029/source.json",
+      "source": "outputs/h100-gpu41-tf32-20261029/source.json",
+      "sha256": "9486614333304f65e11d8a12a1828f2fdaad8e9886445c849c024f76457f3e09",
+      "bytes": 326
+    }
+  ]
+}

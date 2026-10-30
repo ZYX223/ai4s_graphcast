@@ -1,0 +1,13 @@
+{
+  "status": "passed",
+  "checks": [
+    "Same source closure, prepared dataset metadata, original input case hash and FP32 storage on both platforms",
+    "Three rounds per platform, 40 steps each, five excluded warmup steps, unchanged JIT cache",
+    "Hygon 135-step routing audit: 84 GEMMs and 79 fused activations per step",
+    "Hygon each captured round: 3360 GEMMs, 3240 XF32 MX kernels, 3560 standalone RNE kernels",
+    "All 42783 HIP kernels assigned to exactly one measured capture; zero warmup kernels included",
+    "Three SQLite files passed integrity check; each H100 capture has 3560 TF32 kernels and no independent RNE",
+    "Per-round useful FLOPs recomputed from all 3360 real GEMM shape entries, total 1151397956976640",
+    "MFU from actual 40-step interval unions, not extrapolated single-step time"
+  ]
+}

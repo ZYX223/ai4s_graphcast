@@ -1,0 +1,178 @@
+{
+  "native": {
+    "updates": 38,
+    "gpu_kernel_seconds": 1837.959744789,
+    "synchronized_update_seconds": 1857.4907904620632,
+    "useful_gemm_flops": 28660792706203648,
+    "peak_tflops": 170.3936,
+    "mfu_percent": 9.151639924229928,
+    "mfu_over_h100_percent": 84.8188586359881,
+    "whole_card_peak_gib": 128.2236328125,
+    "jax_peak_gib": 90.86638116836548,
+    "last_loss": 28.762954711914062,
+    "max_loss_relative_percent": 0.2645727278307924,
+    "mean_loss_relative_percent": 0.1577940925818446,
+    "last_loss_relative_percent": 0.2638003272297341,
+    "last_loss_abs_difference": 0.07607746124267578,
+    "maximum_error_row": {
+      "update": 37,
+      "horizon": 12,
+      "lr": 3e-07,
+      "starts": [
+        0,
+        0
+      ],
+      "h100_loss": 28.864778518676758,
+      "native_loss": 28.788410186767578,
+      "flagos_loss": 28.8214111328125,
+      "native_abs_difference": 0.07636833190917969,
+      "native_relative_percent": 0.2645727278307924,
+      "flagos_abs_difference": 0.04336738586425781,
+      "flagos_relative_percent": 0.15024326563322576,
+      "native_kernel_seconds": 131.475416872,
+      "native_useful_gemm_flops": 2014460468895744
+    }
+  },
+  "current": {
+    "status": "completed",
+    "paired_updates": 38,
+    "backends": {
+      "h100": {
+        "updates": 38,
+        "gpu_kernel_seconds": 536.957392611,
+        "synchronized_update_seconds": 544.2025231113657,
+        "useful_gemm_flops": 28660795243364352,
+        "mfu_percent": 10.78962871158814,
+        "peak_tflops": 494.7,
+        "whole_card_peak_gib": 76.9423828125,
+        "jax_peak_gib": 75.69888997077942,
+        "best_loss": 1.3054267168045044,
+        "last_loss": 28.83903217315674
+      },
+      "flagos": {
+        "updates": 38,
+        "gpu_kernel_seconds": 2975.6737762440002,
+        "synchronized_update_seconds": 2987.3982668828976,
+        "useful_gemm_flops": 28660792706203648,
+        "mfu_percent": 5.652617539537446,
+        "peak_tflops": 170.3936,
+        "whole_card_peak_gib": 129.2998046875,
+        "jax_peak_gib": 102.53232407569885,
+        "best_loss": 1.3054355382919312,
+        "last_loss": 28.796310424804688
+      }
+    },
+    "formula": "MFU = useful differentiated NO-remat GEMM FLOPs / (actual GPU compute-kernel union seconds x dense peak). Numerator excludes recomputation, RNE and optimizer FLOPs; denominator includes their kernels; copies/CPU/gaps excluded.",
+    "limitations": [
+      "Short prescribed38-update mechanics/loss-consistency test, not convergence.",
+      "Two zero learning rates retained;36 nonzero parameter updates. Each update includes2 microbatches.",
+      "BW additional LayerNorm remat; H100 original stage/message remat. H100 horizons11/12 use96% pool after94% insufficient; BW horizons11/12 use73% instead of70% after measured capacity growth; frozen baseline preserved.",
+      "Independent trajectories from same initial weights/optimizer/data; compare corresponding loss, not trained-checkpoint inference outputs.",
+      "H100 graph has one additional grid2mesh edge; platform FLOPs counted separately.",
+      "MFU is GEMM approximation and GPU-active timing. MFU ratio is candidate peak-normalized efficiency, not formal phase acceptance."
+    ],
+    "max_loss_relative_percent": 0.18801678143198872,
+    "mean_loss_relative_percent": 0.08321080673786918,
+    "internal5_pass": true,
+    "stage10_pass": true,
+    "flagos_over_h100_mfu_ratio_percent": 52.38936103025022
+  },
+  "native_speedup_over_flagos": 1.6190092218725993,
+  "native_time_reduction_vs_flagos_percent": 38.233829277181805,
+  "native_to_h100_internal5_pass": true,
+  "stage_checks": [
+    {
+      "horizon": 1,
+      "updates": 16,
+      "device_sqlite": "/home/zhangyuxin/zyx/graphcast/outputs/jax-training-38-20261023/rne_xf32-r01/trace.db",
+      "model_task_optimizer_data_plan_equal": true,
+      "all_device_unions_match": true
+    },
+    {
+      "horizon": 2,
+      "updates": 2,
+      "device_sqlite": "/home/zhangyuxin/zyx/graphcast/outputs/jax-training-38-20261023/rne_xf32-r02/trace.db",
+      "model_task_optimizer_data_plan_equal": true,
+      "all_device_unions_match": true
+    },
+    {
+      "horizon": 3,
+      "updates": 2,
+      "device_sqlite": "/home/zhangyuxin/zyx/graphcast/outputs/jax-training-38-20261023/rne_xf32-r03/trace.db",
+      "model_task_optimizer_data_plan_equal": true,
+      "all_device_unions_match": true
+    },
+    {
+      "horizon": 4,
+      "updates": 2,
+      "device_sqlite": "/home/zhangyuxin/zyx/graphcast/outputs/jax-training-38-20261023/rne_xf32-r04/trace.db",
+      "model_task_optimizer_data_plan_equal": true,
+      "all_device_unions_match": true
+    },
+    {
+      "horizon": 5,
+      "updates": 2,
+      "device_sqlite": "/home/zhangyuxin/zyx/graphcast/outputs/jax-training-38-20261023/rne_xf32-r05/trace.db",
+      "model_task_optimizer_data_plan_equal": true,
+      "all_device_unions_match": true
+    },
+    {
+      "horizon": 6,
+      "updates": 2,
+      "device_sqlite": "/home/zhangyuxin/zyx/graphcast/outputs/jax-training-38-20261023/rne_xf32-r06/trace.db",
+      "model_task_optimizer_data_plan_equal": true,
+      "all_device_unions_match": true
+    },
+    {
+      "horizon": 7,
+      "updates": 2,
+      "device_sqlite": "/home/zhangyuxin/zyx/graphcast/outputs/jax-training-38-20261023/rne_xf32-r07/trace.db",
+      "model_task_optimizer_data_plan_equal": true,
+      "all_device_unions_match": true
+    },
+    {
+      "horizon": 8,
+      "updates": 2,
+      "device_sqlite": "/home/zhangyuxin/zyx/graphcast/outputs/jax-training-38-20261023/rne_xf32-r08/trace.db",
+      "model_task_optimizer_data_plan_equal": true,
+      "all_device_unions_match": true
+    },
+    {
+      "horizon": 9,
+      "updates": 2,
+      "device_sqlite": "/home/zhangyuxin/zyx/graphcast/outputs/jax-training-38-20261023/rne_xf32-r09/trace.db",
+      "model_task_optimizer_data_plan_equal": true,
+      "all_device_unions_match": true
+    },
+    {
+      "horizon": 10,
+      "updates": 2,
+      "device_sqlite": "/home/zhangyuxin/zyx/graphcast/outputs/jax-training-38-20261023/rne_xf32-r10/trace.db",
+      "model_task_optimizer_data_plan_equal": true,
+      "all_device_unions_match": true
+    },
+    {
+      "horizon": 11,
+      "updates": 2,
+      "device_sqlite": "/home/zhangyuxin/zyx/graphcast/outputs/jax-training-38-20261023/rne_xf32-r11/trace.db",
+      "model_task_optimizer_data_plan_equal": true,
+      "all_device_unions_match": true
+    },
+    {
+      "horizon": 12,
+      "updates": 2,
+      "device_sqlite": "/home/zhangyuxin/zyx/graphcast/outputs/jax-training-38-20261023/rne_xf32-r12/trace.db",
+      "model_task_optimizer_data_plan_equal": true,
+      "all_device_unions_match": true
+    }
+  ],
+  "limitations": [
+    "Historical 2026-10-23 native measurements recomputed 2026-10-30; no native rerun.",
+    "Native useful FLOPs reconstructed from matched model/task/loss source, horizon/microbatch count and graph dimensions, using current BW no-remat differentiated GEMM counts.",
+    "Native vendor JAX0.6.0+das.opt1.dtk2604 differs from FlagOS JAX0.6.0; native uses original remat, FlagOS additional LayerNorm remat; different physical cards of same BW1100 model. Not isolated backend A/B.",
+    "Original native reports lack runtime initial-parameter/optimizer/batch hashes; archived loader, recipe and current archived weight/stat files match, but historical runtime fingerprint is not retroactively proven.",
+    "Native historical HIPPROF signal11 cleanup warnings retained. Outer exits0 and all38 measured HIPOPS kernel intervals independently match saved results; no claim that historical teardown was clean.",
+    "Loss is pre-update mean of2 microbatches; independent trajectories, not convergence or trained-checkpoint inference comparison.",
+    "MFU uses GPU compute-kernel interval union and useful-GEMM approximation. Relative MFU is candidate peak normalization, not formal phase efficiency acceptance."
+  ]
+}

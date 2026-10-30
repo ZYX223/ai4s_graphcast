@@ -1,0 +1,29 @@
+{
+  "observed_utc": "2026-10-30T08:10:10.386281+00:00",
+  "container": "flagos-jax-test",
+  "image_tag": "flagos-r6-optimization-test:20261026-c93db685-bw59-hal642",
+  "image_id": "sha256:6d4813ee61bb39a439d96bb28b62371628d9eb0a2e62cc4a84a5218403bb0aad",
+  "image_labels": {
+    "io.flagos.build-method": "offline-oci-archive-assembly",
+    "io.flagos.compat-change": "matched vendor HYHAL userspace selection and test-harness loader context only",
+    "io.flagos.driver.profile": "bw59-6.4.2-V2.1.0",
+    "io.flagos.optimization-lab.revision": "c93db6856c6c29cc89a5f595ae0d0f4aedf599e9",
+    "io.flagos.parent-image": "sha256:c0331218a98f48b00fb9cc3299a7f58190990e82fac063d92ed2ef7031e62b16",
+    "io.flagos.qualification": "experimental-independent-test-only",
+    "io.flagos.shared-release": "r6-20261026-tfl8cc205d4-fg1285f5d6",
+    "org.opencontainers.image.title": "FlagOS R6 independent optimization test image",
+    "org.opencontainers.image.version": "r6-lab-c93db685-20261026"
+  },
+  "packages": {
+    "flag_gems": "5.5.0.dev0+g1285f5d6a",
+    "flagtree": "0.7.0rc2+hcu3.6.glibc228.compat1.git76201fd9",
+    "jax-rocm60-pjrt": "0.6.0",
+    "jax": "0.6.0",
+    "jaxtyping": "0.3.7",
+    "jaxlib": "0.6.0",
+    "jax-rocm60-plugin": "0.6.0"
+  },
+  "path": "JAX/XLA -> FlagTree; rocBLAS GEMM",
+  "flag_gems_runtime_use": "not evidenced in this GraphCast route",
+  "training_run": "exit-noprofiler-resume1"
+}

@@ -1,0 +1,24 @@
+{
+  "scope": "Exact tested candidate sources/launchers, original baseline untouched; local only, not published",
+  "date": "2026-10-30",
+  "parent_commit": "47129e4b2654bc1c8e99c5b77bb7d54b4a191611",
+  "evidence_root": "/home/zhangyuxin/zyx/graphcast/outputs/flagos-rne-gemm-ex-20261030",
+  "files": {
+    "native_probe.py": "a122c705703dd1dc9e0a6bedfa3d1f675b82b2f4d1f522ada0dec7451f3f1ec1",
+    "build.py": "2b7201031d4c19a6ca804c328bc7aa078205925e7acecce4c36bcd247a37228a",
+    "adapter_probe.py": "5d81181b489e862f5c7ab59183c79661a972b90fb58ebf8284c05e9e273343df",
+    "README.md": "988e0a1562ffef6d220bcaf5e9f00ba37ed9c6d3759f3af552fa27ba218db260",
+    "summarize_profile.py": "2753566ff9d740a2b84d91314b111f746a2df101f762d3d7629a6b72f115515f",
+    "compare_h100.py": "ee904372d3359037a59cf23e88f96ff80d7d08187d845763f9b581cdb874e36a",
+    "run-model.sh": "f95737afe21a8068e20da650ae8ae9903155868dab54db93fbfd40e6d6364a0c",
+    "run-candidate.sh": "eff2b82039856617e910cefc945ab4e8fdebf837de036b03d985b8ee3ba9f54c",
+    "replay-candidate.py": "74cf4df41586fdf1bf0520289b0366ac16c0008a4ebface4f1c023912cec277e",
+    "model-experiment/full_model.py": "c3ea644b3dd00a7fadecd11b53dfd6b9bbc5f76798b693e4d1aa642a1a367af0",
+    "model-experiment/candidate_router.py": "e4400f003a24f1c094f698b532550aac28376502b87ff649a8a4320f33b98715",
+    "model-experiment/model_hook.py": "e6a8f23ba3c8889d71878bbe3734cc6020698c492ca0ccb4b96efadb645b7514",
+    "model-experiment/rne_ops.py": "328c6b020c26ed389e6fee9267f20aad5488c737364b4606bb620a9544167927",
+    "model-experiment/entry.py": "4c770e683ba3dfe5a049258e8ccc078714ab9da8f50d7743b84c576bd6cf825a",
+    "model-experiment/policy.json": "f8091e16844e75ea1a5c18976f9a2bfe8d6b937f22adb12de159dbaf672b397d",
+    "model-experiment/fused_layers.txt": "7c7406e013bc41cfc48ccbd4a99f20f0542d908d2c1b44651da367d2ff6552ff"
+  }
+}

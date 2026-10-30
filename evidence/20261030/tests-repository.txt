@@ -1,0 +1,47 @@
+bash: /work1/share/scnethpc2601/flagos/conda-envs/flagos_base_official_torch210_dtk2604_py310_ft070rc2_g76201fd9_v1/lib/libtinfo.so.6: no version information available (required by bash)
+test_path_escape_rejected (test_assets.AssetTests) ... ok
+test_tamper_and_missing_file_rejected (test_assets.AssetTests) ... ok
+test_gather_preserves_index_order_and_duplicates (test_graph_operators.GraphOperatorTests) ... /work1/share/scnethpc2601/flagos/conda-envs/flagos_base_official_torch210_dtk2604_py310_ft070rc2_g76201fd9_v1/lib/python3.10/site-packages/haiku/_src/transform.py:341: DeprecationWarning: jax.lib.xla_extension.PjitFunction is deprecated.
+  COMPILED_FN_TYPES = (jax.lib.xla_extension.PjitFunction,
+/work1/share/scnethpc2601/flagos/conda-envs/flagos_base_official_torch210_dtk2604_py310_ft070rc2_g76201fd9_v1/lib/python3.10/site-packages/haiku/_src/transform.py:342: DeprecationWarning: jax.lib.xla_extension.PmapFunction is deprecated.
+  jax.lib.xla_extension.PmapFunction)  # pytype: disable=name-error
+ok
+test_layer_norm_includes_epsilon_scale_offset_and_constant_rows (test_graph_operators.GraphOperatorTests) ... ok
+test_scatter_keeps_duplicate_contributions_and_empty_nodes (test_graph_operators.GraphOperatorTests) ... ok
+test_concat_and_slice_references (test_logical_bench.LogicalBenchTests) ... ok
+test_gather_reference_and_execution (test_logical_bench.LogicalBenchTests) ... ok
+test_large_tensor_sampling_does_not_truncate_flat_indices (test_logical_bench.LogicalBenchTests) ... ok
+test_rne_ties_and_signs (test_logical_bench.LogicalBenchTests) ... ok
+test_scalar_literals_remain_compile_time_constants (test_logical_bench.LogicalBenchTests) ... ok
+test_scatter_reference_keeps_duplicates_and_empty_nodes (test_logical_bench.LogicalBenchTests) ... ok
+test_composites_own_their_internal_operations (test_logical_inventory.LogicalInventoryTests) ... ok
+test_dead_equations_are_excluded_from_logical_counts (test_logical_inventory.LogicalInventoryTests) ... ok
+test_multistep_scan_is_not_silently_counted_once (test_logical_inventory.LogicalInventoryTests) ... ok
+test_real_jaxpr_preserves_composites_and_single_step (test_logical_inventory.LogicalInventoryTests) ... ok
+test_rejects_duplicate_equation_identity (test_logical_inventory.LogicalInventoryTests) ... ok
+test_scan_sliced_inputs_keep_upstream_dependencies (test_logical_inventory.LogicalInventoryTests) ... ok
+test_shared_primitive_name_does_not_merge_distinct_invocations (test_logical_inventory.LogicalInventoryTests) ... ok
+test_alignment_and_invalid_values_rejected (test_metrics.MetricTests) ... ok
+test_denominator_is_reference (test_metrics.MetricTests) ... ok
+test_equal_weight_78_layers_and_z500_rmse (test_metrics.MetricTests) ... ok
+test_fixed_case_rejects_matching_cropped_forecasts (test_metrics.MetricTests) ... ok
+test_fixed_grid_and_units_contract (test_metrics.MetricTests) ... ok
+test_threshold_is_strict (test_metrics.MetricTests) ... ok
+test_counts_calls_not_rounds_and_calculates_traffic (test_operator_catalog.CatalogTests) ... ok
+test_rejects_duplicate_layer_even_if_call_count_matches (test_operator_catalog.CatalogTests) ... ok
+test_rejects_hlo_runtime_shape_mismatch (test_operator_catalog.CatalogTests) ... ok
+test_rejects_incomplete_step (test_operator_catalog.CatalogTests) ... ok
+test_rejects_unknown_weight (test_operator_catalog.CatalogTests) ... ok
+test_archive_hashes_match_measured_sources (test_prepare_experiments.PrepareExperimentsTests) ... ok
+test_rejects_existing_output_and_missing_assets_before_writing (test_prepare_experiments.PrepareExperimentsTests) ... ok
+test_training_inputs_resolve_inside_the_training_mount (test_prepare_experiments.PrepareExperimentsTests) ... ok
+test_rejects_cpu_only_trace (test_profile_summary.ProfileSummaryTests) ... ok
+test_rejects_invalid_duration (test_profile_summary.ProfileSummaryTests) ... ok
+test_separates_cpu_api_and_gpu_and_uses_interval_union (test_profile_summary.ProfileSummaryTests) ... ok
+
+----------------------------------------------------------------------
+Ran 35 tests in 2.784s
+
+OK
+Verified 223 archived files
+Verified 178 archived source/evidence files; no GPU execution.

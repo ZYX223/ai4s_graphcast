@@ -1,0 +1,7 @@
+bash: /work1/share/scnethpc2601/flagos/conda-envs/flagos_base_official_torch210_dtk2604_py310_ft070rc2_g76201fd9_v1/lib/libtinfo.so.6: no version information available (required by bash)
+Processing /tmp/zyx-release-check-wheels-20261030/ruff-0.12.2-py3-none-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
+Installing collected packages: ruff
+Successfully installed ruff-0.12.2
+WARNING: Running pip as the 'root' user can result in broken permissions and conflicting behaviour with the system package manager, possibly rendering your system unusable. It is recommended to use a virtual environment instead: https://pip.pypa.io/warnings/venv. Use the --root-user-action option if you know what you are doing and want to suppress this warning.
+All checks passed!
+31 files already formatted

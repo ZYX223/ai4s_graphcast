@@ -1,0 +1,18 @@
+{
+  "date": "2026-10-30",
+  "baseline_commit": "47129e4b2654bc1c8e99c5b77bb7d54b4a191611",
+  "repository_cpu_tests": 35,
+  "training_cpu_tests": 15,
+  "timing_trajectory_xspace_tests": 7,
+  "resource_gate_tests": 4,
+  "old_archived_sources_verified": 223,
+  "new_source_evidence_files_verified": 178,
+  "ruff_check": "passed",
+  "ruff_format": "passed",
+  "inference_router_compile": "passed",
+  "training_router_compile": "passed with existing compiler warning about void kernel return",
+  "gpu_rerun": false,
+  "layernorm_native_forward_timing": "5 cases pending; no new GPU experiment",
+  "baseline_math_source_config_changes": false,
+  "scope": "Release organization and CPU/compiler validation; historical GPU evidence is separately archived."
+}

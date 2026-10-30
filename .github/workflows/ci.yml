@@ -17,3 +17,4 @@ jobs:
       - run: PYTHONPATH=src python -m unittest discover -s tests -v
       - run: PYTHONPATH=src python -c 'from graphcast_bench.assets import verify_source; verify_source()'
       - run: python scripts/prepare_experiments.py --verify-only
+      - run: python scripts/verify_release_20261030.py

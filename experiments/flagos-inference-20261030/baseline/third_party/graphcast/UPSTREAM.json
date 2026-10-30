@@ -1,0 +1,24 @@
+{
+  "repository": "https://github.com/google-deepmind/graphcast",
+  "commit": "08cf73625c9d12bd9aaa038868bcb2fe488f2a22",
+  "scope": "Unmodified official GraphCast inference import closure and upstream license",
+  "files": {
+    "LICENSE": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+    "graphcast/xarray_jax.py": "0203d371ea2029023d2eae90f447020caa3f0858b01b4244f2824611efb34b18",
+    "graphcast/rollout.py": "0858c305f04c1bc0ecbfc2c2075acc985166eac7a111027dfb354f585cdbf2da",
+    "graphcast/xarray_tree.py": "b6c05004109e88175c6e1faee4f864faea652f78fa99065e2e9635039a8c6fae",
+    "graphcast/normalization.py": "5b5f95bcf830be1236244fd09cc418caa28c1c970793130e93bccbc98e0e00e7",
+    "graphcast/predictor_base.py": "ff3f3297e1ec0484d2baf76b4d7e68c96394f17a6f436381f1e181ebbef823b0",
+    "graphcast/losses.py": "520aa2010ddbc441ee0630598c48176a905c3638582e4af6d15887a68b7c7ab8",
+    "graphcast/graphcast.py": "6aeb9cfa2490b0e2dbfa70f255594914ee1765d5e20c3e66ca912b80bc66e953",
+    "graphcast/typed_graph.py": "feebe364b3ef12f0fc56c0f956330c70680297a9c44378d01ae972db504cd6d6",
+    "graphcast/model_utils.py": "bc8006a4454e40eb6c0b4a802b1bbeac77f136af740cafefcb829f5965a9cce0",
+    "graphcast/icosahedral_mesh.py": "bfafc9a3efa272714122963e6b49efe961b3ab1b5d35a7eddd727aa74d693fbe",
+    "graphcast/grid_mesh_connectivity.py": "914aa71a500a9a3e13cd856a25caffbbba724dda65a30ccf6dbf882e1fe72fc2",
+    "graphcast/deep_typed_graph_net.py": "7812649e3128a002603b537e61c7eda060b03a7a2d90bd037eeb7791b52cc59a",
+    "graphcast/typed_graph_net.py": "58bc7c9b090a65ec83d65f0b3cd48d4a450f57f50b8bba5425f33b25d436e7a4",
+    "graphcast/mlp.py": "a0d0cdf91f01817344935ef8b5ffed20902041e386321ed3da45e6a26a92d266",
+    "graphcast/checkpoint.py": "07dc3521a5ed9e606869246a47f865f524e2fc4c689c745305fcdd3f2e5ab24a",
+    "graphcast/autoregressive.py": "2e44d4505bed0c6a5b6d42fd58d0d0d5414bab2658f02ba2b05e92727887749a"
+  }
+}

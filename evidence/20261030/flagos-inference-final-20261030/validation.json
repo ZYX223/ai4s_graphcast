@@ -1,0 +1,43 @@
+{
+  "status": "passed",
+  "checks": [
+    "108 unique cases and 549 calls per backend",
+    "30 fresh Linear cases pass with repaired routing",
+    "216 sample files independently rechecked with original tolerances",
+    "all 216 timing medians recomputed from 60 samples",
+    "338 kernel intervals union recomputed from integer timestamps",
+    "165 FlagTree calls matched to annotated HLO",
+    "84 GEMMs and useful FLOPs independently recomputed",
+    "40-step timing medians and 9 accuracy pairs checked",
+    "workbook rows/columns/numeric cells read back",
+    "original baseline source hash unchanged"
+  ],
+  "workbook": "/home/zhangyuxin/zyx/graphcast/outputs/flagos-inference-final-20261030/GraphCast_BW1100_FlagOS_推理算子与精度性能_20261030.xlsx",
+  "workbook_sha256": "43795864016ca066c5d12bcb505516d6b6281f03a4848b9b683e890011866e75",
+  "sheets": {
+    "逻辑算子16类": [
+      18,
+      12
+    ],
+    "用例明细216行": [
+      218,
+      22
+    ],
+    "整模型性能": [
+      5,
+      9
+    ],
+    "40步末帧精度": [
+      11,
+      9
+    ],
+    "单步GPU分类": [
+      8,
+      5
+    ],
+    "方法与来源": [
+      25,
+      2
+    ]
+  }
+}

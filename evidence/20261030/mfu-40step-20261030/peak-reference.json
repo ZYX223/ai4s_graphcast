@@ -1,0 +1,22 @@
+{
+  "h100": {
+    "peak_tflops": 494.7,
+    "precision": "TF32 Tensor Core dense",
+    "device": "H100 SXM5 80GB",
+    "source": "NVIDIA H100 Tensor Core GPU Architecture v1.04, Table 1 (printed page 20), Table 3 (printed page 39)",
+    "url": "https://resources.nvidia.com/en-us-hopper-architecture/nvidia-h100-tensor-c",
+    "pdf_url": "https://dam-cdn.nvd.orangelogic.com/AssetLink/705n6ur546g0uk43w0117r17n8042d73.pdf",
+    "sparse_peak_excluded_tflops": 989.4,
+    "hardware_evidence": "gpu41 physical GPU2; NVIDIA H100 80GB HBM3; PCI device 0x233010DE; 700W power limit; 1830MHz sampled tensor workload clock; MIG disabled. SXM5 mapping from these hardware identifiers and vendor specifications.",
+    "frequency_policy": "Use vendor dense theoretical peak; do not rescale from telemetry or use maximum non-tensor clock 1980MHz."
+  },
+  "hygon": {
+    "peak_tflops": 170.3936,
+    "precision": "User-designated XF32 reference (TF32TensorSpeed row)",
+    "device": "Project BW1100; raw driver may identify BW1200",
+    "source": "User supplied NMZ peak screenshot, 1300MHz reference",
+    "source_file": "../rne-model-fusion-20261022/mfu/peak-reference.json",
+    "frequency_policy": "Preserve specified reference peak without rescaling; screenshot-to-device and contractual peak basis remain to be confirmed."
+  },
+  "formal_efficiency_policy": "MFU_DCU / MFU_NV is a candidate peak-normalized relative-efficiency calculation only. This document does not approve it as the contractual 60% criterion."
+}

@@ -1,0 +1,33 @@
+﻿operator,phase,jax_ms,flagos_fl_only_ms,speedup,flagtree_coverage,calls_per_update,cases,status
+Sub,auxiliary_unclassified,16.020790411857888,20.753986726049334,0.7719379714042806,10/10 cases contain FlagTree HLO custom calls,88,10,passed
+Div,auxiliary_unclassified,18.580159463454038,23.15741204074584,0.8023417915077017,12/13 cases contain FlagTree HLO custom calls,114,13,passed
+DynamicSlice,auxiliary_unclassified,3.3502818550914526,4.202179959975183,0.797272341261472,2/2 cases contain FlagTree HLO custom calls,20,2,passed
+Squeeze,auxiliary_unclassified,2.9136199736967683,4.1383999632671475,0.7040450414552365,0/2 cases contain FlagTree HLO custom calls,20,2,passed
+Broadcast,auxiliary_unclassified,21.124286024132743,23.648081201827154,0.8932769573922382,14/20 cases contain FlagTree HLO custom calls,148,20,passed
+Transpose,auxiliary_unclassified,25.74740583077073,28.77906514913775,0.8946574774873168,5/17 cases contain FlagTree HLO custom calls,122,17,passed
+Reshape,auxiliary_unclassified,13.531058735679835,12.65679788775742,1.0690744101055816,0/6 cases contain FlagTree HLO custom calls,42,6,passed
+Concat,auxiliary_unclassified,20.593373017618433,26.7993230081629,0.7684288521521915,7/7 cases contain FlagTree HLO custom calls,14,7,passed
+Mul,auxiliary_unclassified,30.006744811544195,24.102005583699793,1.2449895386232,13/14 cases contain FlagTree HLO custom calls,166,14,passed
+Linear,forward,1539.7322601347696,1446.614382934058,1.0643695225895982,16/16 cases contain FlagTree HLO custom calls; GEMM remains rocBLAS,172,16,passed
+SiLU,forward,208.70203062077053,438.7599003384821,0.47566341058006206,5/5 cases contain FlagTree HLO custom calls,86,5,passed
+LayerNorm,forward,,336.2727489438839,,5/5 cases contain FlagTree HLO custom calls,84,5,incomplete correctness/reference; see individual cases
+Gather,forward,163.92079161596484,314.37755178194493,0.5214137927050904,6/6 cases contain FlagTree HLO custom calls,72,6,passed
+Concat,forward,177.93300616904162,349.27907050587237,0.5094293394429142,5/5 cases contain FlagTree HLO custom calls,72,5,passed
+Broadcast,forward,17.581839842023328,8.674661337863654,2.026804177966132,2/2 cases contain FlagTree HLO custom calls,36,2,passed
+ScatterAdd / SegmentSum,forward,221.01718588965014,741.4181067433674,0.2981006046108778,3/3 cases contain FlagTree HLO custom calls,36,3,passed
+Add,forward,67.5019278714899,77.32025664881803,0.8730173798837458,3/3 cases contain FlagTree HLO custom calls,68,3,passed
+Slice,auxiliary_unclassified,4.630066949175671,5.483006039867178,0.8444395128347937,11/11 cases contain FlagTree HLO custom calls,22,11,passed
+IntegerPow,auxiliary_unclassified,8.072812081081793,6.256544002098963,1.29029893793978,2/4 cases contain FlagTree HLO custom calls,44,4,passed
+ReduceSum,auxiliary_unclassified,7.410753110889345,7.397547975415364,1.0017850692577954,3/5 cases contain FlagTree HLO custom calls,48,5,passed
+Split,auxiliary_unclassified,0.5507329769898206,0.5773940065409988,0.9538252402187256,1/1 cases contain FlagTree HLO custom calls,2,1,passed
+Pad,auxiliary_unclassified,17.227020987775177,15.637999022146687,1.101612870251373,11/11 cases contain FlagTree HLO custom calls,22,11,passed
+Add,auxiliary_unclassified,15.5694002751261,36.32783977081999,0.4285804048175768,1/1 cases contain FlagTree HLO custom calls,20,1,passed
+Linear,backward,2800.8014850493055,3243.3989331766497,0.863539004221767,17/17 cases contain FlagTree HLO custom calls; GEMM remains rocBLAS,172,17,passed
+SiLU,backward,244.2420098814182,331.43605579971336,0.7369204575286569,5/5 cases contain FlagTree HLO custom calls,86,5,passed
+LayerNorm,backward,571.0052346985321,1141.0077594046015,0.5004393966579973,5/5 cases contain FlagTree HLO custom calls,84,5,passed
+Split,backward,267.3454803589266,198.4657903376501,1.3470607700404758,5/5 cases contain FlagTree HLO custom calls,72,5,passed
+Add,backward,138.7951075739693,162.32165644760244,0.8550621686070119,3/3 cases contain FlagTree HLO custom calls,166,3,passed
+Gather,backward,81.28406369360164,157.64748127548955,0.5156064850256468,3/3 cases contain FlagTree HLO custom calls,36,3,passed
+ReduceSum,backward,131.57215621322393,133.0637308419682,0.9887905245155366,0/3 cases contain FlagTree HLO custom calls,72,3,passed
+Broadcast,backward,167.26260568248108,150.43070568935946,1.11189138491366,2/5 cases contain FlagTree HLO custom calls,144,5,passed
+ScatterAdd / SegmentSum,backward,442.13243457488716,1547.89325396996,0.2856349644530899,6/6 cases contain FlagTree HLO custom calls,72,6,passed

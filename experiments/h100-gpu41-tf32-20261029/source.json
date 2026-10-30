@@ -1,0 +1,8 @@
+{
+  "commit": "47129e4b2654bc1c8e99c5b77bb7d54b4a191611",
+  "branch": "zyx/sugon-graphcast",
+  "code_tar_sha256": "973f17c3a7bd5a33c49929ab49fdd741e26b0e8b42ab1a3138c560ee036579db",
+  "remote": "/data/zyx/graphcast-h100-tf32-20261029",
+  "precision": "JAX tensorfloat32, FP32 arrays, no RNE hooks or preload",
+  "device": 2
+}

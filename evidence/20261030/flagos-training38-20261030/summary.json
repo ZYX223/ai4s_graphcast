@@ -1,0 +1,44 @@
+{
+  "status": "completed",
+  "paired_updates": 38,
+  "backends": {
+    "h100": {
+      "updates": 38,
+      "gpu_kernel_seconds": 536.957392611,
+      "synchronized_update_seconds": 544.2025231113657,
+      "useful_gemm_flops": 28660795243364352,
+      "mfu_percent": 10.78962871158814,
+      "peak_tflops": 494.7,
+      "whole_card_peak_gib": 76.9423828125,
+      "jax_peak_gib": 75.69888997077942,
+      "best_loss": 1.3054267168045044,
+      "last_loss": 28.83903217315674
+    },
+    "flagos": {
+      "updates": 38,
+      "gpu_kernel_seconds": 2975.6737762440002,
+      "synchronized_update_seconds": 2987.3982668828976,
+      "useful_gemm_flops": 28660792706203648,
+      "mfu_percent": 5.652617539537446,
+      "peak_tflops": 170.3936,
+      "whole_card_peak_gib": 129.2998046875,
+      "jax_peak_gib": 102.53232407569885,
+      "best_loss": 1.3054355382919312,
+      "last_loss": 28.796310424804688
+    }
+  },
+  "formula": "MFU = useful differentiated NO-remat GEMM FLOPs / (actual GPU compute-kernel union seconds x dense peak). Numerator excludes recomputation, RNE and optimizer FLOPs; denominator includes their kernels; copies/CPU/gaps excluded.",
+  "limitations": [
+    "Short prescribed38-update mechanics/loss-consistency test, not convergence.",
+    "Two zero learning rates retained;36 nonzero parameter updates. Each update includes2 microbatches.",
+    "BW additional LayerNorm remat; H100 original stage/message remat. H100 horizons11/12 use96% pool after94% insufficient; BW horizons11/12 use73% instead of70% after measured capacity growth; frozen baseline preserved.",
+    "Independent trajectories from same initial weights/optimizer/data; compare corresponding loss, not trained-checkpoint inference outputs.",
+    "H100 graph has one additional grid2mesh edge; platform FLOPs counted separately.",
+    "MFU is GEMM approximation and GPU-active timing. MFU ratio is candidate peak-normalized efficiency, not formal phase acceptance."
+  ],
+  "max_loss_relative_percent": 0.18801678143198872,
+  "mean_loss_relative_percent": 0.08321080673786918,
+  "internal5_pass": true,
+  "stage10_pass": true,
+  "flagos_over_h100_mfu_ratio_percent": 52.38936103025022
+}

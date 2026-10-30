@@ -1,0 +1,550 @@
+{
+  "schema": "graphcast.operator_catalog.v1",
+  "trace_label": "fp32:1",
+  "calls_per_step": 84,
+  "unique_gemm_shapes": 15,
+  "hlo_runtime_shapes_match": true,
+  "gemm_shapes": [
+    {
+      "id": "m512_n40962_k512",
+      "m": 512,
+      "n": 40962,
+      "k": 512,
+      "activation_shape": [
+        40962,
+        512
+      ],
+      "weight_shape": [
+        512,
+        512
+      ],
+      "output_shape": [
+        40962,
+        512
+      ],
+      "dtype": "float32",
+      "native_layout": "column-major NN: A[m,k], B[k,n], C[m,n]",
+      "alpha": 1,
+      "beta": 0,
+      "calls_per_step": 17,
+      "layers": [
+        "grid2mesh_gnn/~_networks_builder/processor_nodes_0_mesh_nodes_mlp/~/linear_1",
+        "mesh_gnn/~_networks_builder/processor_nodes_0_mesh_nodes_mlp/~/linear_1",
+        "mesh_gnn/~_networks_builder/processor_nodes_1_mesh_nodes_mlp/~/linear_1",
+        "mesh_gnn/~_networks_builder/processor_nodes_2_mesh_nodes_mlp/~/linear_1",
+        "mesh_gnn/~_networks_builder/processor_nodes_3_mesh_nodes_mlp/~/linear_1",
+        "mesh_gnn/~_networks_builder/processor_nodes_4_mesh_nodes_mlp/~/linear_1",
+        "mesh_gnn/~_networks_builder/processor_nodes_5_mesh_nodes_mlp/~/linear_1",
+        "mesh_gnn/~_networks_builder/processor_nodes_6_mesh_nodes_mlp/~/linear_1",
+        "mesh_gnn/~_networks_builder/processor_nodes_7_mesh_nodes_mlp/~/linear_1",
+        "mesh_gnn/~_networks_builder/processor_nodes_8_mesh_nodes_mlp/~/linear_1",
+        "mesh_gnn/~_networks_builder/processor_nodes_9_mesh_nodes_mlp/~/linear_1",
+        "mesh_gnn/~_networks_builder/processor_nodes_10_mesh_nodes_mlp/~/linear_1",
+        "mesh_gnn/~_networks_builder/processor_nodes_11_mesh_nodes_mlp/~/linear_1",
+        "mesh_gnn/~_networks_builder/processor_nodes_12_mesh_nodes_mlp/~/linear_1",
+        "mesh_gnn/~_networks_builder/processor_nodes_13_mesh_nodes_mlp/~/linear_1",
+        "mesh_gnn/~_networks_builder/processor_nodes_14_mesh_nodes_mlp/~/linear_1",
+        "mesh_gnn/~_networks_builder/processor_nodes_15_mesh_nodes_mlp/~/linear_1"
+      ],
+      "flops_per_call": 21475885056,
+      "weight_bytes": 1048576,
+      "activation_bytes": 83890176,
+      "output_bytes": 83890176,
+      "rne_read_write_bytes_per_call": 169877504
+    },
+    {
+      "id": "m512_n40962_k1024",
+      "m": 512,
+      "n": 40962,
+      "k": 1024,
+      "activation_shape": [
+        40962,
+        1024
+      ],
+      "weight_shape": [
+        1024,
+        512
+      ],
+      "output_shape": [
+        40962,
+        512
+      ],
+      "dtype": "float32",
+      "native_layout": "column-major NN: A[m,k], B[k,n], C[m,n]",
+      "alpha": 1,
+      "beta": 0,
+      "calls_per_step": 17,
+      "layers": [
+        "grid2mesh_gnn/~_networks_builder/processor_nodes_0_mesh_nodes_mlp/~/linear_0",
+        "mesh_gnn/~_networks_builder/processor_nodes_0_mesh_nodes_mlp/~/linear_0",
+        "mesh_gnn/~_networks_builder/processor_nodes_1_mesh_nodes_mlp/~/linear_0",
+        "mesh_gnn/~_networks_builder/processor_nodes_2_mesh_nodes_mlp/~/linear_0",
+        "mesh_gnn/~_networks_builder/processor_nodes_3_mesh_nodes_mlp/~/linear_0",
+        "mesh_gnn/~_networks_builder/processor_nodes_4_mesh_nodes_mlp/~/linear_0",
+        "mesh_gnn/~_networks_builder/processor_nodes_5_mesh_nodes_mlp/~/linear_0",
+        "mesh_gnn/~_networks_builder/processor_nodes_6_mesh_nodes_mlp/~/linear_0",
+        "mesh_gnn/~_networks_builder/processor_nodes_7_mesh_nodes_mlp/~/linear_0",
+        "mesh_gnn/~_networks_builder/processor_nodes_8_mesh_nodes_mlp/~/linear_0",
+        "mesh_gnn/~_networks_builder/processor_nodes_9_mesh_nodes_mlp/~/linear_0",
+        "mesh_gnn/~_networks_builder/processor_nodes_10_mesh_nodes_mlp/~/linear_0",
+        "mesh_gnn/~_networks_builder/processor_nodes_11_mesh_nodes_mlp/~/linear_0",
+        "mesh_gnn/~_networks_builder/processor_nodes_12_mesh_nodes_mlp/~/linear_0",
+        "mesh_gnn/~_networks_builder/processor_nodes_13_mesh_nodes_mlp/~/linear_0",
+        "mesh_gnn/~_networks_builder/processor_nodes_14_mesh_nodes_mlp/~/linear_0",
+        "mesh_gnn/~_networks_builder/processor_nodes_15_mesh_nodes_mlp/~/linear_0"
+      ],
+      "flops_per_call": 42951770112,
+      "weight_bytes": 2097152,
+      "activation_bytes": 167780352,
+      "output_bytes": 83890176,
+      "rne_read_write_bytes_per_call": 339755008
+    },
+    {
+      "id": "m512_n327660_k512",
+      "m": 512,
+      "n": 327660,
+      "k": 512,
+      "activation_shape": [
+        327660,
+        512
+      ],
+      "weight_shape": [
+        512,
+        512
+      ],
+      "output_shape": [
+        327660,
+        512
+      ],
+      "dtype": "float32",
+      "native_layout": "column-major NN: A[m,k], B[k,n], C[m,n]",
+      "alpha": 1,
+      "beta": 0,
+      "calls_per_step": 17,
+      "layers": [
+        "mesh_gnn/~_networks_builder/encoder_edges_mesh_mlp/~/linear_1",
+        "mesh_gnn/~_networks_builder/processor_edges_0_mesh_mlp/~/linear_1",
+        "mesh_gnn/~_networks_builder/processor_edges_1_mesh_mlp/~/linear_1",
+        "mesh_gnn/~_networks_builder/processor_edges_2_mesh_mlp/~/linear_1",
+        "mesh_gnn/~_networks_builder/processor_edges_3_mesh_mlp/~/linear_1",
+        "mesh_gnn/~_networks_builder/processor_edges_4_mesh_mlp/~/linear_1",
+        "mesh_gnn/~_networks_builder/processor_edges_5_mesh_mlp/~/linear_1",
+        "mesh_gnn/~_networks_builder/processor_edges_6_mesh_mlp/~/linear_1",
+        "mesh_gnn/~_networks_builder/processor_edges_7_mesh_mlp/~/linear_1",
+        "mesh_gnn/~_networks_builder/processor_edges_8_mesh_mlp/~/linear_1",
+        "mesh_gnn/~_networks_builder/processor_edges_9_mesh_mlp/~/linear_1",
+        "mesh_gnn/~_networks_builder/processor_edges_10_mesh_mlp/~/linear_1",
+        "mesh_gnn/~_networks_builder/processor_edges_11_mesh_mlp/~/linear_1",
+        "mesh_gnn/~_networks_builder/processor_edges_12_mesh_mlp/~/linear_1",
+        "mesh_gnn/~_networks_builder/processor_edges_13_mesh_mlp/~/linear_1",
+        "mesh_gnn/~_networks_builder/processor_edges_14_mesh_mlp/~/linear_1",
+        "mesh_gnn/~_networks_builder/processor_edges_15_mesh_mlp/~/linear_1"
+      ],
+      "flops_per_call": 171788206080,
+      "weight_bytes": 1048576,
+      "activation_bytes": 671047680,
+      "output_bytes": 671047680,
+      "rne_read_write_bytes_per_call": 1344192512
+    },
+    {
+      "id": "m512_n327660_k1536",
+      "m": 512,
+      "n": 327660,
+      "k": 1536,
+      "activation_shape": [
+        327660,
+        1536
+      ],
+      "weight_shape": [
+        1536,
+        512
+      ],
+      "output_shape": [
+        327660,
+        512
+      ],
+      "dtype": "float32",
+      "native_layout": "column-major NN: A[m,k], B[k,n], C[m,n]",
+      "alpha": 1,
+      "beta": 0,
+      "calls_per_step": 16,
+      "layers": [
+        "mesh_gnn/~_networks_builder/processor_edges_0_mesh_mlp/~/linear_0",
+        "mesh_gnn/~_networks_builder/processor_edges_1_mesh_mlp/~/linear_0",
+        "mesh_gnn/~_networks_builder/processor_edges_2_mesh_mlp/~/linear_0",
+        "mesh_gnn/~_networks_builder/processor_edges_3_mesh_mlp/~/linear_0",
+        "mesh_gnn/~_networks_builder/processor_edges_4_mesh_mlp/~/linear_0",
+        "mesh_gnn/~_networks_builder/processor_edges_5_mesh_mlp/~/linear_0",
+        "mesh_gnn/~_networks_builder/processor_edges_6_mesh_mlp/~/linear_0",
+        "mesh_gnn/~_networks_builder/processor_edges_7_mesh_mlp/~/linear_0",
+        "mesh_gnn/~_networks_builder/processor_edges_8_mesh_mlp/~/linear_0",
+        "mesh_gnn/~_networks_builder/processor_edges_9_mesh_mlp/~/linear_0",
+        "mesh_gnn/~_networks_builder/processor_edges_10_mesh_mlp/~/linear_0",
+        "mesh_gnn/~_networks_builder/processor_edges_11_mesh_mlp/~/linear_0",
+        "mesh_gnn/~_networks_builder/processor_edges_12_mesh_mlp/~/linear_0",
+        "mesh_gnn/~_networks_builder/processor_edges_13_mesh_mlp/~/linear_0",
+        "mesh_gnn/~_networks_builder/processor_edges_14_mesh_mlp/~/linear_0",
+        "mesh_gnn/~_networks_builder/processor_edges_15_mesh_mlp/~/linear_0"
+      ],
+      "flops_per_call": 515364618240,
+      "weight_bytes": 3145728,
+      "activation_bytes": 2013143040,
+      "output_bytes": 671047680,
+      "rne_read_write_bytes_per_call": 4032577536
+    },
+    {
+      "id": "m512_n1038240_k512",
+      "m": 512,
+      "n": 1038240,
+      "k": 512,
+      "activation_shape": [
+        1038240,
+        512
+      ],
+      "weight_shape": [
+        512,
+        512
+      ],
+      "output_shape": [
+        1038240,
+        512
+      ],
+      "dtype": "float32",
+      "native_layout": "column-major NN: A[m,k], B[k,n], C[m,n]",
+      "alpha": 1,
+      "beta": 0,
+      "calls_per_step": 5,
+      "layers": [
+        "grid2mesh_gnn/~_networks_builder/encoder_nodes_grid_nodes_mlp/~/linear_1",
+        "grid2mesh_gnn/~_networks_builder/processor_nodes_0_grid_nodes_mlp/~/linear_0",
+        "grid2mesh_gnn/~_networks_builder/processor_nodes_0_grid_nodes_mlp/~/linear_1",
+        "mesh2grid_gnn/~_networks_builder/processor_nodes_0_grid_nodes_mlp/~/linear_1",
+        "mesh2grid_gnn/~_networks_builder/decoder_nodes_grid_nodes_mlp/~/linear_0"
+      ],
+      "flops_per_call": 544336773120,
+      "weight_bytes": 1048576,
+      "activation_bytes": 2126315520,
+      "output_bytes": 2126315520,
+      "rne_read_write_bytes_per_call": 4254728192
+    },
+    {
+      "id": "m512_n1618745_k512",
+      "m": 512,
+      "n": 1618745,
+      "k": 512,
+      "activation_shape": [
+        1618745,
+        512
+      ],
+      "weight_shape": [
+        512,
+        512
+      ],
+      "output_shape": [
+        1618745,
+        512
+      ],
+      "dtype": "float32",
+      "native_layout": "column-major NN: A[m,k], B[k,n], C[m,n]",
+      "alpha": 1,
+      "beta": 0,
+      "calls_per_step": 2,
+      "layers": [
+        "grid2mesh_gnn/~_networks_builder/encoder_edges_grid2mesh_mlp/~/linear_1",
+        "grid2mesh_gnn/~_networks_builder/processor_edges_0_grid2mesh_mlp/~/linear_1"
+      ],
+      "flops_per_call": 848688578560,
+      "weight_bytes": 1048576,
+      "activation_bytes": 3315189760,
+      "output_bytes": 3315189760,
+      "rne_read_write_bytes_per_call": 6632476672
+    },
+    {
+      "id": "m512_n3114720_k512",
+      "m": 512,
+      "n": 3114720,
+      "k": 512,
+      "activation_shape": [
+        3114720,
+        512
+      ],
+      "weight_shape": [
+        512,
+        512
+      ],
+      "output_shape": [
+        3114720,
+        512
+      ],
+      "dtype": "float32",
+      "native_layout": "column-major NN: A[m,k], B[k,n], C[m,n]",
+      "alpha": 1,
+      "beta": 0,
+      "calls_per_step": 2,
+      "layers": [
+        "mesh2grid_gnn/~_networks_builder/encoder_edges_mesh2grid_mlp/~/linear_1",
+        "mesh2grid_gnn/~_networks_builder/processor_edges_0_mesh2grid_mlp/~/linear_1"
+      ],
+      "flops_per_call": 1633010319360,
+      "weight_bytes": 1048576,
+      "activation_bytes": 6378946560,
+      "output_bytes": 6378946560,
+      "rne_read_write_bytes_per_call": 12759990272
+    },
+    {
+      "id": "m83_n1038240_k512",
+      "m": 83,
+      "n": 1038240,
+      "k": 512,
+      "activation_shape": [
+        1038240,
+        512
+      ],
+      "weight_shape": [
+        512,
+        83
+      ],
+      "output_shape": [
+        1038240,
+        83
+      ],
+      "dtype": "float32",
+      "native_layout": "column-major NN: A[m,k], B[k,n], C[m,n]",
+      "alpha": 1,
+      "beta": 0,
+      "calls_per_step": 1,
+      "layers": [
+        "mesh2grid_gnn/~_networks_builder/decoder_nodes_grid_nodes_mlp/~/linear_1"
+      ],
+      "flops_per_call": 88242094080,
+      "weight_bytes": 169984,
+      "activation_bytes": 2126315520,
+      "output_bytes": 344695680,
+      "rne_read_write_bytes_per_call": 4252971008
+    },
+    {
+      "id": "m512_n327660_k4",
+      "m": 512,
+      "n": 327660,
+      "k": 4,
+      "activation_shape": [
+        327660,
+        4
+      ],
+      "weight_shape": [
+        4,
+        512
+      ],
+      "output_shape": [
+        327660,
+        512
+      ],
+      "dtype": "float32",
+      "native_layout": "column-major NN: A[m,k], B[k,n], C[m,n]",
+      "alpha": 1,
+      "beta": 0,
+      "calls_per_step": 1,
+      "layers": [
+        "mesh_gnn/~_networks_builder/encoder_edges_mesh_mlp/~/linear_0"
+      ],
+      "flops_per_call": 1342095360,
+      "weight_bytes": 8192,
+      "activation_bytes": 5242560,
+      "output_bytes": 671047680,
+      "rne_read_write_bytes_per_call": 10501504
+    },
+    {
+      "id": "m512_n1038240_k184",
+      "m": 512,
+      "n": 1038240,
+      "k": 184,
+      "activation_shape": [
+        1038240,
+        184
+      ],
+      "weight_shape": [
+        184,
+        512
+      ],
+      "output_shape": [
+        1038240,
+        512
+      ],
+      "dtype": "float32",
+      "native_layout": "column-major NN: A[m,k], B[k,n], C[m,n]",
+      "alpha": 1,
+      "beta": 0,
+      "calls_per_step": 1,
+      "layers": [
+        "grid2mesh_gnn/~_networks_builder/encoder_nodes_grid_nodes_mlp/~/linear_0"
+      ],
+      "flops_per_call": 195621027840,
+      "weight_bytes": 376832,
+      "activation_bytes": 764144640,
+      "output_bytes": 2126315520,
+      "rne_read_write_bytes_per_call": 1529042944
+    },
+    {
+      "id": "m512_n1038240_k1024",
+      "m": 512,
+      "n": 1038240,
+      "k": 1024,
+      "activation_shape": [
+        1038240,
+        1024
+      ],
+      "weight_shape": [
+        1024,
+        512
+      ],
+      "output_shape": [
+        1038240,
+        512
+      ],
+      "dtype": "float32",
+      "native_layout": "column-major NN: A[m,k], B[k,n], C[m,n]",
+      "alpha": 1,
+      "beta": 0,
+      "calls_per_step": 1,
+      "layers": [
+        "mesh2grid_gnn/~_networks_builder/processor_nodes_0_grid_nodes_mlp/~/linear_0"
+      ],
+      "flops_per_call": 1088673546240,
+      "weight_bytes": 2097152,
+      "activation_bytes": 4252631040,
+      "output_bytes": 2126315520,
+      "rne_read_write_bytes_per_call": 8509456384
+    },
+    {
+      "id": "m512_n1618745_k4",
+      "m": 512,
+      "n": 1618745,
+      "k": 4,
+      "activation_shape": [
+        1618745,
+        4
+      ],
+      "weight_shape": [
+        4,
+        512
+      ],
+      "output_shape": [
+        1618745,
+        512
+      ],
+      "dtype": "float32",
+      "native_layout": "column-major NN: A[m,k], B[k,n], C[m,n]",
+      "alpha": 1,
+      "beta": 0,
+      "calls_per_step": 1,
+      "layers": [
+        "grid2mesh_gnn/~_networks_builder/encoder_edges_grid2mesh_mlp/~/linear_0"
+      ],
+      "flops_per_call": 6630379520,
+      "weight_bytes": 8192,
+      "activation_bytes": 25899920,
+      "output_bytes": 3315189760,
+      "rne_read_write_bytes_per_call": 51816224
+    },
+    {
+      "id": "m512_n1618745_k1536",
+      "m": 512,
+      "n": 1618745,
+      "k": 1536,
+      "activation_shape": [
+        1618745,
+        1536
+      ],
+      "weight_shape": [
+        1536,
+        512
+      ],
+      "output_shape": [
+        1618745,
+        512
+      ],
+      "dtype": "float32",
+      "native_layout": "column-major NN: A[m,k], B[k,n], C[m,n]",
+      "alpha": 1,
+      "beta": 0,
+      "calls_per_step": 1,
+      "layers": [
+        "grid2mesh_gnn/~_networks_builder/processor_edges_0_grid2mesh_mlp/~/linear_0"
+      ],
+      "flops_per_call": 2546065735680,
+      "weight_bytes": 3145728,
+      "activation_bytes": 9945569280,
+      "output_bytes": 3315189760,
+      "rne_read_write_bytes_per_call": 19897430016
+    },
+    {
+      "id": "m512_n3114720_k4",
+      "m": 512,
+      "n": 3114720,
+      "k": 4,
+      "activation_shape": [
+        3114720,
+        4
+      ],
+      "weight_shape": [
+        4,
+        512
+      ],
+      "output_shape": [
+        3114720,
+        512
+      ],
+      "dtype": "float32",
+      "native_layout": "column-major NN: A[m,k], B[k,n], C[m,n]",
+      "alpha": 1,
+      "beta": 0,
+      "calls_per_step": 1,
+      "layers": [
+        "mesh2grid_gnn/~_networks_builder/encoder_edges_mesh2grid_mlp/~/linear_0"
+      ],
+      "flops_per_call": 12757893120,
+      "weight_bytes": 8192,
+      "activation_bytes": 49835520,
+      "output_bytes": 6378946560,
+      "rne_read_write_bytes_per_call": 99687424
+    },
+    {
+      "id": "m512_n3114720_k1536",
+      "m": 512,
+      "n": 3114720,
+      "k": 1536,
+      "activation_shape": [
+        3114720,
+        1536
+      ],
+      "weight_shape": [
+        1536,
+        512
+      ],
+      "output_shape": [
+        3114720,
+        512
+      ],
+      "dtype": "float32",
+      "native_layout": "column-major NN: A[m,k], B[k,n], C[m,n]",
+      "alpha": 1,
+      "beta": 0,
+      "calls_per_step": 1,
+      "layers": [
+        "mesh2grid_gnn/~_networks_builder/processor_edges_0_mesh2grid_mlp/~/linear_0"
+      ],
+      "flops_per_call": 4899030958080,
+      "weight_bytes": 3145728,
+      "activation_bytes": 19136839680,
+      "output_bytes": 6378946560,
+      "rne_read_write_bytes_per_call": 38279970816
+    }
+  ],
+  "input_policy": "Deterministic synthetic inputs; actual model shapes and frequencies. Not captured activations.",
+  "timing_scope": "Standalone operator timings and frequency-weighted estimates are not model profiler timings.",
+  "sources": {
+    "/home/zhangyuxin/zyx/graphcast/outputs/jax-hygon-20261015/xf32-rne-20261016/forty-r1/router.jsonl": "175d7ca9bab57445e03d63c72d5fb773864bb93dcd54a15bd8bcec95d3d9dbab",
+    "/home/zhangyuxin/zyx/graphcast/outputs/jax-reorganization-20261016/hygon-benchmark-r1/run/optimized-hlo.txt": "be3aebd5dea500588b633bfdc809a4723546794117fb74bf20d4b31d739bf956",
+    "/home/zhangyuxin/zyx/graphcast-sugon/kernels/xf32_rne/weights.json": "bd9ad13385c662f316e7ea5dadf94184b237146c9ed6243d99e0725083f8d379"
+  }
+}

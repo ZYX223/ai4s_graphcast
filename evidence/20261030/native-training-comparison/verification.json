@@ -1,0 +1,12 @@
+{
+  "paired_updates": 38,
+  "all_checks_passed": true,
+  "sha256": {
+    "compare_historical_native.py": "1474c6beef7b78b2e39a5afd8d02eb94b9552f36266c85e126aec2932989ccd1",
+    "native-comparison/source-equivalence.json": "c963b5110be96495786e1c97561808adb41e54b15877c262a9ce74133dd17c18",
+    "native-comparison/source-hashes.json": "0b719d48c6c4a75d83ff1783867575335ea8cc28a9d4853cac8f1f0ba36af635",
+    "native-comparison/summary.json": "9122afe021fc042ce11fc459a5b4d4978bc92f46c0cf77c67645ea7e733c7a70",
+    "native-comparison/loss-comparison.csv": "1c98e6111ed144a50d9967de0ba1458a62f95fd8ba2c690284173b75ae8cbbec",
+    "native-comparison/NOTION.md": "ad6127f283628624e5efa3a405c9bbf8d769226e32b8d747eba0c687a3c969ca"
+  }
+}

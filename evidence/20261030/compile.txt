@@ -1,0 +1,43 @@
+bash: /work1/share/scnethpc2601/flagos/conda-envs/flagos_base_official_torch210_dtk2604_py310_ft070rc2_g76201fd9_v1/lib/libtinfo.so.6: no version information available (required by bash)
+/tmp/zyx-release-inference-build-20261030/xf32_rne_router.cc:138:1: warning: void function is missing a return statement [-Wreturn-type]
+}
+^
+/tmp/zyx-release-inference-build-20261030/xf32_rne_router.cc:139:72: warning: void function is missing a return statement [-Wreturn-type]
+extern "C" void graphcast_runtime_enable() { graphcast_runtime_set(1); }
+                                                                       ^
+/tmp/zyx-release-inference-build-20261030/xf32_rne_router.cc:149:1: warning: void function is missing a return statement [-Wreturn-type]
+}
+^
+/tmp/zyx-release-inference-build-20261030/xf32_rne_router.cc:152:1: warning: void function is missing a return statement [-Wreturn-type]
+}
+^
+/tmp/zyx-release-check-20261030/experiments/flagos-inference-20261030/baseline/kernels/xf32_rne/rne_kernel.hip:18:1: warning: void function is missing a return statement [-Wreturn-type]
+}
+^
+4 warnings generated when compiling for gfx938.
+1 warning generated when compiling for gfx938.
+/tmp/zyx-release-inference-build-20261030/xf32_rne_router.cc:138:1: warning: void function is missing a return statement [-Wreturn-type]
+}
+^
+/tmp/zyx-release-inference-build-20261030/xf32_rne_router.cc:139:72: warning: void function is missing a return statement [-Wreturn-type]
+extern "C" void graphcast_runtime_enable() { graphcast_runtime_set(1); }
+                                                                       ^
+/tmp/zyx-release-inference-build-20261030/xf32_rne_router.cc:149:1: warning: void function is missing a return statement [-Wreturn-type]
+}
+^
+/tmp/zyx-release-inference-build-20261030/xf32_rne_router.cc:152:1: warning: void function is missing a return statement [-Wreturn-type]
+}
+^
+/tmp/zyx-release-check-20261030/experiments/flagos-inference-20261030/baseline/kernels/xf32_rne/rne_kernel.hip:18:1: warning: void function is missing a return statement [-Wreturn-type]
+}
+^
+1 warning generated when compiling for host.
+4 warnings generated when compiling for host.
+/tmp/zyx-release-check-20261030/experiments/flagos-training38-20261030/router/rne_kernel.hip:18:1: warning: void function is missing a return statement [-Wreturn-type]
+}
+^
+1 warning generated when compiling for gfx938.
+/tmp/zyx-release-check-20261030/experiments/flagos-training38-20261030/router/rne_kernel.hip:18:1: warning: void function is missing a return statement [-Wreturn-type]
+}
+^
+1 warning generated when compiling for host.

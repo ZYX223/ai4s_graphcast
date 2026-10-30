@@ -1,0 +1,45 @@
+bash: /work1/share/scnethpc2601/flagos/conda-envs/flagos_base_official_torch210_dtk2604_py310_ft070rc2_g76201fd9_v1/lib/libtinfo.so.6: no version information available (required by bash)
+test_restore_later_optimizer_count (test_curriculum.CurriculumTests) ... ok
+test_resume_horizon_boundary (test_curriculum.CurriculumTests) ... ok
+test_xarray_keeps_dimensions_and_coordinates (test_data_transfer.TransferTests) ... ok
+test_scan_multiplier_and_unused_dot (test_flops.FlopsTests) ... ok
+test_two_step_bptt_is_not_two_independent_gradients (test_flops.FlopsTests) ... ok
+test_weight_only_and_both_operand_gradients (test_flops.FlopsTests) ... ok
+test_autodiff_add_any_replays_as_add (test_operator_replay.ReplayTests) ... ok
+test_backward_linear_returns_both_weight_and_input_gradients (test_operator_replay.ReplayTests) ... ok
+test_resume_preserves_failed_case_and_never_duplicates_results (test_operator_replay.ReplayTests) ... ok
+test_full_bptt_and_average_before_update (test_recipe.RecipeTests) ... ok
+test_optimizer_matches_manual_first_two_updates_and_resume (test_recipe.RecipeTests) ... ok
+test_sample_windows_fit_horizon_and_are_reproducible (test_recipe.RecipeTests) ... ok
+test_schedule_boundaries (test_recipe.RecipeTests) ... ok
+test_failed_or_not_finished_predecessor_cannot_resume (test_resume_integrity.ResumeIntegrityTests) ... ok
+test_finite_replacement_is_rejected_despite_matching_recipe_metadata (test_resume_integrity.ResumeIntegrityTests) ... ok
+
+----------------------------------------------------------------------
+Ran 15 tests in 2.397s
+
+OK
+2026-10-30 12:06:51.499376: I tensorflow/core/util/port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+2026-10-30 12:06:51.548703: I tensorflow/core/platform/cpu_feature_guard.cc:210] This TensorFlow binary is optimized to use available CPU instructions in performance-critical operations.
+To enable the following instructions: AVX2 AVX512F AVX512_VNNI AVX512_BF16 AVX_VNNI FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+test_missing_gpu_cannot_report_zero_mfu (test_timing.TimingTests) ... ok
+test_selects_only_gpu_kernels_inside_named_update (test_timing.TimingTests) ... ok
+test_union_excludes_overlap_and_gaps (test_timing.TimingTests) ... ok
+test_finite_parameter_or_optimizer_chain_replacement_rejected (test_trajectory.TrajectoryTests) ... ok
+test_skipped_updates_rejected (test_trajectory.TrajectoryTests) ... ok
+test_missing_device_and_duplicate_ranges_rejected (test_xplane_timing.XPlaneTimingTests) ... ok
+test_real_schema_time_origin_and_cpu_copy_exclusion (test_xplane_timing.XPlaneTimingTests) ... ok
+
+----------------------------------------------------------------------
+Ran 7 tests in 0.001s
+
+OK
+test_compute_usage_rejects_low_memory_context (test_resource_gate.ResourceGateTests) ... ok
+test_idle_card_is_accepted (test_resource_gate.ResourceGateTests) ... ok
+test_missing_selected_card_fails_closed (test_resource_gate.ResourceGateTests) ... ok
+test_reserved_memory_rejects_even_with_zero_utilization (test_resource_gate.ResourceGateTests) ... ok
+
+----------------------------------------------------------------------
+Ran 4 tests in 0.001s
+
+OK

@@ -1,0 +1,97 @@
+{
+  "official_source_sha256": {
+    "graphcast/autoregressive.py": {
+      "native": "2e44d4505bed0c6a5b6d42fd58d0d0d5414bab2658f02ba2b05e92727887749a",
+      "current": "2e44d4505bed0c6a5b6d42fd58d0d0d5414bab2658f02ba2b05e92727887749a"
+    },
+    "graphcast/checkpoint.py": {
+      "native": "07dc3521a5ed9e606869246a47f865f524e2fc4c689c745305fcdd3f2e5ab24a",
+      "current": "07dc3521a5ed9e606869246a47f865f524e2fc4c689c745305fcdd3f2e5ab24a"
+    },
+    "graphcast/data_utils.py": {
+      "native": "0a2ef70e2eaa6e36e03d9bf354639d77db77c91bca8a506da9716b8687de8a53",
+      "current": "0a2ef70e2eaa6e36e03d9bf354639d77db77c91bca8a506da9716b8687de8a53"
+    },
+    "graphcast/deep_typed_graph_net.py": {
+      "native": "7812649e3128a002603b537e61c7eda060b03a7a2d90bd037eeb7791b52cc59a",
+      "current": "7812649e3128a002603b537e61c7eda060b03a7a2d90bd037eeb7791b52cc59a"
+    },
+    "graphcast/graphcast.py": {
+      "native": "6aeb9cfa2490b0e2dbfa70f255594914ee1765d5e20c3e66ca912b80bc66e953",
+      "current": "6aeb9cfa2490b0e2dbfa70f255594914ee1765d5e20c3e66ca912b80bc66e953"
+    },
+    "graphcast/grid_mesh_connectivity.py": {
+      "native": "914aa71a500a9a3e13cd856a25caffbbba724dda65a30ccf6dbf882e1fe72fc2",
+      "current": "914aa71a500a9a3e13cd856a25caffbbba724dda65a30ccf6dbf882e1fe72fc2"
+    },
+    "graphcast/icosahedral_mesh.py": {
+      "native": "bfafc9a3efa272714122963e6b49efe961b3ab1b5d35a7eddd727aa74d693fbe",
+      "current": "bfafc9a3efa272714122963e6b49efe961b3ab1b5d35a7eddd727aa74d693fbe"
+    },
+    "graphcast/losses.py": {
+      "native": "520aa2010ddbc441ee0630598c48176a905c3638582e4af6d15887a68b7c7ab8",
+      "current": "520aa2010ddbc441ee0630598c48176a905c3638582e4af6d15887a68b7c7ab8"
+    },
+    "graphcast/mlp.py": {
+      "native": "a0d0cdf91f01817344935ef8b5ffed20902041e386321ed3da45e6a26a92d266",
+      "current": "a0d0cdf91f01817344935ef8b5ffed20902041e386321ed3da45e6a26a92d266"
+    },
+    "graphcast/model_utils.py": {
+      "native": "bc8006a4454e40eb6c0b4a802b1bbeac77f136af740cafefcb829f5965a9cce0",
+      "current": "bc8006a4454e40eb6c0b4a802b1bbeac77f136af740cafefcb829f5965a9cce0"
+    },
+    "graphcast/normalization.py": {
+      "native": "5b5f95bcf830be1236244fd09cc418caa28c1c970793130e93bccbc98e0e00e7",
+      "current": "5b5f95bcf830be1236244fd09cc418caa28c1c970793130e93bccbc98e0e00e7"
+    },
+    "graphcast/predictor_base.py": {
+      "native": "ff3f3297e1ec0484d2baf76b4d7e68c96394f17a6f436381f1e181ebbef823b0",
+      "current": "ff3f3297e1ec0484d2baf76b4d7e68c96394f17a6f436381f1e181ebbef823b0"
+    },
+    "graphcast/rollout.py": {
+      "native": "0858c305f04c1bc0ecbfc2c2075acc985166eac7a111027dfb354f585cdbf2da",
+      "current": "0858c305f04c1bc0ecbfc2c2075acc985166eac7a111027dfb354f585cdbf2da"
+    },
+    "graphcast/solar_radiation.py": {
+      "native": "f2a5ade645893c252e687013b79520c04e4b0d21019e492602df342da038d7ea",
+      "current": "f2a5ade645893c252e687013b79520c04e4b0d21019e492602df342da038d7ea"
+    },
+    "graphcast/typed_graph.py": {
+      "native": "feebe364b3ef12f0fc56c0f956330c70680297a9c44378d01ae972db504cd6d6",
+      "current": "feebe364b3ef12f0fc56c0f956330c70680297a9c44378d01ae972db504cd6d6"
+    },
+    "graphcast/typed_graph_net.py": {
+      "native": "58bc7c9b090a65ec83d65f0b3cd48d4a450f57f50b8bba5425f33b25d436e7a4",
+      "current": "58bc7c9b090a65ec83d65f0b3cd48d4a450f57f50b8bba5425f33b25d436e7a4"
+    },
+    "graphcast/xarray_jax.py": {
+      "native": "0203d371ea2029023d2eae90f447020caa3f0858b01b4244f2824611efb34b18",
+      "current": "0203d371ea2029023d2eae90f447020caa3f0858b01b4244f2824611efb34b18"
+    },
+    "graphcast/xarray_tree.py": {
+      "native": "b6c05004109e88175c6e1faee4f864faea652f78fa99065e2e9635039a8c6fae",
+      "current": "b6c05004109e88175c6e1faee4f864faea652f78fa99065e2e9635039a8c6fae"
+    }
+  },
+  "assets_sha256": {
+    "jax_weights.npz": {
+      "native": "8f485e84343072785522f6d0696c198c7712e9f0f14070a88c26a9ff35db75a9",
+      "current": "8f485e84343072785522f6d0696c198c7712e9f0f14070a88c26a9ff35db75a9"
+    },
+    "stats/diffs_stddev_by_level.nc": {
+      "native": "e688fc51fe72e1dc897678ef5ce9889add64e28e13f3cec4758d8e47d429c1ce",
+      "current": "e688fc51fe72e1dc897678ef5ce9889add64e28e13f3cec4758d8e47d429c1ce"
+    },
+    "stats/mean_by_level.nc": {
+      "native": "e6e724b94cd27707903cdc5cf5784d420bab306f722e631f4455e25c96da9931",
+      "current": "e6e724b94cd27707903cdc5cf5784d420bab306f722e631f4455e25c96da9931"
+    },
+    "stats/stddev_by_level.nc": {
+      "native": "29f941d8c34906b87a1745f93b2308d1e169ec9bbdc4c5491479c771fe92c3cb",
+      "current": "29f941d8c34906b87a1745f93b2308d1e169ec9bbdc4c5491479c771fe92c3cb"
+    }
+  },
+  "loss_model_identical_except_optional_temporal_remat_flag": true,
+  "recipe_sha256": "394fce0216edac1577689e0170ad1e5d7b835c0b3256db0e4ede3b2e0d3cb5a7",
+  "note": "Current source/archived file equivalence; original native runtime initial-state fingerprints were not saved."
+}

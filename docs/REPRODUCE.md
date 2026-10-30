@@ -1,3 +1,5 @@
+> 2026-10-30最新FlagOS训推与SCNET交付：[本周复现说明](EXPERIMENTS_20261030.md)。以下保留原baseline复现步骤，不用于替代本周FlagOS配置。
+
 # 复现说明
 
 2026-10-22～23新增的RNE融合、MFU、38次训练和精度诊断入口见[本轮完整复现说明](EXPERIMENTS_20261023.md)。本页继续保留原推理baseline及算子profile入口。
