@@ -1,0 +1,12 @@
+{
+  "schema_version": 1,
+  "name": "era5_2017-01-01_07_graphcast_operational_train",
+  "dataset_kind": "era5",
+  "training_stage": "era5_pretrain",
+  "data_role": "train",
+  "shards": [
+    {
+      "path": "../official_era5/era5_2017-01-01_07_graphcast_operational_pretrain.nc"
+    }
+  ]
+}

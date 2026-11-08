@@ -1,0 +1,48 @@
+# Opt-in training coverage candidates, NOT a device-validated allowlist.
+# Forward, checkpoint replay and true backward share the same dispatcher policy.
+# Keep index_add/index_add_ separate here; the workbook merges their display row.
+# _local_scalar_dense remains Native-only. No implicit per-platform fallback.
+# Ascend integration routes same-NPU copy_ directly to FlagGems; CPU/NPU and
+# cross-device transfers remain Native I/O and never count as FlagGems coverage.
+# copy_ stays a target here, but is excluded from GLOBAL registration there.
+# v5.4.0 only_enable indexes implementation function names, not ATen base
+# names. These 36 entries cover 31 logical interfaces (scalar/tensor overloads).
+version: 2
+scope: training
+ops:
+  - addmm
+  - cat
+  - native_layer_norm
+  - index_add_
+  - index_add
+  - silu
+  - index
+  - add
+  - copy_
+  - fill_scalar_
+  - fill_tensor_
+  - mul
+  - sub
+  - sum
+  - pow_tensor_scalar
+  - pow_tensor_tensor
+  - pow_scalar
+  - mean
+  - true_divide
+  - div_mode
+  - abs
+  - ne
+  - eq
+  - all
+  - clamp_min
+  - index_select
+  - mm
+  - add_
+  - layer_norm_backward
+  - _index_put_impl_
+  - silu_backward
+  - gather
+  - remainder
+  - true_divide_
+  - div_mode_
+  - arange

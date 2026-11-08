@@ -1,0 +1,50 @@
+{
+  "key": "c550",
+  "model": "${MODEL}",
+  "ln_sha": "018b54ee69ae40cffc97ad487536cf283e33ac3e0c7521cda60075dab26aa277",
+  "ln_commit": "7f97e605a179b3017326f981f0da9e59e49e4df4",
+  "operator": "mm",
+  "visibility": {
+    "CUDA_VISIBLE_DEVICES": "${MASK}"
+  },
+  "physical_gpu": "${PHYSICAL}",
+  "expected_pci_bus": "${PCI}",
+  "dependency_pythonpath": "${DEPENDENCIES}",
+  "arms": {
+    "candidate": {
+      "source": "${GEMS}",
+      "overlay": {
+        "src/flag_gems/ops/layernorm.py": "78ff9b1465ba3af3aa68713abc8789e9869305b1a3e923b7f17e248297ee188a",
+        "src/flag_gems/runtime/backend/_metax/heuristics_config_utils.py": "bd973292f293882292a4f3d85f8c6c27b1a5932bca55adf66c43dd056999ca04",
+        "src/flag_gems/runtime/backend/_metax/ops/layernorm.py": "018b54ee69ae40cffc97ad487536cf283e33ac3e0c7521cda60075dab26aa277",
+        "src/flag_gems/runtime/backend/_metax/tune_configs.yaml": "d9ecadff7e6829728a8b490d9c57fe1723745cc12660f5096f67b21e6beebae5",
+        "src/flag_gems/runtime/backend/_metax/ops/mm.py": "2b905787966172bb5dd55b622f3e0117ddcbdc714b6f7ade8c2e781ddad51cd3",
+        "src/flag_gems/runtime/backend/_metax/ops/addmm.py": "2682d43085fa8f565227d6c82dfc9840ca37a743ee1807b0b2a932770facc0ac",
+        "src/flag_gems/runtime/backend/_metax/ops/index_select.py": "111cefaf6afed017bffbba11200f7c4560299b7629d32fc63ca3f74a84f41c4a"
+      },
+      "cache_seed": "${CACHE}",
+      "operator_sha256": "2b905787966172bb5dd55b622f3e0117ddcbdc714b6f7ade8c2e781ddad51cd3"
+    }
+  },
+  "expected_source_manifest": "c03eb85f35abaf90665d922013f3ffe67f5c97b9bd919df60dd4d23c11510227",
+  "resume_configuration": {
+    "resume_checkpoint": "${CP36}",
+    "resume_sha256": "211b19a84964215a65694d4ad1a7d88299c19c60cffe9636d142f406ef13935f",
+    "metric_parent_run": "${PARENT_RUN}",
+    "resume_audit_file": "${RESUME_AUDIT}",
+    "expected_resume_lr": 3e-07,
+    "expected_resume_parameter_sha": "51ccd56975540384f62744a43aa3c0f27bf0ee053f52e1dc719ad5a004bc5f4d",
+    "expected_resume_optimizer_sha": "8f8f62ae6f9b0fcadd609117c1753931154277770e2dfcc77981382b9cf819d6",
+    "expected_resume_rng_sha": "ddb24da68e6389456607ac4565bbf69c809f814f0e11356e4192b0d2eab60205"
+  },
+  "recovery_tolerances": {
+    "model_relative_l2_max": 0.0001,
+    "optimizer_relative_l2_max": 0.0001,
+    "loss_each_relative_max": 0.001,
+    "grad_norm_each_relative_max": 0.001,
+    "finite_required": true,
+    "cursor_schedule_rng_lineage_exact": true,
+    "restored_start_parameter_optimizer_rng_exact": true
+  },
+  "purpose": "Exactly two R12 updates37/38 from current qualified CP36; compare with same-source continuous38, no new full course or MFU claim"
+}

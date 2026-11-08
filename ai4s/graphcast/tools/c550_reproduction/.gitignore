@@ -1,0 +1,4 @@
+__pycache__/
+*.pyc
+jobs/
+settings.local.json

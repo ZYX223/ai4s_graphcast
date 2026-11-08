@@ -1,0 +1,19 @@
+{
+  "model_root": "/mnt/ai4s_graphcast/ai4s/graphcast",
+  "flaggems_root": "/mnt/flaggems-c03e",
+  "train_data_root": "/mnt/graphcast-assets/data-r4",
+  "initial_checkpoint": "/mnt/graphcast-assets/weights.pt",
+  "cache_seed": "/mnt/graphcast-assets/cache-seed",
+  "cp36": "/mnt/graphcast-assets/continuous38/run/checkpoints/step_00000036.pt",
+  "cp38": "/mnt/graphcast-assets/continuous38/run/final_checkpoint.pt",
+  "parent_run": "/mnt/graphcast-assets/continuous38/run",
+  "resume_audit": "/mnt/graphcast-assets/checkpoint-input-audit.json",
+  "validation_data_root": "/mnt/graphcast-assets/validation",
+  "python": "/opt/conda/bin/python3",
+  "dependency_paths": ["/mnt/graphcast-assets/private-deps", "/mnt/graphcast-assets/deps"],
+  "python_site_paths": ["/opt/conda/lib/python3.12/site-packages"],
+  "physical_gpu": 7,
+  "pci_bus": "0000:da:00.0",
+  "visible_device": "0",
+  "runtime_library": "/opt/maca/lib/libmcruntime.so"
+}

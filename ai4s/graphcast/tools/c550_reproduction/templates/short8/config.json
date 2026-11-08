@@ -1,0 +1,30 @@
+{
+  "key": "c550",
+  "model": "${MODEL}",
+  "ln_sha": "018b54ee69ae40cffc97ad487536cf283e33ac3e0c7521cda60075dab26aa277",
+  "ln_commit": "7f97e605a179b3017326f981f0da9e59e49e4df4",
+  "operator": "mm",
+  "visibility": {
+    "CUDA_VISIBLE_DEVICES": "${MASK}"
+  },
+  "physical_gpu": "${PHYSICAL}",
+  "expected_pci_bus": "${PCI}",
+  "dependency_pythonpath": "${DEPENDENCIES}",
+  "arms": {
+    "candidate": {
+      "source": "${GEMS}",
+      "overlay": {
+        "src/flag_gems/ops/layernorm.py": "78ff9b1465ba3af3aa68713abc8789e9869305b1a3e923b7f17e248297ee188a",
+        "src/flag_gems/runtime/backend/_metax/heuristics_config_utils.py": "bd973292f293882292a4f3d85f8c6c27b1a5932bca55adf66c43dd056999ca04",
+        "src/flag_gems/runtime/backend/_metax/ops/layernorm.py": "018b54ee69ae40cffc97ad487536cf283e33ac3e0c7521cda60075dab26aa277",
+        "src/flag_gems/runtime/backend/_metax/tune_configs.yaml": "d9ecadff7e6829728a8b490d9c57fe1723745cc12660f5096f67b21e6beebae5",
+        "src/flag_gems/runtime/backend/_metax/ops/mm.py": "2b905787966172bb5dd55b622f3e0117ddcbdc714b6f7ade8c2e781ddad51cd3",
+        "src/flag_gems/runtime/backend/_metax/ops/addmm.py": "2682d43085fa8f565227d6c82dfc9840ca37a743ee1807b0b2a932770facc0ac",
+        "src/flag_gems/runtime/backend/_metax/ops/index_select.py": "111cefaf6afed017bffbba11200f7c4560299b7629d32fc63ca3f74a84f41c4a"
+      },
+      "cache_seed": "${CACHE}",
+      "operator_sha256": "2b905787966172bb5dd55b622f3e0117ddcbdc714b6f7ade8c2e781ddad51cd3"
+    }
+  },
+  "expected_source_manifest": "c03eb85f35abaf90665d922013f3ffe67f5c97b9bd919df60dd4d23c11510227"
+}

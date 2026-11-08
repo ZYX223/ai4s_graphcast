@@ -1,0 +1,118 @@
+{
+  "model_base_git": "f8b26dbd2c3a252dd4bb6f461a7b5cde5ab059ac",
+  "flaggems_repository": "https://github.com/flagos-adaptation-lab/flagos-common",
+  "flaggems_commit": "f2a276f3741026f1234574f3beccde55c5bb5f8c",
+  "flaggems_snapshot": "patches/flaggems/wip-metax-c550-training-c03e",
+  "files": {
+    "harness/full38/run_full38.py": {
+      "original_sha256": "f29d73bdb42c9e6eb13014ebfe4e35fc2c34dc2cb7c430584f2e182aabb5e21e",
+      "packaged_sha256": "541711eb2a38e703beb2489fcb2f563b055eb1d8f167b21c12e7f18f36f2b90a",
+      "change": "explicit -S dependency bootstrap for launcher and worker; GNU timeout --foreground preserves task process group"
+    },
+    "harness/full38/timing_worker.py": {
+      "original_sha256": "3a871b0c48002fe2150728a13beef882c1736ace680a0ec54c1169df86651f9e",
+      "packaged_sha256": "997a64cabe221b148c7d1ffdb3d029acc65268344069cfde7b50f29aa0f20b93",
+      "change": "device placement and fresh resource gate only"
+    },
+    "harness/full38/coverage_extension.py": {
+      "original_sha256": "d9b97aedbcbdfa836edfdd0d4c46c4ccbf4d31e0bf4f086ad338e46f09f097b8",
+      "packaged_sha256": "d9b97aedbcbdfa836edfdd0d4c46c4ccbf4d31e0bf4f086ad338e46f09f097b8",
+      "change": "byte-identical"
+    },
+    "harness/full38/exit_capture.py": {
+      "original_sha256": "ddab4985282d3982663c54381fd2421b99d6e954d28aedf34cc0e7c5add60f3c",
+      "packaged_sha256": "ddab4985282d3982663c54381fd2421b99d6e954d28aedf34cc0e7c5add60f3c",
+      "change": "byte-identical"
+    },
+    "harness/short8/run_sparse.py": {
+      "original_sha256": "847b94f888f03d276ad1228dc7a2e4fa077b913e36b4083f341392057ef08819",
+      "packaged_sha256": "fabffe1d86ac335523fb96c7e9463d9ca0386a722354c2a30316aa0684b1e7b5",
+      "change": "explicit -S dependency bootstrap for launcher and worker; GNU timeout --foreground preserves task process group"
+    },
+    "harness/short8/timing_worker.py": {
+      "original_sha256": "0109012cff241c71ce3ae054a60395545f276993e0d68f44deabace58a23e7cc",
+      "packaged_sha256": "6f595c6785b56c3c24a45c28008b6efbd9388b16cd0a3b01d7d6a42a1d112493",
+      "change": "device placement and fresh resource gate only"
+    },
+    "harness/short8/coverage_extension.py": {
+      "original_sha256": "d9b97aedbcbdfa836edfdd0d4c46c4ccbf4d31e0bf4f086ad338e46f09f097b8",
+      "packaged_sha256": "d9b97aedbcbdfa836edfdd0d4c46c4ccbf4d31e0bf4f086ad338e46f09f097b8",
+      "change": "byte-identical"
+    },
+    "harness/short8/exit_capture.py": {
+      "original_sha256": "ddab4985282d3982663c54381fd2421b99d6e954d28aedf34cc0e7c5add60f3c",
+      "packaged_sha256": "ddab4985282d3982663c54381fd2421b99d6e954d28aedf34cc0e7c5add60f3c",
+      "change": "byte-identical"
+    },
+    "harness/short8/sampling_contract.py": {
+      "original_sha256": "e66913b18d8ababf688e0a6e9a5404824531aad14e916c1c26d09205a7ebd513",
+      "packaged_sha256": "e66913b18d8ababf688e0a6e9a5404824531aad14e916c1c26d09205a7ebd513",
+      "change": "byte-identical"
+    },
+    "harness/short8/sampling_runtime.py": {
+      "original_sha256": "4d599209356d08a809045ae542506ffd656723c696b4b9cc4fa67387bce6edcc",
+      "packaged_sha256": "4d599209356d08a809045ae542506ffd656723c696b4b9cc4fa67387bce6edcc",
+      "change": "byte-identical"
+    },
+    "harness/short8/prediction.py": {
+      "original_sha256": "f6a74bbf7e8a280928495ff0469c9ea887344334423a7ae5dbbec23b31f4ce0d",
+      "packaged_sha256": "f6a74bbf7e8a280928495ff0469c9ea887344334423a7ae5dbbec23b31f4ce0d",
+      "change": "byte-identical"
+    },
+    "harness/short8/comparability_contract.py": {
+      "original_sha256": "f5a1b3ca830e443cc8f81e5a63f53cf7fe88e92eab9ee3a799fb9f94fc17b5e4",
+      "packaged_sha256": "f5a1b3ca830e443cc8f81e5a63f53cf7fe88e92eab9ee3a799fb9f94fc17b5e4",
+      "change": "byte-identical"
+    },
+    "harness/recovery/run_recovery.py": {
+      "original_sha256": "221d0f3812c41487799b7a04905bab55ac04a247831ad92597fda4bbbc5975b7",
+      "packaged_sha256": "ee234979836921e9ba190d0a5465f8061ab99ba70de4441cdbe6857ad7579b5d",
+      "change": "explicit -S dependency bootstrap for launcher and worker; GNU timeout --foreground preserves task process group"
+    },
+    "harness/recovery/timing_worker.py": {
+      "original_sha256": "f606552d41edaeef69ff231a0dbfab64cf7fd570d4972ef17b786c82d0c0ab83",
+      "packaged_sha256": "a5658a042bc358609a86c3a5b34d06e2b03e7d5b2d261c48574da49b2a45524e",
+      "change": "device placement and fresh resource gate only"
+    },
+    "harness/recovery/coverage_extension.py": {
+      "original_sha256": "d9b97aedbcbdfa836edfdd0d4c46c4ccbf4d31e0bf4f086ad338e46f09f097b8",
+      "packaged_sha256": "d9b97aedbcbdfa836edfdd0d4c46c4ccbf4d31e0bf4f086ad338e46f09f097b8",
+      "change": "byte-identical"
+    },
+    "harness/recovery/exit_capture.py": {
+      "original_sha256": "ddab4985282d3982663c54381fd2421b99d6e954d28aedf34cc0e7c5add60f3c",
+      "packaged_sha256": "ddab4985282d3982663c54381fd2421b99d6e954d28aedf34cc0e7c5add60f3c",
+      "change": "byte-identical"
+    },
+    "harness/recovery/resume_metric_prefix.py": {
+      "original_sha256": "74d955d2aa67c4d27e66b8a3ca0c2734f00381bdb254a07154938c6ae85f8a6f",
+      "packaged_sha256": "74d955d2aa67c4d27e66b8a3ca0c2734f00381bdb254a07154938c6ae85f8a6f",
+      "change": "byte-identical"
+    },
+    "harness/recovery/resume_metric_prefix_hook.py": {
+      "original_sha256": "c6ad3ee8a340f2f1839872c53ca10c01977f583ad9acea801515bdd9cc5ecb7d",
+      "packaged_sha256": "c6ad3ee8a340f2f1839872c53ca10c01977f583ad9acea801515bdd9cc5ecb7d",
+      "change": "byte-identical"
+    },
+    "harness/recovery/checkpoint-comparison-probe.py": {
+      "original_sha256": "dd612210e843f3815ae95f88bbc33fbab56b6630d8214df4f9813e2a6f9a3010",
+      "packaged_sha256": "dd612210e843f3815ae95f88bbc33fbab56b6630d8214df4f9813e2a6f9a3010",
+      "change": "byte-identical"
+    },
+    "harness/evaluation/evaluate_remaining_cp38.py": {
+      "original_sha256": "f05ee51a8deb1a62474e6ba7c74f7ed10e5418848747a87ce0da2b333433501a",
+      "packaged_sha256": "f05ee51a8deb1a62474e6ba7c74f7ed10e5418848747a87ce0da2b333433501a",
+      "change": "byte-identical"
+    },
+    "harness/evaluation/validation_journal.py": {
+      "original_sha256": "1544ea734fea4bed01bd696a3a920f9fb2fd54114dee5941dc90fd4660e83ca4",
+      "packaged_sha256": "1544ea734fea4bed01bd696a3a920f9fb2fd54114dee5941dc90fd4660e83ca4",
+      "change": "byte-identical"
+    },
+    "harness/recovery/cp36_probe.py": {
+      "original_sha256": "5f226ea05215737fe52502485594fb38c0a80b13f91a1a95f16609ee5f0f2ed5",
+      "packaged_sha256": "4446064a98781b9ac6e98e0dc9980e71dd42927f4bef429b5b83df1b0674f3d9",
+      "change": "CLI paths; hashes checked before trusted checkpoint loading; export strict original resume path contract; omit unrelated optional native comparison"
+    }
+  }
+}

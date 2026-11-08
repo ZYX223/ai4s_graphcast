@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "name": "hres_2022-01_fullmonth_validation_frozen_20261103",
+  "dataset_kind": "hres",
+  "training_stage": "validation",
+  "data_role": "validation",
+  "shards": [
+    {
+      "path": "../official_hres/hres_2022-01_graphcast_operational_validation.nc",
+      "bytes": 19600887174,
+      "sha256": "ff6287e487371e45035a52d50a9fd83f8b683dc824f9464f16a46281ed6552ee"
+    }
+  ]
+}

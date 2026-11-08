@@ -1,0 +1,64 @@
+{
+  "schema": "graphcast.flaggems_runtime.v1",
+  "repository": "https://github.com/flagos-ai/FlagGems.git",
+  "version": "5.4.0",
+  "tag": "v5.4.0",
+  "commit": "6ed2f39071ef85db26b7e64f0652a162f434959c",
+  "runtime_files": 2984,
+  "runtime_manifest_sha256": "7b9527a7f0f857012dbab413605c49a0bf70d695027786129f0f14525c8e9251",
+  "manifest_scope": "src/flag_gems Python/YAML/JSON plus pyproject.toml and setup.py; exclude build-generated _version.py",
+  "overlays": [],
+  "source_kind": "approved_v540_corrections",
+  "baseline_runtime_manifest_sha256": "a03a58ae11785ae8145cb97259a12175a7e836aba2dd0f5e9d820214a59f2e5b",
+  "patch_sha256": "f8cc05ed375ac4caa225d511207611a956aaa05fcf7d4207e95efcc086da3370",
+  "changes": {
+    "src/flag_gems/ops/addmm.py": {
+      "before_sha256": "5015feda236e211638891784b17a681d77d12a7dfebe81208a04e85f2b5ec342",
+      "after_sha256": "f17e08b9201fad0e78b79d258fc5df4696594e5d49c09b3f9f3eec4e908bdf77"
+    },
+    "src/flag_gems/ops/mm.py": {
+      "before_sha256": "d37eb3ca6511b79340f2c199428873baf7d1e704f34146e154c61c1801aa8d89",
+      "after_sha256": "384c5b47f93de51d09081773e9388a47aeb358650271028e837657782b239b31"
+    },
+    "src/flag_gems/runtime/backend/_ascend/ops/addmm.py": {
+      "before_sha256": "e6122f8040e03729226f93b98f80b19b2663af7a27c0197d2555506b78c1e7c5",
+      "after_sha256": "49e4e3fb22b5e4dfa2a382fe3e53bb8c0ad554739c8c83e50a3ca0f0c866877b"
+    },
+    "src/flag_gems/runtime/backend/_ascend/ops/mm.py": {
+      "before_sha256": "8480dcaecfb6961653bc7663fc0a86d0ae32b7387af378adf2d23cba4c9aeb12",
+      "after_sha256": "f772ed8ef36f6f4561c1ca4d8d4b2adb7476868f1465a6500094089109b13527"
+    },
+    "src/flag_gems/runtime/backend/_hygon/ops/addmm.py": {
+      "before_sha256": "81e5ae4ac6e396c363be2228c7894bd9d04080224c4cd7eae2907a5f4936fb89",
+      "after_sha256": "175ac75bc7cae31a1e1d7823967f82cda65e73c70cc12fde9109c8063a8b74fa"
+    },
+    "src/flag_gems/runtime/backend/_hygon/ops/mm.py": {
+      "before_sha256": "d2594faf1b89fa0bdb2de549d4e2dde19ea87f63c0d92e587b326773d094a0cb",
+      "after_sha256": "0a1819fd8152df122bf9efaa776a5195d339ae23ad39e403432214668dd03f48"
+    },
+    "src/flag_gems/runtime/backend/_metax/ops/addmm.py": {
+      "before_sha256": "6600609649c70c916e7d78dc02bf9f45f250c813cc916d3936c50f173c88b5ad",
+      "after_sha256": "28a7470abfec0acf221dc8188f5d3df7ced4d6aca87301a45a8f13ff59701925"
+    },
+    "src/flag_gems/runtime/backend/_metax/ops/mm.py": {
+      "before_sha256": "15969bb6b9423935df7ec872a09c8719a20531333692ae546d2d59ecbaf93ed9",
+      "after_sha256": "553305530695733f2b41318d2cfd46f1972d41f86257d2a9d487dae30f91245e"
+    },
+    "src/flag_gems/runtime/backend/_mthreads/ops/addmm.py": {
+      "before_sha256": "dd02becd1bd7c045030d5838d433e63cee034e8c194f67e51830bf2cf5aa68cf",
+      "after_sha256": "d310afb2873b1bb96905f3cea8da4b5a8a828a0027d1dd7c2833621facd4c045"
+    },
+    "src/flag_gems/runtime/backend/_mthreads/ops/mm.py": {
+      "before_sha256": "b9ac4223056b472779108f441691feb64615291be93c75ca87f0ced72579f648",
+      "after_sha256": "4b9b4e7539e900866cf114f1bc1fed5fa2af28588a5f1503eae492a8a83ceb7a"
+    },
+    "src/flag_gems/runtime/backend/_nvidia/hopper/ops/mm.py": {
+      "before_sha256": "97447f493cb2962575640d6efca03aac9bfd7ee031ec3ac2c2ff1dd282392e5b",
+      "after_sha256": "5b28e2d5a3814e7688c330e7951105f2a1cb861da4d5d87b2bf6a50787e61854"
+    },
+    "src/flag_gems/utils/matmul_precision.py": {
+      "before_sha256": null,
+      "after_sha256": "518731ce64a2e229ef7c82208a1d2fd4f821da42585b101bab72bace31ca1c46"
+    }
+  }
+}

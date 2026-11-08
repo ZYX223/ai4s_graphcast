@@ -1,0 +1,19 @@
+{
+  "scope": "Historical C550 accepted run, not a new run of the portable packaging",
+  "source_manifest": "c03eb85f35abaf90665d922013f3ffe67f5c97b9bd919df60dd4d23c11510227",
+  "mfu_pct": 8.483626829801254,
+  "h100_mfu_pct": 10.058595198508778,
+  "mfu_ratio_pct": 84.34206429799444,
+  "coverage": {
+    "covered": 33,
+    "total": 41,
+    "percent": 80.48780487804878,
+    "scope": "New current R1/R12 plus unchanged historical R2-R11 dispatch/source evidence; not a new full38 profile"
+  },
+  "validation_c550": 31.348498834146035,
+  "validation_h100": 31.3537019609331,
+  "validation_gap_pct": 0.016594936041521197,
+  "short_prediction_mfu": 8.33944864990857,
+  "short_prediction_error_pct": -1.699487527978194,
+  "sampling_cost_pct": 37.42675879263114
+}

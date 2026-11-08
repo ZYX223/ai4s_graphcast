@@ -21,11 +21,17 @@ optimizer-boundary resume. Start with
 The lightweight regression metric is the explicit-reference, full-interval
 ratio-of-sums loss diagnostic. It consumes `metrics/segment_*.jsonl` together with
 their immutable `.start.json` evidence; metrics alone do not qualify a comparison.
-MP=1 uses the same checkpoint/chunk recipe on all six platforms; only 910C
-has completed the paired single-device short run so far.
+MP=1 uses the same checkpoint/chunk recipe on all six platforms. The training
+guide retains the earlier 910C paired single-device short-run evidence.
 See the training guide for the limited 910C paired short-run evidence;
 this is not all-platform, long-run, backward-coverage or MFU acceptance.
 Legacy quickstart/short probes remain separate from formal training.
+
+For the subsequently accepted C550 training version, see the
+[C550 reproduction guide](tools/c550_reproduction/README.md): pinned FlagGems
+sources, continuous 38-update training, conditional eight-update MFU prediction,
+CP36 recovery and zero-update CP38 validation. The guide separates historical
+hardware acceptance from CPU-only checks of the newly packaged launch tooling.
 
 ## Quick Start
 
