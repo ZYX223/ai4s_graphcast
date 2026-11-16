@@ -1,0 +1,11 @@
+{
+  "schema": "graphcast.artifact_lock.v1",
+  "artifacts": {
+    "data/cases/operational-025deg-13l-b1/v1": "65f984f157d5fe62558f7fdb83ee02ca21b48ad04d6944826fc7fc601b1b17ae",
+    "data/models/operational-025deg-13l/v1": "7158046361028dc9c9d53f10619aef58f7e0cf8c8104fa89cddc078334cde8f3",
+    "references/h100/operational-025deg-13l-b1/v1": "57ea429a74a57778d8b5563f19a42a5ce7ae96eb325ae2f231cabf187a2cf8b6",
+    "references/h100/operational-025deg-13l-b1/original-v1": "207d5ee4eb0d657a4c4dc58261c69fa2596100bd4a4ceb5d019d31770b8ccf1a",
+    "environments/bw1100/operational-v1": "d865c578bf9a1c5b1c87b5ae901d7680e9992a4d146faadbe8dac3199891f9e5",
+    "environments/h100/tf32-v1": "dda452f45bc9878089b97de41ea933fc5766863060dc2d8642151d3a339dffd2"
+  }
+}

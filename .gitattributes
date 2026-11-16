@@ -4,3 +4,6 @@ third_party/** -text whitespace=-blank-at-eof
 kernels/** -text
 # Keep archived measured sources byte-identical, including upstream EOF style.
 experiments/** -text whitespace=-blank-at-eof
+
+# Weekly delivery manifests bind exact source and evidence bytes.
+releases/** -text whitespace=-blank-at-eof

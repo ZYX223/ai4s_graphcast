@@ -1,0 +1,24 @@
+{
+  "schema": "graphcast.runtime.v1",
+  "platform": "hygon",
+  "backend": "fl_only",
+  "jax_version": "0.6.0",
+  "haiku_version": "0.0.14",
+  "expected_device": "BW1200",
+  "precision": "rne_xf32",
+  "training": {
+    "candidate": "mesh-group8-m2g-save-stats-vjp-finalmesh-g2m",
+    "schedule": "training38",
+    "rne_policy": "warmup-verify",
+    "memory_fraction": 0.80,
+    "horizon11_memory_fraction": 0.81,
+    "reference_graph_sha256": "cd4dc305505debbdd7460dc0652f09d08c18731fad860016e32ba34df4865e1d"
+  },
+  "inference": {
+    "steps": 40,
+    "warmup_steps": 5,
+    "repeats": 3,
+    "memory_fraction": 0.85,
+    "reference_graph_sha256": "5654cd00383186ba94a8a150fbe5682e405c41aac2747117af5abb10ef9bbc95"
+  }
+}

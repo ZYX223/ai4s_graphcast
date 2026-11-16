@@ -1,0 +1,9 @@
+{
+  "repository": "https://github.com/google-deepmind/graphcast",
+  "commit": "08cf73625c9d12bd9aaa038868bcb2fe488f2a22",
+  "scope": "Unmodified training data utilities; independently verified against this upstream commit. Original inference UPSTREAM.json is retained for frozen H100 identity.",
+  "files": {
+    "graphcast/data_utils.py": "0a2ef70e2eaa6e36e03d9bf354639d77db77c91bca8a506da9716b8687de8a53",
+    "graphcast/solar_radiation.py": "f2a5ade645893c252e687013b79520c04e4b0d21019e492602df342da038d7ea"
+  }
+}

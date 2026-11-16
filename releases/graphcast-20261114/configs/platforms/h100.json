@@ -1,0 +1,4 @@
+{
+  "id": "h100",
+  "precision": "TF32; no explicit RNE"
+}

@@ -1,0 +1,94 @@
+{
+  "schema": "graphcast.full38.saved_results.v1",
+  "case": "operational-025deg-13l-b1",
+  "updates": 38,
+  "microbatches_per_update": 2,
+  "gpu_count": 1,
+  "useful_flops_per_update": {
+    "1": 172436733394944,
+    "2": 340249127337984,
+    "3": 507670279225344,
+    "4": 675091431112704,
+    "5": 842512583000064,
+    "6": 1009933734887424,
+    "7": 1177354886774784,
+    "8": 1344776038662144,
+    "9": 1512197190549504,
+    "10": 1679618342436864,
+    "11": 1847039494324224,
+    "12": 2014460646211584
+  },
+  "peaks_flops_per_second": {
+    "bw1100": 170393600000000.0,
+    "h100": 494700000000000.0
+  },
+  "mfu_formula": "100 * sum(useful logical training GEMM FLOPs) / (sum(formal GPU compute interval union seconds) * dense TF32 peak)",
+  "loss_formula": "100 * sum(abs(candidate_loss-reference_loss)) / sum(abs(reference_loss))",
+  "executed_releases_sha256": {
+    "executed-release-original.json": "a4a9e1a55e2609ff6fc55b1b65c22967c99cce963e6dae3cc599f87d62be3f46",
+    "executed-release-tracefix.json": "41dc8144ace7991516f143cad709737001427acbfb63fa01ca58e3c8c5058512",
+    "executed-release-thp.json": "6c3c7457c3476bef7a5284721a70216803d05aa8466c57c9718b4803168e2eef"
+  },
+  "qualifications": [
+    "BW completed through checkpoint resume after a trace-validator failure; the original failed run is preserved.",
+    "BW later stages use process-local THP disabling after a same-checkpoint GPU comparison; source and memory policy are recorded per stage.",
+    "BW host supervisor exit code is unknown after session interruption; complete container execution and trajectory are independently verified.",
+    "BW has a host monitoring gap and two short diagnostic CPU profiles; MFU is a development estimate, not formal performance acceptance.",
+    "BW runtime device is named BW1200; the mapping of project peak 170.3936 TFLOP/s to this device/frequency remains unconfirmed.",
+    "Useful FLOPs are logical live GEMMs with rematerialization disabled; recomputation, optimizer, RNE and other compute remain in elapsed time.",
+    "The numerator is a logical GEMM FLOPs approximation; non-GEMM floating-point arithmetic is omitted.",
+    "Short full38 validation does not establish convergence."
+  ],
+  "evidence_files_sha256": {
+    "evidence.json": "4c4844f06a11af98f5c73b8fb3d2a3a46c6a655caa1318cda74fede9d10acd9e",
+    "executed-release-original.json": "a4a9e1a55e2609ff6fc55b1b65c22967c99cce963e6dae3cc599f87d62be3f46",
+    "executed-release-thp.json": "6c3c7457c3476bef7a5284721a70216803d05aa8466c57c9718b4803168e2eef",
+    "executed-release-tracefix.json": "41dc8144ace7991516f143cad709737001427acbfb63fa01ca58e3c8c5058512",
+    "kernel-intervals.csv.gz": "b293e9cce7776066bad49bfa587eed15eb0a993e7c3e23d20fe1fdcb7bb6bbd9",
+    "logical-gemms.csv.gz": "7713da4130ee304e05323bfb5657571008e0fb8a03201d833361c3d5ae04e7c2",
+    "loss-pairs.csv": "959c0da1fc19c98ad8fafee7c3e05d27541668829dec1c9a184bbe71d45e12bb",
+    "recalculate.py": "b051177b3a788c9c7b552e267b6fc87d32271c3ad6b8409c293db27af527afc2"
+  },
+  "results": {
+    "bw1100": {
+      "updates": 38,
+      "useful_flops": 28660795243364352,
+      "gpu_active_seconds": 1908.937904572,
+      "synchronized_update_seconds": 2138.639719091938,
+      "worker_process_seconds": 18959.574362640968,
+      "input_preparation_seconds": 10170.237166553386,
+      "compile_seconds": 2608.1441658211406,
+      "mfu_percent": 8.811364281809745,
+      "loss": {
+        "optimized_h100": {
+          "error_percent": 0.15399142215264688,
+          "threshold_percent": 5.0,
+          "passed": true
+        }
+      }
+    },
+    "h100": {
+      "updates": 38,
+      "useful_flops": 28660795243364352,
+      "gpu_active_seconds": 379.982577855,
+      "synchronized_update_seconds": 398.59631020599045,
+      "worker_process_seconds": 3398.7063189120963,
+      "input_preparation_seconds": 932.7053356815595,
+      "compile_seconds": 1106.015805593226,
+      "mfu_percent": 15.246938248905606,
+      "loss": {
+        "optimized_h100": {
+          "error_percent": 0.13465637776339892,
+          "threshold_percent": 5.0,
+          "passed": true
+        },
+        "original_h100": {
+          "error_percent": 0.012718162755319277,
+          "threshold_percent": 5.0,
+          "passed": true
+        }
+      }
+    },
+    "relative_mfu_bw_to_h100_percent": 57.791040653307604
+  }
+}

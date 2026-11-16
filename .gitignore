@@ -24,3 +24,10 @@ core.*
 *.sqlite
 *.log
 .DS_Store
+
+# External delivery materials and per-user runtime output.
+/environments/
+/references/
+/work/
+/runs/
+/.vscode/

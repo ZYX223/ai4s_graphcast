@@ -1,0 +1,18 @@
+{
+  "platform": "h100",
+  "image": "sha256:71f70ba9183bccdd17d633ae494507d7656be2392d4c9c5185a0f6a9afcb507a",
+  "python": "/workspace/FlagOS/envs/gencast-jax-h100-py312-jax0434/bin/python",
+  "device_default": 7,
+  "backend": "cuda",
+  "jax_version": "0.4.34",
+  "cpu_count": 16,
+  "memory_gib": 64,
+  "shm_gib": 8,
+  "omp_threads": 8,
+  "warmup_steps": 5,
+  "steps": 40,
+  "repeats": 3,
+  "graph_capture": false,
+  "expected_device": "H100",
+  "gpu_access": "volume"
+}

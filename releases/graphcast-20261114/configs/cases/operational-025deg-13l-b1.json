@@ -1,0 +1,23 @@
+{
+  "id": "operational-025deg-13l-b1",
+  "model": "operational-025deg-13l",
+  "inference_engine": "operational",
+  "training_engine": "operational",
+  "training_cards": 1,
+  "artifacts": {
+    "data": "data/cases/operational-025deg-13l-b1/v1",
+    "model": "data/models/operational-025deg-13l/v1",
+    "reference": "references/h100/operational-025deg-13l-b1/v1",
+    "original_reference": "references/h100/operational-025deg-13l-b1/original-v1"
+  },
+  "environments": {
+    "bw1100": "bw1100/operational-v1",
+    "h100": "h100/tf32-v1"
+  },
+  "workloads": [
+    "single",
+    "full40",
+    "train-full38"
+  ],
+  "pending": []
+}

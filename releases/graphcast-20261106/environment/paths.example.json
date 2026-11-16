@@ -1,0 +1,9 @@
+{
+  "assets": "/data/prepared-inference",
+  "training_data": "/data/training",
+  "inference_graph": "/data/reference-graph",
+  "training_graph": "/data/reference-graph-training",
+  "inference_router": "/build/inference/libxf32_rne_router.so",
+  "training_router": "/build/training/training-router-candidate.so",
+  "library_dirs": ["/opt/hyhal/lib"]
+}

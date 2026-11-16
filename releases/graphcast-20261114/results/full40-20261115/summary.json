@@ -1,0 +1,260 @@
+{
+  "schema": "graphcast.full40_results.v1",
+  "date": "2026-11-15",
+  "case": "operational-025deg-13l-b1",
+  "executed_release_sha256": "5e3b49492c893daad6a61d7c8fae1f4cfa78fc6eb03570a52244f80e15e17700",
+  "steps": 40,
+  "warmup_steps": 5,
+  "warmup_scope": "per-repeat, followed by reset",
+  "repeats": 3,
+  "cards_per_platform": 1,
+  "lead_hours": 240,
+  "useful_flops_per_step": 28784948924416,
+  "peaks_flops_per_second": {
+    "bw1100": 170393600000000,
+    "h100": 494700000000000
+  },
+  "peak_sources": {
+    "bw1100": "Project NMZ dense TF32 reference: 170.3936 TFLOP/s; CLI platform bw1100, runtime device label BW1200; exact device/frequency mapping remains unconfirmed.",
+    "h100": "Project H100 dense TF32 reference: 494.7 TFLOP/s."
+  },
+  "upper_air_variables": [
+    "geopotential",
+    "specific_humidity",
+    "temperature",
+    "u_component_of_wind",
+    "v_component_of_wind",
+    "vertical_velocity"
+  ],
+  "pressure_levels_hpa": [
+    50,
+    100,
+    150,
+    200,
+    250,
+    300,
+    400,
+    500,
+    600,
+    700,
+    850,
+    925,
+    1000
+  ],
+  "accuracy_reference_id": "h100-earth-tf32-20261103-v1",
+  "performance_reference": "This H100 2026-11-15 run; distinct from the frozen accuracy reference",
+  "mfu_formula": "100 * sum(useful GEMM FLOPs) / (sum(GPU compute kernel interval union seconds) * dense peak FLOP/s); no mean/median of round MFUs",
+  "accuracy_formula": "100 * mean(abs(candidate-reference)) / mean(abs(reference)) per variable/level; equal mean of 78 items, Z500 separately; float64, final +240h frame",
+  "standards": {
+    "mfu": "https://app.notion.com/p/41773db917b681c28454f3269be6fc15",
+    "case": "https://app.notion.com/p/40873db917b681ebb2f0d8f250a60bdf",
+    "nmz": "https://app.notion.com/p/40873db917b6818ba274ecc696cf578e"
+  },
+  "limitations": [
+    "Useful GEMM FLOPs approximation, not end-to-end MFU or full model arithmetic FLOPs.",
+    "BW Chrome JSON export is truncated at about one million events. Only complete physical GPU streams from XSpace protobuf are used; 3360 GEMM launches and 40 audited formal steps per round, no protobuf warnings/errors.",
+    "H100 Nsight successful launch/kernel correlations and 40-step repeated GEMM signatures are complete. These checks support completeness, not proof of events absent from both tables.",
+    "BW original performance status remains not_accepted: preflight monitoring had 4 foreign-mapping samples and 1 unresolved-PID sample. Their identity cannot be established after exit. Full40 monitoring must be read separately.",
+    "BW runtime reports BW1200 under the bw1100 delivery platform; project 170.3936 TFLOP/s peak is provisional pending exact hardware/frequency confirmation. No frequency-scaled peak substitution.",
+    "Relative MFU is a research peak-normalized estimate, not formal >=60% performance acceptance.",
+    "Profiler overhead, shared host activity and unlocked clocks can affect wall times. Wall minus GPU active is not CPU time.",
+    "Five warmups were tested per repeat; this run does not establish the minimum warmup count. Training was not rerun.",
+    "Raw predictions, full logs and traces remain at recorded host paths. This compact bundle recalculates interval/layer-statistic metrics; original-array comparisons need the saved NetCDF and frozen environment.",
+    "Results are bound to executed-release.json. Subsequent result/document-only packaging does not imply a new GPU execution."
+  ],
+  "evidence_files_sha256": {
+    "accuracy-layers.csv.gz": "fdf5e82dc609905646ef2ff999f6f6a476675bacddb972e62c874a9201841e0c",
+    "evidence.json": "24f32de5ef6224db0b2030030facf26c4f1ca27bd667e1ab57940472ae69be2f",
+    "executed-release.json": "5e3b49492c893daad6a61d7c8fae1f4cfa78fc6eb03570a52244f80e15e17700",
+    "gemm-flops.csv": "2651996c03dc5d66b36aeda51295ece3d7556bf172c40a4effc45dbb9394e8bd",
+    "kernel-intervals.csv.gz": "76cf26bb064fd1cd2d96b661234a56ad117e0c7b2ebaa9cf2e824bd1125cb418",
+    "recalculate.py": "10912e31ea3d21dac4c1ffb26ebc2d98014cb29ebb3f0073ed986676cdc67caf"
+  },
+  "results": {
+    "bw1100": {
+      "rounds": [
+        {
+          "round": 1,
+          "kernel_count": 25821,
+          "gpu_active_seconds": 47.687362086,
+          "synchronized_apply_seconds": 54.94847769185435,
+          "rollout_wall_seconds": 84.80026388610713,
+          "mfu_percent": 14.16996823281538
+        },
+        {
+          "round": 2,
+          "kernel_count": 25821,
+          "gpu_active_seconds": 47.747741624,
+          "synchronized_apply_seconds": 47.81113923736848,
+          "rollout_wall_seconds": 54.89825234503951,
+          "mfu_percent": 14.152049560512312
+        },
+        {
+          "round": 3,
+          "kernel_count": 25821,
+          "gpu_active_seconds": 47.709008421,
+          "synchronized_apply_seconds": 47.797197094303556,
+          "rollout_wall_seconds": 195.8023672309937,
+          "mfu_percent": 14.163539093131734
+        }
+      ],
+      "gpu_active_total_seconds": 143.14411213099999,
+      "mfu_percent": 14.161848415678822,
+      "accuracy": {
+        "pairs": [
+          {
+            "candidate_round": 1,
+            "reference_round": 1,
+            "overall_mean_percent": 0.6027899978572298,
+            "z500_percent": 0.006984833957038029
+          },
+          {
+            "candidate_round": 1,
+            "reference_round": 2,
+            "overall_mean_percent": 0.6396174946376406,
+            "z500_percent": 0.00830158991445254
+          },
+          {
+            "candidate_round": 1,
+            "reference_round": 3,
+            "overall_mean_percent": 0.6062227382554479,
+            "z500_percent": 0.007522654014053621
+          },
+          {
+            "candidate_round": 2,
+            "reference_round": 1,
+            "overall_mean_percent": 0.5230392329582967,
+            "z500_percent": 0.006272054501276211
+          },
+          {
+            "candidate_round": 2,
+            "reference_round": 2,
+            "overall_mean_percent": 0.6552747247042466,
+            "z500_percent": 0.00821041216278056
+          },
+          {
+            "candidate_round": 2,
+            "reference_round": 3,
+            "overall_mean_percent": 0.5236007427993571,
+            "z500_percent": 0.006316065230907471
+          },
+          {
+            "candidate_round": 3,
+            "reference_round": 1,
+            "overall_mean_percent": 0.5340372609981601,
+            "z500_percent": 0.0061563333446870965
+          },
+          {
+            "candidate_round": 3,
+            "reference_round": 2,
+            "overall_mean_percent": 0.5641032954067641,
+            "z500_percent": 0.006736992997413541
+          },
+          {
+            "candidate_round": 3,
+            "reference_round": 3,
+            "overall_mean_percent": 0.5497904584738573,
+            "z500_percent": 0.005705406892976545
+          }
+        ],
+        "max_overall_percent": 0.6552747247042466,
+        "max_z500_percent": 0.00830158991445254,
+        "all_pairs_under_5_percent": true,
+        "all_pairs_at_most_10_percent": true
+      }
+    },
+    "h100": {
+      "rounds": [
+        {
+          "round": 1,
+          "kernel_count": 16341,
+          "gpu_active_seconds": 11.485508303,
+          "synchronized_apply_seconds": 11.82735195942223,
+          "rollout_wall_seconds": 16.34178079594858,
+          "mfu_percent": 20.264380151400516
+        },
+        {
+          "round": 2,
+          "kernel_count": 16341,
+          "gpu_active_seconds": 11.486146498,
+          "synchronized_apply_seconds": 11.854393454501405,
+          "rollout_wall_seconds": 16.349255095003173,
+          "mfu_percent": 20.263254218861437
+        },
+        {
+          "round": 3,
+          "kernel_count": 16341,
+          "gpu_active_seconds": 11.484862372,
+          "synchronized_apply_seconds": 11.803945637773722,
+          "rollout_wall_seconds": 16.149755724007264,
+          "mfu_percent": 20.26551985955823
+        }
+      ],
+      "gpu_active_total_seconds": 34.456517173,
+      "mfu_percent": 20.26438470105491,
+      "accuracy": {
+        "pairs": [
+          {
+            "candidate_round": 1,
+            "reference_round": 1,
+            "overall_mean_percent": 0.6312347562300965,
+            "z500_percent": 0.007058327121407825
+          },
+          {
+            "candidate_round": 1,
+            "reference_round": 2,
+            "overall_mean_percent": 0.5618397324495384,
+            "z500_percent": 0.007346305349839148
+          },
+          {
+            "candidate_round": 1,
+            "reference_round": 3,
+            "overall_mean_percent": 0.6226901079717911,
+            "z500_percent": 0.007597090099922753
+          },
+          {
+            "candidate_round": 2,
+            "reference_round": 1,
+            "overall_mean_percent": 0.5195357263270622,
+            "z500_percent": 0.005842271696459375
+          },
+          {
+            "candidate_round": 2,
+            "reference_round": 2,
+            "overall_mean_percent": 0.6032202202568769,
+            "z500_percent": 0.007625305376639249
+          },
+          {
+            "candidate_round": 2,
+            "reference_round": 3,
+            "overall_mean_percent": 0.5802889855526552,
+            "z500_percent": 0.006863965890856722
+          },
+          {
+            "candidate_round": 3,
+            "reference_round": 1,
+            "overall_mean_percent": 0.6182594436310108,
+            "z500_percent": 0.007487267631160933
+          },
+          {
+            "candidate_round": 3,
+            "reference_round": 2,
+            "overall_mean_percent": 0.5843700274725561,
+            "z500_percent": 0.007457809381864479
+          },
+          {
+            "candidate_round": 3,
+            "reference_round": 3,
+            "overall_mean_percent": 0.523009741323772,
+            "z500_percent": 0.006434625812565834
+          }
+        ],
+        "max_overall_percent": 0.6312347562300965,
+        "max_z500_percent": 0.007625305376639249,
+        "all_pairs_under_5_percent": true,
+        "all_pairs_at_most_10_percent": true
+      }
+    },
+    "relative_mfu_bw_to_h100_percent": 69.8854104114081
+  }
+}

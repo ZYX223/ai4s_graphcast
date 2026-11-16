@@ -1,0 +1,405 @@
+{
+  "schema": "graphcast.curated-engine.v1",
+  "platform": "h100",
+  "precision": "FP32 storage; TF32; no explicit RNE",
+  "files": {
+    "inference/compare.py": {
+      "source": "compare.py",
+      "sha256": "3d0c04ddd3ef28354c70eb5d65e4ac79aa213572b4ad082a79a63d25f366a178"
+    },
+    "inference/analyze_single_step.py": {
+      "source": "analyze_single_step.py",
+      "sha256": "8601dec827d66acf14fc117eeddeac4313bae29ff086c257527594a947b27e6b"
+    },
+    "inference/analyze.py": {
+      "source": "analyze.py",
+      "sha256": "a53ab774de21b367340cb257822a5195616f7edc191665eb108317a6e9baaec0"
+    },
+    "inference/smoke_single_step.py": {
+      "source": "smoke_single_step.py",
+      "sha256": "ca997058afd9a4c670a2151d0ce37c298b09721547577fb041bb37cc65271713",
+      "delivery_sha256": "9f1170260b6a337df8afd0c267c985aad1ff63110661990fb7e74cc450f7cdd9",
+      "delivery_change": "Explicit maintained H100 worker entry; original source identity retained"
+    },
+    "inference/regular3_hooks.py": {
+      "source": "regular3_hooks.py",
+      "sha256": "ee15ac3ab08cc4284ebc897484759792ae5a4001cbd74f2749592eca166ee50e"
+    },
+    "inference/candidate_hooks.py": {
+      "source": "candidate_hooks.py",
+      "sha256": "117e819bc6dbbb0c117f446c861f3fc7babdb4ec8eb95adbed07a893a0a3bb3d"
+    },
+    "inference/combined_hooks.py": {
+      "source": "combined_hooks.py",
+      "sha256": "0174c7e7135740ca71301b9a65f8c06a9ce5e2da4fce7254181be636a626d35c"
+    },
+    "inference/mesh_gather_hooks.py": {
+      "source": "mesh_gather_hooks.py",
+      "sha256": "384407a19222362b27738db2a2dde11b505f230d08ff0f75ed5d002a97ed2bd4"
+    },
+    "inference/shifted_ln_hooks.py": {
+      "source": "shifted_ln_hooks.py",
+      "sha256": "90238a03e7e668fa5b9c0900a7e7945b78446357071157e63da579248f8fb2d2"
+    },
+    "inference/shifted_layernorm.py": {
+      "source": "shifted_layernorm.py",
+      "sha256": "025d2dd5070e7c38a67b2e084364077cc9477a645edd5c2dccc8308154b52d5e"
+    },
+    "inference/stable_ln_hooks.py": {
+      "source": "stable_ln_hooks.py",
+      "sha256": "682574ab8af5e9b72a83fdaca9211cd7da8cfcd829c478527ddbcb5ee66ed3c3"
+    },
+    "inference/pallas_layernorm.py": {
+      "source": "pallas_layernorm.py",
+      "sha256": "befb61a9b55fd096116fc7fed06ecd8776f1fe2c833e34db908c875af3f959ea"
+    },
+    "inference/fastvar_hooks.py": {
+      "source": "fastvar_hooks.py",
+      "sha256": "9fd947d3c2a1e3b10f146aec65c81577a27077ce449cde2199acb6a2c2560488"
+    },
+    "inference/profile40.py": {
+      "source": "profile40.py",
+      "sha256": "420c9cbe74f6a8f28b3e8062697699b05422b4c62a767e4a644c7ae37013ed26",
+      "delivery_sha256": "d49bf659b6e830a0a48e0500a2b23cabc2051742bba680ae34bb9cc279dc9393",
+      "delivery_change": "Explicit maintained H100 worker entry; original source identity retained"
+    },
+    "inference/run.sh": {
+      "source": "run.sh",
+      "sha256": "f6019ad548790df344334e9034173a07de9acde9d80b2213532f651504b5fa5f",
+      "delivery_sha256": "cebb18232ae5bc51951da2547bb8690c73a52055dcce2ab168e408faada87f4e",
+      "delivery_change": "Explicit maintained H100 worker entry; original source identity retained"
+    },
+    "training/attribution.py": {
+      "source": "attribution.py",
+      "sha256": "d3cba896e0603b2e025fbbb4e18760f56fb9daabaee68c97a6b6fe0f6edb6874"
+    },
+    "training/trace_integrity.py": {
+      "source": "trace_integrity.py",
+      "sha256": "f016e564f23fe94679c2c4c1b8662ffdb0d959e4b31a46b4db90b36b88d87999"
+    },
+    "training/timing.py": {
+      "source": "timing.py",
+      "sha256": "97c00d9610c7c80398dda52c7c900f245507241ffd61e671d3d2edb357b5cb88",
+      "delivery_sha256": "6c5f5fee8d42f8544f97a07633038221e8ccc2242307f340d0534641b3d6e5e5",
+      "delivery_change": "Periodic committed checkpoints and explicit checkpoint timing exclusion; numerical recipe preserved"
+    },
+    "training/verify_chain.py": {
+      "source": "verify_chain.py",
+      "sha256": "36b54927bb510f752319d568ee24f8a23c4af170b39c88f135c045bc5bc7f41a",
+      "delivery_sha256": "92e95a7b35aaf7a77439b7fa8112a2021e30157dfb89c9b7d0f10d23015ad543",
+      "delivery_change": "2026-11-13: shared full-interval loss metric and complete-chain validation; model/MFU unchanged"
+    },
+    "training/compare.py": {
+      "source": "compare.py",
+      "sha256": "4666ff574904af5c95a8ceae6d140ad79a83cbe9ec3c7efde0ca9693effff117",
+      "delivery_sha256": "f66384ff7e6709ae38b410b4755c87903cb7d9bc54353ca3e1f92ed07a00d415",
+      "delivery_change": "2026-11-13: shared full-interval loss metric and complete-chain validation; model/MFU unchanged"
+    },
+    "training/entry.py": {
+      "source": "entry.py",
+      "sha256": "ded04faca6bdb94ee4eaa7274002e4b572f60f5934688c62da46e1d90fe63a15",
+      "delivery_sha256": "a5a03b0d3866737e400c68534b44f223fab05f14a11e6c9245a7b7918de1fbc9",
+      "delivery_change": "Explicit context entry, readable stage updates and English progress; shared host telemetry and exception-safe capture; numerical hooks and checkpoint format preserved."
+    },
+    "training/training_mesh_hooks.py": {
+      "source": "training_mesh_hooks.py",
+      "sha256": "e9c075588212e4759600cd2b67b7ebc1e3059b333cf02aa3f1cd7daf895e91e9"
+    },
+    "training/training_mesh_vjp.py": {
+      "source": "training_mesh_vjp.py",
+      "sha256": "50a30ee63a5e2320c21ad58f7c538f3ca7c4cc9c1cfe0dac1ec7fb77dbd2896e"
+    },
+    "training/layernorm_stats.py": {
+      "source": "layernorm_stats.py",
+      "sha256": "cf822fe909a94059a3bedd6f939c10bff1dad6df3c28873607b5de6ed55bbdd1"
+    },
+    "training/training_layernorm_vjp.py": {
+      "source": "training_layernorm_vjp.py",
+      "sha256": "723c84c211ae6280a104f924b86c5fa61e11ebab7672b8201e08ab8e0e19e8e0"
+    },
+    "training/training_edge_linear.py": {
+      "source": "training_edge_linear.py",
+      "sha256": "96d7751316ca4a403e283584e21462dd34e80547b94f393dd152ca93d00f66aa"
+    },
+    "training/training_g2m_mesh.py": {
+      "source": "training_g2m_mesh.py",
+      "sha256": "9e3250d7a6a9cc663e21a28a4ea1a2c026e38498fe0da157d528e9540f2a8741"
+    },
+    "training/training_final_mesh.py": {
+      "source": "training_final_mesh.py",
+      "sha256": "d70450293ffc0f1d23517dc8b518c45bb2a1345dbb48314736c6ff6824ebce39"
+    },
+    "training/regular3_hooks.py": {
+      "source": "regular3_hooks.py",
+      "sha256": "e3fa2f332281cdf6ad3743eb97744088cfaf2483ea058faea7b4806d9813e1f5"
+    },
+    "training/shifted_ln_hooks.py": {
+      "source": "shifted_ln_hooks.py",
+      "sha256": "d282fc446be38a3c4191f36916aa9b876e48b0f57ee31d662273601e7eb419fd"
+    },
+    "training/shifted_layernorm.py": {
+      "source": "shifted_layernorm.py",
+      "sha256": "025d2dd5070e7c38a67b2e084364077cc9477a645edd5c2dccc8308154b52d5e"
+    },
+    "training/streamed_train.py": {
+      "source": "streamed_train.py",
+      "sha256": "3f6a22b3f743051cc8904aa2459a4be2ea96808740db3cd36cbc8e02c7ebacf5",
+      "delivery_sha256": "64dd331e947d29e08b1a7fd27ab4867ecfd2eb264c37849497d3428f259d6112",
+      "delivery_change": "Explicit context entry, readable stage updates and English progress; shared host telemetry and exception-safe capture; numerical hooks and checkpoint format preserved."
+    },
+    "training/streamed_microbatches.py": {
+      "source": "streamed_microbatches.py",
+      "sha256": "45c9739a22a003961727935ef9efddf9ff94f825713be0cd59551e4769ad5a17"
+    },
+    "training/selective_remat.py": {
+      "source": "selective_remat.py",
+      "sha256": "7baa2e7d117c738410698a8bbfc483ccd57c3b76848eb632bcb9a21128f1810c"
+    },
+    "training/audit_finally.py": {
+      "source": "audit_finally.py",
+      "sha256": "7786619f9cbca4285bd3a5da1d6c429c9e63f722462ef8b2994ff4f17c8387ce"
+    },
+    "training/run-h100.sh": {
+      "source": "run-h100.sh",
+      "sha256": "d891ecae9fc31ae308b8f4b0c133d60c7b147675d6b24ae7fcfef184069fdf0a",
+      "delivery_sha256": "6a6204e5b56ac592f80be90c3899d9b1a488df3b5009fbdbb828a3016f9f25d9",
+      "delivery_change": "Explicit runtime context and centrally generated compatibility environment; numerical recipe and checkpoint behavior preserved"
+    },
+    "original_training/data_transfer.py": {
+      "source": "data_transfer.py",
+      "sha256": "bd878c6149dc429a15707013ea2ca4928cb8b26d402374a2c6affefa85f58e98"
+    },
+    "original_training/remat_policy.py": {
+      "source": "remat_policy.py",
+      "sha256": "c0edb0448b0b0a0e0d3137fa8416d8542624fedf1775c88e065a83a1ba65819d"
+    },
+    "original_training/model.py": {
+      "source": "model.py",
+      "sha256": "e1ac6210cbb78c413d125abd00321f7345e62f013ef7c18e3ad674875750b272"
+    },
+    "original_training/curriculum.py": {
+      "source": "curriculum.py",
+      "sha256": "a9d1e3738a9deb4ffe9facf49113d2ac9b22396bca41bcda329dd5e6041123ba"
+    },
+    "original_training/recipe.py": {
+      "source": "recipe.py",
+      "sha256": "394fce0216edac1577689e0170ad1e5d7b835c0b3256db0e4ede3b2e0d3cb5a7"
+    },
+    "original_training/runtime.py": {
+      "source": "runtime.py",
+      "sha256": "57c378c88a5ef0a3c3da87a1d585f107a7c5d23ac8f987cd49c8f9a30593ba43"
+    },
+    "original_training/precision.py": {
+      "source": "precision.py",
+      "sha256": "447b0ec1b2efffb74b1bad14eca8296a2836f31d85020f8ed15af7eabdd354d6"
+    },
+    "original_training/train.py": {
+      "source": "train.py",
+      "sha256": "77df16253040abf114c6ca24cd024d907e5489de29a8a7800671a0c5b09e1969"
+    },
+    "frozen/src/graphcast_bench/logical_bench.py": {
+      "source": "logical_bench.py",
+      "sha256": "b1139d4d4192c659f6fac1f1a446132da8b273c069a145e241f729771f386614"
+    },
+    "frozen/src/graphcast_bench/benchmark.py": {
+      "source": "benchmark.py",
+      "sha256": "d61e641dfe228ec17bed4f201aefb6236b099a9e32b866cd075a8a0fde1775e2"
+    },
+    "frozen/src/graphcast_bench/graph_operator_bench.py": {
+      "source": "graph_operator_bench.py",
+      "sha256": "f1a400d3f57445749359296ebfd0f9617370beea8bbe896d878295886582de8e"
+    },
+    "frozen/src/graphcast_bench/metrics.py": {
+      "source": "metrics.py",
+      "sha256": "a21741b5660b4969e4a8eb34cedd8ca87f71813b7aa334ca912d45b516f72457"
+    },
+    "frozen/src/graphcast_bench/assets.py": {
+      "source": "assets.py",
+      "sha256": "cab87ed8a68ac717bac048046096e6cc3d223a28f3e3b0c1630b4261a4701ce8"
+    },
+    "frozen/src/graphcast_bench/logical_inventory.py": {
+      "source": "logical_inventory.py",
+      "sha256": "b8986bcfcda7e1a3b23af7d87ed1c03e27df4b569f2758db1030038702c2c70d"
+    },
+    "frozen/src/graphcast_bench/operator_catalog.py": {
+      "source": "operator_catalog.py",
+      "sha256": "bf1d8bf0cfed1f1fca9b84dbaf9f6aaa389644d47f34b189ca50103812c5ba13"
+    },
+    "frozen/src/graphcast_bench/__init__.py": {
+      "source": "__init__.py",
+      "sha256": "0b1f04fd491075770fb44036aff45175fccb0045cb6973d91dbf090b419b6537"
+    },
+    "frozen/src/graphcast_bench/router.py": {
+      "source": "router.py",
+      "sha256": "78928a6bc98a4b9e9ac9a0321983303d23540f7745fe37d3489e01261bdabe26"
+    },
+    "frozen/src/graphcast_bench/profile_summary.py": {
+      "source": "profile_summary.py",
+      "sha256": "8e0ffa440893f022821b0d0358345cfe0b90b966149332fba05f9cce5ed1c62e"
+    },
+    "frozen/third_party/graphcast/LICENSE": {
+      "source": "LICENSE",
+      "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+    },
+    "frozen/third_party/graphcast/UPSTREAM.json": {
+      "source": "UPSTREAM.json",
+      "sha256": "8878f3fe9ff91123d805859c501cba7ae6229390d100370a7fd7baec22d08b89"
+    },
+    "frozen/third_party/graphcast/graphcast/grid_mesh_connectivity.py": {
+      "source": "grid_mesh_connectivity.py",
+      "sha256": "914aa71a500a9a3e13cd856a25caffbbba724dda65a30ccf6dbf882e1fe72fc2"
+    },
+    "frozen/third_party/graphcast/graphcast/checkpoint.py": {
+      "source": "checkpoint.py",
+      "sha256": "07dc3521a5ed9e606869246a47f865f524e2fc4c689c745305fcdd3f2e5ab24a"
+    },
+    "frozen/third_party/graphcast/graphcast/autoregressive.py": {
+      "source": "autoregressive.py",
+      "sha256": "2e44d4505bed0c6a5b6d42fd58d0d0d5414bab2658f02ba2b05e92727887749a"
+    },
+    "frozen/third_party/graphcast/graphcast/predictor_base.py": {
+      "source": "predictor_base.py",
+      "sha256": "ff3f3297e1ec0484d2baf76b4d7e68c96394f17a6f436381f1e181ebbef823b0"
+    },
+    "frozen/third_party/graphcast/graphcast/icosahedral_mesh.py": {
+      "source": "icosahedral_mesh.py",
+      "sha256": "bfafc9a3efa272714122963e6b49efe961b3ab1b5d35a7eddd727aa74d693fbe"
+    },
+    "frozen/third_party/graphcast/graphcast/normalization.py": {
+      "source": "normalization.py",
+      "sha256": "5b5f95bcf830be1236244fd09cc418caa28c1c970793130e93bccbc98e0e00e7"
+    },
+    "frozen/third_party/graphcast/graphcast/xarray_tree.py": {
+      "source": "xarray_tree.py",
+      "sha256": "b6c05004109e88175c6e1faee4f864faea652f78fa99065e2e9635039a8c6fae"
+    },
+    "frozen/third_party/graphcast/graphcast/losses.py": {
+      "source": "losses.py",
+      "sha256": "520aa2010ddbc441ee0630598c48176a905c3638582e4af6d15887a68b7c7ab8"
+    },
+    "frozen/third_party/graphcast/graphcast/graphcast.py": {
+      "source": "graphcast.py",
+      "sha256": "6aeb9cfa2490b0e2dbfa70f255594914ee1765d5e20c3e66ca912b80bc66e953"
+    },
+    "frozen/third_party/graphcast/graphcast/typed_graph.py": {
+      "source": "typed_graph.py",
+      "sha256": "feebe364b3ef12f0fc56c0f956330c70680297a9c44378d01ae972db504cd6d6"
+    },
+    "frozen/third_party/graphcast/graphcast/rollout.py": {
+      "source": "rollout.py",
+      "sha256": "0858c305f04c1bc0ecbfc2c2075acc985166eac7a111027dfb354f585cdbf2da"
+    },
+    "frozen/third_party/graphcast/graphcast/mlp.py": {
+      "source": "mlp.py",
+      "sha256": "a0d0cdf91f01817344935ef8b5ffed20902041e386321ed3da45e6a26a92d266"
+    },
+    "frozen/third_party/graphcast/graphcast/typed_graph_net.py": {
+      "source": "typed_graph_net.py",
+      "sha256": "58bc7c9b090a65ec83d65f0b3cd48d4a450f57f50b8bba5425f33b25d436e7a4"
+    },
+    "frozen/third_party/graphcast/graphcast/xarray_jax.py": {
+      "source": "xarray_jax.py",
+      "sha256": "0203d371ea2029023d2eae90f447020caa3f0858b01b4244f2824611efb34b18"
+    },
+    "frozen/third_party/graphcast/graphcast/model_utils.py": {
+      "source": "model_utils.py",
+      "sha256": "bc8006a4454e40eb6c0b4a802b1bbeac77f136af740cafefcb829f5965a9cce0"
+    },
+    "frozen/third_party/graphcast/graphcast/deep_typed_graph_net.py": {
+      "source": "deep_typed_graph_net.py",
+      "sha256": "7812649e3128a002603b537e61c7eda060b03a7a2d90bd037eeb7791b52cc59a"
+    },
+    "frozen/configs/case.json": {
+      "source": "case.json",
+      "sha256": "58b0a7c916b65bb165d96b47a864355e42977d2250f7b770e70c11176bd62300"
+    },
+    "frozen/configs/h100.json": {
+      "source": "h100.json",
+      "sha256": "7b600a302129f5a25c64aa24c3eeffe2c96dec759a7ae663e9265dd5c9f91dd7"
+    },
+    "clone3_compat_exec.py": {
+      "source": "clone3_compat_exec.py",
+      "sha256": "2ee9e5ff019214d3b4a9227209e75f9989ea932090eab58b9a11cdcc89af8ebd"
+    },
+    "minimal-official/LICENSE": {
+      "source": "LICENSE",
+      "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30"
+    },
+    "minimal-official/UPSTREAM.json": {
+      "source": "UPSTREAM.json",
+      "sha256": "8878f3fe9ff91123d805859c501cba7ae6229390d100370a7fd7baec22d08b89"
+    },
+    "minimal-official/graphcast/grid_mesh_connectivity.py": {
+      "source": "grid_mesh_connectivity.py",
+      "sha256": "914aa71a500a9a3e13cd856a25caffbbba724dda65a30ccf6dbf882e1fe72fc2"
+    },
+    "minimal-official/graphcast/checkpoint.py": {
+      "source": "checkpoint.py",
+      "sha256": "07dc3521a5ed9e606869246a47f865f524e2fc4c689c745305fcdd3f2e5ab24a"
+    },
+    "minimal-official/graphcast/autoregressive.py": {
+      "source": "autoregressive.py",
+      "sha256": "2e44d4505bed0c6a5b6d42fd58d0d0d5414bab2658f02ba2b05e92727887749a"
+    },
+    "minimal-official/graphcast/predictor_base.py": {
+      "source": "predictor_base.py",
+      "sha256": "ff3f3297e1ec0484d2baf76b4d7e68c96394f17a6f436381f1e181ebbef823b0"
+    },
+    "minimal-official/graphcast/icosahedral_mesh.py": {
+      "source": "icosahedral_mesh.py",
+      "sha256": "bfafc9a3efa272714122963e6b49efe961b3ab1b5d35a7eddd727aa74d693fbe"
+    },
+    "minimal-official/graphcast/solar_radiation.py": {
+      "source": "solar_radiation.py",
+      "sha256": "f2a5ade645893c252e687013b79520c04e4b0d21019e492602df342da038d7ea"
+    },
+    "minimal-official/graphcast/normalization.py": {
+      "source": "normalization.py",
+      "sha256": "5b5f95bcf830be1236244fd09cc418caa28c1c970793130e93bccbc98e0e00e7"
+    },
+    "minimal-official/graphcast/xarray_tree.py": {
+      "source": "xarray_tree.py",
+      "sha256": "b6c05004109e88175c6e1faee4f864faea652f78fa99065e2e9635039a8c6fae"
+    },
+    "minimal-official/graphcast/losses.py": {
+      "source": "losses.py",
+      "sha256": "520aa2010ddbc441ee0630598c48176a905c3638582e4af6d15887a68b7c7ab8"
+    },
+    "minimal-official/graphcast/graphcast.py": {
+      "source": "graphcast.py",
+      "sha256": "6aeb9cfa2490b0e2dbfa70f255594914ee1765d5e20c3e66ca912b80bc66e953"
+    },
+    "minimal-official/graphcast/typed_graph.py": {
+      "source": "typed_graph.py",
+      "sha256": "feebe364b3ef12f0fc56c0f956330c70680297a9c44378d01ae972db504cd6d6"
+    },
+    "minimal-official/graphcast/data_utils.py": {
+      "source": "data_utils.py",
+      "sha256": "0a2ef70e2eaa6e36e03d9bf354639d77db77c91bca8a506da9716b8687de8a53"
+    },
+    "minimal-official/graphcast/rollout.py": {
+      "source": "rollout.py",
+      "sha256": "0858c305f04c1bc0ecbfc2c2075acc985166eac7a111027dfb354f585cdbf2da"
+    },
+    "minimal-official/graphcast/mlp.py": {
+      "source": "mlp.py",
+      "sha256": "a0d0cdf91f01817344935ef8b5ffed20902041e386321ed3da45e6a26a92d266"
+    },
+    "minimal-official/graphcast/typed_graph_net.py": {
+      "source": "typed_graph_net.py",
+      "sha256": "58bc7c9b090a65ec83d65f0b3cd48d4a450f57f50b8bba5425f33b25d436e7a4"
+    },
+    "minimal-official/graphcast/xarray_jax.py": {
+      "source": "xarray_jax.py",
+      "sha256": "0203d371ea2029023d2eae90f447020caa3f0858b01b4244f2824611efb34b18"
+    },
+    "minimal-official/graphcast/model_utils.py": {
+      "source": "model_utils.py",
+      "sha256": "bc8006a4454e40eb6c0b4a802b1bbeac77f136af740cafefcb829f5965a9cce0"
+    },
+    "minimal-official/graphcast/deep_typed_graph_net.py": {
+      "source": "deep_typed_graph_net.py",
+      "sha256": "7812649e3128a002603b537e61c7eda060b03a7a2d90bd037eeb7791b52cc59a"
+    }
+  }
+}
